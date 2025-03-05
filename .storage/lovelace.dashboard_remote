@@ -149,7 +149,12 @@
                     },
                     {
                       "entity": "sensor.generator"
-                    },
+                    }
+                  ]
+                },
+                {
+                  "type": "glance",
+                  "entities": [
                     {
                       "entity": "sensor.outback1_voltage",
                       "name": "Charger"
@@ -158,6 +163,41 @@
                       "entity": "sensor.outback1_inverter_mode",
                       "name": "Inverter"
                     }
+                  ],
+                  "visibility": [
+                    {
+                      "condition": "state",
+                      "entity": "sensor.outback1_voltage",
+                      "state_not": "unavailable"
+                    },
+                    {
+                      "condition": "state",
+                      "entity": "sensor.outback1_voltage",
+                      "state_not": "unknown"
+                    }
+                  ]
+                },
+                {
+                  "type": "glance",
+                  "entities": [
+                    {
+                      "entity": "sensor.charger_status_voltage"
+                    },
+                    {
+                      "entity": "sensor.inverter_status"
+                    }
+                  ],
+                  "visibility": [
+                    {
+                      "condition": "state",
+                      "entity": "sensor.charger_status_voltage",
+                      "state_not": "unavailable"
+                    },
+                    {
+                      "condition": "state",
+                      "entity": "sensor.charger_status_voltage",
+                      "state_not": "unknown"
+                    }
                   ]
                 }
               ]
@@ -165,6 +205,42 @@
             {
               "type": "grid",
               "cards": [
+                {
+                  "square": false,
+                  "columns": 4,
+                  "type": "grid",
+                  "cards": [
+                    {
+                      "type": "gauge",
+                      "entity": "sensor.chassis_battery",
+                      "min": 0,
+                      "max": 15,
+                      "needle": true,
+                      "name": "Chassis .Battery"
+                    },
+                    {
+                      "type": "gauge",
+                      "entity": "sensor.dc_house_voltage",
+                      "min": 0,
+                      "max": 15,
+                      "needle": true,
+                      "name": "House .Battery"
+                    }
+                  ],
+                  "visibility": [
+                    {
+                      "condition": "numeric_state",
+                      "entity": "sensor.chassis_battery",
+                      "above": 0
+                    },
+                    {
+                      "condition": "numeric_state",
+                      "entity": "sensor.dc_house_voltage",
+                      "above": 0
+                    }
+                  ],
+                  "title": "Battereis"
+                },
                 {
                   "square": false,
                   "columns": 4,
@@ -181,12 +257,45 @@
                     },
                     {
                       "type": "gauge",
-                      "entity": "sensor.chassis_battery",
+                      "entity": "sensor.outback1_ac_mode",
                       "min": 0,
                       "max": 15,
-                      "needle": true,
-                      "name": "Chassis .Battery"
+                      "needle": true
                     },
+                    {
+                      "type": "gauge",
+                      "entity": "sensor.outback1_inverter_mode",
+                      "min": 0,
+                      "max": 15,
+                      "needle": true
+                    },
+                    {
+                      "type": "gauge",
+                      "entity": "sensor.outback2_voltage",
+                      "min": 0,
+                      "max": 15,
+                      "needle": true
+                    }
+                  ],
+                  "visibility": [
+                    {
+                      "condition": "state",
+                      "entity": "sensor.outback1_voltage",
+                      "state_not": "unavailable"
+                    },
+                    {
+                      "condition": "state",
+                      "entity": "sensor.outback1_voltage",
+                      "state_not": "unknown"
+                    }
+                  ],
+                  "title": "Outback Interters"
+                },
+                {
+                  "square": false,
+                  "columns": 4,
+                  "type": "grid",
+                  "cards": [
                     {
                       "type": "gauge",
                       "entity": "sensor.smartbmv_battery",
@@ -212,11 +321,20 @@
                         "red": 90
                       }
                     }
-                  ]
-                },
-                {
-                  "type": "heading",
-                  "heading_style": "title"
+                  ],
+                  "visibility": [
+                    {
+                      "condition": "state",
+                      "entity": "sensor.smartbmv_battery",
+                      "state_not": "unavailable"
+                    },
+                    {
+                      "condition": "state",
+                      "entity": "sensor.smartbmv_battery",
+                      "state_not": "unknown"
+                    }
+                  ],
+                  "title": "Smart BVM"
                 },
                 {
                   "square": false,
@@ -375,7 +493,19 @@
                   }
                 }
               ],
-              "column_span": 2
+              "column_span": 2,
+              "visibility": [
+                {
+                  "condition": "state",
+                  "entity": "camera.g5_flex_high_resolution_channel",
+                  "state_not": "unknown"
+                },
+                {
+                  "condition": "state",
+                  "entity": "camera.g5_flex_high_resolution_channel",
+                  "state_not": "unavailable"
+                }
+              ]
             },
             {
               "type": "grid",
@@ -608,23 +738,13 @@
                     "yellow": 65,
                     "red": 75
                   }
-                },
+                }
+              ],
+              "visibility": [
                 {
-                  "type": "entities",
-                  "entities": [
-                    {
-                      "entity": "sensor.engine_day_run_time"
-                    },
-                    {
-                      "entity": "sensor.engine_trip_run_time"
-                    },
-                    {
-                      "entity": "sensor.generator_day_run_time"
-                    },
-                    {
-                      "entity": "sensor.generator_oil_duration"
-                    }
-                  ]
+                  "condition": "numeric_state",
+                  "entity": "sensor.vehicle_rpm",
+                  "above": 0
                 }
               ]
             },
@@ -640,9 +760,6 @@
                   "entities": [
                     {
                       "entity": "zone.home"
-                    },
-                    {
-                      "entity": "device_tracker.ipad_mini2"
                     }
                   ],
                   "default_zoom": 16,
@@ -1391,41 +1508,6 @@
                   "title": "Power"
                 },
                 {
-                  "square": false,
-                  "columns": 4,
-                  "type": "grid",
-                  "cards": [
-                    {
-                      "type": "gauge",
-                      "entity": "sensor.outback1_voltage",
-                      "min": 0,
-                      "max": 15,
-                      "needle": true,
-                      "name": "House Battery",
-                      "unit": "V"
-                    },
-                    {
-                      "type": "gauge",
-                      "entity": "sensor.chassis_battery",
-                      "min": 0,
-                      "max": 15,
-                      "needle": true,
-                      "name": "Chassis .Battery"
-                    },
-                    {
-                      "type": "gauge",
-                      "entity": "sensor.smartbmv_battery",
-                      "needle": true,
-                      "name": "Battery",
-                      "severity": {
-                        "green": 40,
-                        "yellow": 20,
-                        "red": 0
-                      }
-                    }
-                  ]
-                },
-                {
                   "type": "picture",
                   "image": "/api/image/serve/4d11003c323dea2c422486511af81f52/512x512",
                   "card_mod": {
@@ -1455,9 +1537,69 @@
                     {
                       "type": "custom:mini-graph-card",
                       "entities": [
+                        "sensor.dc_house_voltage"
+                      ]
+                    },
+                    {
+                      "type": "custom:mini-graph-card",
+                      "entities": [
+                        "sensor.charger_status_current"
+                      ]
+                    },
+                    {
+                      "type": "custom:mini-graph-card",
+                      "entities": [
+                        "sensor.charger_status_voltage"
+                      ]
+                    }
+                  ],
+                  "columns": 2,
+                  "visibility": [
+                    {
+                      "condition": "numeric_state",
+                      "entity": "sensor.chassis_battery",
+                      "above": 0
+                    }
+                  ],
+                  "grid_options": {
+                    "columns": "full"
+                  }
+                },
+                {
+                  "square": true,
+                  "type": "grid",
+                  "cards": [
+                    {
+                      "type": "custom:mini-graph-card",
+                      "entities": [
                         "sensor.outback1_voltage"
                       ]
                     },
+                    {
+                      "type": "custom:mini-graph-card",
+                      "entities": [
+                        "sensor.outback1_vac_out_l2"
+                      ]
+                    }
+                  ],
+                  "columns": 2,
+                  "visibility": [
+                    {
+                      "condition": "state",
+                      "entity": "sensor.outback1_voltage",
+                      "state_not": "unavailable"
+                    },
+                    {
+                      "condition": "state",
+                      "entity": "sensor.outback1_voltage",
+                      "state_not": "unknown"
+                    }
+                  ]
+                },
+                {
+                  "square": true,
+                  "type": "grid",
+                  "cards": [
                     {
                       "type": "custom:mini-graph-card",
                       "entities": [
@@ -1471,7 +1613,19 @@
                       ]
                     }
                   ],
-                  "columns": 2
+                  "columns": 2,
+                  "visibility": [
+                    {
+                      "condition": "state",
+                      "entity": "sensor.smartbmv_voltage",
+                      "state_not": "unavailable"
+                    },
+                    {
+                      "condition": "state",
+                      "entity": "sensor.smartbmv_voltage",
+                      "state_not": "unknown"
+                    }
+                  ]
                 },
                 {
                   "chart_type": "line",
