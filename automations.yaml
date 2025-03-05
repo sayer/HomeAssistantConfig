@@ -1,0 +1,1561 @@
+- id: '1677979184037'
+  alias: Bus - Temp Range
+  description: ''
+  trigger:
+  - type: temperature
+    platform: device
+    device_id: f19d9202e36b464f072f404896f84a2c
+    entity_id: sensor.bus_sensor_air_temperature
+    domain: sensor
+    above: 85
+    for:
+      hours: 0
+      minutes: 10
+      seconds: 0
+  - type: temperature
+    platform: device
+    device_id: f0dd4cb37e399fec19e8f2e0747e3526
+    entity_id: sensor.bus_kitchen_motion_temperature
+    domain: sensor
+    below: 45
+    for:
+      hours: 0
+      minutes: 10
+      seconds: 0
+  - platform: numeric_state
+    entity_id: sensor.inside_temperature
+    above: 90
+    for:
+      hours: 0
+      minutes: 10
+      seconds: 0
+  - platform: numeric_state
+    entity_id: sensor.inside_temperature
+    below: 45
+    for:
+      hours: 0
+      minutes: 10
+      seconds: 0
+  condition: []
+  action:
+  - service: script.notify_home
+    data:
+      title: Foretravel
+      message: 'Bus temp out of range  '
+  mode: single
+- id: '1679594857104'
+  alias: Drive Time - Based on Parked Off
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_boolean.busparked
+    to: 'off'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 2
+  condition: []
+  action:
+  - service: script.drive_time
+    data: {}
+  - service: script.set_current_location_as_home
+    data: {}
+  - service: script.notify_home
+    data:
+      title: Foretravel
+      message: Bus is driving
+  mode: single
+- id: '1679595255314'
+  alias: Stopped - Bus was parked
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_boolean.busparked
+    to: 'on'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 5
+  condition: []
+  action:
+  - service: homeassistant.turn_on
+    data: {}
+    target:
+      entity_id:
+      - light.cockpit_accents
+      - light.living_room_accents
+  - service: homeassistant.turn_on
+    data: {}
+    target:
+      entity_id:
+      - switch.auto_gen
+      - switch.auto_gen_5
+  - service: script.set_current_location_as_home
+    data: {}
+  - service: script.notify_home
+    data:
+      title: Foretravel
+      message: Bus Parked
+  mode: single
+- id: '1679595916901'
+  alias: Fresh Water Low
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.fresh_water
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+    below: 20
+  condition: []
+  action:
+  - service: script.notify_home
+    data:
+      title: Foretravel
+      message: Fresh water is low
+  mode: single
+- id: '1679596041591'
+  alias: Waste nearly full
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.black_tank
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+    above: 75
+  condition: []
+  action:
+  - service: script.notify_home
+    data:
+      title: Foretravel
+      message: Waste tank is nearly full. Please empty.
+  mode: single
+- id: '1679596107141'
+  alias: Waste - Full
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.black_tank
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+    above: 95
+  condition: []
+  action:
+  - service: script.notify_home
+    data:
+      title: Foretravel
+      message: Waste tank is full. Please empty.
+  mode: single
+- id: '1679596223955'
+  alias: Bus - High Speed
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.vehicle_speed
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+    above: 7500
+  condition: []
+  action:
+  - service: notify.notify
+    data:
+      title: Bus - Speed
+      message: Bus over 75mph
+  - service: script.set_current_location_as_home
+    data: {}
+  mode: single
+- id: '1679596423970'
+  alias: AC Source Change
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.ac_source
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+  condition: []
+  action:
+  - service: script.notify_home
+    data:
+      title: Foretravel
+      message: Power source changed
+  mode: single
+- id: '1679596627758'
+  alias: Chassis Battery Low
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.chassis_battery
+    below: 11.9
+  condition: []
+  action:
+  - service: homeassistant.turn_on
+    data: {}
+    target:
+      entity_id:
+      - switch.auto_gen
+      - switch.auto_gen_5
+  - service: script.notify_home
+    data:
+      title: Foretravel
+      message: Chassis batteries low
+  mode: single
+- id: '1679597270218'
+  alias: House Batteries Low
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id:
+    - sensor.dc_house_voltage
+    below: 11.5
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+    above: 5
+  - type: battery_level
+    platform: device
+    device_id: abe92fb7e658d969cd79015ee4856a3d
+    entity_id: 3e9afeb58864289e786ad18f509c6e7a
+    domain: sensor
+    below: 25
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+  condition: []
+  action:
+  - service: light.turn_off
+    data: {}
+    target:
+      entity_id:
+      - light.all_ceiling_lights
+      - light.exterior_lights
+  - service: homeassistant.turn_on
+    data: {}
+    target:
+      entity_id:
+      - switch.auto_gen
+      - switch.auto_gen_5
+  - service: script.notify_home
+    data:
+      title: Foretravel
+      message: House batteries are low.
+  mode: single
+- id: '1679623337905'
+  alias: Evening Lights
+  description: ''
+  trigger:
+  - platform: sun
+    event: sunset
+    offset: -02:00:00
+  condition:
+  - condition: state
+    entity_id: input_boolean.busparked
+    state: 'on'
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+  - condition: state
+    entity_id: input_boolean.camping
+    state: 'on'
+  action:
+  - service: script.evening
+    data: {}
+  mode: single
+- id: '1679624060266'
+  alias: Good Night
+  description: ''
+  trigger:
+  - platform: time
+    at: '23:00:00'
+  condition:
+  - condition: state
+    entity_id: input_boolean.busparked
+    state: 'on'
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+  - condition: state
+    entity_id: input_boolean.storage
+    state: 'off'
+  action:
+  - service: script.good_night
+    data: {}
+  mode: single
+- id: '1679711956079'
+  alias: Set Bus Parked
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.parking_brake
+    to: park brake engaged
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 2
+  condition:
+  - condition: template
+    value_template: '{{ states(''sensor.parking_brake'') != ''unknown'' and states(''sensor.parking_brake'')
+      != ''unavailable'' and states(''sensor.transmision_gear'') != ''unknown'' and
+      states(''sensor.transmision_gear'') != ''unavailable'' }}'
+  - condition: state
+    entity_id: sensor.parking_brake
+    state:
+    - '{{ trigger.from_state.state not in [''unknown'', ''unavailable''] }}'
+    enabled: false
+  action:
+  - service: homeassistant.turn_on
+    data: {}
+    target:
+      entity_id: input_boolean.busparked
+  - service: script.set_current_location_as_home
+    data: {}
+  - service: timer.cancel
+    data: {}
+    target:
+      entity_id: timer.setlocationtimer
+  mode: single
+- id: '1679712196386'
+  alias: Clear Bus Parked
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.parking_brake
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+    from: park brake engaged
+    to: park brake released
+  - platform: state
+    entity_id:
+    - sensor.transmision_gear
+    from: neutral
+    enabled: false
+  - platform: numeric_state
+    entity_id: sensor.vehicle_speed
+    above: 1
+    enabled: false
+  condition:
+  - condition: template
+    value_template: '{{ states(''sensor.parking_brake'') != ''unknown'' and states(''sensor.parking_brake'')
+      != ''unavailable'' and states(''sensor.transmision_gear'') != ''unknown'' and
+      states(''sensor.transmision_gear'') != ''unavailable'' }}'
+  - condition: state
+    entity_id: sensor.parking_brake
+    state:
+    - '{{ trigger.from_state.state not in [''unknown'', ''unavailable''] }}'
+    - '{{ trigger.to_state.state not in [''unknown'', ''unavailable''] }}'
+    enabled: false
+  action:
+  - service: homeassistant.turn_off
+    data: {}
+    target:
+      entity_id: input_boolean.busparked
+  mode: single
+- id: '1680467480278'
+  alias: Motion Turns on front accents
+  description: ''
+  trigger:
+  - type: motion
+    platform: device
+    device_id: f0dd4cb37e399fec19e8f2e0747e3526
+    entity_id: binary_sensor.bus_kitchen_motion
+    domain: binary_sensor
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
+  condition:
+  - condition: state
+    entity_id: input_boolean.busparked
+    state: 'on'
+  - condition: time
+    after: 09:00:00
+    before: '21:00:00'
+    weekday:
+    - fri
+    - thu
+    - wed
+    - tue
+    - mon
+    - sun
+  - condition: state
+    entity_id: media_player.home_theater_2
+    state: idle
+  action:
+  - service: light.turn_on
+    data: {}
+    target:
+      entity_id:
+      - light.cockpit_accents
+      - light.d_s_front_accent
+      - light.living_room_accents
+  mode: single
+- id: '1680467633716'
+  alias: No motion - Turns off accents
+  description: ''
+  trigger:
+  - type: no_motion
+    platform: device
+    device_id: f0dd4cb37e399fec19e8f2e0747e3526
+    entity_id: binary_sensor.bus_kitchen_motion
+    domain: binary_sensor
+    for:
+      hours: 0
+      minutes: 15
+      seconds: 0
+  condition:
+  - condition: state
+    entity_id: input_boolean.busparked
+    state: 'on'
+  action:
+  - service: light.turn_off
+    data: {}
+    target:
+      entity_id: light.interior_accents
+  mode: single
+- id: '1680468227395'
+  alias: Opening Entry door turn on accent lights
+  description: ''
+  trigger:
+  - type: opened
+    platform: device
+    device_id: d6cedbc49583d517031af19065450111
+    entity_id: binary_sensor.samjin_multi
+    domain: binary_sensor
+  - platform: state
+    entity_id:
+    - lock.entry_door_lock_2
+    to: unlocked
+    from: locked
+  condition:
+  - condition: state
+    entity_id: input_boolean.busparked
+    state: 'on'
+  - condition: state
+    entity_id: light.all_ceiling_lights
+    state: 'off'
+  action:
+  - service: light.turn_on
+    data: {}
+    target:
+      entity_id:
+      - light.cockpit_accents
+      - light.d_s_front_accent
+      - light.dimmer_3_10
+      - light.living_room_accents
+  - service: notify.mobile_app_iphone_15_pro_max
+    data:
+      message: Entry door opened
+      title: Foretravel
+  mode: single
+- id: '1680468557675'
+  alias: Locking door turns off ceiling lights
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - lock.entry_door_lock_2
+    to: locked
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 30
+  condition:
+  - condition: state
+    entity_id: input_boolean.busparked
+    state: 'on'
+  action:
+  - service: light.turn_off
+    data: {}
+    target:
+      entity_id: light.all_ceiling_lights
+  mode: single
+- id: '1680576809879'
+  alias: House Batteries Critical Low
+  description: ''
+  triggers:
+  - type: battery_level
+    device_id: abe92fb7e658d969cd79015ee4856a3d
+    entity_id: 3e9afeb58864289e786ad18f509c6e7a
+    domain: sensor
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
+    below: 20
+    trigger: device
+  - entity_id:
+    - sensor.smartbmv_battery
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
+    below: 20
+    trigger: numeric_state
+  conditions: []
+  actions:
+  - data: {}
+    target:
+      entity_id: light.all_lights
+    action: light.turn_off
+  - data: {}
+    target:
+      entity_id: switch.generator
+    action: homeassistant.turn_on
+  - data:
+      title: Foretravel
+      message: House batteries critically low. Starting generator.
+    action: script.notify_home
+  mode: single
+- id: '1681093699796'
+  alias: No Motion - 30 mins - Ceiling off
+  description: ''
+  trigger:
+  - type: no_motion
+    platform: device
+    device_id: f0dd4cb37e399fec19e8f2e0747e3526
+    entity_id: binary_sensor.bus_kitchen_motion
+    domain: binary_sensor
+    for:
+      hours: 1
+      minutes: 30
+      seconds: 0
+  condition:
+  - condition: state
+    entity_id: input_boolean.busparked
+    state: 'on'
+  - condition: state
+    entity_id: binary_sensor.samjin_multi
+    state: 'off'
+    for:
+      hours: 0
+      minutes: 15
+      seconds: 0
+  action:
+  - service: light.turn_off
+    data: {}
+    target:
+      entity_id: light.all_ceiling_lights
+  mode: single
+- id: '1681093767189'
+  alias: No motion - 1 hour - all lights off
+  description: ''
+  trigger:
+  - type: no_motion
+    platform: device
+    device_id: f0dd4cb37e399fec19e8f2e0747e3526
+    entity_id: binary_sensor.bus_kitchen_motion
+    domain: binary_sensor
+    for:
+      hours: 1
+      minutes: 1
+      seconds: 0
+  condition:
+  - condition: state
+    entity_id: input_boolean.busparked
+    state: 'on'
+  - condition: state
+    entity_id: binary_sensor.samjin_multi
+    state: 'off'
+    for:
+      hours: 0
+      minutes: 30
+      seconds: 0
+  action:
+  - service: light.turn_off
+    data: {}
+    target:
+      entity_id: light.all_lights
+  mode: single
+- id: '1681094314568'
+  alias: Stop - Bus stoped for 3 mins
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_boolean.busparked
+    to: 'on'
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 30
+  condition: []
+  action:
+  - service: homeassistant.turn_on
+    data: {}
+    target:
+      entity_id:
+      - light.cockpit_accents
+      - light.living_room_accents
+      - light.entry_light
+      - light.living_room_ceiling_recess
+  mode: single
+- id: '1681101104068'
+  alias: Engine off - Lights on
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_boolean.engineon
+    from: 'on'
+    to: 'off'
+  condition:
+  - condition: state
+    entity_id: input_boolean.busparked
+    state: 'on'
+  action:
+  - service: homeassistant.turn_on
+    data: {}
+    target:
+      entity_id:
+      - light.dimmer_3_17
+      - light.front_accents
+      - light.dimmer_3_19
+  - service: script.notify_home
+    data:
+      title: Foretravel
+      message: Main engine off
+  mode: single
+- id: '1681103295361'
+  alias: Engine started
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_boolean.engineon
+    from: 'off'
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: input_boolean.busparked
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+    state: 'on'
+  action:
+  - service: homeassistant.turn_off
+    data: {}
+    target:
+      entity_id:
+      - light.entry_light
+      - light.front_ceiling_lights
+  - service: script.notify_home
+    data:
+      title: Foretravel
+      message: Main engine started
+  mode: single
+- id: '1681274370761'
+  alias: Set engine on based on RPM
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.vehicle_rpm
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 5
+    above: 200
+  condition:
+  - condition: state
+    entity_id: sensor.vehicle_rpm
+    state:
+    - '{{ trigger.from_state.state not in [''unknown'', ''unavailable''] }}'
+    - '{{ trigger.to_state.state not in [''unknown'', ''unavailable''] }}'
+    - '{{ trigger.from_state.state != trigger.to_state.state}}'
+    enabled: false
+  - condition: state
+    entity_id: sensor.vehicle_rpm
+    state:
+    - '{{ sensor.vehicle_rpm not in [''unknown'', ''unavailable''] }}'
+    enabled: false
+  action:
+  - service: homeassistant.turn_on
+    data: {}
+    target:
+      entity_id: input_boolean.engineon
+  mode: single
+- id: '1681274686152'
+  alias: Set Engine off based on RPM
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.vehicle_rpm
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 2
+    below: 100
+  condition:
+  - condition: state
+    entity_id: sensor.vehicle_rpm
+    state:
+    - '{{ sensor.vehicle_rpm not in [''unknown'', ''unavailable''] }}'
+    enabled: false
+  action:
+  - service: homeassistant.turn_off
+    data: {}
+    target:
+      entity_id: input_boolean.engineon
+  mode: single
+- id: '1681275724517'
+  alias: Generator started
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.generator
+    to: running
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+  condition: []
+  action:
+  - service: script.notify_home
+    data:
+      title: Foretravel
+      message: Generator started
+  mode: single
+- id: '1681275875182'
+  alias: Generator running long
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.generator
+    to: running
+    for:
+      hours: 6
+      minutes: 0
+      seconds: 0
+  condition: []
+  action:
+  - service: script.notify_home
+    data:
+      title: Foretravel
+      message: Generator has been running for a while.
+  mode: single
+- id: '1681276049248'
+  alias: Generator stopped
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.generator
+    to: stopped
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+    from: running
+  condition: []
+  action:
+  - service: script.notify_home
+    data:
+      title: Foretravel
+      message: Generator stopped
+  mode: single
+- id: '1681701002812'
+  alias: Set Location timer
+  description: ''
+  trigger:
+  - platform: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.setlocationtimer
+  condition: []
+  action:
+  - service: script.set_current_location_as_home
+    data: {}
+  - service: timer.start
+    data: {}
+    target:
+      entity_id: timer.setlocationtimer
+  mode: single
+- id: '1681747601445'
+  alias: Notify when iPhone leaves bus
+  description: ''
+  use_blueprint:
+    path: homeassistant/notify_leaving_zone.yaml
+    input:
+      person_entity: person.stephen_ayers
+      zone_entity: zone.home
+      notify_device: 7b4c37b34352f1a27b809745460d4c0d
+- id: '1683228868874'
+  alias: Entry Door - Announce opening
+  description: ''
+  trigger:
+  - type: opened
+    platform: device
+    device_id: d6cedbc49583d517031af19065450111
+    entity_id: binary_sensor.samjin_multi
+    domain: binary_sensor
+  condition: []
+  action:
+  - service: script.notify_home
+    data:
+      title: Foretravel
+      message: Entry door opened.
+  mode: single
+- id: '1683228964113'
+  alias: Entry Door - Announce unlocked
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - lock.entry_door_lock_2
+    to: unlocked
+  condition: []
+  action:
+  - service: script.notify_home
+    data:
+      title: Foretravel
+      message: Entry door unlocked
+  mode: single
+- id: '1683260882111'
+  alias: Locks - Doors after 10 mins driving
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_boolean.busparked
+    to: 'off'
+    for:
+      hours: 0
+      minutes: 10
+      seconds: 2
+  condition: []
+  action:
+  - service: lock.lock
+    data: {}
+    target:
+      entity_id:
+      - lock.cargo_doors
+      - lock.entry_door_lock_2
+  - service: media_player.play_media
+    target:
+      entity_id:
+      - media_player.kitchen
+      - media_player.bedroom_2
+    data:
+      media_content_id: media-source://media_source/local/f1-radio-notification.mp3
+      media_content_type: audio/mpeg
+    metadata:
+      title: f1-radio-notification.mp3
+      thumbnail:
+      media_class: music
+      children_media_class:
+      navigateIds:
+      - {}
+      - media_content_type: app
+        media_content_id: media-source://media_source
+  mode: single
+- id: '1684801136986'
+  alias: Freezer temp
+  description: ''
+  trigger:
+  - type: temperature
+    platform: device
+    device_id: 7cc88d86afc654053213e7bc5eb79d33
+    entity_id: sensor.kitchen_freezer_temperature
+    domain: sensor
+    above: 10
+    for:
+      hours: 0
+      minutes: 10
+      seconds: 0
+  condition: []
+  action:
+  - service: notify.mobile_app_iphone_14_pro_max
+    data:
+      title: Foretravel
+      message: Freezer temp high
+  - service: notify.notify
+    data:
+      title: Foretravel
+      message: Freezer temp high
+  - service: notify.ha_email_notify
+    data:
+      title: Foretravel
+      message: Freezer temp high
+  - service: tts.cloud_say
+    data:
+      cache: false
+      entity_id: media_player.bedroom_2
+      message: 'Freezer temperature high  '
+  mode: single
+- id: '1686706712222'
+  alias: Light state change - turn on panel lights
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - light.all_lights
+  - platform: state
+    entity_id:
+    - binary_sensor.samjin_multi
+    to: 'on'
+  condition: []
+  action:
+  - service: light.turn_on
+    data: {}
+    target:
+      entity_id: light.entry_light_2
+  mode: single
+- id: '1686707309457'
+  alias: Apple TV Play - TV Time
+  description: ''
+  trigger:
+  - platform: device
+    device_id: 2e34140e2c5b8fb54977e7d77cc7ae5e
+    domain: media_player
+    entity_id: media_player.home_theater_2
+    type: playing
+  condition: []
+  action:
+  - service: script.tv_time
+    data: {}
+  mode: single
+- id: '1687185322291'
+  alias: Fans - Limit time on
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - fan.fans
+    to: 'on'
+    for:
+      hours: 2
+      minutes: 0
+      seconds: 0
+  condition:
+  - condition: state
+    entity_id: input_boolean.storage
+    state: 'off'
+  action:
+  - service: fan.turn_off
+    data: {}
+    target:
+      entity_id: fan.fans
+  mode: single
+- id: '1687536730317'
+  alias: Floors - Turn off when outside temp is warm
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.thermostat_ambient_status
+    for:
+      hours: 0
+      minutes: 10
+      seconds: 0
+    above: 68
+  condition: []
+  action:
+  - service: homeassistant.turn_off
+    data: {}
+    target:
+      entity_id:
+      - switch.floor_heat_1
+      - switch.floor_heat_2
+      - switch.floor_heat_3
+  mode: single
+- id: '1687537049303'
+  alias: Floor - Turn on when cool outside
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.thermostat_ambient_status
+    for:
+      hours: 0
+      minutes: 10
+      seconds: 0
+    below: 60
+  - platform: state
+    entity_id:
+    - sensor.ac_source
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
+  condition:
+  - condition: state
+    entity_id: input_boolean.camping
+    state: 'on'
+  - condition: state
+    entity_id: sensor.ac_source
+    state: Shore
+  - condition: numeric_state
+    entity_id: sensor.thermostat_ambient_status
+    below: 55
+  action:
+  - service: homeassistant.turn_on
+    data: {}
+    target:
+      entity_id:
+      - switch.floor_heat_1
+      - switch.floor_heat_2
+      - switch.floor_heat_3
+  - service: notify.notify
+    data:
+      title: Foretravel
+      message: Floor heat turned on
+  mode: single
+- id: '1693703113127'
+  alias: Cargo D/S Locked triggers P/S Lock
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - lock.cargo_door_1
+    to: locked
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
+  condition: []
+  action:
+  - service: lock.lock
+    data: {}
+    target:
+      entity_id: lock.cargo_door_lock_2
+  mode: single
+- id: '1693703365938'
+  alias: Cargo D/S Unlock - Tiggers P/S Unlock
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - lock.cargo_door_1
+    to: unlocked
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
+  condition: []
+  action:
+  - service: lock.unlock
+    data: {}
+    target:
+      entity_id: lock.cargo_door_lock_2
+  mode: single
+- id: '1694061801232'
+  alias: Zone - iPhone enters zone
+  description: ''
+  trigger:
+  - platform: zone
+    entity_id: device_tracker.iphone_14_pro_max
+    zone: zone.home
+    event: enter
+  - platform: zone
+    entity_id: device_tracker.stephens_iphone
+    zone: zone.home
+    event: enter
+  - platform: device
+    device_id: 57ba748df517b4e46487f4c54395a276
+    domain: device_tracker
+    entity_id: d07b8dc644e3f95e16eb1a2841159346
+    type: enters
+    zone: zone.home
+  condition:
+  - condition: state
+    entity_id: input_boolean.busparked
+    state: 'on'
+  action:
+  - service: script.notify_home
+    data:
+      title: Foretravel
+      message: Steve entered bus zone
+  - service: light.turn_on
+    data: {}
+    target:
+      entity_id: light.porch_handle
+  - service: notify.notify
+    data:
+      message: Steve iPhone entered bus zone
+      title: Foretravel
+  - condition: state
+    entity_id: input_boolean.camping
+    state: 'on'
+  - service: lock.unlock
+    data: {}
+    target:
+      entity_id: lock.entry_door_lock_2
+  mode: single
+- id: '1694146955573'
+  alias: Zone - iPhone left bus
+  description: ''
+  trigger:
+  - platform: zone
+    entity_id: device_tracker.iphone_14_pro_max
+    zone: zone.home
+    event: leave
+  - platform: zone
+    entity_id: device_tracker.stephens_iphone
+    zone: zone.home
+    event: leave
+  - platform: device
+    device_id: 57ba748df517b4e46487f4c54395a276
+    domain: device_tracker
+    entity_id: d07b8dc644e3f95e16eb1a2841159346
+    type: leaves
+    zone: zone.home
+  condition:
+  - condition: state
+    entity_id: input_boolean.busparked
+    state: 'on'
+  action:
+  - service: script.notify_home
+    data:
+      title: Foretravel
+      message: Steve left Bus zone
+  mode: single
+- id: '1705344019087'
+  alias: Kitchen - Fridge temp high
+  description: ''
+  trigger:
+  - type: temperature
+    platform: device
+    device_id: ba1ef5e342719adc479937ac24f7b783
+    entity_id: ccd37bd359c599cc2365674eeed2d916
+    domain: sensor
+    above: 45
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+  condition: []
+  action:
+  - service: script.notify_home
+    metadata: {}
+    data:
+      title: Foretravel
+      message: Refrigerator temp high
+  mode: single
+- id: '1705634296797'
+  alias: Cockpit Lights
+  description: Toggle Cockpit Lights
+  trigger:
+  - platform: event
+    event_type: ios.action_fired
+    enabled: true
+    event_data:
+      event_name: Cockpit Lights
+  condition: []
+  action:
+  - service: light.toggle
+    metadata: {}
+    data: {}
+    target:
+      entity_id:
+      - light.cockpit_lights
+  mode: single
+- id: '1705945997427'
+  alias: Low Temp Warning
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id:
+    - sensor.min_temperature
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+    below: 40
+  condition: []
+  action:
+  - service: script.notify_home
+    metadata: {}
+    data:
+      title: Foretravel
+      message: Low temperature warning
+  mode: single
+- id: '1705946072025'
+  alias: High Temperature Warning
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id:
+    - sensor.max_temperature
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+    above: 95
+  condition: []
+  action:
+  - service: script.notify_home
+    metadata: {}
+    data:
+      title: Foretravel
+      message: High temperature warning
+  mode: single
+- id: '1708624859254'
+  alias: Shore Power - Warn with engine on/brake released
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_boolean.engineon
+    from: 'off'
+    to: 'on'
+  - platform: state
+    entity_id:
+    - sensor.parking_brake
+    to: park brake released
+  condition:
+  - condition: state
+    entity_id: sensor.ac_source
+    state: Shore
+  action:
+  - service: script.notify_home
+    data:
+      title: Foretravel
+      message: Engine started with Shore Power connected
+  mode: single
+- id: '1711665403923'
+  alias: Camping - Turns off Storage
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_boolean.camping
+    from: 'off'
+    to: 'on'
+  condition: []
+  action:
+  - service: input_boolean.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: input_boolean.storage
+  mode: single
+- id: '1718765676791'
+  alias: Generator Alert
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.generator_oil_level_shutdown_alert
+    - sensor.generator_temperature_shutdown_alert
+    - sensor.generator_oil_pressure_shutdown_alert
+    from:
+    to: Alert
+  condition: []
+  action:
+  - service: script.notify_home
+    data:
+      title: Foretravel
+      message: Generator Alert!
+  - service: script.notify_iphone
+    data:
+      title: Foretravel
+      message: Generator Alert!
+  mode: single
+- id: '1718857604955'
+  alias: Inverter Errors
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.outback1_error
+    - sensor.outback1_warning
+    - sensor.outback2_error
+    - sensor.outback2_warning
+    to:
+  condition:
+  - condition: template
+    value_template: "{{ not is_state('sensor.outback1_error', 'unknown')\n   and not
+      is_state('sensor.outback1_warning', 'unknown')\n   and not is_state('sensor.outback2_warning',
+      'unknown')\n   and not is_state('sensor.outback2_error', 'unknown') }}\n"
+  action:
+  - service: script.notify_home
+    data_template:
+      message: '{% set sensor = trigger.entity_id.split(''.'')[1] %}  The state of
+        Outback {{ sensor }} changed to {{ trigger.to_state.state }}.
+
+        '
+      title: Foretravel
+  - service: script.notify_iphone
+    metadata: {}
+    data:
+      title: Foretravel
+      message: Inverters reporting errors
+  mode: single
+- id: '1719616309591'
+  alias: ISP Changed
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.current_isp
+    from:
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
+    to:
+  condition: []
+  action:
+  - service: script.notify_iphone
+    data_template:
+      message: 'ISP changed to {{ trigger.to_state.state }}.
+
+        '
+      title: Foretravel
+  mode: single
+- id: '1722130923777'
+  alias: Storage Mode with Parked at Storage
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_boolean.busparked
+    to: 'on'
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+  condition:
+  - condition: state
+    entity_id: input_boolean.busparked
+    state: 'on'
+  - condition: zone
+    entity_id: device_tracker.ipad_mini2
+    zone: zone.40_459625244140625_105_08472859154142
+  action:
+  - service: input_boolean.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id: input_boolean.storage
+  mode: single
+- id: '1723073320720'
+  alias: iPhone - Charging turns off bedroom lights
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.iphone_15_pro_max_battery_state
+    from:
+    to: Charging
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
+  condition:
+  - condition: time
+    after: '21:00:00'
+  action:
+  - action: light.turn_off
+    metadata: {}
+    data: {}
+    target:
+      area_id:
+      - bedroom
+      - rear_bath
+  mode: single
+- id: '1725925644066'
+  alias: Fresh Water Empty - Turn off pump
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id:
+    - sensor.fresh_water
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+    below: 4
+  condition:
+  - condition: state
+    entity_id: switch.water_pump
+    state: 'on'
+  action:
+  - data:
+      title: Foretravel
+      message: Fresh water is empty - pump off
+    action: script.notify_home
+  - action: switch.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: switch.water_pump
+  mode: single
+- id: '1732656561514'
+  alias: AI Event Summary (LLM Vision v1.3.1)
+  description: ''
+  use_blueprint:
+    path: valentinfrlch/event_summary.yaml
+    input:
+      provider: 01JDN5XHDWG1Q8TJ5718TYR6EE
+      model: gemini-1.5-flash
+      mode: Camera
+      notify_device:
+      - a70f7210cebfb63e75054cac90853d9d
+      - 69510310d26ca8453b9eb9710c1bf3cf
+      camera_entities:
+      - camera.g5_flex_high_resolution_channel
+      motion_sensors:
+      - binary_sensor.g5_flex_motion
+- id: '1732761533020'
+  alias: AI - Dash Camera motion
+  description: ''
+  triggers:
+  - type: motion
+    device_id: eea91240afc6576d615f0b18aa1ec28e
+    entity_id: a0a40a7423ff2cdb6ef8cb153c366b96
+    domain: binary_sensor
+    trigger: device
+  conditions:
+  - condition: state
+    entity_id: input_boolean.camping
+    state: 'on'
+    enabled: false
+  actions:
+  - action: script.ai_analyze_dash_video
+    metadata: {}
+    data: {}
+    response_variable: response
+  mode: single
+- id: '1733093667643'
+  alias: GPS - Update Home Location from GPSD
+  description: ''
+  triggers:
+  - entity_id:
+    - sensor.gpsd_latitude
+    - sensor.gpsd_longitude
+    trigger: state
+  conditions:
+  - condition: and
+    conditions:
+    - condition: template
+      value_template: '{{  states(''sensor.gpsd_latitude'') is not none  and states(''sensor.gpsd_latitude'')
+        != ''unavailable'' and states(''sensor.gpsd_latitude'') != ''unknown'' }}
+
+        '
+    - condition: template
+      value_template: '{{ not is_state(''sensor.gpsd_latitude'', ''unavailable'')
+        }}'
+      enabled: false
+    - condition: template
+      value_template: '{{ not is_state(''sensor.gpsd_longitude'', ''unavailable'')
+        }}'
+      enabled: false
+    - condition: template
+      value_template: '{{ not is_state(''sensor.gpsd_latitude'', ''unknown'') }}'
+      enabled: false
+    - condition: template
+      value_template: '{{ not is_state(''sensor.gpsd_longitude'', ''unknown'') }}'
+      enabled: false
+    - condition: template
+      value_template: '{{ states(''sensor.gpsd_latitude'')|float(-1000) != -1000 }}'
+      enabled: false
+    - condition: template
+      value_template: "{% set current_lat = states('sensor.gpsd_latitude') | float(-1000)
+        %} {% set current_lon = states('sensor.gpsd_longitude') | float(-1000) %}
+        {% set home_lat = states.zone.home.attributes.latitude | float(-1000) %} {%
+        set home_lon = states.zone.home.attributes.longitude | float(-1000) %} {%
+        if current_lat > -999 and current_lon > -999 and home_lat > -999 and home_lon
+        > -999 %} {% set dist = distance(current_lat, current_lon, home_lat, home_lon)
+        %}\n  {{ dist > 0.1 }}\n{% else %}\n  {{ false }}\n{% endif %}\n"
+      enabled: false
+  actions:
+  - data:
+      latitude: '{{ states(''sensor.gpsd_latitude'') | float }}'
+      longitude: '{{ states(''sensor.gpsd_longitude'') | float }}'
+    action: homeassistant.set_location
+  - data:
+      title: Home Location Updated
+      message: 'Home location updated to: Latitude: {{ states(''sensor.gpsd_latitude'')
+        }} Longitude: {{ states(''sensor.gpsd_longitude'') }}
+
+        '
+    action: persistent_notification.create
+- id: '1733172820841'
+  alias: Update Fresh Water Data for GPM Calculation
+  description: Tracks fresh water tank level and timestamp for rate calculation
+  triggers:
+  - entity_id: sensor.fresh_water
+    trigger: state
+  actions:
+  - target:
+      entity_id: input_number.previous_fresh_water_gallons
+    data:
+      value: '{{ states(''sensor.fresh_water'') | float }}'
+    action: input_number.set_value
+  - target:
+      entity_id: input_number.previous_fresh_water_time
+    data:
+      value: '{{ as_timestamp(now()) }}'
+    action: input_number.set_value
+- id: '1733172989638'
+  alias: Fresh Water - Update Smoothed Rate
+  description: Updates the smoothed rate for fresh water depletion
+  triggers:
+  - entity_id: sensor.fresh_water_raw_rate
+    trigger: state
+  actions:
+  - target:
+      entity_id: input_number.previous_rate
+    data:
+      value: '{{ states(''sensor.fresh_water_smoothed_rate'') | float }}'
+    action: input_number.set_value
+- id: '1733173085764'
+  alias: Fresh Water - Warn on High Fresh Water Depletion Rate (GPM)
+  description: Warns when the smoothed rate of fresh water depletion is too high
+  triggers:
+  - entity_id: sensor.fresh_water_smoothed_rate
+    below: -5
+    trigger: numeric_state
+  conditions:
+  - condition: numeric_state
+    entity_id: sensor.fresh_water
+    above: 0
+  actions:
+  - data:
+      message: 'Warning: Fresh water tank is depleting rapidly at {{ states(''sensor.fresh_water_smoothed_rate'')
+        }} gallons/min! Current level: {{ states(''sensor.fresh_water'') }} gallons.
+
+        '
+      title: Fresh Water Alert
+    action: script.notify_home
+- id: '1733602676112'
+  alias: HA - Start sets shade state
+  description: ''
+  triggers:
+  - trigger: homeassistant
+    event: start
+  - trigger: event
+    event_type: automation_reloaded
+  conditions: []
+  actions:
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 10
+      milliseconds: 0
+  - data:
+      topic: RVCSET/MESSAGE/1FEDF
+      payload: 01FF0004FF000000
+      qos: '1'
+    action: mqtt.publish
+  mode: single
