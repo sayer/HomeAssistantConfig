@@ -408,12 +408,14 @@ mqtt:
       command_topic: "RVCSET/DC_DIMMER_STATUS_3/1"
       payload_on: "100"
       payload_off: "0"
+      optimistic: true
       unique_id: "dimmer_3_1"
     - name: "Cockpit Accents"
       state_topic: "RVC/DC_DIMMER_STATUS_3/2"
       state_value_template: "{{ value_json['operating status (brightness)'] }}"
       payload_on: "100"
       payload_off: "0"
+      optimistic: true
       command_topic: "RVCSET/DC_DIMMER_STATUS_3/2"
       icon: mdi:light-recessed
       unique_id: "dimmer_3_2"
@@ -424,6 +426,7 @@ mqtt:
       payload_on: "100"
       payload_off: "0"
       command_topic: "RVCSET/DC_DIMMER_STATUS_3/3"
+      optimistic: true
       unique_id: "dimmer_3_3"
     - name: "Living Room Accents"
       state_topic: "RVC/DC_DIMMER_STATUS_3/4"
@@ -432,6 +435,7 @@ mqtt:
       payload_on: "100"
       payload_off: "0"
       command_topic: "RVCSET/DC_DIMMER_STATUS_3/4"
+      optimistic: true
       unique_id: "dimmer_3_4"
     - name: "D/S Front Sofa"
       state_topic: "RVC/DC_DIMMER_STATUS_3/5"
@@ -439,6 +443,7 @@ mqtt:
       payload_on: "100"
       payload_off: "0"
       command_topic: "RVCSET/DC_DIMMER_STATUS_3/5"
+      optimistic: true
       icon: mdi:light-recessed
       unique_id: "dimmer_3_5"
     - name: "D/S Front Accent"
@@ -447,6 +452,7 @@ mqtt:
       payload_on: "100"
       payload_off: "0"
       command_topic: "RVCSET/DC_DIMMER_STATUS_3/6"
+      optimistic: true
       icon: mdi:light-recessed
       unique_id: "dimmer_3_6"
     - name: "Living Room Ceiling Recess"
@@ -456,6 +462,7 @@ mqtt:
       payload_on: "100"
       payload_off: "0"
       command_topic: "RVCSET/DC_DIMMER_STATUS_3/8"
+      optimistic: true
       unique_id: "dimmer_3_8"
     - name: "P/S Dinette Ceiling"
       state_topic: "RVC/DC_DIMMER_STATUS_3/9"
@@ -464,6 +471,7 @@ mqtt:
       payload_off: "0"
       command_topic: "RVCSET/DC_DIMMER_STATUS_3/9"
       icon: mdi:light-recessed
+      optimistic: true
       unique_id: "dimmer_3_9"
     - name: "P/S Dinette Accent"
       state_topic: "RVC/DC_DIMMER_STATUS_3/10"
@@ -472,6 +480,7 @@ mqtt:
       payload_off: "0"
       command_topic: "RVCSET/DC_DIMMER_STATUS_3/10"
       icon: mdi:light-recessed
+      optimistic: true
       unique_id: "dimmer_3_10"
     - name: "Kitchen Ceiling"
       state_topic: "RVC/DC_DIMMER_STATUS_3/12"
@@ -480,6 +489,7 @@ mqtt:
       payload_on: "100"
       payload_off: "0"
       command_topic: "RVCSET/DC_DIMMER_STATUS_3/12"
+      optimistic: true
       unique_id: "dimmer_3_12"
     - name: "Kitchen Sink"
       state_topic: "RVC/DC_DIMMER_STATUS_3/13"
@@ -488,6 +498,7 @@ mqtt:
       payload_off: "0"
       command_topic: "RVCSET/DC_DIMMER_STATUS_3/13"
       icon: mdi:light-recessed
+      optimistic: true
       unique_id: "dimmer_3_13"
     - name: "Floor Lights"
       state_topic: "RVC/DC_DIMMER_STATUS_3/14"
@@ -496,6 +507,7 @@ mqtt:
       payload_off: "0"
       command_topic: "RVCSET/DC_DIMMER_STATUS_3/14"
       icon: mdi:light-recessed
+      optimistic: true
       unique_id: "dimmer_3_14"
     - name: "Mid Batch Ceiling"
       state_topic: "RVC/DC_DIMMER_STATUS_3/15"
@@ -504,6 +516,7 @@ mqtt:
       payload_off: "0"
       command_topic: "RVCSET/DC_DIMMER_STATUS_3/15"
       icon: mdi:light-recessed
+      optimistic: true
       unique_id: "dimmer_3_15"
     - name: "Mid Batch Accent"
       state_topic: "RVC/DC_DIMMER_STATUS_3/16"
@@ -512,6 +525,7 @@ mqtt:
       payload_off: "0"
       command_topic: "RVCSET/DC_DIMMER_STATUS_3/16"
       icon: mdi:light-recessed
+      optimistic: true
       unique_id: "dimmer_3_16"
     - name: "Hall Ceiling"
       state_topic: "RVC/DC_DIMMER_STATUS_3/17"
@@ -520,6 +534,7 @@ mqtt:
       payload_off: "0"
       command_topic: "RVCSET/DC_DIMMER_STATUS_3/17"
       icon: mdi:light-recessed
+      optimistic: true
       unique_id: "dimmer_3_17"
     - name: "Bedroom Ceiling"
       state_topic: "RVC/DC_DIMMER_STATUS_3/18"
@@ -528,6 +543,7 @@ mqtt:
       payload_off: "0"
       command_topic: "RVCSET/DC_DIMMER_STATUS_3/18"
       icon: mdi:light-recessed
+      optimistic: true
       unique_id: "dimmer_3_18"
     - name: "Bedroom Ceiling Accent"
       state_topic: "RVC/DC_DIMMER_STATUS_3/19"
@@ -536,6 +552,7 @@ mqtt:
       payload_off: "0"
       command_topic: "RVCSET/DC_DIMMER_STATUS_3/19"
       icon: mdi:light-recessed
+      optimistic: true
       unique_id: "dimmer_3_19"
     - name: "Bedroom right reading"
       state_topic: "RVC/DC_DIMMER_STATUS_3/21"
@@ -544,6 +561,7 @@ mqtt:
       payload_off: "0"
       command_topic: "RVCSET/DC_DIMMER_STATUS_3/21"
       icon: mdi:light-recessed
+      optimistic: true
       unique_id: "dimmer_3_21"
     - name: "Bedroom left reading"
       state_topic: "RVC/DC_DIMMER_STATUS_3/22"
@@ -552,6 +570,7 @@ mqtt:
       payload_off: "0"
       command_topic: "RVCSET/DC_DIMMER_STATUS_3/22"
       icon: mdi:light-recessed
+      optimistic: true
       unique_id: "dimmer_3_22"
     - name: "Bedroom D/S accent"
       state_topic: "RVC/DC_DIMMER_STATUS_3/23"
@@ -560,6 +579,7 @@ mqtt:
       payload_off: "0"
       command_topic: "RVCSET/DC_DIMMER_STATUS_3/23"
       icon: mdi:light-recessed
+      optimistic: true
       unique_id: "dimmer_3_23"
     - name: "Bedroom Dresser Ceiling"
       state_topic: "RVC/DC_DIMMER_STATUS_3/24"
@@ -568,6 +588,7 @@ mqtt:
       payload_off: "0"
       command_topic: "RVCSET/DC_DIMMER_STATUS_3/24"
       icon: mdi:light-recessed
+      optimistic: true
       unique_id: "dimmer_3_24"
     - name: "Bedroom Dresser accent"
       state_topic: "RVC/DC_DIMMER_STATUS_3/25"
@@ -576,6 +597,7 @@ mqtt:
       payload_off: "0"
       command_topic: "RVCSET/DC_DIMMER_STATUS_3/25"
       icon: mdi:light-recessed
+      optimistic: true
       unique_id: "dimmer_3_25"
     - name: "Rear Bath Shower"
       state_topic: "RVC/DC_DIMMER_STATUS_3/27"
@@ -584,6 +606,7 @@ mqtt:
       payload_off: "0"
       command_topic: "RVCSET/DC_DIMMER_STATUS_3/27"
       icon: mdi:light-recessed
+      optimistic: true
       unique_id: "dimmer_3_27"
     - name: "Rear Bath Ceiling"
       state_topic: "RVC/DC_DIMMER_STATUS_3/28"
@@ -592,6 +615,7 @@ mqtt:
       payload_off: "0"
       command_topic: "RVCSET/DC_DIMMER_STATUS_3/28"
       icon: mdi:light-recessed
+      optimistic: true
       unique_id: "dimmer_3_28"
     - name: "Rear Bath Accent"
       state_topic: "RVC/DC_DIMMER_STATUS_3/29"
@@ -600,6 +624,7 @@ mqtt:
       payload_off: "0"
       command_topic: "RVCSET/DC_DIMMER_STATUS_3/29"
       icon: mdi:light-recessed
+      optimistic: true
       unique_id: "dimmer_3_29"
     - name: "Rear Bath Vanity"
       state_topic: "RVC/DC_DIMMER_STATUS_3/30"
@@ -608,6 +633,7 @@ mqtt:
       payload_off: "0"
       command_topic: "RVCSET/DC_DIMMER_STATUS_3/30"
       icon: mdi:light-recessed
+      optimistic: true
       unique_id: "dimmer_3_30"
     - name: "Bedroom Recess Ceiling"
       state_topic: "RVC/DC_DIMMER_STATUS_3/31"
@@ -616,6 +642,7 @@ mqtt:
       payload_off: "0"
       command_topic: "RVCSET/DC_DIMMER_STATUS_3/31"
       icon: mdi:light-recessed
+      optimistic: true
       unique_id: "dimmer_3_31"
     - name: "Top Bunk Reading"
       state_topic: "RVC/DC_DIMMER_STATUS_3/32"
@@ -624,6 +651,7 @@ mqtt:
       payload_off: "0"
       command_topic: "RVCSET/DC_DIMMER_STATUS_3/32"
       icon: mdi:light-recessed
+      optimistic: true
       unique_id: "dimmer_3_32"
     - name: "Top Bunk Accent"
       state_topic: "RVC/DC_DIMMER_STATUS_3/33"
@@ -632,6 +660,7 @@ mqtt:
       payload_off: "0"
       command_topic: "RVCSET/DC_DIMMER_STATUS_3/33"
       icon: mdi:light-recessed
+      optimistic: true
       unique_id: "dimmer_3_33"
     - name: "Bottom Bunk Reading"
       state_topic: "RVC/DC_DIMMER_STATUS_3/34"
@@ -640,6 +669,7 @@ mqtt:
       payload_on: "100"
       payload_off: "0"
       command_topic: "RVCSET/DC_DIMMER_STATUS_3/34"
+      optimistic: true
       unique_id: "dimmer_3_34"
     - name: "Bottom Bunk Accent"
       state_topic: "RVC/DC_DIMMER_STATUS_3/35"
@@ -648,6 +678,7 @@ mqtt:
       payload_on: "100"
       payload_off: "0"
       command_topic: "RVCSET/DC_DIMMER_STATUS_3/35"
+      optimistic: true
       unique_id: "dimmer_3_35"
     - name: "Docking Lights"
       state_topic: "RVC/DC_DIMMER_STATUS_3/121"
@@ -655,6 +686,7 @@ mqtt:
       payload_on: "100"
       payload_off: "0"
       command_topic: "RVCSET/DC_DIMMER_STATUS_3/121"
+      optimistic: true
       unique_id: "dimmer_3_121"
     - name: "Awning Lights"
       state_topic: "RVC/DC_DIMMER_STATUS_3/122"
@@ -662,6 +694,7 @@ mqtt:
       payload_on: "100"
       payload_off: "0"
       command_topic: "RVCSET/DC_DIMMER_STATUS_3/122"
+      optimistic: true
       unique_id: "dimmer_3_122"
     - name: "Exterior Accents"
       state_topic: "RVC/DC_DIMMER_STATUS_3/123"
@@ -669,6 +702,7 @@ mqtt:
       payload_on: "100"
       payload_off: "0"
       command_topic: "RVCSET/DC_DIMMER_STATUS_3/123"
+      optimistic: true
       unique_id: "dimmer_3_123"
     - name: "Passenger Map Light"
       state_topic: "RVC/DC_DIMMER_STATUS_3/124"
@@ -677,6 +711,7 @@ mqtt:
       payload_off: "0"
       command_topic: "RVCSET/DC_DIMMER_STATUS_3/124"
       icon: mdi:light-recessed
+      optimistic: true
       unique_id: "dimmer_3_124"
     - name: "Porch Handle"
       state_topic: "RVC/DC_DIMMER_STATUS_3/127"
@@ -684,6 +719,7 @@ mqtt:
       payload_on: "100"
       payload_off: "0"
       command_topic: "RVCSET/DC_DIMMER_STATUS_3/127"
+      optimistic: true
       unique_id: "dimmer_3_127"
     - name: "Master Switch"
       state_topic: "RVC/DC_DIMMER_STATUS_3/128"
@@ -691,6 +727,7 @@ mqtt:
       payload_on: "100"
       payload_off: "0"
       command_topic: "RVCSET/DC_DIMMER_STATUS_3/128-DONOTUSE"
+      optimistic: true
       unique_id: "dimmer_3_128"
 
   switch:
