@@ -392,6 +392,23 @@
                   }
                 }
               ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading_style": "subtitle"
+                },
+                {
+                  "type": "entities",
+                  "entities": [
+                    {
+                      "entity": "input_number.coach_number"
+                    }
+                  ]
+                }
+              ]
             }
           ],
           "max_columns": 4,
