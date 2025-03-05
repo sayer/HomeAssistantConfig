@@ -1,0 +1,2075 @@
+{
+  "version": 1,
+  "minor_version": 1,
+  "key": "lovelace.dashboard_remote",
+  "data": {
+    "config": {
+      "wallpanel": {
+        "enabled": true,
+        "hide_toolbar": false,
+        "hide_sidebar": false,
+        "fullscreen": false,
+        "idle_time": 3600,
+        "fade_in_time": 5,
+        "crossfade_time": 2,
+        "display_time": 20,
+        "black_screen_after_time": 0,
+        "control_reactivation_time": 0.5,
+        "keep_screen_on_time": 0
+      },
+      "views": [
+        {
+          "title": "Home",
+          "background": "center / cover no-repeat url(\"/local/Background.png\")",
+          "cards": [],
+          "badges": [],
+          "type": "sections",
+          "sections": [
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading_style": "subtitle"
+                },
+                {
+                  "type": "custom:mushroom-chips-card",
+                  "chips": [
+                    {
+                      "type": "entity",
+                      "entity": "script.drive_time",
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "script.drive_time",
+                        "target": {}
+                      },
+                      "icon": "mdi:steering",
+                      "name": "Drive",
+                      "content_info": "name"
+                    },
+                    {
+                      "type": "entity",
+                      "entity": "script.store_bus",
+                      "name": "Store",
+                      "content_info": "name",
+                      "icon": "mdi:parking",
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "script.store_bus",
+                        "target": {}
+                      }
+                    },
+                    {
+                      "type": "entity",
+                      "entity": "script.good_morning",
+                      "name": "Morning",
+                      "content_info": "name",
+                      "icon": "mdi:sun-clock",
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "script.good_morning",
+                        "target": {}
+                      }
+                    },
+                    {
+                      "type": "entity",
+                      "entity": "script.evening",
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "script.evening",
+                        "target": {}
+                      },
+                      "icon": "mdi:clock-time-seven",
+                      "name": "Evening",
+                      "content_info": "name"
+                    },
+                    {
+                      "type": "entity",
+                      "entity": "script.good_night",
+                      "name": "Night",
+                      "content_info": "name",
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "script.good_night",
+                        "target": {}
+                      },
+                      "icon": "mdi:lightbulb-night"
+                    },
+                    {
+                      "type": "entity",
+                      "entity": "person.stephen_ayers",
+                      "name": "TV",
+                      "content_info": "name",
+                      "icon": "mdi:television",
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "script.tv_time",
+                        "target": {}
+                      }
+                    }
+                  ]
+                },
+                {
+                  "show_name": true,
+                  "show_icon": true,
+                  "show_state": true,
+                  "type": "glance",
+                  "entities": [
+                    {
+                      "entity": "lock.entry_door_lock_2"
+                    },
+                    {
+                      "entity": "lock.cargo_doors"
+                    }
+                  ],
+                  "state_color": true
+                },
+                {
+                  "type": "glance",
+                  "entities": [
+                    {
+                      "entity": "sensor.thermostat_ambient_status"
+                    },
+                    {
+                      "entity": "sensor.inside_temperature"
+                    },
+                    {
+                      "entity": "sensor.fresh_water"
+                    },
+                    {
+                      "entity": "sensor.black_tank"
+                    }
+                  ]
+                },
+                {
+                  "type": "glance",
+                  "entities": [
+                    {
+                      "entity": "sensor.ac_source"
+                    },
+                    {
+                      "entity": "sensor.generator"
+                    },
+                    {
+                      "entity": "sensor.outback1_voltage",
+                      "name": "Charger"
+                    },
+                    {
+                      "entity": "sensor.outback1_inverter_mode",
+                      "name": "Inverter"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "square": false,
+                  "columns": 4,
+                  "type": "grid",
+                  "cards": [
+                    {
+                      "type": "gauge",
+                      "entity": "sensor.outback1_voltage",
+                      "min": 0,
+                      "max": 15,
+                      "needle": true,
+                      "name": "House Battery",
+                      "unit": "V"
+                    },
+                    {
+                      "type": "gauge",
+                      "entity": "sensor.chassis_battery",
+                      "min": 0,
+                      "max": 15,
+                      "needle": true,
+                      "name": "Chassis .Battery"
+                    },
+                    {
+                      "type": "gauge",
+                      "entity": "sensor.smartbmv_battery",
+                      "needle": true,
+                      "name": "Battery",
+                      "severity": {
+                        "green": 40,
+                        "yellow": 20,
+                        "red": 0
+                      }
+                    },
+                    {
+                      "type": "gauge",
+                      "entity": "sensor.smartbmv_temperature",
+                      "min": 0,
+                      "needle": true,
+                      "name": "Battery Temp",
+                      "unit": "F",
+                      "max": 110,
+                      "severity": {
+                        "green": 45,
+                        "yellow": 0,
+                        "red": 90
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "heading_style": "title"
+                },
+                {
+                  "square": false,
+                  "type": "grid",
+                  "cards": [
+                    {
+                      "type": "custom:mushroom-climate-card",
+                      "entity": "climate.living_room",
+                      "show_temperature_control": true,
+                      "collapsible_controls": false,
+                      "fill_container": false
+                    },
+                    {
+                      "type": "custom:mushroom-climate-card",
+                      "entity": "climate.kitchen",
+                      "show_temperature_control": true,
+                      "collapsible_controls": true
+                    }
+                  ],
+                  "columns": 2
+                },
+                {
+                  "square": false,
+                  "columns": 2,
+                  "type": "grid",
+                  "cards": [
+                    {
+                      "type": "custom:mushroom-fan-card",
+                      "entity": "fan.rear_bath_fan",
+                      "icon_animation": true
+                    },
+                    {
+                      "type": "custom:mushroom-fan-card",
+                      "entity": "fan.mid_bath_fan",
+                      "icon_animation": true
+                    }
+                  ]
+                },
+                {
+                  "type": "weather-forecast",
+                  "entity": "weather.foretravel",
+                  "forecast_type": "daily"
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "show_name": true,
+                  "show_icon": true,
+                  "show_state": true,
+                  "type": "glance",
+                  "entities": [
+                    {
+                      "entity": "sensor.parking_brake"
+                    },
+                    {
+                      "entity": "sensor.transmision_gear",
+                      "name": "Gear"
+                    },
+                    {
+                      "entity": "sensor.vehicle_speed",
+                      "name": "Speed"
+                    },
+                    {
+                      "entity": "input_boolean.busparked",
+                      "name": "Parked"
+                    },
+                    {
+                      "entity": "input_boolean.camping"
+                    }
+                  ],
+                  "state_color": true
+                },
+                {
+                  "show_name": true,
+                  "show_icon": true,
+                  "show_state": true,
+                  "type": "glance",
+                  "entities": [
+                    {
+                      "entity": "light.cockpit_lights",
+                      "name": "Cockpit"
+                    },
+                    {
+                      "entity": "light.exterior_lights",
+                      "name": "Exterior"
+                    },
+                    {
+                      "entity": "light.front_lights",
+                      "name": "House Front"
+                    },
+                    {
+                      "entity": "light.rear_lights",
+                      "name": "House Rear"
+                    }
+                  ],
+                  "state_color": true
+                },
+                {
+                  "type": "heading",
+                  "heading_style": "title",
+                  "heading": "Shades"
+                },
+                {
+                  "square": false,
+                  "type": "grid",
+                  "cards": [
+                    {
+                      "type": "custom:mushroom-cover-card",
+                      "entity": "cover.all_night_shades",
+                      "fill_container": false,
+                      "show_buttons_control": true,
+                      "name": "All Night"
+                    },
+                    {
+                      "type": "custom:mushroom-cover-card",
+                      "entity": "cover.all_day_shades",
+                      "name": "All Day",
+                      "show_buttons_control": true
+                    },
+                    {
+                      "type": "custom:mushroom-cover-card",
+                      "entity": "cover.cockpit_night_shades",
+                      "name": "Cockpit Night",
+                      "show_position_control": false,
+                      "show_buttons_control": true
+                    },
+                    {
+                      "type": "custom:mushroom-cover-card",
+                      "entity": "cover.cockpit_day_shades",
+                      "show_buttons_control": true,
+                      "name": "Cockpit Day"
+                    }
+                  ],
+                  "columns": 2
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading_style": "title"
+                },
+                {
+                  "show_state": true,
+                  "show_name": true,
+                  "camera_view": "auto",
+                  "type": "picture-entity",
+                  "entity": "camera.g5_flex_high_resolution_channel",
+                  "grid_options": {
+                    "columns": "full"
+                  }
+                }
+              ],
+              "column_span": 2
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading_style": "subtitle"
+                },
+                {
+                  "type": "picture",
+                  "image": "/api/image/serve/4d11003c323dea2c422486511af81f52/512x512",
+                  "card_mod": {
+                    "style": "ha-card {\n  background: rgba(0, 0, 0, 0);  /* Transparent background */\n  box-shadow: none;  /* Remove border shadow */\n}\n"
+                  }
+                }
+              ]
+            }
+          ],
+          "max_columns": 4,
+          "dense_section_placement": true
+        },
+        {
+          "title": "Drive",
+          "badges": [],
+          "background": "center / cover no-repeat url(\"/local/Background.png\")",
+          "cards": [
+            {
+              "type": "custom:mushroom-chips-card",
+              "chips": [
+                {
+                  "type": "entity",
+                  "entity": "script.drive_time",
+                  "tap_action": {
+                    "action": "call-service",
+                    "service": "script.drive_time",
+                    "target": {}
+                  },
+                  "icon": "mdi:steering",
+                  "name": "Drive",
+                  "content_info": "name"
+                },
+                {
+                  "type": "entity",
+                  "entity": "script.store_bus",
+                  "name": "Store",
+                  "content_info": "name",
+                  "icon": "mdi:parking",
+                  "tap_action": {
+                    "action": "call-service",
+                    "service": "script.store_bus",
+                    "target": {}
+                  }
+                }
+              ]
+            }
+          ],
+          "type": "sections",
+          "sections": [
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading_style": "subtitle"
+                },
+                {
+                  "show_name": true,
+                  "show_icon": true,
+                  "show_state": true,
+                  "type": "glance",
+                  "entities": [
+                    {
+                      "entity": "light.cockpit_lights",
+                      "name": "Cockpit"
+                    },
+                    {
+                      "entity": "light.exterior_lights",
+                      "name": "Exterior"
+                    },
+                    {
+                      "entity": "light.front_lights",
+                      "name": "House Front"
+                    },
+                    {
+                      "entity": "light.rear_lights",
+                      "name": "House Rear"
+                    }
+                  ],
+                  "state_color": true,
+                  "columns": 2,
+                  "grid_options": {
+                    "columns": "full"
+                  }
+                },
+                {
+                  "square": false,
+                  "type": "grid",
+                  "cards": [
+                    {
+                      "type": "custom:mushroom-cover-card",
+                      "entity": "cover.cockpit_night_shades",
+                      "name": "Cockpit Night",
+                      "show_position_control": false,
+                      "show_buttons_control": true,
+                      "fill_container": true,
+                      "layout": "vertical"
+                    },
+                    {
+                      "type": "custom:mushroom-cover-card",
+                      "entity": "cover.cockpit_day_shades",
+                      "show_buttons_control": true,
+                      "name": "Cockpit Day",
+                      "layout": "vertical",
+                      "fill_container": true
+                    }
+                  ],
+                  "columns": 2
+                },
+                {
+                  "type": "weather-forecast",
+                  "entity": "weather.foretravel",
+                  "forecast_type": "daily"
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "show_name": true,
+                  "show_icon": true,
+                  "show_state": true,
+                  "type": "glance",
+                  "entities": [
+                    {
+                      "entity": "sensor.parking_brake"
+                    },
+                    {
+                      "entity": "sensor.transmision_gear",
+                      "name": "Gear"
+                    },
+                    {
+                      "entity": "input_boolean.busparked",
+                      "name": "Parked"
+                    },
+                    {
+                      "entity": "input_boolean.camping"
+                    }
+                  ],
+                  "state_color": true,
+                  "columns": 2
+                },
+                {
+                  "type": "heading",
+                  "heading_style": "subtitle",
+                  "heading": "Generator"
+                },
+                {
+                  "square": true,
+                  "type": "grid",
+                  "cards": [
+                    {
+                      "type": "custom:mushroom-entity-card",
+                      "entity": "sensor.generator",
+                      "name": "Status",
+                      "tap_action": {
+                        "action": "more-info"
+                      },
+                      "fill_container": true,
+                      "icon": "mdi:turbine"
+                    },
+                    {
+                      "type": "custom:mushroom-entity-card",
+                      "entity": "sensor.generator_current_run_time",
+                      "fill_container": true
+                    }
+                  ],
+                  "columns": 2
+                },
+                {
+                  "type": "picture",
+                  "image": "/api/image/serve/4d11003c323dea2c422486511af81f52/512x512",
+                  "card_mod": {
+                    "style": "ha-card {\n  background: rgba(0, 0, 0, 0);  /* Transparent background */\n  box-shadow: none;  /* Remove border shadow */\n}\n"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading_style": "subtitle"
+                },
+                {
+                  "type": "gauge",
+                  "entity": "sensor.vehicle_rpm",
+                  "needle": true,
+                  "severity": {
+                    "green": 0,
+                    "yellow": 2000,
+                    "red": 2450
+                  },
+                  "max": 2500
+                },
+                {
+                  "type": "gauge",
+                  "entity": "sensor.vehicle_speed",
+                  "needle": true,
+                  "severity": {
+                    "green": 0,
+                    "yellow": 65,
+                    "red": 75
+                  }
+                },
+                {
+                  "type": "entities",
+                  "entities": [
+                    {
+                      "entity": "sensor.engine_day_run_time"
+                    },
+                    {
+                      "entity": "sensor.engine_trip_run_time"
+                    },
+                    {
+                      "entity": "sensor.generator_day_run_time"
+                    },
+                    {
+                      "entity": "sensor.generator_oil_duration"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading_style": "subtitle"
+                },
+                {
+                  "type": "map",
+                  "entities": [
+                    {
+                      "entity": "zone.home"
+                    },
+                    {
+                      "entity": "device_tracker.ipad_mini2"
+                    }
+                  ],
+                  "default_zoom": 16,
+                  "theme_mode": "auto"
+                }
+              ],
+              "column_span": 2
+            }
+          ]
+        },
+        {
+          "type": "sections",
+          "max_columns": 4,
+          "title": "Water",
+          "path": "water",
+          "background": "center / cover no-repeat url(\"/local/Background.png\")",
+          "sections": [
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading_style": "title",
+                  "heading": "Tanks"
+                },
+                {
+                  "show_name": true,
+                  "show_icon": true,
+                  "show_state": true,
+                  "type": "glance",
+                  "entities": [
+                    {
+                      "entity": "sensor.fresh_water"
+                    },
+                    {
+                      "entity": "sensor.black_tank"
+                    },
+                    {
+                      "entity": "switch.water_autofill"
+                    },
+                    {
+                      "entity": "switch.gray_water_bypass"
+                    },
+                    {
+                      "entity": "switch.black_waste_dump"
+                    },
+                    {
+                      "entity": "switch.water_pump"
+                    }
+                  ],
+                  "columns": 2
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading_style": "subtitle",
+                  "heading": "Fresh Water"
+                },
+                {
+                  "type": "custom:mini-graph-card",
+                  "entities": [
+                    "sensor.fresh_water",
+                    "sensor.black_tank"
+                  ]
+                },
+                {
+                  "type": "picture",
+                  "image": "/api/image/serve/4d11003c323dea2c422486511af81f52/512x512",
+                  "card_mod": {
+                    "style": "ha-card {\n  background: rgba(0, 0, 0, 0);  /* Transparent background */\n  box-shadow: none;  /* Remove border shadow */\n}\n"
+                  }
+                }
+              ]
+            }
+          ],
+          "cards": []
+        },
+        {
+          "type": "sections",
+          "max_columns": 4,
+          "title": "HVAC",
+          "path": "hvac",
+          "background": "center / cover no-repeat url(\"/local/Background.png\")",
+          "sections": [
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading_style": "subtitle",
+                  "heading": "Fans",
+                  "icon": "mdi:fan"
+                },
+                {
+                  "show_name": true,
+                  "show_icon": true,
+                  "show_state": true,
+                  "type": "glance",
+                  "entities": [
+                    {
+                      "entity": "sensor.min_temperature"
+                    },
+                    {
+                      "entity": "sensor.max_temperature"
+                    },
+                    {
+                      "entity": "sensor.thermostat_ambient_status"
+                    },
+                    {
+                      "entity": "sensor.inside_temperature"
+                    }
+                  ],
+                  "state_color": true
+                },
+                {
+                  "square": false,
+                  "columns": 2,
+                  "type": "grid",
+                  "cards": [
+                    {
+                      "type": "custom:mushroom-fan-card",
+                      "entity": "fan.rear_bath_fan",
+                      "icon_animation": true
+                    },
+                    {
+                      "type": "custom:mushroom-fan-card",
+                      "entity": "fan.mid_bath_fan",
+                      "icon_animation": true
+                    }
+                  ]
+                },
+                {
+                  "square": false,
+                  "type": "grid",
+                  "cards": [
+                    {
+                      "type": "custom:mushroom-climate-card",
+                      "entity": "climate.living_room",
+                      "show_temperature_control": true,
+                      "collapsible_controls": false,
+                      "fill_container": true,
+                      "hvac_modes": []
+                    },
+                    {
+                      "type": "custom:mushroom-climate-card",
+                      "entity": "climate.kitchen",
+                      "show_temperature_control": true,
+                      "collapsible_controls": true
+                    }
+                  ],
+                  "columns": 2
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading_style": "subtitle",
+                  "heading": "Heating",
+                  "icon": "mdi:heat-wave"
+                },
+                {
+                  "show_name": true,
+                  "show_icon": true,
+                  "show_state": true,
+                  "type": "glance",
+                  "entities": [
+                    {
+                      "entity": "switch.floor_heat_1",
+                      "name": "Front"
+                    },
+                    {
+                      "entity": "switch.floor_heat_2",
+                      "name": "Middle"
+                    },
+                    {
+                      "entity": "switch.floor_heat_3",
+                      "name": "Rear"
+                    }
+                  ],
+                  "title": "Floor Heat",
+                  "state_color": true
+                },
+                {
+                  "show_name": true,
+                  "show_icon": true,
+                  "show_state": true,
+                  "type": "glance",
+                  "entities": [
+                    {
+                      "entity": "switch.heat"
+                    },
+                    {
+                      "entity": "switch.heat_1"
+                    },
+                    {
+                      "entity": "switch.heat_2"
+                    },
+                    {
+                      "entity": "switch.heat_3"
+                    },
+                    {
+                      "entity": "switch.heat_4"
+                    }
+                  ],
+                  "title": "Heat Pumps",
+                  "state_color": true
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading_style": "subtitle",
+                  "heading": "Air Conditioning",
+                  "icon": "mdi:air-conditioner"
+                },
+                {
+                  "show_name": true,
+                  "show_icon": true,
+                  "show_state": true,
+                  "type": "glance",
+                  "entities": [
+                    {
+                      "entity": "switch.air_conditioning"
+                    },
+                    {
+                      "entity": "switch.front_ac"
+                    },
+                    {
+                      "entity": "switch.ac_2"
+                    },
+                    {
+                      "entity": "switch.ac_3"
+                    },
+                    {
+                      "entity": "switch.ac_4"
+                    }
+                  ],
+                  "state_color": true,
+                  "title": "Air Conditioning"
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading_style": "subtitle",
+                  "heading": "Local Weather"
+                },
+                {
+                  "type": "weather-forecast",
+                  "entity": "weather.foretravel",
+                  "forecast_type": "daily"
+                },
+                {
+                  "type": "picture",
+                  "image": "/api/image/serve/4d11003c323dea2c422486511af81f52/512x512",
+                  "card_mod": {
+                    "style": "ha-card {\n  background: rgba(0, 0, 0, 0);  /* Transparent background */\n  box-shadow: none;  /* Remove border shadow */\n}\n"
+                  }
+                }
+              ]
+            }
+          ],
+          "cards": []
+        },
+        {
+          "title": "Lights",
+          "path": "lights",
+          "icon": "",
+          "badges": [],
+          "background": "center / cover no-repeat url(\"/local/Background.png\")",
+          "cards": [
+            {
+              "show_name": true,
+              "show_icon": true,
+              "show_state": false,
+              "type": "glance",
+              "entities": [
+                {
+                  "entity": "light.cockpit_lights"
+                },
+                {
+                  "entity": "light.entry_light_2"
+                },
+                {
+                  "entity": "light.cockpit_accents"
+                },
+                {
+                  "entity": "light.entry_light"
+                }
+              ],
+              "title": "Cockpit",
+              "state_color": true,
+              "columns": 2
+            },
+            {
+              "show_name": true,
+              "show_icon": true,
+              "show_state": false,
+              "type": "glance",
+              "entities": [
+                {
+                  "entity": "light.exterior_lights"
+                },
+                {
+                  "entity": "light.exterior_accents"
+                },
+                {
+                  "entity": "light.awning_lights"
+                },
+                {
+                  "entity": "light.porch_handle"
+                },
+                {
+                  "entity": "light.awning_lights"
+                }
+              ],
+              "title": "Exterior",
+              "columns": 2,
+              "state_color": true
+            },
+            {
+              "show_name": true,
+              "show_icon": true,
+              "show_state": false,
+              "type": "glance",
+              "entities": [
+                {
+                  "entity": "light.living_room_lights"
+                },
+                {
+                  "entity": "light.living_room_accents"
+                },
+                {
+                  "entity": "light.living_room_ceiling"
+                },
+                {
+                  "entity": "light.living_room_ceiling_recess"
+                }
+              ],
+              "title": "Living",
+              "state_color": true,
+              "columns": 2
+            },
+            {
+              "show_name": true,
+              "show_icon": true,
+              "show_state": false,
+              "type": "glance",
+              "entities": [
+                {
+                  "entity": "light.kitchen_lights"
+                },
+                {
+                  "entity": "light.dimmer_3_12"
+                },
+                {
+                  "entity": "light.dimmer_3_13"
+                },
+                {
+                  "entity": "light.dimmer_3_14"
+                }
+              ],
+              "title": "Kitchen",
+              "state_color": true,
+              "columns": 2
+            },
+            {
+              "show_name": true,
+              "show_icon": true,
+              "show_state": false,
+              "type": "glance",
+              "entities": [
+                {
+                  "entity": "light.hallway_lights"
+                },
+                {
+                  "entity": "light.dimmer_3_17"
+                },
+                {
+                  "entity": "light.top_buck_accent"
+                },
+                {
+                  "entity": "light.top_bunk_reading"
+                },
+                {
+                  "entity": "light.bottom_bunk_accent"
+                },
+                {
+                  "entity": "light.bottom_bunk_reading"
+                },
+                {
+                  "entity": "light.dimmer_3_15"
+                },
+                {
+                  "entity": "light.dimmer_3_16"
+                }
+              ],
+              "title": "Hallway",
+              "state_color": true,
+              "columns": 2
+            },
+            {
+              "show_name": true,
+              "show_icon": true,
+              "show_state": false,
+              "type": "glance",
+              "entities": [
+                {
+                  "entity": "light.bedroom_lights"
+                },
+                {
+                  "entity": "light.bedroom_ceiling_2"
+                },
+                {
+                  "entity": "light.bedroom_dresser_ceiling"
+                },
+                {
+                  "entity": "light.dimmer_3_19"
+                },
+                {
+                  "entity": "light.bedroom_d_s_accent"
+                },
+                {
+                  "entity": "light.bedroom_dresser_accent"
+                },
+                {
+                  "entity": "light.bedroom_dresser_accent"
+                },
+                {
+                  "entity": "light.dimmer_3_21"
+                },
+                {
+                  "entity": "light.dimmer_3_22"
+                }
+              ],
+              "title": "Bedroom",
+              "state_color": true,
+              "columns": 2
+            },
+            {
+              "show_name": true,
+              "show_icon": true,
+              "show_state": false,
+              "type": "glance",
+              "entities": [
+                {
+                  "entity": "light.rear_bathroom_lights"
+                },
+                {
+                  "entity": "light.rear_bath_ceiling"
+                },
+                {
+                  "entity": "light.rear_bath_shower"
+                },
+                {
+                  "entity": "light.iread_bath_accent_2"
+                },
+                {
+                  "entity": "light.rear_bath_accent"
+                }
+              ],
+              "title": "Rear Bath",
+              "state_color": true,
+              "columns": 2
+            },
+            {
+              "type": "picture",
+              "image": "/api/image/serve/4d11003c323dea2c422486511af81f52/512x512",
+              "card_mod": {
+                "style": "ha-card {\n  background: rgba(0, 0, 0, 0);  /* Transparent background */\n  box-shadow: none;  /* Remove border shadow */\n}\n"
+              }
+            }
+          ],
+          "type": "masonry"
+        },
+        {
+          "title": "Shades",
+          "path": "shades-and-fans",
+          "badges": [],
+          "background": "center / cover no-repeat url(\"/local/Background.png\")",
+          "cards": [
+            {
+              "square": false,
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "custom:mushroom-cover-card",
+                  "entity": "cover.all_night_shades",
+                  "fill_container": false,
+                  "show_buttons_control": true,
+                  "name": "All Night"
+                },
+                {
+                  "type": "custom:mushroom-cover-card",
+                  "entity": "cover.all_day_shades",
+                  "name": "All Day",
+                  "show_buttons_control": true
+                },
+                {
+                  "type": "custom:mushroom-cover-card",
+                  "entity": "cover.cockpit_night_shades",
+                  "name": "Cockpit Night",
+                  "show_position_control": false,
+                  "show_buttons_control": true
+                },
+                {
+                  "type": "custom:mushroom-cover-card",
+                  "entity": "cover.cockpit_day_shades",
+                  "show_buttons_control": true,
+                  "name": "Cockpit Day"
+                }
+              ],
+              "columns": 2
+            },
+            {
+              "show_name": true,
+              "show_icon": true,
+              "show_state": true,
+              "type": "glance",
+              "entities": [
+                {
+                  "entity": "cover.windshield_day"
+                },
+                {
+                  "entity": "cover.driver_day"
+                },
+                {
+                  "entity": "cover.entry_door_day"
+                }
+              ],
+              "state_color": true
+            },
+            {
+              "type": "custom:mushroom-chips-card",
+              "chips": [
+                {
+                  "type": "entity",
+                  "entity": "script.good_morning",
+                  "name": "Morning",
+                  "content_info": "name",
+                  "icon": "mdi:sun-clock",
+                  "tap_action": {
+                    "action": "call-service",
+                    "service": "script.good_morning",
+                    "target": {}
+                  }
+                },
+                {
+                  "type": "entity",
+                  "entity": "script.evening",
+                  "tap_action": {
+                    "action": "call-service",
+                    "service": "script.evening",
+                    "target": {}
+                  },
+                  "icon": "mdi:clock-time-seven",
+                  "name": "Evening",
+                  "content_info": "name"
+                },
+                {
+                  "type": "entity",
+                  "entity": "script.good_night",
+                  "name": "Night",
+                  "content_info": "name",
+                  "tap_action": {
+                    "action": "call-service",
+                    "service": "script.good_night",
+                    "target": {}
+                  },
+                  "icon": "mdi:lightbulb-night"
+                },
+                {
+                  "type": "entity",
+                  "entity": "person.stephen_ayers",
+                  "name": "TV",
+                  "content_info": "name",
+                  "icon": "mdi:television",
+                  "tap_action": {
+                    "action": "call-service",
+                    "service": "script.tv_time",
+                    "target": {}
+                  }
+                }
+              ]
+            },
+            {
+              "show_name": true,
+              "show_icon": true,
+              "show_state": true,
+              "type": "glance",
+              "entities": [
+                {
+                  "entity": "cover.windshield_night"
+                },
+                {
+                  "entity": "cover.driver_night"
+                },
+                {
+                  "entity": "cover.entry_door_night"
+                }
+              ],
+              "state_color": true
+            },
+            {
+              "show_name": true,
+              "show_icon": true,
+              "show_state": true,
+              "type": "glance",
+              "entities": [
+                {
+                  "entity": "cover.d_s_living_room_day"
+                },
+                {
+                  "entity": "cover.dinette_day"
+                }
+              ],
+              "state_color": true
+            },
+            {
+              "show_name": true,
+              "show_icon": true,
+              "show_state": true,
+              "type": "glance",
+              "entities": [
+                {
+                  "entity": "cover.bedroom_dresser_day"
+                },
+                {
+                  "entity": "cover.bedroom_front_day"
+                },
+                {
+                  "entity": "cover.bedroom_rear_day"
+                }
+              ],
+              "state_color": true
+            },
+            {
+              "show_name": true,
+              "show_icon": true,
+              "show_state": true,
+              "type": "glance",
+              "entities": [
+                {
+                  "entity": "cover.top_bunk_night"
+                },
+                {
+                  "entity": "cover.botton_bunk_night"
+                },
+                {
+                  "entity": "cover.mid_bath_night"
+                }
+              ],
+              "state_color": true
+            },
+            {
+              "show_name": true,
+              "show_icon": true,
+              "show_state": true,
+              "type": "glance",
+              "entities": [
+                {
+                  "entity": "cover.bedroom_dresser_night"
+                },
+                {
+                  "entity": "cover.bedroom_front_night"
+                },
+                {
+                  "entity": "cover.bedroom_rear_night"
+                }
+              ],
+              "state_color": true
+            },
+            {
+              "show_name": true,
+              "show_icon": true,
+              "show_state": true,
+              "type": "glance",
+              "entities": [
+                {
+                  "entity": "cover.d_s_living_room_night"
+                },
+                {
+                  "entity": "cover.dinette_night"
+                }
+              ],
+              "state_color": true
+            },
+            {
+              "type": "picture",
+              "image": "/api/image/serve/4d11003c323dea2c422486511af81f52/512x512",
+              "card_mod": {
+                "style": "ha-card {\n  background: rgba(0, 0, 0, 0);  /* Transparent background */\n  box-shadow: none;  /* Remove border shadow */\n}\n"
+              }
+            }
+          ],
+          "type": "masonry"
+        },
+        {
+          "type": "sections",
+          "max_columns": 4,
+          "title": "Power",
+          "path": "power",
+          "background": "center / cover no-repeat url(\"/local/Background.png\")",
+          "sections": [
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading_style": "subtitle",
+                  "heading": "Power"
+                },
+                {
+                  "show_name": true,
+                  "show_icon": true,
+                  "show_state": true,
+                  "type": "glance",
+                  "entities": [
+                    {
+                      "entity": "sensor.ac_source"
+                    },
+                    {
+                      "entity": "sensor.generator"
+                    },
+                    {
+                      "entity": "sensor.outback1_voltage",
+                      "name": "Charger"
+                    },
+                    {
+                      "entity": "sensor.outback1_inverter_mode"
+                    }
+                  ],
+                  "title": "Power"
+                },
+                {
+                  "square": false,
+                  "columns": 4,
+                  "type": "grid",
+                  "cards": [
+                    {
+                      "type": "gauge",
+                      "entity": "sensor.outback1_voltage",
+                      "min": 0,
+                      "max": 15,
+                      "needle": true,
+                      "name": "House Battery",
+                      "unit": "V"
+                    },
+                    {
+                      "type": "gauge",
+                      "entity": "sensor.chassis_battery",
+                      "min": 0,
+                      "max": 15,
+                      "needle": true,
+                      "name": "Chassis .Battery"
+                    },
+                    {
+                      "type": "gauge",
+                      "entity": "sensor.smartbmv_battery",
+                      "needle": true,
+                      "name": "Battery",
+                      "severity": {
+                        "green": 40,
+                        "yellow": 20,
+                        "red": 0
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "picture",
+                  "image": "/api/image/serve/4d11003c323dea2c422486511af81f52/512x512",
+                  "card_mod": {
+                    "style": "ha-card {\n  background: rgba(0, 0, 0, 0);  /* Transparent background */\n  box-shadow: none;  /* Remove border shadow */\n}\n"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading_style": "subtitle",
+                  "heading": "Battery"
+                },
+                {
+                  "square": true,
+                  "type": "grid",
+                  "cards": [
+                    {
+                      "type": "custom:mini-graph-card",
+                      "entities": [
+                        "sensor.chassis_battery"
+                      ]
+                    },
+                    {
+                      "type": "custom:mini-graph-card",
+                      "entities": [
+                        "sensor.outback1_voltage"
+                      ]
+                    },
+                    {
+                      "type": "custom:mini-graph-card",
+                      "entities": [
+                        "sensor.smartbmv_voltage"
+                      ]
+                    },
+                    {
+                      "type": "custom:mini-graph-card",
+                      "entities": [
+                        "sensor.smartbmv_battery"
+                      ]
+                    }
+                  ],
+                  "columns": 2
+                },
+                {
+                  "chart_type": "line",
+                  "period": "hour",
+                  "type": "statistics-graph",
+                  "entities": [
+                    "sensor.chassis_battery",
+                    "sensor.dc_house_voltage",
+                    "sensor.smartbmv_voltage"
+                  ],
+                  "stat_types": [
+                    "min"
+                  ],
+                  "title": "Batteries",
+                  "days_to_show": 5
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading_style": "subtitle",
+                  "heading": "Generator"
+                },
+                {
+                  "square": true,
+                  "type": "grid",
+                  "cards": [
+                    {
+                      "type": "gauge",
+                      "entity": "sensor.generator_2",
+                      "name": "Generator RPM",
+                      "max": 2000,
+                      "needle": true
+                    },
+                    {
+                      "type": "custom:mushroom-entity-card",
+                      "entity": "switch.generator",
+                      "name": "Status",
+                      "tap_action": {
+                        "action": "toggle"
+                      },
+                      "fill_container": true,
+                      "icon": "mdi:turbine"
+                    },
+                    {
+                      "type": "custom:mushroom-entity-card",
+                      "entity": "sensor.generator_hours",
+                      "name": "Total Hours",
+                      "fill_container": true,
+                      "icon": "mdi:turbine"
+                    },
+                    {
+                      "type": "custom:mushroom-entity-card",
+                      "entity": "sensor.generator_current_run_time",
+                      "fill_container": true,
+                      "icon": "mdi:av-timer"
+                    }
+                  ],
+                  "columns": 2
+                },
+                {
+                  "show_name": true,
+                  "show_icon": true,
+                  "show_state": true,
+                  "type": "glance",
+                  "entities": [
+                    {
+                      "entity": "sensor.generator_oil_level_shutdown_alert",
+                      "name": "Oil Level"
+                    },
+                    {
+                      "entity": "sensor.generator_oil_pressure_shutdown_alert",
+                      "name": "Oil Pressure"
+                    },
+                    {
+                      "entity": "sensor.generator_temperature_shutdown_alert",
+                      "name": "Temperature"
+                    }
+                  ],
+                  "state_color": true
+                }
+              ]
+            }
+          ],
+          "cards": []
+        },
+        {
+          "icon": "mdi:floor-plan",
+          "title": "Floor Plan",
+          "path": "floor-plan",
+          "type": "panel",
+          "badges": [],
+          "background": "center / cover no-repeat url(\"/local/Background.png\")",
+          "cards": [
+            {
+              "type": "picture-elements",
+              "elements": [
+                {
+                  "type": "state-icon",
+                  "tap_action": {
+                    "action": "toggle"
+                  },
+                  "entity": "light.entry_light",
+                  "style": {
+                    "top": "50%",
+                    "left": "90%",
+                    "border-radius": "200%",
+                    "text-align": "center",
+                    "background-color": "rgba(102, 102, 102, 0.2)"
+                  }
+                },
+                {
+                  "type": "state-icon",
+                  "tap_action": {
+                    "action": "toggle"
+                  },
+                  "entity": "light.passenger_map_light",
+                  "style": {
+                    "top": "67%",
+                    "left": "88%",
+                    "border-radius": "200%",
+                    "text-align": "center",
+                    "background-color": "rgba(102, 102, 102, 0.2)"
+                  }
+                },
+                {
+                  "type": "state-icon",
+                  "tap_action": {
+                    "action": "toggle"
+                  },
+                  "entity": "light.dimmer_3_13",
+                  "style": {
+                    "top": "75%",
+                    "left": "57%",
+                    "border-radius": "200%",
+                    "text-align": "center",
+                    "background-color": "rgba(102, 102, 102, 0.2)"
+                  }
+                },
+                {
+                  "type": "state-icon",
+                  "tap_action": {
+                    "action": "toggle"
+                  },
+                  "entity": "light.dimmer_3_9",
+                  "style": {
+                    "top": "82%",
+                    "left": "73.5%",
+                    "border-radius": "200%",
+                    "text-align": "center",
+                    "background-color": "rgba(102, 102, 102, 0.2)"
+                  }
+                },
+                {
+                  "type": "state-icon",
+                  "tap_action": {
+                    "action": "toggle"
+                  },
+                  "entity": "light.living_room_ceiling",
+                  "style": {
+                    "top": "21%",
+                    "left": "77%",
+                    "border-radius": "200%",
+                    "text-align": "center",
+                    "background-color": "rgba(102, 102, 102, 0.2)"
+                  }
+                },
+                {
+                  "type": "state-icon",
+                  "tap_action": {
+                    "action": "toggle"
+                  },
+                  "entity": "light.living_room_ceiling_recess",
+                  "style": {
+                    "top": "50%",
+                    "left": "77%",
+                    "border-radius": "200%",
+                    "text-align": "center",
+                    "background-color": "rgba(102, 102, 102, 0.2)"
+                  }
+                },
+                {
+                  "type": "state-icon",
+                  "tap_action": {
+                    "action": "toggle"
+                  },
+                  "entity": "light.dimmer_3_12",
+                  "style": {
+                    "top": "50%",
+                    "left": "60%",
+                    "border-radius": "200%",
+                    "text-align": "center",
+                    "background-color": "rgba(102, 102, 102, 0.2)"
+                  }
+                },
+                {
+                  "type": "state-icon",
+                  "tap_action": {
+                    "action": "toggle"
+                  },
+                  "entity": "light.dimmer_3_15",
+                  "style": {
+                    "top": "34%",
+                    "left": "48%",
+                    "border-radius": "200%",
+                    "text-align": "center",
+                    "background-color": "rgba(102, 102, 102, 0.2)"
+                  }
+                },
+                {
+                  "type": "state-icon",
+                  "tap_action": {
+                    "action": "toggle"
+                  },
+                  "entity": "light.top_bunk_reading",
+                  "style": {
+                    "top": "70%",
+                    "left": "50%",
+                    "border-radius": "200%",
+                    "text-align": "center",
+                    "background-color": "rgba(102, 102, 102, 0.2)"
+                  }
+                },
+                {
+                  "type": "state-icon",
+                  "tap_action": {
+                    "action": "toggle"
+                  },
+                  "entity": "light.dimmer_3_17",
+                  "style": {
+                    "top": "52%",
+                    "left": "45%",
+                    "border-radius": "200%",
+                    "text-align": "center",
+                    "background-color": "rgba(102, 102, 102, 0.2)"
+                  }
+                },
+                {
+                  "type": "state-icon",
+                  "tap_action": {
+                    "action": "toggle"
+                  },
+                  "entity": "light.bedroom_ceiling_2",
+                  "style": {
+                    "top": "52%",
+                    "left": "29%",
+                    "border-radius": "200%",
+                    "text-align": "center",
+                    "background-color": "rgba(102, 102, 102, 0.2)"
+                  }
+                },
+                {
+                  "type": "state-icon",
+                  "tap_action": {
+                    "action": "toggle"
+                  },
+                  "entity": "light.bedroom_dresser_ceiling",
+                  "style": {
+                    "top": "80%",
+                    "left": "29%",
+                    "border-radius": "200%",
+                    "text-align": "center",
+                    "background-color": "rgba(102, 102, 102, 0.2)"
+                  }
+                },
+                {
+                  "type": "state-icon",
+                  "tap_action": {
+                    "action": "toggle"
+                  },
+                  "entity": "light.dimmer_3_22",
+                  "style": {
+                    "top": "14%",
+                    "left": "25%",
+                    "border-radius": "200%",
+                    "text-align": "center",
+                    "background-color": "rgba(102, 102, 102, 0.2)"
+                  }
+                },
+                {
+                  "type": "state-icon",
+                  "tap_action": {
+                    "action": "toggle"
+                  },
+                  "entity": "light.dimmer_3_22",
+                  "style": {
+                    "top": "14%",
+                    "left": "33%",
+                    "border-radius": "200%",
+                    "text-align": "center",
+                    "background-color": "rgba(102, 102, 102, 0.2)"
+                  }
+                },
+                {
+                  "type": "state-icon",
+                  "tap_action": {
+                    "action": "toggle"
+                  },
+                  "entity": "light.rear_bath_ceiling",
+                  "style": {
+                    "top": "50%",
+                    "left": "16%",
+                    "border-radius": "200%",
+                    "text-align": "center",
+                    "background-color": "rgba(102, 102, 102, 0.2)"
+                  }
+                },
+                {
+                  "type": "state-icon",
+                  "tap_action": {
+                    "action": "toggle"
+                  },
+                  "entity": "light.rear_bath_shower",
+                  "style": {
+                    "top": "70%",
+                    "left": "10%",
+                    "border-radius": "200%",
+                    "text-align": "center",
+                    "background-color": "rgba(102, 102, 102, 0.2)"
+                  }
+                },
+                {
+                  "type": "state-icon",
+                  "tap_action": {
+                    "action": "toggle"
+                  },
+                  "entity": "light.iread_bath_accent_2",
+                  "style": {
+                    "top": "49%",
+                    "left": "9%",
+                    "border-radius": "200%",
+                    "text-align": "center",
+                    "background-color": "rgba(102, 102, 102, 0.2)"
+                  }
+                },
+                {
+                  "type": "state-icon",
+                  "icon": "mdi:fan",
+                  "tap_action": {
+                    "action": "toggle"
+                  },
+                  "entity": "switch.mid_bath_fan",
+                  "style": {
+                    "top": "33%",
+                    "left": "42%",
+                    "border-radius": "50%",
+                    "text-align": "center",
+                    "background-color": "rgba(102, 102, 102, 0.2)"
+                  }
+                },
+                {
+                  "type": "state-icon",
+                  "icon": "mdi:fan",
+                  "tap_action": {
+                    "action": "toggle"
+                  },
+                  "entity": "switch.rear_bath_fan",
+                  "style": {
+                    "top": "33%",
+                    "left": "15%",
+                    "border-radius": "50%",
+                    "text-align": "center",
+                    "background-color": "rgba(102, 102, 102, 0.2)"
+                  }
+                },
+                {
+                  "type": "state-icon",
+                  "icon": "mdi:roller-shade-closed",
+                  "tap_action": {
+                    "action": "toggle"
+                  },
+                  "entity": "cover.windshield_night",
+                  "style": {
+                    "top": "40%",
+                    "left": "97%",
+                    "border-radius": "50%",
+                    "text-align": "center",
+                    "background-color": "rgba(102, 102, 102, 0.2)"
+                  }
+                },
+                {
+                  "type": "state-icon",
+                  "icon": "mdi:roller-shade",
+                  "tap_action": {
+                    "action": "toggle"
+                  },
+                  "entity": "cover.windshield_day",
+                  "style": {
+                    "top": "60%",
+                    "left": "97%",
+                    "border-radius": "50%",
+                    "text-align": "center",
+                    "background-color": "rgba(102, 102, 102, 0.2)"
+                  }
+                },
+                {
+                  "type": "state-icon",
+                  "icon": "mdi:roller-shade-closed",
+                  "tap_action": {
+                    "action": "toggle"
+                  },
+                  "entity": "cover.d_s_living_room_night",
+                  "style": {
+                    "top": "10%",
+                    "left": "80%",
+                    "border-radius": "50%",
+                    "text-align": "center",
+                    "background-color": "rgba(102, 102, 102, 0.2)"
+                  }
+                },
+                {
+                  "type": "state-icon",
+                  "icon": "mdi:led-strip",
+                  "tap_action": {
+                    "action": "toggle"
+                  },
+                  "entity": "light.cockpit_accents",
+                  "style": {
+                    "top": "50%",
+                    "left": "85%",
+                    "border-radius": "50%",
+                    "text-align": "center",
+                    "background-color": "rgba(102, 102, 102, 0.2)"
+                  }
+                },
+                {
+                  "type": "state-icon",
+                  "icon": "mdi:car-light-fog",
+                  "tap_action": {
+                    "action": "toggle"
+                  },
+                  "entity": "light.exterior_accents",
+                  "style": {
+                    "top": "22%",
+                    "left": "98%",
+                    "border-radius": "50%",
+                    "text-align": "center",
+                    "background-color": "rgba(102, 102, 102, 0.2)"
+                  }
+                },
+                {
+                  "type": "state-icon",
+                  "icon": "mdi:car-light-fog",
+                  "tap_action": {
+                    "action": "toggle"
+                  },
+                  "entity": "light.exterior_accents",
+                  "style": {
+                    "top": "78%",
+                    "left": "98%",
+                    "border-radius": "50%",
+                    "text-align": "center",
+                    "background-color": "rgba(102, 102, 102, 0.2)"
+                  }
+                }
+              ],
+              "image": "local/ForetravelIH-45Bunk.png"
+            }
+          ]
+        },
+        {
+          "title": "Systems",
+          "path": "systems",
+          "badges": [],
+          "background": "center / cover no-repeat url(\"/local/Background.png\")",
+          "cards": [
+            {
+              "type": "entity",
+              "entity": "sensor.current_isp",
+              "name": "ISP",
+              "icon": "mdi:web"
+            },
+            {
+              "type": "entities",
+              "entities": [
+                {
+                  "entity": "sensor.disk_use_percent_config",
+                  "name": "Disk use (percent) /config"
+                },
+                {
+                  "entity": "sensor.disk_use",
+                  "name": "Disk use /"
+                },
+                {
+                  "entity": "sensor.last_boot",
+                  "name": "Last boot"
+                },
+                {
+                  "entity": "sensor.load_15m",
+                  "name": "Load (15m)"
+                },
+                {
+                  "entity": "sensor.load_1m",
+                  "name": "Load (1m)"
+                },
+                {
+                  "entity": "sensor.load_5m",
+                  "name": "Load (5m)"
+                },
+                {
+                  "entity": "sensor.memory_free",
+                  "name": "Memory free"
+                },
+                {
+                  "entity": "sensor.memory_use",
+                  "name": "Memory use"
+                },
+                {
+                  "entity": "sensor.memory_use_percent",
+                  "name": "Memory use (percent)"
+                },
+                {
+                  "entity": "sensor.processor_temperature",
+                  "name": "Processor temperature"
+                },
+                {
+                  "entity": "sensor.processor_use",
+                  "name": "Processor use"
+                }
+              ],
+              "title": "System Monitor"
+            },
+            {
+              "type": "custom:home-feed-card",
+              "title": "Bus Activity",
+              "card_id": "main_feed",
+              "show_empty": false,
+              "calendars": [
+                "calendar.sayer_ayersnet_com"
+              ],
+              "id_filter": "^home_feed_.*",
+              "more_info_on_tap": true,
+              "state_color": true,
+              "entities": [
+                {
+                  "entity": "sensor.parking_brake"
+                },
+                {
+                  "entity": "light.exterior_lights"
+                },
+                {
+                  "entity": "sensor.black_tank"
+                },
+                {
+                  "entity": "sensor.fresh_water"
+                },
+                {
+                  "entity": "lock.entry_door_lock_2"
+                },
+                {
+                  "entity": "fan.fans"
+                },
+                {
+                  "entity": "sensor.inverter_status"
+                },
+                {
+                  "entity": "switch.generator"
+                },
+                {
+                  "entity": "binary_sensor.samjin_multi"
+                },
+                {
+                  "entity": "sensor.generator_hours"
+                },
+                {
+                  "entity": "switch.water_pump"
+                },
+                {
+                  "entity": "input_boolean.engineon"
+                },
+                {
+                  "entity": "input_boolean.camping"
+                },
+                {
+                  "entity": "input_boolean.storage"
+                },
+                {
+                  "entity": "input_boolean.busparked"
+                },
+                {
+                  "entity": "climate.living_room"
+                },
+                {
+                  "entity": "climate.kitchen"
+                }
+              ]
+            },
+            {
+              "type": "picture",
+              "image": "/api/image/serve/4d11003c323dea2c422486511af81f52/512x512",
+              "card_mod": {
+                "style": "ha-card {\n  background: rgba(0, 0, 0, 0);  /* Transparent background */\n  box-shadow: none;  /* Remove border shadow */\n}\n"
+              }
+            },
+            {
+              "type": "entities",
+              "entities": [
+                {
+                  "entity": "input_number.model_year"
+                },
+                {
+                  "entity": "input_number.coach_number"
+                },
+                {
+                  "entity": "input_text.owner_name"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "title": "Master Dashboard"
+    }
+  }
+}

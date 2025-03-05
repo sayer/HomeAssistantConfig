@@ -1,0 +1,13 @@
+custom_components
+configuration.yaml.save
+deps
+home-assistant.log
+home-assistant.log.1
+home-assistant.log.fault
+home-assistant_v2.db
+home-assistant_v2.db-shm
+home-assistant_v2.db-wal
+known_devices.yaml
+zigbee.db
+zigbee.db-shm
+zigbee.db-wal
