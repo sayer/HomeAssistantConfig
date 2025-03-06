@@ -1496,7 +1496,16 @@
                     },
                     {
                       "entity": "sensor.generator"
-                    },
+                    }
+                  ],
+                  "title": "Power"
+                },
+                {
+                  "show_name": true,
+                  "show_icon": true,
+                  "show_state": true,
+                  "type": "glance",
+                  "entities": [
                     {
                       "entity": "sensor.outback1_voltage",
                       "name": "Charger"
@@ -1505,7 +1514,51 @@
                       "entity": "sensor.outback1_inverter_mode"
                     }
                   ],
-                  "title": "Power"
+                  "title": "Power - Outback",
+                  "visibility": [
+                    {
+                      "condition": "state",
+                      "entity": "sensor.outback1_voltage",
+                      "state_not": "unavailable"
+                    },
+                    {
+                      "condition": "state",
+                      "entity": "sensor.outback1_voltage",
+                      "state_not": "unknown"
+                    }
+                  ],
+                  "state_color": true
+                },
+                {
+                  "show_name": true,
+                  "show_icon": true,
+                  "show_state": true,
+                  "type": "glance",
+                  "entities": [
+                    {
+                      "entity": "sensor.charger_status_current",
+                      "name": "Charger"
+                    },
+                    {
+                      "entity": "sensor.charger_status_voltage"
+                    },
+                    {
+                      "entity": "sensor.inverter_status"
+                    }
+                  ],
+                  "title": "Power - Inverter",
+                  "visibility": [
+                    {
+                      "condition": "state",
+                      "entity": "sensor.charger_status_current",
+                      "state_not": "unavailable"
+                    },
+                    {
+                      "condition": "state",
+                      "entity": "sensor.charger_status_current",
+                      "state_not": "unknown"
+                    }
+                  ]
                 },
                 {
                   "type": "picture",
