@@ -1,6 +1,7 @@
 # Loads default set of integrations. Do not remove.
 default_config:
 
+
 logger:
 
 # Load frontend themes from the themes folder
@@ -62,7 +63,6 @@ input_number:
     max: 2040
     step: 1
     mode: box
-    initial: 2024 
     icon: mdi:rv-truck
   coach_number:
     name: Coach Number
@@ -70,8 +70,12 @@ input_number:
     max: 10000
     step: 1
     mode: box
-    initial: 6629 
     icon: mdi:rv-truck
+    
+input_boolean:
+  is_optimistic:
+    name: "Use Optimistic Mode"
+    icon: mdi:toggle-switch
 
 input_text:
   owner_name:
@@ -110,6 +114,15 @@ template:
           {% else %}
             {{ raw_rate }}
           {% endif %}
+
+binary_sensor:
+  
+  - platform: template
+    sensors:
+      rv_optimistic_setting:
+        friendly_name: "RV Optimistic Setting"
+        value_template: "{{ states('input_number.model_year') | int > 2020 }}"
+
 
 sensor:
 
@@ -162,6 +175,18 @@ sensor:
         friendly_name: "Outback 1 VAC_out_L2"
         value_template: "{{ state_attr('sensor.Outback_1', 'VAC_out_L2') }}"
         
+  - platform: template
+    sensors:
+      docking_lights_code:
+        friendly_name: "Docking Lights Code"
+        value_template: >-
+          {% if states('input_number.model_year') | int >= 2024 %}
+            43
+          {% else %}
+            121
+          {% endif %}
+      
+
   - platform: rest
     name: "Outback 2"
     resource: "http://192.168.100.228/Dev_status.cgi?&Port=0"
@@ -280,12 +305,8 @@ sensor:
     start: '{{ states("input_datetime.reset_engine_on_time") | as_timestamp }}'
     end: '{{ now() }}'
 
-#  - platform: gpsd
-#    name: gps
-#    host: 10.100.254.94
-
-#  - platform: gpsd
   - platform: template
+
     sensors:
       latitude:
         friendly_name: "Latitude"
@@ -339,9 +360,6 @@ notify:
     sender: "sayer@ayersnet.com"
     recipient: "sayer@ayersnet.com"
 
-remote_homeassistant:
-  instances:
-
 # Full example configuration.yaml entry
 mqtt:
   climate:
@@ -393,6 +411,27 @@ mqtt:
       initial: 72
 
   light:
+    - name: "Docking Lights MQTT Pre-2024"
+      state_topic: "RVC/DC_DIMMER_STATUS_3/121"
+      state_value_template: "{{ value_json['operating status (brightness)'] }}"
+      payload_on: "100"
+      payload_off: "0"
+      command_topic: "RVCSET/DC_DIMMER_STATUS_3/121"
+      optimistic: false
+      unique_id: "docking_lights_mqtt_pre2024"
+      #entity_category: "diagnostic" # Hidden from UI
+
+    # --- MQTT Lights (Backend - Hidden, for 2024+ Model Years) ---
+    - name: "Docking Lights MQTT 2024"
+      state_topic: "RVC/DC_DIMMER_STATUS_3/43"
+      state_value_template: "{{ value_json['operating status (brightness)'] }}"
+      payload_on: "100"
+      payload_off: "0"
+      command_topic: "RVCSET/DC_DIMMER_STATUS_3/43"
+      optimistic: true
+      unique_id: "docking_lights_mqtt_2024"
+      #entity_category: "diagnostic" # Hidden from UI
+
     - name: "Panel Lights"
       state_topic: "RVC/DC_DIMMER_STATUS_3/1"
       state_value_template: "{% if value_json['brightness'] == 0 %} 0 {% else %} 100 {% endif %}"
@@ -2353,3 +2392,37 @@ mqtt:
       payload_on: "open"
       payload_off: "closed"
       unique_id: "gray_water_dump"
+
+
+
+
+
+light:
+  - platform: template
+
+    lights:
+      docking_lights_dynamic99:
+        value_template: >-
+          {% if states('input_number.model_year') | int >= 2024 %}
+            {{ states('light.docking_lights_mqtt_2024') }}
+          {% else %}
+            {{ states('light.docking_lights_mqtt_pre2024') }}
+          {% endif %}
+        turn_on:
+          service: light.turn_on
+          target:
+            entity_id: >-
+              {% if states('input_number.model_year') | int >= 2024 %}
+                light.docking_lights_mqtt_2024
+              {% else %}
+                light.docking_lights_mqtt_pre2024
+              {% endif %}
+        turn_off:
+          service: light.turn_off
+          target:
+            entity_id: >-
+              {% if states('input_number.model_year') | int >= 2024 %}
+                light.docking_lights_mqtt_2024
+              {% else %}
+                light.docking_lights_mqtt_pre2024
+              {% endif %}

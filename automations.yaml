@@ -1559,3 +1559,15 @@
       qos: '1'
     action: mqtt.publish
   mode: single
+- id: '1741325651131'
+  alias: Set Optimistic at Startup
+  description: Update Optimistic Mode Based on Model Year
+  triggers:
+  - entity_id: input_number.model_year
+    trigger: state
+  - event: start
+    trigger: homeassistant
+  actions:
+  - entity_id: input_boolean.is_optimistic
+    action: '{% if states(''input_number.model_year'') | int > 2017 | int %} input_boolean.turn_on
+      {% else %} input_boolean.turn_off {% endif %}'
