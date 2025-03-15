@@ -1441,15 +1441,20 @@
   description: ''
   triggers:
   - entity_id:
-    - sensor.gpsd_latitude
-    - sensor.gpsd_longitude
+    - sensor.gpsd_127_0_0_1_latitude
+    - sensor.gpsd_127_0_0_1_longitude
     trigger: state
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
   conditions:
   - condition: and
     conditions:
     - condition: template
-      value_template: '{{  states(''sensor.gpsd_latitude'') is not none  and states(''sensor.gpsd_latitude'')
-        != ''unavailable'' and states(''sensor.gpsd_latitude'') != ''unknown'' }}
+      value_template: '{{  states(''sensor.gpsd_127_0_0_1_latitude'') is not none  and
+        states(''sensor.gpsd_127_0_0_1_latitude'') != ''unavailable'' and states(''sensor.gpsd_latitude'')
+        != ''unknown'' }}
 
         '
     - condition: template
@@ -1480,13 +1485,13 @@
       enabled: false
   actions:
   - data:
-      latitude: '{{ states(''sensor.gpsd_latitude'') | float }}'
-      longitude: '{{ states(''sensor.gpsd_longitude'') | float }}'
+      latitude: '{{ states(''sensor.gps_127_0_0_1_latitude'') | float }}'
+      longitude: '{{ states(''sensor.gps_127_0_0_1_longitude'') | float }}'
     action: homeassistant.set_location
   - data:
       title: Home Location Updated
-      message: 'Home location updated to: Latitude: {{ states(''sensor.gpsd_latitude'')
-        }} Longitude: {{ states(''sensor.gpsd_longitude'') }}
+      message: 'Home location updated to: Latitude: {{ states(''sensor.gpsd_127_0_0_1_latitude'')
+        }} Longitude: {{ states(''sensor.gpsd_127_0_0_1_longitude'') }}
 
         '
     action: persistent_notification.create
@@ -1581,10 +1586,10 @@
   actions: []
   mode: single
 - id: update_model_configuration
-  alias: "Update Model Configuration"
+  alias: Update Model Configuration
   trigger:
-    - platform: state
-      entity_id: input_number.model_year
+  - platform: state
+    entity_id: input_number.model_year
   action:
-    - service: shell_command.update_model_config
-    - service: homeassistant.restart
+  - service: shell_command.update_model_config
+  - service: homeassistant.restart
