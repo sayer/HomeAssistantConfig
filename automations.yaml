@@ -1571,3 +1571,20 @@
   - entity_id: input_boolean.is_optimistic
     action: '{% if states(''input_number.model_year'') | int > 2017 | int %} input_boolean.turn_on
       {% else %} input_boolean.turn_off {% endif %}'
+- id: '1741898065083'
+  alias: Startup - Copy YAML based on model year
+  description: ''
+  triggers:
+  - trigger: homeassistant
+    event: start
+  conditions: []
+  actions: []
+  mode: single
+- id: update_model_configuration
+  alias: "Update Model Configuration"
+  trigger:
+    - platform: state
+      entity_id: input_number.model_year
+  action:
+    - service: shell_command.update_model_config
+    - service: homeassistant.restart

@@ -1,7 +1,2 @@
-reboot_remote_pc: "ssh -i /config/ssh_keys/id_rsa_homeassistant -o 'StrictHostKeyChecking=no' sayer@10.100.254.123 sudo df"
-drive_time: "ssh -i /config/ssh_keys/id_rsa_homeassistant -o 'StrictHostKeyChecking=no' sayer@10.100.254.123 bash /coachproxy/rv-c/foretravel.sh drive"
-evening_time: "ssh -i /config/ssh_keys/id_rsa_homeassistant -o 'StrictHostKeyChecking=no' sayer@10.100.254.123 bash /coachproxy/rv-c/foretravel.sh evening"
-night_time: "ssh -i /config/ssh_keys/id_rsa_homeassistant -o 'StrictHostKeyChecking=no' sayer@10.100.254.123 bash /coachproxy/rv-c/foretravel.sh night"
-store_time: "ssh -i /config/ssh_keys/id_rsa_homeassistant -o 'StrictHostKeyChecking=no' sayer@10.100.254.123 bash /coachproxy/rv-c/foretravel.sh store"
-bright_time: "ssh -i /config/ssh_keys/id_rsa_homeassistant -o 'StrictHostKeyChecking=no' sayer@10.100.254.123 bash /coachproxy/rv-c/foretravel.sh bright"
-morning_time: "ssh -i /config/ssh_keys/id_rsa_homeassistant -o 'StrictHostKeyChecking=no' sayer@10.100.254.123 bash /coachproxy/rv-c/foretravel.sh morning"
+# shell_commands.yaml
+update_model_config: /config/update_config.sh {{ states('input_number.model_year') }}
