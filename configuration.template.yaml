@@ -366,6 +366,24 @@ mqtt:
 
   light:
 
+ # Example 1: Entry Light (Instance 1)
+    - name: "Entry Light"
+      state_topic: "RVC/DC_DIMMER_STATUS_3/1"
+      state_value_template: >
+        {% if value_json['operating status (brightness)'] == 0 %}
+          off
+        {% else %}
+          on
+        {% endif %}
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/1/set"
+      payload_on: >
+        {"instance": 1, "desired level": 100, "command": 0}
+      payload_off: >
+        {"instance": 1, "desired level": 0, "command": 3}
+      json_attributes_topic: "RVC/DC_DIMMER_STATUS_3/1"
+      unique_id: "entery_dimmer_set"
+
+
     # Example 1: Standard Dimmer Light (Living Room)
     - name: "Living Room Light 2"
       #schema: json
@@ -382,6 +400,7 @@ mqtt:
       payload_off: >
         {"instance": 1, "desired level": 0, "command": 3}
       json_attributes_topic: "RVC/DC_DIMMER_STATUS_3/1"
+      unique_id: "livingroom_dimmer_set"
 
     - name: "Docking Lights"
       state_topic: "RVC/DC_DIMMER_STATUS_3/%%DOCKING_LIGHTS_CODE%%"
