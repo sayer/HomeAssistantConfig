@@ -42,21 +42,7 @@ recorder:
   purge_keep_days: 365
 
 input_number:
-  previous_fresh_water_gallons:
-    name: Previous Fresh Water Level (Gallons)
-    min: 0
-    max: 135  # Tank capacity
-    step: 0.1
-  previous_fresh_water_time:
-    name: Previous Fresh Water Time
-    min: 0
-    max: 9999999999  # Unix timestamp range
-    step: 1
-  previous_rate:
-    name: Previous Smoothed Rate (GPM)
-    min: -999
-    max: 999
-    step: 0.1
+
   model_year:
     name: Coach Model Year
     min: 2000
@@ -72,6 +58,14 @@ input_number:
     mode: box
     icon: mdi:rv-truck
     
+  water_heater_setpoint:
+    name: Water Heater Temperature Setpoint
+    min: 38
+    max: 65
+    step: 1
+    unit_of_measurement: °C
+    icon: mdi:thermometer
+    
 input_boolean:
   is_optimistic:
     name: "Use Optimistic Mode"
@@ -81,48 +75,6 @@ input_text:
   owner_name:
     name: Owner Name
         
-
-template:
-  - sensor:
-      - name: "Fresh Water Raw Rate"
-        unit_of_measurement: "gallons/min"
-        state: >
-          {% set current_value = states('sensor.fresh_water') | float %}
-          {% set current_time = as_timestamp(now()) %}
-          {% set previous_value = states('input_number.previous_fresh_water_gallons') | float %}
-          {% set previous_time = states('input_number.previous_fresh_water_time') | float %}
-
-          {% if previous_time > 0 and current_time > previous_time %}
-            {{ (previous_value - current_value) / ((current_time - previous_time) / 60) }}
-          {% else %}
-            0
-          {% endif %}
-        availability: >
-          {{ states('sensor.fresh_water') | float >= 0 and
-             states('input_number.previous_fresh_water_gallons') | float >= 0 and
-             states('input_number.previous_fresh_water_time') | float > 0 }}
-
-      - name: "Fresh Water Smoothed Rate"
-        unit_of_measurement: "gallons/min"
-        state: >
-          {% set raw_rate = states('sensor.fresh_water_raw_rate') | float %}
-          {% set previous_rate = states('input_number.previous_rate') | float %}
-          {% set alpha = 0.2 %}  # Smoothing factor
-
-          {% if previous_rate > 0 %}
-            {{ (alpha * raw_rate) + ((1 - alpha) * previous_rate) }}
-          {% else %}
-            {{ raw_rate }}
-          {% endif %}
-
-binary_sensor:
-  
-  - platform: template
-    sensors:
-      rv_optimistic_setting:
-        friendly_name: "RV Optimistic Setting"
-        value_template: "{{ states('input_number.model_year') | int > 2020 }}"
-
 
 sensor:
 
@@ -413,6 +365,24 @@ mqtt:
       initial: 72
 
   light:
+
+    # Example 1: Standard Dimmer Light (Living Room)
+    - name: "Living Room Light 2"
+      #schema: json
+      state_topic: "RVC/DC_DIMMER_STATUS_3/1"
+      state_value_template: >
+        {% if value_json['operating status (brightness)'] == 0 %}
+          off
+        {% else %}
+          on
+        {% endif %}
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/1/set"
+      payload_on: >
+        {"instance": 1, "desired level": 100, "command": 0}
+      payload_off: >
+        {"instance": 1, "desired level": 0, "command": 3}
+      json_attributes_topic: "RVC/DC_DIMMER_STATUS_3/1"
+
     - name: "Docking Lights"
       state_topic: "RVC/DC_DIMMER_STATUS_3/%%DOCKING_LIGHTS_CODE%%"
       state_value_template: "{{ value_json['operating status (brightness)'] }}"
@@ -2151,6 +2121,88 @@ mqtt:
       unique_id: "cargolock5"
 
   sensor:
+
+
+   # Battery Voltage Sensor
+    - name: "House Battery Voltage"
+      state_topic: "RVC/DC_SOURCE_STATUS_1/1"
+      unit_of_measurement: "V"
+      device_class: "voltage"
+      state_class: "measurement"
+      value_template: >
+        {% if value_json['dc voltage'] == "n/a" %}
+          0
+        {% else %}
+          {{ value_json['dc voltage'] }}
+        {% endif %}
+      
+    # Battery Current Sensor
+    - name: "House Battery Current"
+      state_topic: "RVC/DC_SOURCE_STATUS_1/1"
+      unit_of_measurement: "A"
+      device_class: "current"
+      state_class: "measurement"
+      value_template: >
+        {% if value_json['dc current'] == "n/a" %}
+          0
+        {% else %}
+          {{ value_json['dc current'] }}
+        {% endif %}
+      
+    # Battery State of Charge
+    - name: "House Battery State of Charge"
+      state_topic: "RVC/DC_SOURCE_STATUS_2/1"
+      unit_of_measurement: "%"
+      device_class: "battery"
+      state_class: "measurement"
+      value_template: >
+        {% if value_json['state of charge'] == "n/a" %}
+          0
+        {% else %}
+          {{ value_json['state of charge'] }}
+        {% endif %}
+      
+    # Battery Health
+    - name: "House Battery Health"
+      state_topic: "RVC/DC_SOURCE_STATUS_3/1"
+      unit_of_measurement: "%"
+      state_class: "measurement"
+      value_template: >
+        {% if value_json['state of health'] == "n/a" %}
+          0
+        {% else %}
+          {{ value_json['state of health'] }}
+        {% endif %}
+      
+    # Water Heater Temperature
+    - name: "Water Heater Temperature"
+      state_topic: "RVC/WATERHEATER_STATUS/1"
+      value_template: "{{ value_json['water temperature'] }}"
+      unit_of_measurement: "°C"
+      device_class: temperature
+      state_class: measurement
+      
+    - name: "Water Heater Temperature F"
+      state_topic: "RVC/WATERHEATER_STATUS/1"
+      value_template: "{{ value_json['water temperature F'] }}"
+      unit_of_measurement: "°F"
+      device_class: temperature
+      state_class: measurement
+      
+    # Date and Time from RV-C
+    - name: "RV-C System Date"
+      state_topic: "RVC/DATE_TIME_STATUS"
+      value_template: >-
+        {{ value_json['year'] }}-{{ '%02d'|format(value_json['month']) }}-{{ '%02d'|format(value_json['date']) }}
+      icon: mdi:calendar
+      
+    - name: "RV-C System Time"
+      state_topic: "RVC/DATE_TIME_STATUS"
+      value_template: >-
+        {{ '%02d'|format(value_json['hour']) }}:{{ '%02d'|format(value_json['minute']) }}:{{ '%02d'|format(value_json['second']) }}
+      icon: mdi:clock
+
+
     - name: "Shade Raw Data"
       state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/1"
       value_template: "{{ value_json }}"
@@ -2420,6 +2472,25 @@ mqtt:
       payload_on: "open"
       payload_off: "closed"
       unique_id: "gray_water_dump"
+
+   # AC Power Status
+    - name: "AC Power Status"
+      state_topic: "RVC/WATERHEATER_STATUS/1"
+      value_template: "{{ value_json['ac power failure status definition'] != 'ac power not present' }}"
+      device_class: power
+      
+    # DC Power Status
+    - name: "DC Power Status"
+      state_topic: "RVC/WATERHEATER_STATUS/1"
+      value_template: "{{ value_json['dc power failure status definition'] != 'dc power not present' }}"
+      device_class: power
+      
+    # Water Heater Status
+    - name: "Water Heater Active"
+      state_topic: "RVC/WATERHEATER_STATUS/1"
+      value_template: "{{ value_json['operating modes'] != 0 }}"
+      device_class: heat
+      
 
 
 ##################################################################

@@ -1495,54 +1495,6 @@
 
         '
     action: persistent_notification.create
-- id: '1733172820841'
-  alias: Update Fresh Water Data for GPM Calculation
-  description: Tracks fresh water tank level and timestamp for rate calculation
-  triggers:
-  - entity_id: sensor.fresh_water
-    trigger: state
-  actions:
-  - target:
-      entity_id: input_number.previous_fresh_water_gallons
-    data:
-      value: '{{ states(''sensor.fresh_water'') | float }}'
-    action: input_number.set_value
-  - target:
-      entity_id: input_number.previous_fresh_water_time
-    data:
-      value: '{{ as_timestamp(now()) }}'
-    action: input_number.set_value
-- id: '1733172989638'
-  alias: Fresh Water - Update Smoothed Rate
-  description: Updates the smoothed rate for fresh water depletion
-  triggers:
-  - entity_id: sensor.fresh_water_raw_rate
-    trigger: state
-  actions:
-  - target:
-      entity_id: input_number.previous_rate
-    data:
-      value: '{{ states(''sensor.fresh_water_smoothed_rate'') | float }}'
-    action: input_number.set_value
-- id: '1733173085764'
-  alias: Fresh Water - Warn on High Fresh Water Depletion Rate (GPM)
-  description: Warns when the smoothed rate of fresh water depletion is too high
-  triggers:
-  - entity_id: sensor.fresh_water_smoothed_rate
-    below: -5
-    trigger: numeric_state
-  conditions:
-  - condition: numeric_state
-    entity_id: sensor.fresh_water
-    above: 0
-  actions:
-  - data:
-      message: 'Warning: Fresh water tank is depleting rapidly at {{ states(''sensor.fresh_water_smoothed_rate'')
-        }} gallons/min! Current level: {{ states(''sensor.fresh_water'') }} gallons.
-
-        '
-      title: Fresh Water Alert
-    action: script.notify_home
 - id: '1733602676112'
   alias: HA - Start sets shade state
   description: ''
@@ -1576,15 +1528,6 @@
   - entity_id: input_boolean.is_optimistic
     action: '{% if states(''input_number.model_year'') | int > 2017 | int %} input_boolean.turn_on
       {% else %} input_boolean.turn_off {% endif %}'
-- id: '1741898065083'
-  alias: Startup - Copy YAML based on model year
-  description: ''
-  triggers:
-  - trigger: homeassistant
-    event: start
-  conditions: []
-  actions: []
-  mode: single
 - id: update_model_configuration
   alias: Update Model Configuration
   trigger:
