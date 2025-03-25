@@ -1,8 +1,11 @@
 # Loads default set of integrations. Do not remove.
 default_config:
 
-
 logger:
+  default: warning
+  logs:
+    homeassistant.components.mqtt: debug
+    homeassistant.components.light: debug
 
 # Load frontend themes from the themes folder
 frontend:
@@ -42,7 +45,6 @@ recorder:
   purge_keep_days: 365
 
 input_number:
-
   model_year:
     name: Coach Model Year
     min: 2000
@@ -57,7 +59,7 @@ input_number:
     step: 1
     mode: box
     icon: mdi:rv-truck
-    
+
   water_heater_setpoint:
     name: Water Heater Temperature Setpoint
     min: 38
@@ -65,7 +67,7 @@ input_number:
     step: 1
     unit_of_measurement: °C
     icon: mdi:thermometer
-    
+
 input_boolean:
   is_optimistic:
     name: "Use Optimistic Mode"
@@ -74,15 +76,13 @@ input_boolean:
 input_text:
   owner_name:
     name: Owner Name
-        
 
 sensor:
-
   - platform: rest
     name: Current ISP
     scan_interval: 600
     resource: http://ip-api.com/json/?fields=isp
-    value_template: '{{ value_json.isp }}'
+    value_template: "{{ value_json.isp }}"
 
   - platform: rest
     name: "Outback 1"
@@ -93,7 +93,7 @@ sensor:
     scan_interval: 30
     json_attributes_path: "devstatus.ports[0]"
     json_attributes:
-      - Batt_V 
+      - Batt_V
       - Warn
       - Error
       - AC_mode
@@ -101,7 +101,7 @@ sensor:
       - VAC1_in_L2
       - VAC_out_L2
     value_template: "{{ value_json.devstatus.Sys_Batt_V }}"
-      
+
   - platform: template
     sensors:
       outback1_voltage:
@@ -126,7 +126,7 @@ sensor:
       outback1_vac_out_l2:
         friendly_name: "Outback 1 VAC_out_L2"
         value_template: "{{ state_attr('sensor.Outback_1', 'VAC_out_L2') }}"
-        
+
   - platform: template
     sensors:
       docking_lights_code:
@@ -137,7 +137,6 @@ sensor:
           {% else %}
             121
           {% endif %}
-      
 
   - platform: rest
     name: "Outback 2"
@@ -148,7 +147,7 @@ sensor:
     scan_interval: 30
     json_attributes_path: "devstatus.ports[0]"
     json_attributes:
-      - Batt_V 
+      - Batt_V
       - Warn
       - Error
       - AC_mode
@@ -156,7 +155,7 @@ sensor:
       - VAC1_in_L2
       - VAC_out_L2
     value_template: "{{ value_json.devstatus.Sys_Batt_V }}"
-      
+
   - platform: template
     sensors:
       outback2_voltage:
@@ -181,81 +180,77 @@ sensor:
       outback2_vac_out_l2:
         friendly_name: "Outback 2 VAC_out_L2"
         value_template: "{{ state_attr('sensor.Outback_2', 'VAC_out_L2') }}"
-      
-      
 
   - platform: history_stats
     type: time
     name: Generator Day Run Time
     entity_id: sensor.generator
     state: running
-    start: '{{ now().replace(hour=0, minute=0, second=0, microsecond=0) }}'
-    end: '{{ now() }}'
+    start: "{{ now().replace(hour=0, minute=0, second=0, microsecond=0) }}"
+    end: "{{ now() }}"
 
-# Hvac Activiy
+  # Hvac Activiy
   - platform: template
     sensors:
       generator_activity:
-        friendly_name: 'Generator Activity'
+        friendly_name: "Generator Activity"
         value_template: '{{ state_attr("generator.", "attribute_xxx") }}'
 
   - platform: history_stats
     type: time
     name: Entry Light Duration
     entity_id: light.entry_light
-    state: 'on'
-    start: '{{ now().replace(hour=0, minute=0, second=0, microsecond=0) }}'
-    end: '{{ now() }}'
-
+    state: "on"
+    start: "{{ now().replace(hour=0, minute=0, second=0, microsecond=0) }}"
+    end: "{{ now() }}"
 
   - platform: history_stats
     type: time
     name: Generator Oil Duration
     entity_id: sensor.generatorstatus
-    state: 'running'
+    state: "running"
     start: '{{ states("input_datetime.reset_generator_on_time") | as_timestamp }}'
-    end: '{{ now() }}'
+    end: "{{ now() }}"
 
   - platform: history_stats
     type: time
     name: Engine Day Run Time
     entity_id: input_boolean.engineon
-    state: 'on'
-    start: '{{ now().replace(hour=0, minute=0, second=0, microsecond=0) }}'
-    end: '{{ now() }}'
+    state: "on"
+    start: "{{ now().replace(hour=0, minute=0, second=0, microsecond=0) }}"
+    end: "{{ now() }}"
 
   - platform: history_stats
     type: time
     name: Day Drive time
     entity_id: input_boolean.busparked
-    state: 'off'
-    start: '{{ now().replace(hour=0, minute=0, second=0, microsecond=0) }}'
-    end: '{{ now() }}'
-
+    state: "off"
+    start: "{{ now().replace(hour=0, minute=0, second=0, microsecond=0) }}"
+    end: "{{ now() }}"
 
   - platform: history_stats
     type: time
     name: Trip Parked time
     entity_id: input_boolean.busparked
-    state: 'on'
+    state: "on"
     start: '{{ states("input_datetime.reset_trip_on_time") | as_timestamp }}'
-    end: '{{ now() }}'
+    end: "{{ now() }}"
 
   - platform: history_stats
     type: time
     name: Trip Drive time
     entity_id: input_boolean.busparked
-    state: 'off'
+    state: "off"
     start: '{{ states("input_datetime.reset_trip_on_time") | as_timestamp }}'
-    end: '{{ now() }}'
+    end: "{{ now() }}"
 
   - platform: history_stats
     type: time
     name: Engine Trip Run Time
     entity_id: input_boolean.engineon
-    state: 'on'
+    state: "on"
     start: '{{ states("input_datetime.reset_engine_on_time") | as_timestamp }}'
-    end: '{{ now() }}'
+    end: "{{ now() }}"
 
   - platform: template
 
@@ -314,7 +309,7 @@ notify:
 
 # Full example configuration.yaml entry
 mqtt:
-#  light: !include lights/lights_common.yaml
+  #  light: !include lights/lights_common.yaml
 
   climate:
     - name: Living Room
@@ -365,51 +360,46 @@ mqtt:
       initial: 72
 
   light:
-
- # Example 1: Entry Light (Instance 1)
-    - name: "Entry Light"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/1"
-      state_value_template: >
-        {% if value_json['operating status (brightness)'] == 0 %}
-          off
-        {% else %}
-          on
-        {% endif %}
+    # Example 1: Entry Light (Instance 1)
+    - name: "RVC Light 1"
+      unique_id: "rvc_light_1"
+      schema: "template"
       command_topic: "RVC/DC_DIMMER_COMMAND_2/1/set"
-      payload_on: >
-        {"instance": 1, "desired level": 100, "command": 0}
-      payload_off: >
-        {"instance": 1, "desired level": 0, "command": 3}
-      json_attributes_topic: "RVC/DC_DIMMER_STATUS_3/1"
-      unique_id: "entery_dimmer_set"
-
-
-    # Example 1: Standard Dimmer Light (Living Room)
-    - name: "Living Room Light 2"
-      #schema: json
+      command_on_template: '{"instance": 1, "desired level": 100, "command": 0}'
+      command_off_template: '{"instance": 1, "desired level": 0, "command": 3}'
       state_topic: "RVC/DC_DIMMER_STATUS_3/1"
-      state_value_template: >
-        {% if value_json['operating status (brightness)'] == 0 %}
-          off
-        {% else %}
+      state_template: >-
+        {% if value_json['operating status (brightness)']|int > 0 %}
           on
+        {% else %}
+          off
         {% endif %}
-      command_topic: "RVC/DC_DIMMER_COMMAND_2/1/set"
-      payload_on: >
-        {"instance": 1, "desired level": 100, "command": 0}
-      payload_off: >
-        {"instance": 1, "desired level": 0, "command": 3}
-      json_attributes_topic: "RVC/DC_DIMMER_STATUS_3/1"
-      unique_id: "livingroom_dimmer_set"
 
+    # Using the template format you provided
     - name: "Docking Lights"
+      unique_id: "docking_lights"
+      state_topic: "RVC/DC_DIMMER_STATUS_3/%%DOCKING_LIGHTS_CODE%%"
+      state_template: >-
+        {% if value_json['operating status (brightness)']|int > 0 %}
+          on
+        {% else %}
+          off
+        {% endif %}
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/%%DOCKING_LIGHTS_CODE%%/set"
+      command_on_template: '{"instance": %%DOCKING_LIGHTS_CODE%%, "desired level": 100, "command": 0}'
+      command_off_template: '{"instance": %%DOCKING_LIGHTS_CODE%%, "desired level": 0, "command": 3}'
+      schema: "template"
+      optimistic: %%OPTIMISTIC_MODE%%
+      #entity_category: "diagnostic" # Hidden from UI
+
+    - name: "Docking Lights-old"
       state_topic: "RVC/DC_DIMMER_STATUS_3/%%DOCKING_LIGHTS_CODE%%"
       state_value_template: "{{ value_json['operating status (brightness)'] }}"
       payload_on: "100"
       payload_off: "0"
       command_topic: "RVCSET/DC_DIMMER_STATUS_3/%%DOCKING_LIGHTS_CODE%%"
       optimistic: %%OPTIMISTIC_MODE%%
-      unique_id: "docking_lights"
+      unique_id: "docking_lights-old"
       #entity_category: "diagnostic" # Hidden from UI
 
     - name: "Panel Lights"
@@ -731,14 +721,14 @@ mqtt:
       optimistic: %%OPTIMISTIC_MODE%%
       unique_id: "dimmer_3_35"
 
-#    - name: "Docking Lights"
-#      state_topic: "RVC/DC_DIMMER_STATUS_3/121"
-#      state_value_template: "{{ value_json['operating status (brightness)'] }}"
-#      payload_on: "100"
-#      payload_off: "0"
-#      command_topic: "RVCSET/DC_DIMMER_STATUS_3/121"
-#      optimistic: %%OPTIMISTIC_MODE%%
-#      unique_id: "dimmer_3_121"
+    #    - name: "Docking Lights"
+    #      state_topic: "RVC/DC_DIMMER_STATUS_3/121"
+    #      state_value_template: "{{ value_json['operating status (brightness)'] }}"
+    #      payload_on: "100"
+    #      payload_off: "0"
+    #      command_topic: "RVCSET/DC_DIMMER_STATUS_3/121"
+    #      optimistic: %%OPTIMISTIC_MODE%%
+    #      unique_id: "dimmer_3_121"
 
     - name: "Awning Lights"
       state_topic: "RVC/DC_DIMMER_STATUS_3/%%AWNING_LIGHTS%%"
@@ -1085,7 +1075,7 @@ mqtt:
         {% endif %}
       unique_id: "windshield_night"
       optimistic: false
-      
+
     - name: "Dinette Day"
       state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/10"
       position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/10"
@@ -1135,7 +1125,7 @@ mqtt:
         {% endif %}
       unique_id: "dinette_day"
       optimistic: false
-      
+
     - name: "Dinette Night"
       state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/14"
       position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/14"
@@ -1535,7 +1525,7 @@ mqtt:
         {% endif %}
       unique_id: "mid_bath_night"
       optimistic: false
-    
+
     - name: "Rear Bath Night"
       state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/16"
       position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/16"
@@ -2140,9 +2130,7 @@ mqtt:
       unique_id: "cargolock5"
 
   sensor:
-
-
-   # Battery Voltage Sensor
+    # Battery Voltage Sensor
     - name: "House Battery Voltage"
       state_topic: "RVC/DC_SOURCE_STATUS_1/1"
       unit_of_measurement: "V"
@@ -2154,7 +2142,7 @@ mqtt:
         {% else %}
           {{ value_json['dc voltage'] }}
         {% endif %}
-      
+
     # Battery Current Sensor
     - name: "House Battery Current"
       state_topic: "RVC/DC_SOURCE_STATUS_1/1"
@@ -2167,7 +2155,7 @@ mqtt:
         {% else %}
           {{ value_json['dc current'] }}
         {% endif %}
-      
+
     # Battery State of Charge
     - name: "House Battery State of Charge"
       state_topic: "RVC/DC_SOURCE_STATUS_2/1"
@@ -2180,7 +2168,7 @@ mqtt:
         {% else %}
           {{ value_json['state of charge'] }}
         {% endif %}
-      
+
     # Battery Health
     - name: "House Battery Health"
       state_topic: "RVC/DC_SOURCE_STATUS_3/1"
@@ -2192,7 +2180,7 @@ mqtt:
         {% else %}
           {{ value_json['state of health'] }}
         {% endif %}
-      
+
     # Water Heater Temperature
     - name: "Water Heater Temperature"
       state_topic: "RVC/WATERHEATER_STATUS/1"
@@ -2200,32 +2188,31 @@ mqtt:
       unit_of_measurement: "°C"
       device_class: temperature
       state_class: measurement
-      
+
     - name: "Water Heater Temperature F"
       state_topic: "RVC/WATERHEATER_STATUS/1"
       value_template: "{{ value_json['water temperature F'] }}"
       unit_of_measurement: "°F"
       device_class: temperature
       state_class: measurement
-      
+
     # Date and Time from RV-C
     - name: "RV-C System Date"
       state_topic: "RVC/DATE_TIME_STATUS"
       value_template: >-
         {{ value_json['year'] }}-{{ '%02d'|format(value_json['month']) }}-{{ '%02d'|format(value_json['date']) }}
       icon: mdi:calendar
-      
+
     - name: "RV-C System Time"
       state_topic: "RVC/DATE_TIME_STATUS"
       value_template: >-
         {{ '%02d'|format(value_json['hour']) }}:{{ '%02d'|format(value_json['minute']) }}:{{ '%02d'|format(value_json['second']) }}
       icon: mdi:clock
 
-
     - name: "Shade Raw Data"
       state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/1"
       value_template: "{{ value_json }}"
-    
+
     - name: "Shade Status Monitor"
       state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/1"
       value_template: >-
@@ -2353,13 +2340,13 @@ mqtt:
       state_topic: "RVC/ATS_AC_STATUS_1/1"
       state_class: measurement
       unit_of_measurement: "A"
-      value_template: "{{ value_json['rms current'] }}" 
-#      value_template: >-
-#        {% if (value_json['rms current'] == 'unknown')  %}
-#          0
-#          {% else %}
-#          {{ value_json['rms current'] }}
-#          {% endif %}
+      value_template: "{{ value_json['rms current'] }}"
+      #      value_template: >-
+      #        {% if (value_json['rms current'] == 'unknown')  %}
+      #          0
+      #          {% else %}
+      #          {{ value_json['rms current'] }}
+      #          {% endif %}
       unique_id: "power_rms_current"
     - name: "Power RMS Voltage"
       state_topic: "RVC/ATS_AC_STATUS_1/1"
@@ -2395,7 +2382,7 @@ mqtt:
       state_class: measurement
     - name: "Generator oil level shutdown alert"
       state_topic: "RVC/GENERATOR_STATUS_2"
-      value_template:  >
+      value_template: >
         {% if value_json['oil level shutdown switch'] == 0 %}
           {{ "Off" | string }}
         {% else %}
@@ -2404,7 +2391,7 @@ mqtt:
       unique_id: "generator_oil_level_shutdown_alert"
     - name: "Generator oil pressure shutdown alert"
       state_topic: "RVC/GENERATOR_STATUS_2"
-      value_template:  >
+      value_template: >
         {% if value_json['oil pressure shutdown switch'] == 0 %}
           {{ "Off" | string }}
         {% else %}
@@ -2413,7 +2400,7 @@ mqtt:
       unique_id: "generator_oil_pressure_shutdown_alert"
     - name: "Generator temperature shutdown alert"
       state_topic: "RVC/GENERATOR_STATUS_2"
-      value_template:  >
+      value_template: >
         {% if value_json['temperature shutdown switch'] == 0 %}
           {{ "Off" | string }}
         {% else %}
@@ -2454,6 +2441,34 @@ mqtt:
       unit_of_measurement: "%"
       unique_id: "dimmer_3_128"
 
+    - name: "DC Dimmer Operating Status"
+      unique_id: "rvc_dc_dimmer_operating_status_1"
+      state_topic: "RVC/DC_DIMMER_STATUS_3/1"
+      value_template: "{{ value_json['operating status (brightness)'] }}"
+
+    # Targeting just the last command value
+    - name: "DC Dimmer Last Command"
+      unique_id: "rvc_dc_dimmer_last_command_1"
+      state_topic: "RVC/DC_DIMMER_STATUS_3/1"
+      value_template: "{{ value_json['last command'] }}"
+
+    # Targeting just the command definition
+    - name: "DC Dimmer Command Definition"
+      unique_id: "rvc_dc_dimmer_command_def_1"
+      state_topic: "RVC/DC_DIMMER_STATUS_3/1"
+      value_template: "{{ value_json['last command definition'] }}"
+
+    # Binary sensor to test on/off logic
+    - name: "DC Dimmer Is On"
+      unique_id: "rvc_dc_dimmer_is_on_1"
+      state_topic: "RVC/DC_DIMMER_STATUS_3/1"
+      value_template: >-
+        {% if value_json['operating status (brightness)']|int > 0 %}
+          ON
+        {% else %}
+          OFF
+        {% endif %}
+
   binary_sensor:
     - name: "Water Hookup"
       state_topic: "RVC/WATER_PUMP_STATUS"
@@ -2492,36 +2507,32 @@ mqtt:
       payload_off: "closed"
       unique_id: "gray_water_dump"
 
-   # AC Power Status
+    # AC Power Status
     - name: "AC Power Status"
       state_topic: "RVC/WATERHEATER_STATUS/1"
       value_template: "{{ value_json['ac power failure status definition'] != 'ac power not present' }}"
       device_class: power
-      
+
     # DC Power Status
     - name: "DC Power Status"
       state_topic: "RVC/WATERHEATER_STATUS/1"
       value_template: "{{ value_json['dc power failure status definition'] != 'dc power not present' }}"
       device_class: power
-      
+
     # Water Heater Status
     - name: "Water Heater Active"
       state_topic: "RVC/WATERHEATER_STATUS/1"
       value_template: "{{ value_json['operating modes'] != 0 }}"
       device_class: heat
-      
-
 
 ##################################################################
 
-
 light:
-
   - platform: group
     name: Exterior Lights
     unique_id: exterior_lights
     entities:
       - light.docking_lights
-      - light.awning_lights 
+      - light.awning_lights
       - light.exterior_accents
       - light.porch_handle
