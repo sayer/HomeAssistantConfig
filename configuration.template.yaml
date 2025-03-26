@@ -1150,6 +1150,7 @@ mqtt:
       state_on: "100"
       state_off: "0"
       unique_id: "dimmer_3_55"
+
     - name: "Rear Bath Fan"
       state_topic: "RVC/DC_DIMMER_STATUS_3/%%VENT_FAN2%%"
       value_template: "{{ value_json['operating status (brightness)'] }}"
@@ -1159,16 +1160,28 @@ mqtt:
       state_on: "100"
       state_off: "0"
       unique_id: "dimmer_3_56"
+
     - name: "Water Pump"
+      unique_id: "waterpump"
       state_topic: "RVC/WATER_PUMP_STATUS"
       value_template: "{{ value_json['operating status definition'] }}"
-      payload_on: "FDFFFFFFFFFFFFFF"
-      payload_off: "FCFFFFFFFFFFFFFF"
-      command_topic: "RVCSET/MESSAGE/1FFB2"
+      command_topic: "RVC/WATER_PUMP_COMMAND/set"
+      payload_on: '{"command": 1}'
+      payload_off: '{"command": 0}'
       state_on: "on"
       state_off: "off"
-      unique_id: "waterpump"
+
     - name: "Black Waste Dump"
+      unique_id: "blackwastedump"
+      state_topic: "RVC/WASTEDUMP_STATUS"
+      value_template: "{{ value_json['black valve definition'] }}"
+      command_topic: "RVC/WASTEDUMP_COMMAND/set"
+      payload_on: '{"black valve": 5}'
+      payload_off: '{"black valve": 0}'
+      state_on: "open"
+      state_off: "closed"
+
+    - name: "Black Waste Dump - old"
       state_topic: "RVC/WASTEDUMP_COMMAND"
       value_template: "{{ value_json['black valve definition'] }}"
       payload_on: "05FFFFFFFFFFFFFF"
@@ -1176,8 +1189,19 @@ mqtt:
       command_topic: "RVCSET/MESSAGE/1FFAE"
       state_on: "open"
       state_off: "closed"
-      unique_id: "blackwastedump"
+      unique_id: "blackwastedump_old"
+
     - name: "Gray Water Bypass"
+      unique_id: "graywaterbypass"
+      state_topic: "RVC/WASTEDUMP_STATUS"
+      value_template: "{{ value_json['gray valve definition'] }}"
+      command_topic: "RVC/WASTEDUMP_COMMAND/255/set"
+      payload_on: '{"instance": 255, "gray valve": 1}'
+      payload_off: '{"instance": 255, "gray valve": 0}'
+      state_on: "open"
+      state_off: "closed"
+
+    - name: "Gray Water Bypass - old"
       state_topic: "RVC/WASTEDUMP_COMMAND"
       value_template: "{{ value_json['gray valve definition'] }}"
       payload_on: "FF01FFFFFFFFFFFF"
@@ -1185,8 +1209,29 @@ mqtt:
       command_topic: "RVCSET/MESSAGE/1FFAE"
       state_on: "open"
       state_off: "closed"
-      unique_id: "graywaterbypass"
+      unique_id: "graywaterbypass_old"
+
     - name: "Water Autofill"
+      unique_id: "waterautofill"
+      state_topic: "RVC/AUTOFILL_STATUS"
+      value_template: "{{ value_json['valve status definition'] }}"
+      command_topic: "RVC/AUTOFILL_COMMAND/set"
+      payload_on: '{"operating status": 1}'
+      payload_off: '{"operating status": 0}'
+      state_on: "open"
+      state_off: "closed"
+
+    - name: "Generator"
+      unique_id: "generatorstatus"
+      state_topic: "RVC/GENERATOR_STATUS_1"
+      value_template: "{{ value_json['status definition'] }}"
+      command_topic: "RVC/GENERATOR_COMMAND/1/set"
+      payload_on: '{"instance": 1, "command": 1}'
+      payload_off: '{"instance": 1, "command": 0}'
+      state_on: "running"
+      state_off: "stopped"
+
+    - name: "Water Autofill - old"
       state_topic: "RVC/AUTOFILL_STATUS"
       value_template: "{{ value_json['valve status definition'] }}"
       payload_on: "FDFFFFFFFFFFFFFF"
@@ -1194,19 +1239,60 @@ mqtt:
       command_topic: "RVCSET/MESSAGE/1FFB0"
       state_on: "open"
       state_off: "closed"
-      unique_id: "waterautofill"
-    - name: "Generator"
-      state_topic: "RVC/GENERATOR_STATUS_1"
-      value_template: "{{ value_json['status definition'] }}"
-      payload_on: "0100FFFFFFFFFFFF"
-      payload_off: "000000FFFFFFFFFF"
-      command_topic: "RVCSET/MESSAGE/1FEFF"
-      state_on: "running"
-      state_off: "stopped"
-      unique_id: "generatorstatus"
+      unique_id: "waterautofill_old"
 
   cover:
     - name: "Windshield Day"
+      unique_id: "windshield_day"
+      state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/1"
+      position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/1"
+      value_template: >-
+        {% if not value_json is defined %}closed
+        {% else %}
+        {% set motor = value_json['motor status definition'] | default('inactive') %}
+        {% set last_cmd = value_json['last command definition'] | default('none') %}
+        {% if motor == 'active' %}
+          {% if last_cmd == 'toggle forward' %}opening
+          {% elif last_cmd == 'toggle reverse' %}closing
+          {% else %}closed{% endif %}
+        {% else %}
+          {% if last_cmd == 'toggle forward' %}open
+          {% elif last_cmd == 'toggle reverse' %}closed
+          {% else %}closed{% endif %}
+        {% endif %}
+        {% endif %}
+      command_topic: "RVC/WINDOW_SHADE_COMMAND/1/set"
+      payload_open: '{"instance": 1, "command": "open"}'
+      payload_close: '{"instance": 1, "command": "close"}'
+      payload_stop: '{"instance": 1, "command": "stop"}'
+      payload_available: "online"
+      payload_not_available: "offline"
+      state_opening: "opening"
+      state_closing: "closing"
+      state_open: "open"
+      state_closed: "closed"
+      position_template: >-
+        {% set last_cmd = value_json['last command definition'] %}
+        {% if last_cmd == 'toggle forward' %}
+        100
+        {% elif last_cmd == 'toggle reverse' %}
+        0
+        {% else %}
+        {{ value_json.position | default(value_json['motor duty']) | default(0) }}
+        {% endif %}
+      position_open: 100
+      position_closed: 0
+      set_position_topic: "RVC/WINDOW_SHADE_COMMAND/1/set"
+      set_position_template: '{"instance": 1, "position": {{ position }}}'
+      availability_template: >-
+        {% if value_json is defined and value_json['motor status definition'] is defined %}
+        online
+        {% else %}
+        offline
+        {% endif %}
+      optimistic: false
+
+    - name: "Windshield Day - old"
       state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/1"
       position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/1"
       value_template: >-
@@ -1253,7 +1339,7 @@ mqtt:
         {% else %}
         offline
         {% endif %}
-      unique_id: "windshield_day"
+      unique_id: "windshield_day_old"
       optimistic: false
 
     - name: "Windshield Night"
@@ -2306,58 +2392,61 @@ mqtt:
       unique_id: "bedroom_rear_night"
       optimistic: false
 
-      # Example configuration.yaml entry
   lock:
     - name: "Entry Door Lock"
+      unique_id: "EntryDoorLock"
       icon: mdi:key
       state_topic: "RVC/LOCK_STATUS/1"
-      unique_id: "EntryDoorLock"
       value_template: "{{ value_json['lock status definition'] }}"
-      command_topic: "RVCSET/MESSAGE/1FEE4"
-      payload_lock: "0101FFFFFFFFFFFF"
-      payload_unlock: "0100FFFFFFFFFFFF"
+      command_topic: "RVC/LOCK_COMMAND/1/set"
+      payload_lock: '{"instance": 1, "lock status": 1}'
+      payload_unlock: '{"instance": 1, "lock status": 0}'
       state_locked: "locked"
       state_unlocked: "unlocked"
+
     - name: "Cargo Door D/S"
+      unique_id: "cargolock2"
       icon: mdi:key
       state_topic: "RVC/LOCK_STATUS/2"
       value_template: "{{ value_json['lock status definition'] }}"
-      command_topic: "RVCSET/MESSAGE/1FEE4"
-      payload_lock: "0201FFFFFFFFFFFF"
-      payload_unlock: "0200FFFFFFFFFFFF"
+      command_topic: "RVC/LOCK_COMMAND/2/set"
+      payload_lock: '{"instance": 2, "lock status": 1}'
+      payload_unlock: '{"instance": 2, "lock status": 0}'
       state_locked: "locked"
       state_unlocked: "unlocked"
-      unique_id: "cargolock2"
+
     - name: "Cargo Door P/S"
+      unique_id: "cargolock3"
       icon: mdi:key
       state_topic: "RVC/LOCK_STATUS/3"
       value_template: "{{ value_json['lock status definition'] }}"
-      command_topic: "RVCSET/MESSAGE/1FEE4"
-      payload_lock: "0301FFFFFFFFFFFF"
-      payload_unlock: "0300FFFFFFFFFFFF"
+      command_topic: "RVC/LOCK_COMMAND/3/set"
+      payload_lock: '{"instance": 3, "lock status": 1}'
+      payload_unlock: '{"instance": 3, "lock status": 0}'
       state_locked: "locked"
       state_unlocked: "unlocked"
-      unique_id: "cargolock3"
+
     - name: "Cargo Door 3"
+      unique_id: "cargolock4"
       icon: mdi:key
       state_topic: "RVC/LOCK_STATUS/4"
       value_template: "{{ value_json['lock status definition'] }}"
-      command_topic: "RVCSET/MESSAGE/1FEE4"
-      payload_lock: "0401FFFFFFFFFFFF"
-      payload_unlock: "0400FFFFFFFFFFFF"
+      command_topic: "RVC/LOCK_COMMAND/4/set"
+      payload_lock: '{"instance": 4, "lock status": 1}'
+      payload_unlock: '{"instance": 4, "lock status": 0}'
       state_locked: "locked"
       state_unlocked: "unlocked"
-      unique_id: "cargolock4"
+
     - name: "Cargo Door 4"
+      unique_id: "cargolock5"
       icon: mdi:key
       state_topic: "RVC/LOCK_STATUS/6"
       value_template: "{{ value_json['lock status definition'] }}"
-      command_topic: "RVCSET/MESSAGE/1FEE4"
-      payload_lock: "0601FFFFFFFFFFFF"
-      payload_unlock: "0601FFFFFFFFFFFF"
+      command_topic: "RVC/LOCK_COMMAND/6/set"
+      payload_lock: '{"instance": 6, "lock status": 1}'
+      payload_unlock: '{"instance": 6, "lock status": 0}'
       state_locked: "locked"
       state_unlocked: "unlocked"
-      unique_id: "cargolock5"
 
   sensor:
     # Battery Voltage Sensor
