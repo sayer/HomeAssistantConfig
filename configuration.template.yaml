@@ -360,21 +360,6 @@ mqtt:
       initial: 72
 
   light:
-    # Example 1: Entry Light (Instance 1)
-    - name: "RVC Light 1"
-      unique_id: "rvc_light_1"
-      schema: "template"
-      command_topic: "RVC/DC_DIMMER_COMMAND_2/1/set"
-      command_on_template: '{"instance": 1, "desired level": 100, "command": 0}'
-      command_off_template: '{"instance": 1, "desired level": 0, "command": 3}'
-      state_topic: "RVC/DC_DIMMER_STATUS_3/1"
-      state_template: >-
-        {% if value_json['operating status (brightness)']|int > 0 %}
-          on
-        {% else %}
-          off
-        {% endif %}
-
     # Using the template format you provided
     - name: "Docking Lights"
       unique_id: "docking_lights"
@@ -392,389 +377,601 @@ mqtt:
       optimistic: %%OPTIMISTIC_MODE%%
       #entity_category: "diagnostic" # Hidden from UI
 
-    - name: "Docking Lights-old"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/%%DOCKING_LIGHTS_CODE%%"
-      state_value_template: "{{ value_json['operating status (brightness)'] }}"
-      payload_on: "100"
-      payload_off: "0"
-      command_topic: "RVCSET/DC_DIMMER_STATUS_3/%%DOCKING_LIGHTS_CODE%%"
-      optimistic: %%OPTIMISTIC_MODE%%
-      unique_id: "docking_lights-old"
-      #entity_category: "diagnostic" # Hidden from UI
-
     - name: "Panel Lights"
+      unique_id: "panel_lights"
+      state_topic: "RVC/DC_DIMMER_STATUS_3/1"
+      state_template: >-
+        {% if value_json['brightness']|int > 0 %}
+          on
+        {% else %}
+          off
+        {% endif %}
+      command_topic: "RVC/GENERIC_INDICATOR_COMMAND/255/set"
+      command_on_template: '{"instance": 255, "desired level": 100, "command": 0}'
+      command_off_template: '{"instance": 255, "desired level": 0, "command": 3}'
+      schema: "template"
+      optimistic: %%OPTIMISTIC_MODE%%
+
+    - name: "Panel Lights old"
       state_topic: "RVC/DC_DIMMER_STATUS_3/1"
       state_value_template: "{% if value_json['brightness'] == 0 %} 0 {% else %} 100 {% endif %}"
       command_topic: "RVCSET/MESSAGE/1FED9"
       payload_on: "FF7E64FFFFFF00FF"
       payload_off: "FF7E00FFFFFF00FF"
       optimistic: %%OPTIMISTIC_MODE%%
-      unique_id: "panel_lights"
+      unique_id: "panel_lights_old"
 
     - name: "Entry Light"
+      unique_id: "dimmer_3_1"
       icon: mdi:light-recessed
       state_topic: "RVC/DC_DIMMER_STATUS_3/1"
-      state_value_template: "{% if value_json['operating status (brightness)'] == 0 %} 0 {% else %} 100 {% endif %}"
-      command_topic: "RVCSET/DC_DIMMER_STATUS_3/1"
-      payload_on: "100"
-      payload_off: "0"
+      state_template: >-
+        {% if value_json['operating status (brightness)']|int > 0 %}
+          on
+        {% else %}
+          off
+        {% endif %}
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/1/set"
+      command_on_template: '{"instance": 1, "desired level": 100, "command": 0}'
+      command_off_template: '{"instance": 1, "desired level": 0, "command": 3}'
+      schema: "template"
       optimistic: %%OPTIMISTIC_MODE%%
-      unique_id: "dimmer_3_1"
 
     - name: "Cockpit Accents"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/2"
-      state_value_template: "{{ value_json['operating status (brightness)'] }}"
-      payload_on: "100"
-      payload_off: "0"
-      optimistic: %%OPTIMISTIC_MODE%%
-      command_topic: "RVCSET/DC_DIMMER_STATUS_3/2"
-      icon: mdi:light-recessed
       unique_id: "dimmer_3_2"
+      icon: mdi:light-recessed
+      state_topic: "RVC/DC_DIMMER_STATUS_3/2"
+      state_template: >-
+        {% if value_json['operating status (brightness)']|int > 0 %}
+          on
+        {% else %}
+          off
+        {% endif %}
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/2/set"
+      command_on_template: '{"instance": 2, "desired level": 100, "command": 0}'
+      command_off_template: '{"instance": 2, "desired level": 0, "command": 3}'
+      schema: "template"
+      optimistic: %%OPTIMISTIC_MODE%%
 
     - name: "Living Room Ceiling"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/3"
-      icon: mdi:light-recessed
-      state_value_template: "{{ value_json['operating status (brightness)'] }}"
-      payload_on: "100"
-      payload_off: "0"
-      command_topic: "RVCSET/DC_DIMMER_STATUS_3/3"
-      optimistic: %%OPTIMISTIC_MODE%%
       unique_id: "dimmer_3_3"
+      icon: mdi:light-recessed
+      state_topic: "RVC/DC_DIMMER_STATUS_3/3"
+      state_template: >-
+        {% if value_json['operating status (brightness)']|int > 0 %}
+          on
+        {% else %}
+          off
+        {% endif %}
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/3/set"
+      command_on_template: '{"instance": 3, "desired level": 100, "command": 0}'
+      command_off_template: '{"instance": 3, "desired level": 0, "command": 3}'
+      schema: "template"
+      optimistic: %%OPTIMISTIC_MODE%%
 
     - name: "Living Room Accents"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/4"
-      icon: mdi:light-recessed
-      state_value_template: "{{ value_json['operating status (brightness)'] }}"
-      payload_on: "100"
-      payload_off: "0"
-      command_topic: "RVCSET/DC_DIMMER_STATUS_3/4"
-      optimistic: %%OPTIMISTIC_MODE%%
       unique_id: "dimmer_3_4"
+      icon: mdi:light-recessed
+      state_topic: "RVC/DC_DIMMER_STATUS_3/4"
+      state_template: >-
+        {% if value_json['operating status (brightness)']|int > 0 %}
+          on
+        {% else %}
+          off
+        {% endif %}
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/4/set"
+      command_on_template: '{"instance": 4, "desired level": 100, "command": 0}'
+      command_off_template: '{"instance": 4, "desired level": 0, "command": 3}'
+      schema: "template"
+      optimistic: %%OPTIMISTIC_MODE%%
 
     - name: "D/S Front Sofa"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/5"
-      state_value_template: "{{ value_json['operating status (brightness)'] }}"
-      payload_on: "100"
-      payload_off: "0"
-      command_topic: "RVCSET/DC_DIMMER_STATUS_3/5"
-      optimistic: %%OPTIMISTIC_MODE%%
-      icon: mdi:light-recessed
       unique_id: "dimmer_3_5"
+      icon: mdi:light-recessed
+      state_topic: "RVC/DC_DIMMER_STATUS_3/5"
+      state_template: >-
+        {% if value_json['operating status (brightness)']|int > 0 %}
+          on
+        {% else %}
+          off
+        {% endif %}
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/5/set"
+      command_on_template: '{"instance": 5, "desired level": 100, "command": 0}'
+      command_off_template: '{"instance": 5, "desired level": 0, "command": 3}'
+      schema: "template"
+      optimistic: %%OPTIMISTIC_MODE%%
 
     - name: "D/S Front Accent"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/6"
-      state_value_template: "{{ value_json['operating status (brightness)'] }}"
-      payload_on: "100"
-      payload_off: "0"
-      command_topic: "RVCSET/DC_DIMMER_STATUS_3/6"
-      optimistic: %%OPTIMISTIC_MODE%%
-      icon: mdi:light-recessed
       unique_id: "dimmer_3_6"
+      icon: mdi:light-recessed
+      state_topic: "RVC/DC_DIMMER_STATUS_3/6"
+      state_template: >-
+        {% if value_json['operating status (brightness)']|int > 0 %}
+          on
+        {% else %}
+          off
+        {% endif %}
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/6/set"
+      command_on_template: '{"instance": 6, "desired level": 100, "command": 0}'
+      command_off_template: '{"instance": 6, "desired level": 0, "command": 3}'
+      schema: "template"
+      optimistic: %%OPTIMISTIC_MODE%%
 
     - name: "Living Room Ceiling Recess"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/8"
-      icon: mdi:light-recessed
-      state_value_template: "{{ value_json['operating status (brightness)'] }}"
-      payload_on: "100"
-      payload_off: "0"
-      command_topic: "RVCSET/DC_DIMMER_STATUS_3/8"
-      optimistic: %%OPTIMISTIC_MODE%%
       unique_id: "dimmer_3_8"
+      icon: mdi:light-recessed
+      state_topic: "RVC/DC_DIMMER_STATUS_3/8"
+      state_template: >-
+        {% if value_json['operating status (brightness)']|int > 0 %}
+          on
+        {% else %}
+          off
+        {% endif %}
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/8/set"
+      command_on_template: '{"instance": 8, "desired level": 100, "command": 0}'
+      command_off_template: '{"instance": 8, "desired level": 0, "command": 3}'
+      schema: "template"
+      optimistic: %%OPTIMISTIC_MODE%%
 
     - name: "P/S Dinette Ceiling"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/9"
-      state_value_template: "{{ value_json['operating status (brightness)'] }}"
-      payload_on: "100"
-      payload_off: "0"
-      command_topic: "RVCSET/DC_DIMMER_STATUS_3/9"
-      icon: mdi:light-recessed
-      optimistic: %%OPTIMISTIC_MODE%%
       unique_id: "dimmer_3_9"
+      icon: mdi:light-recessed
+      state_topic: "RVC/DC_DIMMER_STATUS_3/9"
+      state_template: >-
+        {% if value_json['operating status (brightness)']|int > 0 %}
+          on
+        {% else %}
+          off
+        {% endif %}
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/9/set"
+      command_on_template: '{"instance": 9, "desired level": 100, "command": 0}'
+      command_off_template: '{"instance": 9, "desired level": 0, "command": 3}'
+      schema: "template"
+      optimistic: %%OPTIMISTIC_MODE%%
 
     - name: "P/S Dinette Accent"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/10"
-      state_value_template: "{{ value_json['operating status (brightness)'] }}"
-      payload_on: "100"
-      payload_off: "0"
-      command_topic: "RVCSET/DC_DIMMER_STATUS_3/10"
-      icon: mdi:light-recessed
-      optimistic: %%OPTIMISTIC_MODE%%
       unique_id: "dimmer_3_10"
+      icon: mdi:light-recessed
+      state_topic: "RVC/DC_DIMMER_STATUS_3/10"
+      state_template: >-
+        {% if value_json['operating status (brightness)']|int > 0 %}
+          on
+        {% else %}
+          off
+        {% endif %}
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/10/set"
+      command_on_template: '{"instance": 10, "desired level": 100, "command": 0}'
+      command_off_template: '{"instance": 10, "desired level": 0, "command": 3}'
+      schema: "template"
+      optimistic: %%OPTIMISTIC_MODE%%
 
     - name: "Kitchen Ceiling"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/12"
-      icon: mdi:light-recessed
-      state_value_template: "{{ value_json['operating status (brightness)'] }}"
-      payload_on: "100"
-      payload_off: "0"
-      command_topic: "RVCSET/DC_DIMMER_STATUS_3/12"
-      optimistic: %%OPTIMISTIC_MODE%%
       unique_id: "dimmer_3_12"
+      icon: mdi:light-recessed
+      state_topic: "RVC/DC_DIMMER_STATUS_3/12"
+      state_template: >-
+        {% if value_json['operating status (brightness)']|int > 0 %}
+          on
+        {% else %}
+          off
+        {% endif %}
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/12/set"
+      command_on_template: '{"instance": 12, "desired level": 100, "command": 0}'
+      command_off_template: '{"instance": 12, "desired level": 0, "command": 3}'
+      schema: "template"
+      optimistic: %%OPTIMISTIC_MODE%%
 
     - name: "Kitchen Sink"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/13"
-      state_value_template: "{{ value_json['operating status (brightness)'] }}"
-      payload_on: "100"
-      payload_off: "0"
-      command_topic: "RVCSET/DC_DIMMER_STATUS_3/13"
-      icon: mdi:light-recessed
-      optimistic: %%OPTIMISTIC_MODE%%
       unique_id: "dimmer_3_13"
+      icon: mdi:light-recessed
+      state_topic: "RVC/DC_DIMMER_STATUS_3/13"
+      state_template: >-
+        {% if value_json['operating status (brightness)']|int > 0 %}
+          on
+        {% else %}
+          off
+        {% endif %}
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/13/set"
+      command_on_template: '{"instance": 13, "desired level": 100, "command": 0}'
+      command_off_template: '{"instance": 13, "desired level": 0, "command": 3}'
+      schema: "template"
+      optimistic: %%OPTIMISTIC_MODE%%
 
     - name: "Floor Lights"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/14"
-      state_value_template: "{{ value_json['operating status (brightness)'] }}"
-      payload_on: "100"
-      payload_off: "0"
-      command_topic: "RVCSET/DC_DIMMER_STATUS_3/14"
-      icon: mdi:light-recessed
-      optimistic: %%OPTIMISTIC_MODE%%
       unique_id: "dimmer_3_14"
+      icon: mdi:light-recessed
+      state_topic: "RVC/DC_DIMMER_STATUS_3/14"
+      state_template: >-
+        {% if value_json['operating status (brightness)']|int > 0 %}
+          on
+        {% else %}
+          off
+        {% endif %}
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/14/set"
+      command_on_template: '{"instance": 14, "desired level": 100, "command": 0}'
+      command_off_template: '{"instance": 14, "desired level": 0, "command": 3}'
+      schema: "template"
+      optimistic: %%OPTIMISTIC_MODE%%
 
     - name: "Mid Batch Ceiling"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/15"
-      state_value_template: "{{ value_json['operating status (brightness)'] }}"
-      payload_on: "100"
-      payload_off: "0"
-      command_topic: "RVCSET/DC_DIMMER_STATUS_3/15"
-      icon: mdi:light-recessed
-      optimistic: %%OPTIMISTIC_MODE%%
       unique_id: "dimmer_3_15"
+      icon: mdi:light-recessed
+      state_topic: "RVC/DC_DIMMER_STATUS_3/15"
+      state_template: >-
+        {% if value_json['operating status (brightness)']|int > 0 %}
+          on
+        {% else %}
+          off
+        {% endif %}
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/15/set"
+      command_on_template: '{"instance": 15, "desired level": 100, "command": 0}'
+      command_off_template: '{"instance": 15, "desired level": 0, "command": 3}'
+      schema: "template"
+      optimistic: %%OPTIMISTIC_MODE%%
 
     - name: "Mid Batch Accent"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/16"
-      state_value_template: "{{ value_json['operating status (brightness)'] }}"
-      payload_on: "100"
-      payload_off: "0"
-      command_topic: "RVCSET/DC_DIMMER_STATUS_3/16"
-      icon: mdi:light-recessed
-      optimistic: %%OPTIMISTIC_MODE%%
       unique_id: "dimmer_3_16"
+      icon: mdi:light-recessed
+      state_topic: "RVC/DC_DIMMER_STATUS_3/16"
+      state_template: >-
+        {% if value_json['operating status (brightness)']|int > 0 %}
+          on
+        {% else %}
+          off
+        {% endif %}
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/16/set"
+      command_on_template: '{"instance": 16, "desired level": 100, "command": 0}'
+      command_off_template: '{"instance": 16, "desired level": 0, "command": 3}'
+      schema: "template"
+      optimistic: %%OPTIMISTIC_MODE%%
 
     - name: "Hall Ceiling"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/17"
-      state_value_template: "{{ value_json['operating status (brightness)'] }}"
-      payload_on: "100"
-      payload_off: "0"
-      command_topic: "RVCSET/DC_DIMMER_STATUS_3/17"
-      icon: mdi:light-recessed
-      optimistic: %%OPTIMISTIC_MODE%%
       unique_id: "dimmer_3_17"
+      icon: mdi:light-recessed
+      state_topic: "RVC/DC_DIMMER_STATUS_3/17"
+      state_template: >-
+        {% if value_json['operating status (brightness)']|int > 0 %}
+          on
+        {% else %}
+          off
+        {% endif %}
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/17/set"
+      command_on_template: '{"instance": 17, "desired level": 100, "command": 0}'
+      command_off_template: '{"instance": 17, "desired level": 0, "command": 3}'
+      schema: "template"
+      optimistic: %%OPTIMISTIC_MODE%%
 
     - name: "Bedroom Ceiling"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/18"
-      state_value_template: "{{ value_json['operating status (brightness)'] }}"
-      payload_on: "100"
-      payload_off: "0"
-      command_topic: "RVCSET/DC_DIMMER_STATUS_3/18"
-      icon: mdi:light-recessed
-      optimistic: %%OPTIMISTIC_MODE%%
       unique_id: "dimmer_3_18"
+      icon: mdi:light-recessed
+      state_topic: "RVC/DC_DIMMER_STATUS_3/18"
+      state_template: >-
+        {% if value_json['operating status (brightness)']|int > 0 %}
+          on
+        {% else %}
+          off
+        {% endif %}
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/18/set"
+      command_on_template: '{"instance": 18, "desired level": 100, "command": 0}'
+      command_off_template: '{"instance": 18, "desired level": 0, "command": 3}'
+      schema: "template"
+      optimistic: %%OPTIMISTIC_MODE%%
 
     - name: "Bedroom Ceiling Accent"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/19"
-      state_value_template: "{{ value_json['operating status (brightness)'] }}"
-      payload_on: "100"
-      payload_off: "0"
-      command_topic: "RVCSET/DC_DIMMER_STATUS_3/19"
-      icon: mdi:light-recessed
-      optimistic: %%OPTIMISTIC_MODE%%
       unique_id: "dimmer_3_19"
+      icon: mdi:light-recessed
+      state_topic: "RVC/DC_DIMMER_STATUS_3/19"
+      state_template: >-
+        {% if value_json['operating status (brightness)']|int > 0 %}
+          on
+        {% else %}
+          off
+        {% endif %}
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/19/set"
+      command_on_template: '{"instance": 19, "desired level": 100, "command": 0}'
+      command_off_template: '{"instance": 19, "desired level": 0, "command": 3}'
+      schema: "template"
+      optimistic: %%OPTIMISTIC_MODE%%
 
     - name: "Bedroom right reading"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/21"
-      state_value_template: "{{ value_json['operating status (brightness)'] }}"
-      payload_on: "100"
-      payload_off: "0"
-      command_topic: "RVCSET/DC_DIMMER_STATUS_3/21"
-      icon: mdi:light-recessed
-      optimistic: %%OPTIMISTIC_MODE%%
       unique_id: "dimmer_3_21"
+      icon: mdi:light-recessed
+      state_topic: "RVC/DC_DIMMER_STATUS_3/21"
+      state_template: >-
+        {% if value_json['operating status (brightness)']|int > 0 %}
+          on
+        {% else %}
+          off
+        {% endif %}
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/21/set"
+      command_on_template: '{"instance": 21, "desired level": 100, "command": 0}'
+      command_off_template: '{"instance": 21, "desired level": 0, "command": 3}'
+      schema: "template"
+      optimistic: %%OPTIMISTIC_MODE%%
 
     - name: "Bedroom left reading"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/22"
-      state_value_template: "{{ value_json['operating status (brightness)'] }}"
-      payload_on: "100"
-      payload_off: "0"
-      command_topic: "RVCSET/DC_DIMMER_STATUS_3/22"
-      icon: mdi:light-recessed
-      optimistic: %%OPTIMISTIC_MODE%%
       unique_id: "dimmer_3_22"
+      icon: mdi:light-recessed
+      state_topic: "RVC/DC_DIMMER_STATUS_3/22"
+      state_template: >-
+        {% if value_json['operating status (brightness)']|int > 0 %}
+          on
+        {% else %}
+          off
+        {% endif %}
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/22/set"
+      command_on_template: '{"instance": 22, "desired level": 100, "command": 0}'
+      command_off_template: '{"instance": 22, "desired level": 0, "command": 3}'
+      schema: "template"
+      optimistic: %%OPTIMISTIC_MODE%%
 
     - name: "Bedroom D/S accent"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/23"
-      state_value_template: "{{ value_json['operating status (brightness)'] }}"
-      payload_on: "100"
-      payload_off: "0"
-      command_topic: "RVCSET/DC_DIMMER_STATUS_3/23"
-      icon: mdi:light-recessed
-      optimistic: %%OPTIMISTIC_MODE%%
       unique_id: "dimmer_3_23"
+      icon: mdi:light-recessed
+      state_topic: "RVC/DC_DIMMER_STATUS_3/23"
+      state_template: >-
+        {% if value_json['operating status (brightness)']|int > 0 %}
+          on
+        {% else %}
+          off
+        {% endif %}
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/23/set"
+      command_on_template: '{"instance": 23, "desired level": 100, "command": 0}'
+      command_off_template: '{"instance": 23, "desired level": 0, "command": 3}'
+      schema: "template"
+      optimistic: %%OPTIMISTIC_MODE%%
 
     - name: "Bedroom Dresser Ceiling"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/24"
-      state_value_template: "{{ value_json['operating status (brightness)'] }}"
-      payload_on: "100"
-      payload_off: "0"
-      command_topic: "RVCSET/DC_DIMMER_STATUS_3/24"
-      icon: mdi:light-recessed
-      optimistic: %%OPTIMISTIC_MODE%%
       unique_id: "dimmer_3_24"
+      icon: mdi:light-recessed
+      state_topic: "RVC/DC_DIMMER_STATUS_3/24"
+      state_template: >-
+        {% if value_json['operating status (brightness)']|int > 0 %}
+          on
+        {% else %}
+          off
+        {% endif %}
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/24/set"
+      command_on_template: '{"instance": 24, "desired level": 100, "command": 0}'
+      command_off_template: '{"instance": 24, "desired level": 0, "command": 3}'
+      schema: "template"
+      optimistic: %%OPTIMISTIC_MODE%%
 
     - name: "Bedroom Dresser accent"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/25"
-      state_value_template: "{{ value_json['operating status (brightness)'] }}"
-      payload_on: "100"
-      payload_off: "0"
-      command_topic: "RVCSET/DC_DIMMER_STATUS_3/25"
-      icon: mdi:light-recessed
-      optimistic: %%OPTIMISTIC_MODE%%
       unique_id: "dimmer_3_25"
+      icon: mdi:light-recessed
+      state_topic: "RVC/DC_DIMMER_STATUS_3/25"
+      state_template: >-
+        {% if value_json['operating status (brightness)']|int > 0 %}
+          on
+        {% else %}
+          off
+        {% endif %}
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/25/set"
+      command_on_template: '{"instance": 25, "desired level": 100, "command": 0}'
+      command_off_template: '{"instance": 25, "desired level": 0, "command": 3}'
+      schema: "template"
+      optimistic: %%OPTIMISTIC_MODE%%
 
     - name: "Rear Bath Shower"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/27"
-      state_value_template: "{{ value_json['operating status (brightness)'] }}"
-      payload_on: "100"
-      payload_off: "0"
-      command_topic: "RVCSET/DC_DIMMER_STATUS_3/27"
-      icon: mdi:light-recessed
-      optimistic: %%OPTIMISTIC_MODE%%
       unique_id: "dimmer_3_27"
+      icon: mdi:light-recessed
+      state_topic: "RVC/DC_DIMMER_STATUS_3/27"
+      state_template: >-
+        {% if value_json['operating status (brightness)']|int > 0 %}
+          on
+        {% else %}
+          off
+        {% endif %}
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/27/set"
+      command_on_template: '{"instance": 27, "desired level": 100, "command": 0}'
+      command_off_template: '{"instance": 27, "desired level": 0, "command": 3}'
+      schema: "template"
+      optimistic: %%OPTIMISTIC_MODE%%
 
     - name: "Rear Bath Ceiling"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/28"
-      state_value_template: "{{ value_json['operating status (brightness)'] }}"
-      payload_on: "100"
-      payload_off: "0"
-      command_topic: "RVCSET/DC_DIMMER_STATUS_3/28"
-      icon: mdi:light-recessed
-      optimistic: %%OPTIMISTIC_MODE%%
       unique_id: "dimmer_3_28"
+      icon: mdi:light-recessed
+      state_topic: "RVC/DC_DIMMER_STATUS_3/28"
+      state_template: >-
+        {% if value_json['operating status (brightness)']|int > 0 %}
+          on
+        {% else %}
+          off
+        {% endif %}
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/28/set"
+      command_on_template: '{"instance": 28, "desired level": 100, "command": 0}'
+      command_off_template: '{"instance": 28, "desired level": 0, "command": 3}'
+      schema: "template"
+      optimistic: %%OPTIMISTIC_MODE%%
 
     - name: "Rear Bath Accent"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/29"
-      state_value_template: "{{ value_json['operating status (brightness)'] }}"
-      payload_on: "100"
-      payload_off: "0"
-      command_topic: "RVCSET/DC_DIMMER_STATUS_3/29"
-      icon: mdi:light-recessed
-      optimistic: %%OPTIMISTIC_MODE%%
       unique_id: "dimmer_3_29"
+      icon: mdi:light-recessed
+      state_topic: "RVC/DC_DIMMER_STATUS_3/29"
+      state_template: >-
+        {% if value_json['operating status (brightness)']|int > 0 %}
+          on
+        {% else %}
+          off
+        {% endif %}
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/29/set"
+      command_on_template: '{"instance": 29, "desired level": 100, "command": 0}'
+      command_off_template: '{"instance": 29, "desired level": 0, "command": 3}'
+      schema: "template"
+      optimistic: %%OPTIMISTIC_MODE%%
 
     - name: "Rear Bath Vanity"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/30"
-      state_value_template: "{{ value_json['operating status (brightness)'] }}"
-      payload_on: "100"
-      payload_off: "0"
-      command_topic: "RVCSET/DC_DIMMER_STATUS_3/30"
-      icon: mdi:light-recessed
-      optimistic: %%OPTIMISTIC_MODE%%
       unique_id: "dimmer_3_30"
+      icon: mdi:light-recessed
+      state_topic: "RVC/DC_DIMMER_STATUS_3/30"
+      state_template: >-
+        {% if value_json['operating status (brightness)']|int > 0 %}
+          on
+        {% else %}
+          off
+        {% endif %}
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/30/set"
+      command_on_template: '{"instance": 30, "desired level": 100, "command": 0}'
+      command_off_template: '{"instance": 30, "desired level": 0, "command": 3}'
+      schema: "template"
+      optimistic: %%OPTIMISTIC_MODE%%
 
     - name: "Bedroom Recess Ceiling"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/31"
-      state_value_template: "{{ value_json['operating status (brightness)'] }}"
-      payload_on: "100"
-      payload_off: "0"
-      command_topic: "RVCSET/DC_DIMMER_STATUS_3/31"
-      icon: mdi:light-recessed
-      optimistic: %%OPTIMISTIC_MODE%%
       unique_id: "dimmer_3_31"
+      icon: mdi:light-recessed
+      state_topic: "RVC/DC_DIMMER_STATUS_3/31"
+      state_template: >-
+        {% if value_json['operating status (brightness)']|int > 0 %}
+          on
+        {% else %}
+          off
+        {% endif %}
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/31/set"
+      command_on_template: '{"instance": 31, "desired level": 100, "command": 0}'
+      command_off_template: '{"instance": 31, "desired level": 0, "command": 3}'
+      schema: "template"
+      optimistic: %%OPTIMISTIC_MODE%%
 
     - name: "Top Bunk Reading"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/32"
-      state_value_template: "{{ value_json['operating status (brightness)'] }}"
-      payload_on: "100"
-      payload_off: "0"
-      command_topic: "RVCSET/DC_DIMMER_STATUS_3/32"
-      icon: mdi:light-recessed
-      optimistic: %%OPTIMISTIC_MODE%%
       unique_id: "dimmer_3_32"
+      icon: mdi:light-recessed
+      state_topic: "RVC/DC_DIMMER_STATUS_3/32"
+      state_template: >-
+        {% if value_json['operating status (brightness)']|int > 0 %}
+          on
+        {% else %}
+          off
+        {% endif %}
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/32/set"
+      command_on_template: '{"instance": 32, "desired level": 100, "command": 0}'
+      command_off_template: '{"instance": 32, "desired level": 0, "command": 3}'
+      schema: "template"
+      optimistic: %%OPTIMISTIC_MODE%%
 
     - name: "Top Bunk Accent"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/33"
-      state_value_template: "{{ value_json['operating status (brightness)'] }}"
-      payload_on: "100"
-      payload_off: "0"
-      command_topic: "RVCSET/DC_DIMMER_STATUS_3/33"
-      icon: mdi:light-recessed
-      optimistic: %%OPTIMISTIC_MODE%%
       unique_id: "dimmer_3_33"
+      icon: mdi:light-recessed
+      state_topic: "RVC/DC_DIMMER_STATUS_3/33"
+      state_template: >-
+        {% if value_json['operating status (brightness)']|int > 0 %}
+          on
+        {% else %}
+          off
+        {% endif %}
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/33/set"
+      command_on_template: '{"instance": 33, "desired level": 100, "command": 0}'
+      command_off_template: '{"instance": 33, "desired level": 0, "command": 3}'
+      schema: "template"
+      optimistic: %%OPTIMISTIC_MODE%%
 
     - name: "Bottom Bunk Reading"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/34"
-      icon: mdi:light-recessed
-      state_value_template: "{{ value_json['operating status (brightness)'] }}"
-      payload_on: "100"
-      payload_off: "0"
-      command_topic: "RVCSET/DC_DIMMER_STATUS_3/34"
-      optimistic: %%OPTIMISTIC_MODE%%
       unique_id: "dimmer_3_34"
+      icon: mdi:light-recessed
+      state_topic: "RVC/DC_DIMMER_STATUS_3/34"
+      state_template: >-
+        {% if value_json['operating status (brightness)']|int > 0 %}
+          on
+        {% else %}
+          off
+        {% endif %}
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/34/set"
+      command_on_template: '{"instance": 34, "desired level": 100, "command": 0}'
+      command_off_template: '{"instance": 34, "desired level": 0, "command": 3}'
+      schema: "template"
+      optimistic: %%OPTIMISTIC_MODE%%
 
     - name: "Bottom Bunk Accent"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/35"
-      icon: mdi:light-recessed
-      state_value_template: "{{ value_json['operating status (brightness)'] }}"
-      payload_on: "100"
-      payload_off: "0"
-      command_topic: "RVCSET/DC_DIMMER_STATUS_3/35"
-      optimistic: %%OPTIMISTIC_MODE%%
       unique_id: "dimmer_3_35"
-
-    #    - name: "Docking Lights"
-    #      state_topic: "RVC/DC_DIMMER_STATUS_3/121"
-    #      state_value_template: "{{ value_json['operating status (brightness)'] }}"
-    #      payload_on: "100"
-    #      payload_off: "0"
-    #      command_topic: "RVCSET/DC_DIMMER_STATUS_3/121"
-    #      optimistic: %%OPTIMISTIC_MODE%%
-    #      unique_id: "dimmer_3_121"
+      icon: mdi:light-recessed
+      state_topic: "RVC/DC_DIMMER_STATUS_3/35"
+      state_template: >-
+        {% if value_json['operating status (brightness)']|int > 0 %}
+          on
+        {% else %}
+          off
+        {% endif %}
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/35/set"
+      command_on_template: '{"instance": 35, "desired level": 100, "command": 0}'
+      command_off_template: '{"instance": 35, "desired level": 0, "command": 3}'
+      schema: "template"
+      optimistic: %%OPTIMISTIC_MODE%%
 
     - name: "Awning Lights"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/%%AWNING_LIGHTS%%"
-      state_value_template: "{{ value_json['operating status (brightness)'] }}"
-      payload_on: "100"
-      payload_off: "0"
-      command_topic: "RVCSET/DC_DIMMER_STATUS_3/%%AWNING_LIGHTS%%"
-      optimistic: %%OPTIMISTIC_MODE%%
       unique_id: "dimmer_3_122"
+      state_topic: "RVC/DC_DIMMER_STATUS_3/%%AWNING_LIGHTS%%"
+      state_template: >-
+        {% if value_json['operating status (brightness)']|int > 0 %}
+          on
+        {% else %}
+          off
+        {% endif %}
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/%%AWNING_LIGHTS%%/set"
+      command_on_template: '{"instance": %%AWNING_LIGHTS%%, "desired level": 100, "command": 0}'
+      command_off_template: '{"instance": %%AWNING_LIGHTS%%, "desired level": 0, "command": 3}'
+      schema: "template"
+      optimistic: %%OPTIMISTIC_MODE%%
 
     - name: "Exterior Accents"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/%%EXTERIOR_ACCENT_LIGHTS%%"
-      state_value_template: "{{ value_json['operating status (brightness)'] }}"
-      payload_on: "100"
-      payload_off: "0"
-      command_topic: "RVCSET/DC_DIMMER_STATUS_3/%%EXTERIOR_ACCENT_LIGHTS%%"
-      optimistic: %%OPTIMISTIC_MODE%%
       unique_id: "dimmer_3_123"
+      state_topic: "RVC/DC_DIMMER_STATUS_3/%%EXTERIOR_ACCENT_LIGHTS%%"
+      state_template: >-
+        {% if value_json['operating status (brightness)']|int > 0 %}
+          on
+        {% else %}
+          off
+        {% endif %}
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/%%EXTERIOR_ACCENT_LIGHTS%%/set"
+      command_on_template: '{"instance": %%EXTERIOR_ACCENT_LIGHTS%%, "desired level": 100, "command": 0}'
+      command_off_template: '{"instance": %%EXTERIOR_ACCENT_LIGHTS%%, "desired level": 0, "command": 3}'
+      schema: "template"
+      optimistic: %%OPTIMISTIC_MODE%%
 
     - name: "Passenger Map Light"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/124"
-      state_value_template: "{{ value_json['operating status (brightness)'] }}"
-      payload_on: "100"
-      payload_off: "0"
-      command_topic: "RVCSET/DC_DIMMER_STATUS_3/124"
-      icon: mdi:light-recessed
-      optimistic: %%OPTIMISTIC_MODE%%
       unique_id: "dimmer_3_124"
+      icon: mdi:light-recessed
+      state_topic: "RVC/DC_DIMMER_STATUS_3/124"
+      state_template: >-
+        {% if value_json['operating status (brightness)']|int > 0 %}
+          on
+        {% else %}
+          off
+        {% endif %}
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/124/set"
+      command_on_template: '{"instance": 124, "desired level": 100, "command": 0}'
+      command_off_template: '{"instance": 124, "desired level": 0, "command": 3}'
+      schema: "template"
+      optimistic: %%OPTIMISTIC_MODE%%
 
     - name: "Porch Handle"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/127"
-      state_value_template: "{{ value_json['operating status (brightness)'] }}"
-      payload_on: "100"
-      payload_off: "0"
-      command_topic: "RVCSET/DC_DIMMER_STATUS_3/127"
-      optimistic: %%OPTIMISTIC_MODE%%
       unique_id: "dimmer_3_127"
+      state_topic: "RVC/DC_DIMMER_STATUS_3/127"
+      state_template: >-
+        {% if value_json['operating status (brightness)']|int > 0 %}
+          on
+        {% else %}
+          off
+        {% endif %}
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/127/set"
+      command_on_template: '{"instance": 127, "desired level": 100, "command": 0}'
+      command_off_template: '{"instance": 127, "desired level": 0, "command": 3}'
+      schema: "template"
+      optimistic: %%OPTIMISTIC_MODE%%
 
     - name: "Master Switch"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/128"
-      state_value_template: "{{ value_json['operating status (brightness)'] }}"
-      payload_on: "100"
-      payload_off: "0"
-      command_topic: "RVCSET/DC_DIMMER_STATUS_3/128-DONOTUSE"
-      optimistic: %%OPTIMISTIC_MODE%%
       unique_id: "dimmer_3_128"
+      state_topic: "RVC/DC_DIMMER_STATUS_3/128"
+      state_template: >-
+        {% if value_json['operating status (brightness)']|int > 0 %}
+          on
+        {% else %}
+          off
+        {% endif %}
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/128-DONOTUSE/set"
+      command_on_template: '{"instance": 128, "desired level": 100, "command": 0}'
+      command_off_template: '{"instance": 128, "desired level": 0, "command": 3}'
+      schema: "template"
+      optimistic: %%OPTIMISTIC_MODE%%
 
   switch:
     - name: "AC 1"
@@ -884,7 +1081,38 @@ mqtt:
       state_on: "active"
       state_off: "inactive"
       unique_id: "auto_gen8"
+
     - name: "Floor Heat 1"
+      unique_id: "floor_heat_1"
+      state_topic: "RVC/FLOOR_HEAT_STATUS/1"
+      value_template: "{{ value_json['operating status definition'] }}"
+      command_topic: "RVC/FLOOR_HEAT_COMMAND/1/set"
+      payload_on: '{"instance": 1, "Desired operating mode": 1, "Set point": 9520, "Dead band": 255}'
+      payload_off: '{"instance": 1, "Desired operating mode": 0, "Set point": 0, "Dead band": 255}'
+      state_on: "on"
+      state_off: "off"
+
+    - name: "Floor Heat 2"
+      unique_id: "floor_heat_2"
+      state_topic: "RVC/FLOOR_HEAT_STATUS/2"
+      value_template: "{{ value_json['operating status definition'] }}"
+      command_topic: "RVC/FLOOR_HEAT_COMMAND/2/set"
+      payload_on: '{"instance": 2, "Desired operating mode": 1, "Set point": 9520, "Dead band": 255}'
+      payload_off: '{"instance": 2, "Desired operating mode": 0, "Set point": 0, "Dead band": 255}'
+      state_on: "on"
+      state_off: "off"
+
+    - name: "Floor Heat 3"
+      unique_id: "floor_heat_3"
+      state_topic: "RVC/FLOOR_HEAT_STATUS/3"
+      value_template: "{{ value_json['operating status definition'] }}"
+      command_topic: "RVC/FLOOR_HEAT_COMMAND/3/set"
+      payload_on: '{"instance": 3, "Desired operating mode": 1, "Set point": 32805, "Dead band": 255}'
+      payload_off: '{"instance": 3, "Desired operating mode": 0, "Set point": 0, "Dead band": 255}'
+      state_on: "on"
+      state_off: "off"
+
+    - name: "Floor Heat 1 - old"
       state_topic: "RVC/FLOOR_HEAT_STATUS/1"
       value_template: "{{ value_json['operating status definition'] }}"
       payload_on: "01D43025FFFFFFFF"
@@ -892,8 +1120,9 @@ mqtt:
       command_topic: "RVCSET/MESSAGE/1FEFB"
       state_on: "on"
       state_off: "off"
-      unique_id: "floor_heat_1"
-    - name: "Floor Heat 2"
+      unique_id: "floor_heat_1_old"
+
+    - name: "Floor Heat 2 - old"
       state_topic: "RVC/FLOOR_HEAT_STATUS/2"
       value_template: "{{ value_json['operating status definition'] }}"
       payload_on: "02D43025FFFFFFFF"
@@ -901,8 +1130,8 @@ mqtt:
       command_topic: "RVCSET/MESSAGE/1FEFB"
       state_on: "on"
       state_off: "off"
-      unique_id: "floor_heat_2"
-    - name: "Floor Heat 3"
+      unique_id: "floor_heat_2_old"
+    - name: "Floor Heat 3 - old"
       state_topic: "RVC/FLOOR_HEAT_STATUS/3"
       value_template: "{{ value_json['operating status definition'] }}"
       payload_on: "03D48025FFFFFFFF"
@@ -910,7 +1139,8 @@ mqtt:
       command_topic: "RVCSET/MESSAGE/1FEFB"
       state_on: "on"
       state_off: "off"
-      unique_id: "floor_heat_3"
+      unique_id: "floor_heat_3_old"
+
     - name: "Mid Bath Fan"
       state_topic: "RVC/DC_DIMMER_STATUS_3/%%VENT_FAN1%%"
       value_template: "{{ value_json['operating status (brightness)'] }}"
