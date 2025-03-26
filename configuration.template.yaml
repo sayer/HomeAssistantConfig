@@ -25,23 +25,6 @@ homeassistant:
     zone.foretravel:
       radius: 20
 
-template:
-  - fan:
-      - name: "Mid Bath Fan" # The user-facing name
-        unique_id: "dimmer_3_55"
-
-        # --- State & On/Off Actions linked to the Switch ---
-        value_template: "{{ states('switch.dimmer_3_55_switch') }}" # Mirrors the switch
-        turn_on:
-          service: switch.turn_on
-          target:
-            entity_id: switch.dimmer_3_55_switch # Calls the switch's service
-        turn_off:
-          service: switch.turn_off
-          target:
-            entity_id: switch.dimmer_3_55_switch # Calls the switch's service
-        icon: mdi:fan
-
 influxdb:
   host: a0d7b954-influxdb
   port: 8086
@@ -144,17 +127,6 @@ sensor:
         friendly_name: "Outback 1 VAC_out_L2"
         value_template: "{{ state_attr('sensor.Outback_1', 'VAC_out_L2') }}"
 
-  - platform: template
-    sensors:
-      docking_lights_code:
-        friendly_name: "Docking Lights Code"
-        value_template: >-
-          {% if states('input_number.model_year') | int >= 2024 %}
-            43
-          {% else %}
-            121
-          {% endif %}
-
   - platform: rest
     name: "Outback 2"
     resource: "http://192.168.100.228/Dev_status.cgi?&Port=0"
@@ -206,21 +178,6 @@ sensor:
     start: "{{ now().replace(hour=0, minute=0, second=0, microsecond=0) }}"
     end: "{{ now() }}"
 
-  # Hvac Activiy
-  - platform: template
-    sensors:
-      generator_activity:
-        friendly_name: "Generator Activity"
-        value_template: '{{ state_attr("generator.", "attribute_xxx") }}'
-
-  - platform: history_stats
-    type: time
-    name: Entry Light Duration
-    entity_id: light.entry_light
-    state: "on"
-    start: "{{ now().replace(hour=0, minute=0, second=0, microsecond=0) }}"
-    end: "{{ now() }}"
-
   - platform: history_stats
     type: time
     name: Generator Oil Duration
@@ -228,70 +185,6 @@ sensor:
     state: "running"
     start: '{{ states("input_datetime.reset_generator_on_time") | as_timestamp }}'
     end: "{{ now() }}"
-
-  - platform: history_stats
-    type: time
-    name: Engine Day Run Time
-    entity_id: input_boolean.engineon
-    state: "on"
-    start: "{{ now().replace(hour=0, minute=0, second=0, microsecond=0) }}"
-    end: "{{ now() }}"
-
-  - platform: history_stats
-    type: time
-    name: Day Drive time
-    entity_id: input_boolean.busparked
-    state: "off"
-    start: "{{ now().replace(hour=0, minute=0, second=0, microsecond=0) }}"
-    end: "{{ now() }}"
-
-  - platform: history_stats
-    type: time
-    name: Trip Parked time
-    entity_id: input_boolean.busparked
-    state: "on"
-    start: '{{ states("input_datetime.reset_trip_on_time") | as_timestamp }}'
-    end: "{{ now() }}"
-
-  - platform: history_stats
-    type: time
-    name: Trip Drive time
-    entity_id: input_boolean.busparked
-    state: "off"
-    start: '{{ states("input_datetime.reset_trip_on_time") | as_timestamp }}'
-    end: "{{ now() }}"
-
-  - platform: history_stats
-    type: time
-    name: Engine Trip Run Time
-    entity_id: input_boolean.engineon
-    state: "on"
-    start: '{{ states("input_datetime.reset_engine_on_time") | as_timestamp }}'
-    end: "{{ now() }}"
-
-  - platform: template
-
-    sensors:
-      latitude:
-        friendly_name: "Latitude"
-        unit_of_measurement: "Degrees"
-        value_template: "{{ state_attr('device_tracker.ipad_mini_2', 'latitude') }}"
-        unique_id: "current_latitude"
-      longitude:
-        friendly_name: "longitude"
-        unit_of_measurement: "Degrees"
-        value_template: "{{ state_attr('device_tracker.ipad_mini_2', 'longitude') }}"
-        unique_id: "current_longitude"
-      vehicle_gps_speed:
-        friendly_name: "speed"
-        unit_of_measurement: "mph"
-        value_template: "{{ state_attr('sensor.gps', 'speed') }}"
-        unique_id: "current_gps_speed"
-      vehicle_gps_elevation:
-        friendly_name: "elevation"
-        unit_of_measurement: "meters"
-        value_template: "{{ state_attr('device_tracker.ipad_mini_2', 'elevation') }}"
-        unique_id: "current_gps_elevation"
 
   - platform: template
     sensors:
@@ -324,10 +217,7 @@ notify:
     sender: "sayer@ayersnet.com"
     recipient: "sayer@ayersnet.com"
 
-# Full example configuration.yaml entry
 mqtt:
-  #  light: !include lights/lights_common.yaml
-
   climate:
     - name: Living Room
       temperature_unit: "F"
@@ -1299,7 +1189,7 @@ mqtt:
         {% endif %}
       command_topic: "RVC/ROOF_FAN_COMMAND_1/1/set"
       payload_on: '{"instance": 1, "Direction of movement": "extend"}'
-      payload_off: '{"instance": 1, "Direction of movement": "stop"}'
+      payload_off: '{"instance": 1, "Direction of movement": "retract"}'
       optimistic: %%OPTIMISTIC_MODE%%
       icon: "mdi:fan"
 
@@ -1314,7 +1204,7 @@ mqtt:
         {% endif %}
       command_topic: "RVC/ROOF_FAN_COMMAND_1/2/set"
       payload_on: '{"instance": 2, "Direction of movement": "extend"}'
-      payload_off: '{"instance": 2, "Direction of movement": "stop"}'
+      payload_off: '{"instance": 2, "Direction of movement": "retract"}'
       optimistic: %%OPTIMISTIC_MODE%%
       icon: "mdi:fan"
 
@@ -2932,3 +2822,43 @@ light:
       - light.awning_lights
       - light.exterior_accents
       - light.porch_handle
+
+fan:
+  - platform: template
+    fans:
+      # Fan definition using the key 'mid_bath_fan'
+      mid_bath_fan:
+        friendly_name: "Mid Bath Fan"
+        unique_id: "mid_bath_fan_55_template_wrapper_old_syntax" # Use a unique ID
+
+        # State mirrors the backend switch
+        value_template: "{{ states('switch.mid_bath_fan_switch') }}" # Ensure this switch ID is correct
+
+        # Actions call the backend switch's services
+        turn_on:
+          service: switch.turn_on
+          target:
+            entity_id: switch.mid_bath_fan_switch
+        turn_off:
+          service: switch.turn_off
+          target:
+            entity_id:
+              switch.mid_bath_fan_switch
+
+              # Fan definition using the key 'rear_bath_fan'
+      rear_bath_fan:
+        friendly_name: "Mid Bath Fan"
+        unique_id: "mid_bath_fan_56_template_wrapper_old_syntax" # Use a unique ID
+
+        # State mirrors the backend switch
+        value_template: "{{ states('switch.rear_bath_fan_switch') }}" # Ensure this switch ID is correct
+
+        # Actions call the backend switch's services
+        turn_on:
+          service: switch.turn_on
+          target:
+            entity_id: switch.rear_bath_fan_switch
+        turn_off:
+          service: switch.turn_off
+          target:
+            entity_id: switch.rear_bath_fan_switch
