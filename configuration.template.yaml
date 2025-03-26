@@ -25,6 +25,23 @@ homeassistant:
     zone.foretravel:
       radius: 20
 
+template:
+  - fan:
+      - name: "Mid Bath Fan" # The user-facing name
+        unique_id: "dimmer_3_55"
+
+        # --- State & On/Off Actions linked to the Switch ---
+        value_template: "{{ states('switch.dimmer_3_55_switch') }}" # Mirrors the switch
+        turn_on:
+          service: switch.turn_on
+          target:
+            entity_id: switch.dimmer_3_55_switch # Calls the switch's service
+        turn_off:
+          service: switch.turn_off
+          target:
+            entity_id: switch.dimmer_3_55_switch # Calls the switch's service
+        icon: mdi:fan
+
 influxdb:
   host: a0d7b954-influxdb
   port: 8086
@@ -378,17 +395,17 @@ mqtt:
       #entity_category: "diagnostic" # Hidden from UI
 
     - name: "Panel Lights"
-      unique_id: "panel_lights"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/1"
+      state_topic: "RVC/DC_DIMMER_STATUS_3/100"
       state_template: >-
-        {% if value_json['brightness']|int > 0 %}
+        {% if value_json['operating status (brightness)']|int > 0 %}
           on
         {% else %}
           off
         {% endif %}
-      command_topic: "RVC/GENERIC_INDICATOR_COMMAND/255/set"
-      command_on_template: '{"instance": 255, "desired level": 100, "command": 0}'
-      command_off_template: '{"instance": 255, "desired level": 0, "command": 3}'
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/100/set"
+      command_on_template: '{"instance": 100, "desired level": 100, "command": 0}'
+      command_off_template: '{"instance": 100, "desired level": 0, "command": 3}'
+      unique_id: "panel_lights"
       schema: "template"
       optimistic: %%OPTIMISTIC_MODE%%
 
@@ -1141,7 +1158,46 @@ mqtt:
       state_off: "off"
       unique_id: "floor_heat_3_old"
 
-    - name: "Mid Bath Fan"
+    - name: "Mid Bath Fan Switch"
+      unique_id: "dimmer_3_55_switch"
+      state_topic: "RVC/DC_DIMMER_STATUS_3/%%VENT_FAN1%%"
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/%%VENT_FAN1%%/set"
+      value_template: >-
+        {# Ensure brightness key exists and is a number before converting to string #}
+        {% if value_json['operating status (brightness)'] is number %}
+          {{ value_json['operating status (brightness)'] | string }}
+        {% else %}
+          "0" {# Default to string "0" if missing/invalid #}
+        {% endif %}
+      # state_on/state_off compare the *result* of the value_template
+      state_on: "100" # Fan is ON if the template returns the string "100"
+      state_off: "0" # Fan is OFF if the template returns the string "0"
+      payload_on: '{"instance": %%VENT_FAN1%%, "desired level": 100, "command": 0}'
+      payload_off: '{"instance": %%VENT_FAN1%%, "desired level": 0, "command": 3}'
+      json_attributes_topic: "RVC/DC_DIMMER_STATUS_3/%%VENT_FAN1%%"
+      optimistic: %%OPTIMISTIC_MODE%%
+      icon: mdi:fan
+
+    - name: "Rear Bath Fan Switch"
+      state_topic: "RVC/DC_DIMMER_STATUS_3/%%VENT_FAN2%%"
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/%%VENT_FAN2%%/set"
+      value_template: >-
+        {# Ensure brightness key exists and is a number before converting to string #}
+        {% if value_json['operating status (brightness)'] is number %}
+          {{ value_json['operating status (brightness)'] | string }}
+        {% else %}
+          "0" {# Default to string "0" if missing/invalid #}
+        {% endif %}
+      # state_on/state_off compare the *result* of the value_template
+      state_on: "100" # Fan is ON if the template returns the string "100"
+      state_off: "0" # Fan is OFF if the template returns the string "0"
+      payload_on: '{"instance": %%VENT_FAN2%%, "desired level": 100, "command": 0}'
+      payload_off: '{"instance": %%VENT_FAN2%%, "desired level": 0, "command": 3}'
+      json_attributes_topic: "RVC/DC_DIMMER_STATUS_3/%%VENT_FAN1%%"
+      unique_id: "dimmer_3_56_switch"
+      icon: mdi:fan
+
+    - name: "Mid Bath Fan - old"
       state_topic: "RVC/DC_DIMMER_STATUS_3/%%VENT_FAN1%%"
       value_template: "{{ value_json['operating status (brightness)'] }}"
       command_topic: "RVCSET/DC_DIMMER_STATUS_3%%VENT_FAN1%%/"
@@ -1149,17 +1205,7 @@ mqtt:
       payload_off: "0"
       state_on: "100"
       state_off: "0"
-      unique_id: "dimmer_3_55"
-
-    - name: "Rear Bath Fan"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/%%VENT_FAN2%%"
-      value_template: "{{ value_json['operating status (brightness)'] }}"
-      payload_on: "100"
-      payload_off: "0"
-      command_topic: "RVCSET/DC_DIMMER_STATUS_3/%%VENT_FAN2%%"
-      state_on: "100"
-      state_off: "0"
-      unique_id: "dimmer_3_56"
+      unique_id: "dimmer_3_55 - old"
 
     - name: "Water Pump"
       unique_id: "waterpump"
@@ -1240,6 +1286,37 @@ mqtt:
       state_on: "open"
       state_off: "closed"
       unique_id: "waterautofill_old"
+
+  fan:
+    - name: "Roof Fan"
+      unique_id: "roof_fan_1"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/1"
+      state_value_template: >-
+        {% if value_json['System Status'] == 'On' %}
+          on
+        {% else %}
+          off
+        {% endif %}
+      command_topic: "RVC/ROOF_FAN_COMMAND_1/1/set"
+      payload_on: '{"instance": 1, "Direction of movement": "extend"}'
+      payload_off: '{"instance": 1, "Direction of movement": "stop"}'
+      optimistic: %%OPTIMISTIC_MODE%%
+      icon: "mdi:fan"
+
+    - name: "Roof Fan"
+      unique_id: "roof_fan_2"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/2"
+      state_value_template: >-
+        {% if value_json['System Status'] == 'On' %}
+          on
+        {% else %}
+          off
+        {% endif %}
+      command_topic: "RVC/ROOF_FAN_COMMAND_1/2/set"
+      payload_on: '{"instance": 2, "Direction of movement": "extend"}'
+      payload_off: '{"instance": 2, "Direction of movement": "stop"}'
+      optimistic: %%OPTIMISTIC_MODE%%
+      icon: "mdi:fan"
 
   cover:
     - name: "Windshield Day"
