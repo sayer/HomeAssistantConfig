@@ -1132,8 +1132,8 @@ mqtt:
       state_topic: "RVC/WASTEDUMP_STATUS"
       value_template: "{{ value_json['gray valve definition'] }}"
       command_topic: "RVC/WASTEDUMP_COMMAND/255/set"
-      payload_on: '{"instance": 255, "gray valve": 1}'
-      payload_off: '{"instance": 255, "gray valve": 0}'
+      payload_on: '{"Command - Gray tank": 1}'
+      payload_off: '{"Command - Gray tank": 0}'
       state_on: "open"
       state_off: "closed"
 
