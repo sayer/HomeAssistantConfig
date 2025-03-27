@@ -284,7 +284,8 @@ mqtt:
       optimistic: %%OPTIMISTIC_MODE%%
       #entity_category: "diagnostic" # Hidden from UI
 
-    - name: "Panel Lights"
+    - name: "Panel Light"
+      unique_id: "panel_lights"
       state_topic: "RVC/DC_DIMMER_STATUS_3/100"
       state_template: >-
         {% if value_json['operating status (brightness)']|int > 0 %}
@@ -295,7 +296,6 @@ mqtt:
       command_topic: "RVC/DC_DIMMER_COMMAND_2/100/set"
       command_on_template: '{"instance": 100, "desired level": 100, "command": 0}'
       command_off_template: '{"instance": 100, "desired level": 0, "command": 3}'
-      unique_id: "panel_lights"
       schema: "template"
       optimistic: %%OPTIMISTIC_MODE%%
 
@@ -994,8 +994,8 @@ mqtt:
       state_topic: "RVC/FLOOR_HEAT_STATUS/1"
       value_template: "{{ value_json['operating status definition'] }}"
       command_topic: "RVC/FLOOR_HEAT_COMMAND/1/set"
-      payload_on: '{"instance": 1, "Desired operating mode": 1, "Set point": 9520, "Dead band": 255}'
-      payload_off: '{"instance": 1, "Desired operating mode": 0, "Set point": 0, "Dead band": 255}'
+      payload_on: '{"instance": 1, "Desired operating mode": 0, "Set point": 24.5, "Dead band": 5}'
+      payload_off: '{"instance": 1, "Desired operating mode": 0, "Set point": 0}'
       state_on: "on"
       state_off: "off"
 
@@ -1004,8 +1004,8 @@ mqtt:
       state_topic: "RVC/FLOOR_HEAT_STATUS/2"
       value_template: "{{ value_json['operating status definition'] }}"
       command_topic: "RVC/FLOOR_HEAT_COMMAND/2/set"
-      payload_on: '{"instance": 2, "Desired operating mode": 1, "Set point": 9520, "Dead band": 255}'
-      payload_off: '{"instance": 2, "Desired operating mode": 0, "Set point": 0, "Dead band": 255}'
+      payload_on: '{"instance": 2, "Desired operating mode": 0, "Set point": 24.5, "Dead band": 5}'
+      payload_off: '{"instance": 2, "Desired operating mode": 0, "Set point": 0}'
       state_on: "on"
       state_off: "off"
 
@@ -1014,8 +1014,8 @@ mqtt:
       state_topic: "RVC/FLOOR_HEAT_STATUS/3"
       value_template: "{{ value_json['operating status definition'] }}"
       command_topic: "RVC/FLOOR_HEAT_COMMAND/3/set"
-      payload_on: '{"instance": 3, "Desired operating mode": 1, "Set point": 32805, "Dead band": 255}'
-      payload_off: '{"instance": 3, "Desired operating mode": 0, "Set point": 0, "Dead band": 255}'
+      payload_on: '{"instance": 3, "Desired operating mode": 0, "Set point": 24.5, "Dead band": 5}'
+      payload_off: '{"instance": 3, "Desired operating mode": 0, "Set point": 0}'
       state_on: "on"
       state_off: "off"
 
@@ -1152,8 +1152,8 @@ mqtt:
       state_topic: "RVC/AUTOFILL_STATUS"
       value_template: "{{ value_json['valve status definition'] }}"
       command_topic: "RVC/AUTOFILL_COMMAND/set"
-      payload_on: '{"operating status": 1}'
-      payload_off: '{"operating status": 0}'
+      payload_on: '{"command": 1}'
+      payload_off: '{"command": 0}'
       state_on: "open"
       state_off: "closed"
 
