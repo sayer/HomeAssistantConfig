@@ -317,10 +317,37 @@ if [ $? -ne 0 ]; then
     fi
 fi
 
-# Trap to clean up temporary file on exit
-trap 'rm -f "$TEMP_FILE"' EXIT
+# Another temporary file for the final config
+TEMP_FILE2=$(mktemp)
+if [ $? -ne 0 ]; then
+    # Fallback to local directory if mktemp fails
+    TEMP_FILE2="${CONFIG_DIR}/.temp_config2.$$"
+    touch "$TEMP_FILE2"
+    if [ $? -ne 0 ]; then
+        echo "Error: Unable to create second temporary file"
+        rm -f "$TEMP_FILE"
+        exit 1
+    fi
+fi
 
-# Replace tokens using compatible sed commands
+# Trap to clean up temporary files on exit
+trap 'rm -f "$TEMP_FILE" "$TEMP_FILE2"' EXIT
+
+# Create an empty file for the ALL_SHADES content
+SHADES_FILE=$(mktemp)
+if [ $? -ne 0 ]; then
+    SHADES_FILE="${CONFIG_DIR}/.shades_temp.$$"
+    touch "$SHADES_FILE"
+    if [ $? -ne 0 ]; then
+        echo "Error: Unable to create shades temporary file"
+        rm -f "$TEMP_FILE" "$TEMP_FILE2"
+        exit 1
+    fi
+fi
+echo "$SHADE_YAML" > "$SHADES_FILE"
+
+# Fix the sed unmatched '|' error by using a different approach
+# Replace tokens using compatible sed commands with / as delimiter
 cat "$CONFIG_FILE" | sed "s/%%DOCKING_LIGHTS_CODE%%/$DOCKING_LIGHTS_CODE/g" > "$TEMP_FILE"
 mv "$TEMP_FILE" "$CONFIG_FILE"
 
@@ -345,19 +372,30 @@ for token in $ALL_SHADE_TOKENS; do
     token_var="${token}_CODE"
     token_value=$(eval echo \$$token_var)
     token_name="%%${token_var}%%"
-    cat "$CONFIG_FILE" | sed "s|$token_name|$token_value|g" > "$TEMP_FILE"
+    # Use a safer sed approach that should work regardless of content
+    sed "s/%%${token_var}%%/${token_value}/g" "$CONFIG_FILE" > "$TEMP_FILE"
     mv "$TEMP_FILE" "$CONFIG_FILE"
 done
 
 # Replace %%ALL_SHADES%% with the generated shade YAML
 echo "Inserting shade YAML entries..."
 if grep -q "%%ALL_SHADES%%" "$CONFIG_FILE"; then
-    cat "$CONFIG_FILE" | sed "s|%%ALL_SHADES%%|$SHADE_YAML|" > "$TEMP_FILE"
+    # Use awk for safer multi-line replacement
+    awk -v shadefile="$SHADES_FILE" '
+    /%%ALL_SHADES%%/ {
+        system("cat " shadefile)
+        next
+    }
+    { print }
+    ' "$CONFIG_FILE" > "$TEMP_FILE"
     mv "$TEMP_FILE" "$CONFIG_FILE"
     echo "Added window shade entries to configuration"
 else
     echo "Warning: %%ALL_SHADES%% token not found in $CONFIG_FILE"
 fi
+
+# Clean up
+rm -f "$SHADES_FILE"
 
 echo "==============================================="
 echo "Configuration updated for model year $MODEL_YEAR"
