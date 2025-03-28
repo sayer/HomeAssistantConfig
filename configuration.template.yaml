@@ -1213,8 +1213,8 @@ mqtt:
 
       unique_id: "windshield_day"
 
-      state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/1"
-      position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/1"
+      state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/%%WINDSHIELD_DAY_CODE%%"
+      position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/%%WINDSHIELD_DAY_CODE%%"
       value_template: >-
         {% if not value_json is defined %}closed
         {% else %}
@@ -1230,10 +1230,10 @@ mqtt:
           {% else %}closed{% endif %}
         {% endif %}
         {% endif %}
-      command_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/1/set"
-      payload_open: '{"instance": 1, "command": "open"}'
-      payload_close: '{"instance": 1, "command": "close"}'
-      payload_stop: '{"instance": 1, "command": "stop"}'
+      command_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/%%WINDSHIELD_DAY_CODE%%/set"
+      payload_open: '{"instance": %%WINDSHIELD_DAY_CODE%%, "command": "open"}'
+      payload_close: '{"instance": %%WINDSHIELD_DAY_CODE%%, "command": "close"}'
+      payload_stop: '{"instance": %%WINDSHIELD_DAY_CODE%%, "command": "stop"}'
       payload_available: "online"
       payload_not_available: "offline"
       state_opening: "opening"
@@ -1251,8 +1251,8 @@ mqtt:
         {% endif %}
       position_open: 100
       position_closed: 0
-      set_position_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/1/set"
-      set_position_template: '{"instance": 1, "position": {{ position }}}'
+      set_position_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/%%WINDSHIELD_DAY_CODE%%/set"
+      set_position_template: '{"instance": %%WINDSHIELD_DAY_CODE%%, "position": {{ position }}}'
       availability_template: >-
         {% if value_json is defined and value_json['motor status definition'] is defined %}
         online
@@ -1313,8 +1313,8 @@ mqtt:
 
     - name: "Windshield Night"
       unique_id: "windshield_night"
-      state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/5"
-      position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/5"
+      state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/%%WINDSHIELD_NIGHT_CODE%%"
+      position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/%%WINDSHIELD_NIGHT_CODE%%"
       value_template: >-
         {% if not value_json is defined %}closed
         {% else %}
@@ -1330,10 +1330,10 @@ mqtt:
           {% else %}closed{% endif %}
         {% endif %}
         {% endif %}
-      command_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/5/set"
-      payload_open: '{"instance": 5, "command": "open"}'
-      payload_close: '{"instance": 5, "command": "close"}'
-      payload_stop: '{"instance": 5, "command": "stop"}'
+      command_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/%%WINDSHIELD_NIGHT_CODE%%/set"
+      payload_open: '{"instance": %%WINDSHIELD_NIGHT_CODE%%, "command": "open"}'
+      payload_close: '{"instance": %%WINDSHIELD_NIGHT_CODE%%, "command": "close"}'
+      payload_stop: '{"instance": %%WINDSHIELD_NIGHT_CODE%%, "command": "stop"}'
       payload_available: "online"
       payload_not_available: "offline"
       state_opening: "opening"
@@ -1351,8 +1351,8 @@ mqtt:
         {% endif %}
       position_open: 100
       position_closed: 0
-      set_position_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/5/set"
-      set_position_template: '{"instance": 5, "position": {{ position }}}'
+      set_position_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/%%WINDSHIELD_NIGHT_CODE%%/set"
+      set_position_template: '{"instance": %%WINDSHIELD_NIGHT_CODE%%, "position": {{ position }}}'
       availability_template: >-
         {% if value_json is defined and value_json['motor status definition'] is defined %}
         online
@@ -1413,8 +1413,8 @@ mqtt:
 
     - name: "Dinette Day"
       unique_id: "dinette_day"
-      state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/10"
-      position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/10"
+      state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/%%DINETTE_DAY_CODE%%"
+      position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/%%DINETTE_DAY_CODE%%"
       value_template: >-
         {% if not value_json is defined %}closed
         {% else %}
@@ -1430,10 +1430,10 @@ mqtt:
           {% else %}closed{% endif %}
         {% endif %}
         {% endif %}
-      command_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/10/set"
-      payload_open: '{"instance": 10, "command": "open"}'
-      payload_close: '{"instance": 10, "command": "close"}'
-      payload_stop: '{"instance": 10, "command": "stop"}'
+      command_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/%%DINETTE_DAY_CODE%%/set"
+      payload_open: '{"instance": %%DINETTE_DAY_CODE%%, "command": "open"}'
+      payload_close: '{"instance": %%DINETTE_DAY_CODE%%, "command": "close"}'
+      payload_stop: '{"instance": %%DINETTE_DAY_CODE%%, "command": "stop"}'
       payload_available: "online"
       payload_not_available: "offline"
       state_opening: "opening"
@@ -1451,8 +1451,8 @@ mqtt:
         {% endif %}
       position_open: 100
       position_closed: 0
-      set_position_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/10/set"
-      set_position_template: '{"instance": 10, "position": {{ position }}}'
+      set_position_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/%%DINETTE_DAY_CODE%%/set"
+      set_position_template: '{"instance": %%DINETTE_DAY_CODE%%, "position": {{ position }}}'
       availability_template: >-
         {% if value_json is defined and value_json['motor status definition'] is defined %}
         online
@@ -1513,8 +1513,8 @@ mqtt:
 
     - name: "Dinette Night"
       unique_id: "dinette_night"
-      state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/14"
-      position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/14"
+      state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/%%DINETTE_NIGHT_CODE%%"
+      position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/%%DINETTE_NIGHT_CODE%%"
       value_template: >-
         {% if not value_json is defined %}closed
         {% else %}
@@ -1530,10 +1530,10 @@ mqtt:
           {% else %}closed{% endif %}
         {% endif %}
         {% endif %}
-      command_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/14/set"
-      payload_open: '{"instance": 14, "command": "open"}'
-      payload_close: '{"instance": 14, "command": "close"}'
-      payload_stop: '{"instance": 14, "command": "stop"}'
+      command_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/%%DINETTE_NIGHT_CODE%%/set"
+      payload_open: '{"instance": %%DINETTE_NIGHT_CODE%%, "command": "open"}'
+      payload_close: '{"instance": %%DINETTE_NIGHT_CODE%%, "command": "close"}'
+      payload_stop: '{"instance": %%DINETTE_NIGHT_CODE%%, "command": "stop"}'
       payload_available: "online"
       payload_not_available: "offline"
       state_opening: "opening"
@@ -1551,8 +1551,8 @@ mqtt:
         {% endif %}
       position_open: 100
       position_closed: 0
-      set_position_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/14/set"
-      set_position_template: '{"instance": 14, "position": {{ position }}}'
+      set_position_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/%%DINETTE_NIGHT_CODE%%/set"
+      set_position_template: '{"instance": %%DINETTE_NIGHT_CODE%%, "position": {{ position }}}'
       availability_template: >-
         {% if value_json is defined and value_json['motor status definition'] is defined %}
         online
@@ -1613,8 +1613,8 @@ mqtt:
 
     - name: "Driver Day"
       unique_id: "driver_day"
-      state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/2"
-      position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/2"
+      state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/%%DRIVER_DAY_CODE%%"
+      position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/%%DRIVER_DAY_CODE%%"
       value_template: >-
         {% if not value_json is defined %}closed
         {% else %}
@@ -1630,10 +1630,10 @@ mqtt:
           {% else %}closed{% endif %}
         {% endif %}
         {% endif %}
-      command_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/2/set"
-      payload_open: '{"instance": 2, "command": "open"}'
-      payload_close: '{"instance": 2, "command": "close"}'
-      payload_stop: '{"instance": 2, "command": "stop"}'
+      command_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/%%DRIVER_DAY_CODE%%/set"
+      payload_open: '{"instance": %%DRIVER_DAY_CODE%%, "command": "open"}'
+      payload_close: '{"instance": %%DRIVER_DAY_CODE%%, "command": "close"}'
+      payload_stop: '{"instance": %%DRIVER_DAY_CODE%%, "command": "stop"}'
       payload_available: "online"
       payload_not_available: "offline"
       state_opening: "opening"
@@ -1651,8 +1651,8 @@ mqtt:
         {% endif %}
       position_open: 100
       position_closed: 0
-      set_position_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/2/set"
-      set_position_template: '{"instance": 2, "position": {{ position }}}'
+      set_position_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/%%DRIVER_DAY_CODE%%/set"
+      set_position_template: '{"instance": %%DRIVER_DAY_CODE%%, "position": {{ position }}}'
       availability_template: >-
         {% if value_json is defined and value_json['motor status definition'] is defined %}
         online
@@ -1713,8 +1713,8 @@ mqtt:
 
     - name: "Passenger Day"
       unique_id: "passenger_day"
-      state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/3"
-      position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/3"
+      state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/%%PASSENGER_DAY_CODE%%"
+      position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/%%PASSENGER_DAY_CODE%%"
       value_template: >-
         {% if not value_json is defined %}closed
         {% else %}
@@ -1730,10 +1730,10 @@ mqtt:
           {% else %}closed{% endif %}
         {% endif %}
         {% endif %}
-      command_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/3/set"
-      payload_open: '{"instance": 3, "command": "open"}'
-      payload_close: '{"instance": 3, "command": "close"}'
-      payload_stop: '{"instance": 3, "command": "stop"}'
+      command_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/%%PASSENGER_DAY_CODE%%/set"
+      payload_open: '{"instance": %%PASSENGER_DAY_CODE%%, "command": "open"}'
+      payload_close: '{"instance": %%PASSENGER_DAY_CODE%%, "command": "close"}'
+      payload_stop: '{"instance": %%PASSENGER_DAY_CODE%%, "command": "stop"}'
       payload_available: "online"
       payload_not_available: "offline"
       state_opening: "opening"
@@ -1751,8 +1751,8 @@ mqtt:
         {% endif %}
       position_open: 100
       position_closed: 0
-      set_position_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/3/set"
-      set_position_template: '{"instance": 3, "position": {{ position }}}'
+      set_position_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/%%PASSENGER_DAY_CODE%%/set"
+      set_position_template: '{"instance": %%PASSENGER_DAY_CODE%%, "position": {{ position }}}'
       availability_template: >-
         {% if value_json is defined and value_json['motor status definition'] is defined %}
         online
@@ -1813,8 +1813,8 @@ mqtt:
 
     - name: "Entry Door Day"
       unique_id: "entry_door_day"
-      state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/4"
-      position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/4"
+      state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/%%ENTRY_DOOR_DAY_CODE%%"
+      position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/%%ENTRY_DOOR_DAY_CODE%%"
       value_template: >-
         {% if not value_json is defined %}closed
         {% else %}
@@ -1830,10 +1830,10 @@ mqtt:
           {% else %}closed{% endif %}
         {% endif %}
         {% endif %}
-      command_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/4/set"
-      payload_open: '{"instance": 4, "command": "open"}'
-      payload_close: '{"instance": 4, "command": "close"}'
-      payload_stop: '{"instance": 4, "command": "stop"}'
+      command_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/%%ENTRY_DOOR_DAY_CODE%%/set"
+      payload_open: '{"instance": %%ENTRY_DOOR_DAY_CODE%%, "command": "open"}'
+      payload_close: '{"instance": %%ENTRY_DOOR_DAY_CODE%%, "command": "close"}'
+      payload_stop: '{"instance": %%ENTRY_DOOR_DAY_CODE%%, "command": "stop"}'
       payload_available: "online"
       payload_not_available: "offline"
       state_opening: "opening"
@@ -1851,8 +1851,8 @@ mqtt:
         {% endif %}
       position_open: 100
       position_closed: 0
-      set_position_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/4/set"
-      set_position_template: '{"instance": 4, "position": {{ position }}}'
+      set_position_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/%%ENTRY_DOOR_DAY_CODE%%/set"
+      set_position_template: '{"instance": %%ENTRY_DOOR_DAY_CODE%%, "position": {{ position }}}'
       availability_template: >-
         {% if value_json is defined and value_json['motor status definition'] is defined %}
         online
@@ -1913,8 +1913,8 @@ mqtt:
 
     - name: "Driver Night"
       unique_id: "driver_night"
-      state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/6"
-      position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/6"
+      state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/%%DRIVER_NIGHT_CODE%%"
+      position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/%%DRIVER_NIGHT_CODE%%"
       value_template: >-
         {% if not value_json is defined %}closed
         {% else %}
@@ -1930,10 +1930,10 @@ mqtt:
           {% else %}closed{% endif %}
         {% endif %}
         {% endif %}
-      command_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/6/set"
-      payload_open: '{"instance": 6, "command": "open"}'
-      payload_close: '{"instance": 6, "command": "close"}'
-      payload_stop: '{"instance": 6, "command": "stop"}'
+      command_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/%%DRIVER_NIGHT_CODE%%/set"
+      payload_open: '{"instance": %%DRIVER_NIGHT_CODE%%, "command": "open"}'
+      payload_close: '{"instance": %%DRIVER_NIGHT_CODE%%, "command": "close"}'
+      payload_stop: '{"instance": %%DRIVER_NIGHT_CODE%%, "command": "stop"}'
       payload_available: "online"
       payload_not_available: "offline"
       state_opening: "opening"
@@ -1951,8 +1951,8 @@ mqtt:
         {% endif %}
       position_open: 100
       position_closed: 0
-      set_position_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/6/set"
-      set_position_template: '{"instance": 6, "position": {{ position }}}'
+      set_position_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/%%DRIVER_NIGHT_CODE%%/set"
+      set_position_template: '{"instance": %%DRIVER_NIGHT_CODE%%, "position": {{ position }}}'
       availability_template: >-
         {% if value_json is defined and value_json['motor status definition'] is defined %}
         online
@@ -2013,8 +2013,8 @@ mqtt:
 
     - name: "Passenger Night"
       unique_id: "passenger_night"
-      state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/7"
-      position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/7"
+      state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/%%PASSENGER_NIGHT_CODE%%"
+      position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/%%PASSENGER_NIGHT_CODE%%"
       value_template: >-
         {% if not value_json is defined %}closed
         {% else %}
@@ -2030,10 +2030,10 @@ mqtt:
           {% else %}closed{% endif %}
         {% endif %}
         {% endif %}
-      command_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/7/set"
-      payload_open: '{"instance": 7, "command": "open"}'
-      payload_close: '{"instance": 7, "command": "close"}'
-      payload_stop: '{"instance": 7, "command": "stop"}'
+      command_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/%%PASSENGER_NIGHT_CODE%%/set"
+      payload_open: '{"instance": %%PASSENGER_NIGHT_CODE%%, "command": "open"}'
+      payload_close: '{"instance": %%PASSENGER_NIGHT_CODE%%, "command": "close"}'
+      payload_stop: '{"instance": %%PASSENGER_NIGHT_CODE%%, "command": "stop"}'
       payload_available: "online"
       payload_not_available: "offline"
       state_opening: "opening"
@@ -2051,8 +2051,8 @@ mqtt:
         {% endif %}
       position_open: 100
       position_closed: 0
-      set_position_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/7/set"
-      set_position_template: '{"instance": 7, "position": {{ position }}}'
+      set_position_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/%%PASSENGER_NIGHT_CODE%%/set"
+      set_position_template: '{"instance": %%PASSENGER_NIGHT_CODE%%, "position": {{ position }}}'
       availability_template: >-
         {% if value_json is defined and value_json['motor status definition'] is defined %}
         online
@@ -2113,8 +2113,8 @@ mqtt:
 
     - name: "Entry Door Night"
       unique_id: "entry_door_night"
-      state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/8"
-      position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/8"
+      state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/%%ENTRY_DOOR_NIGHT_CODE%%"
+      position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/%%ENTRY_DOOR_NIGHT_CODE%%"
       value_template: >-
         {% if not value_json is defined %}closed
         {% else %}
@@ -2130,10 +2130,10 @@ mqtt:
           {% else %}closed{% endif %}
         {% endif %}
         {% endif %}
-      command_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/8/set"
-      payload_open: '{"instance": 8, "command": "open"}'
-      payload_close: '{"instance": 8, "command": "close"}'
-      payload_stop: '{"instance": 8, "command": "stop"}'
+      command_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/%%ENTRY_DOOR_NIGHT_CODE%%/set"
+      payload_open: '{"instance": %%ENTRY_DOOR_NIGHT_CODE%%, "command": "open"}'
+      payload_close: '{"instance": %%ENTRY_DOOR_NIGHT_CODE%%, "command": "close"}'
+      payload_stop: '{"instance": %%ENTRY_DOOR_NIGHT_CODE%%, "command": "stop"}'
       payload_available: "online"
       payload_not_available: "offline"
       state_opening: "opening"
@@ -2151,8 +2151,8 @@ mqtt:
         {% endif %}
       position_open: 100
       position_closed: 0
-      set_position_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/8/set"
-      set_position_template: '{"instance": 8, "position": {{ position }}}'
+      set_position_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/%%ENTRY_DOOR_NIGHT_CODE%%/set"
+      set_position_template: '{"instance": %%ENTRY_DOOR_NIGHT_CODE%%, "position": {{ position }}}'
       availability_template: >-
         {% if value_json is defined and value_json['motor status definition'] is defined %}
         online
@@ -2213,8 +2213,8 @@ mqtt:
 
     - name: "Mid Bath Night"
       unique_id: "mid_bath_night"
-      state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/12"
-      position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/12"
+      state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/%%MID_BATH_NIGHT_CODE%%"
+      position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/%%MID_BATH_NIGHT_CODE%%"
       value_template: >-
         {% if not value_json is defined %}closed
         {% else %}
@@ -2230,10 +2230,10 @@ mqtt:
           {% else %}closed{% endif %}
         {% endif %}
         {% endif %}
-      command_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/12/set"
-      payload_open: '{"instance": 12, "command": "open"}'
-      payload_close: '{"instance": 12, "command": "close"}'
-      payload_stop: '{"instance": 12, "command": "stop"}'
+      command_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/%%MID_BATH_NIGHT_CODE%%/set"
+      payload_open: '{"instance": %%MID_BATH_NIGHT_CODE%%, "command": "open"}'
+      payload_close: '{"instance": %%MID_BATH_NIGHT_CODE%%, "command": "close"}'
+      payload_stop: '{"instance": %%MID_BATH_NIGHT_CODE%%, "command": "stop"}'
       payload_available: "online"
       payload_not_available: "offline"
       state_opening: "opening"
@@ -2251,8 +2251,8 @@ mqtt:
         {% endif %}
       position_open: 100
       position_closed: 0
-      set_position_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/12/set"
-      set_position_template: '{"instance": 12, "position": {{ position }}}'
+      set_position_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/%%MID_BATH_NIGHT_CODE%%/set"
+      set_position_template: '{"instance": %%MID_BATH_NIGHT_CODE%%, "position": {{ position }}}'
       availability_template: >-
         {% if value_json is defined and value_json['motor status definition'] is defined %}
         online
@@ -2313,8 +2313,8 @@ mqtt:
 
     - name: "Rear Bath Night"
       unique_id: "rear_bath_night"
-      state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/16"
-      position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/16"
+      state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/%%REAR_BATH_NIGHT_CODE%%"
+      position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/%%REAR_BATH_NIGHT_CODE%%"
       value_template: >-
         {% if not value_json is defined %}closed
         {% else %}
@@ -2330,10 +2330,10 @@ mqtt:
           {% else %}closed{% endif %}
         {% endif %}
         {% endif %}
-      command_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/16/set"
-      payload_open: '{"instance": 16, "command": "open"}'
-      payload_close: '{"instance": 16, "command": "close"}'
-      payload_stop: '{"instance": 16, "command": "stop"}'
+      command_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/%%REAR_BATH_NIGHT_CODE%%/set"
+      payload_open: '{"instance": %%REAR_BATH_NIGHT_CODE%%, "command": "open"}'
+      payload_close: '{"instance": %%REAR_BATH_NIGHT_CODE%%, "command": "close"}'
+      payload_stop: '{"instance": %%REAR_BATH_NIGHT_CODE%%, "command": "stop"}'
       payload_available: "online"
       payload_not_available: "offline"
       state_opening: "opening"
@@ -2351,8 +2351,8 @@ mqtt:
         {% endif %}
       position_open: 100
       position_closed: 0
-      set_position_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/16/set"
-      set_position_template: '{"instance": 16, "position": {{ position }}}'
+      set_position_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/%%REAR_BATH_NIGHT_CODE%%/set"
+      set_position_template: '{"instance": %%REAR_BATH_NIGHT_CODE%%, "position": {{ position }}}'
       availability_template: >-
         {% if value_json is defined and value_json['motor status definition'] is defined %}
         online
@@ -2413,8 +2413,8 @@ mqtt:
 
     - name: "Top Bunk Night"
       unique_id: "top_bunk_night"
-      state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/17"
-      position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/17"
+      state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/%%TOP_BUNK_NIGHT_CODE%%"
+      position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/%%TOP_BUNK_NIGHT_CODE%%"
       value_template: >-
         {% if not value_json is defined %}closed
         {% else %}
@@ -2430,10 +2430,10 @@ mqtt:
           {% else %}closed{% endif %}
         {% endif %}
         {% endif %}
-      command_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/17/set"
-      payload_open: '{"instance": 17, "command": "open"}'
-      payload_close: '{"instance": 17, "command": "close"}'
-      payload_stop: '{"instance": 17, "command": "stop"}'
+      command_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/%%TOP_BUNK_NIGHT_CODE%%/set"
+      payload_open: '{"instance": %%TOP_BUNK_NIGHT_CODE%%, "command": "open"}'
+      payload_close: '{"instance": %%TOP_BUNK_NIGHT_CODE%%, "command": "close"}'
+      payload_stop: '{"instance": %%TOP_BUNK_NIGHT_CODE%%, "command": "stop"}'
       payload_available: "online"
       payload_not_available: "offline"
       state_opening: "opening"
@@ -2451,8 +2451,8 @@ mqtt:
         {% endif %}
       position_open: 100
       position_closed: 0
-      set_position_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/17/set"
-      set_position_template: '{"instance": 17, "position": {{ position }}}'
+      set_position_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/%%TOP_BUNK_NIGHT_CODE%%/set"
+      set_position_template: '{"instance": %%TOP_BUNK_NIGHT_CODE%%, "position": {{ position }}}'
       availability_template: >-
         {% if value_json is defined and value_json['motor status definition'] is defined %}
         online
@@ -2513,8 +2513,8 @@ mqtt:
 
     - name: "D/S Living Room Day"
       unique_id: "ds_living_day"
-      state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/18"
-      position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/18"
+      state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/%%DS_LIVING_DAY_CODE%%"
+      position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/%%DS_LIVING_DAY_CODE%%"
       value_template: >-
         {% if not value_json is defined %}closed
         {% else %}
@@ -2530,10 +2530,10 @@ mqtt:
           {% else %}closed{% endif %}
         {% endif %}
         {% endif %}
-      command_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/18/set"
-      payload_open: '{"instance": 18, "command": "open"}'
-      payload_close: '{"instance": 18, "command": "close"}'
-      payload_stop: '{"instance": 18, "command": "stop"}'
+      command_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/%%DS_LIVING_DAY_CODE%%/set"
+      payload_open: '{"instance": %%DS_LIVING_DAY_CODE%%, "command": "open"}'
+      payload_close: '{"instance": %%DS_LIVING_DAY_CODE%%, "command": "close"}'
+      payload_stop: '{"instance": %%DS_LIVING_DAY_CODE%%, "command": "stop"}'
       payload_available: "online"
       payload_not_available: "offline"
       state_opening: "opening"
@@ -2551,8 +2551,8 @@ mqtt:
         {% endif %}
       position_open: 100
       position_closed: 0
-      set_position_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/18/set"
-      set_position_template: '{"instance": 18, "position": {{ position }}}'
+      set_position_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/%%DS_LIVING_DAY_CODE%%/set"
+      set_position_template: '{"instance": %%DS_LIVING_DAY_CODE%%, "position": {{ position }}}'
       availability_template: >-
         {% if value_json is defined and value_json['motor status definition'] is defined %}
         online
@@ -2613,8 +2613,8 @@ mqtt:
 
     - name: "Bedroom Dresser Day"
       unique_id: "bedroom_dreser_day"
-      state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/20"
-      position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/20"
+      state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/%%BEDROOM_DRESSER_DAY_CODE%%"
+      position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/%%BEDROOM_DRESSER_DAY_CODE%%"
       value_template: >-
         {% if not value_json is defined %}closed
         {% else %}
@@ -2630,10 +2630,10 @@ mqtt:
           {% else %}closed{% endif %}
         {% endif %}
         {% endif %}
-      command_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/20/set"
-      payload_open: '{"instance": 20, "command": "open"}'
-      payload_close: '{"instance": 20, "command": "close"}'
-      payload_stop: '{"instance": 20, "command": "stop"}'
+      command_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/%%BEDROOM_DRESSER_DAY_CODE%%/set"
+      payload_open: '{"instance": %%BEDROOM_DRESSER_DAY_CODE%%, "command": "open"}'
+      payload_close: '{"instance": %%BEDROOM_DRESSER_DAY_CODE%%, "command": "close"}'
+      payload_stop: '{"instance": %%BEDROOM_DRESSER_DAY_CODE%%, "command": "stop"}'
       payload_available: "online"
       payload_not_available: "offline"
       state_opening: "opening"
@@ -2651,8 +2651,8 @@ mqtt:
         {% endif %}
       position_open: 100
       position_closed: 0
-      set_position_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/20/set"
-      set_position_template: '{"instance": 20, "position": {{ position }}}'
+      set_position_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/%%BEDROOM_DRESSER_DAY_CODE%%/set"
+      set_position_template: '{"instance": %%BEDROOM_DRESSER_DAY_CODE%%, "position": {{ position }}}'
       availability_template: >-
         {% if value_json is defined and value_json['motor status definition'] is defined %}
         online
@@ -2711,7 +2711,7 @@ mqtt:
       unique_id: "bedroom_dreser_day_old"
       optimistic: false
 
-    - name: "Bedroom Dresser Day"
+    - name: "Bottom Bunk Night"
       unique_id: "bottom_bunk_night"
       state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/21"
       position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/21"
@@ -2813,8 +2813,8 @@ mqtt:
 
     - name: "D/S Living Room Night"
       unique_id: "ds_living_night"
-      state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/22"
-      position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/22"
+      state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/%%DS_LIVING_NIGHT_CODE%%"
+      position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/%%DS_LIVING_NIGHT_CODE%%"
       value_template: >-
         {% if not value_json is defined %}closed
         {% else %}
@@ -2830,10 +2830,10 @@ mqtt:
           {% else %}closed{% endif %}
         {% endif %}
         {% endif %}
-      command_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/22/set"
-      payload_open: '{"instance": 22, "command": "open"}'
-      payload_close: '{"instance": 22, "command": "close"}'
-      payload_stop: '{"instance": 22, "command": "stop"}'
+      command_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/%%DS_LIVING_NIGHT_CODE%%/set"
+      payload_open: '{"instance": %%DS_LIVING_NIGHT_CODE%%, "command": "open"}'
+      payload_close: '{"instance": %%DS_LIVING_NIGHT_CODE%%, "command": "close"}'
+      payload_stop: '{"instance": %%DS_LIVING_NIGHT_CODE%%, "command": "stop"}'
       payload_available: "online"
       payload_not_available: "offline"
       state_opening: "opening"
@@ -2851,8 +2851,8 @@ mqtt:
         {% endif %}
       position_open: 100
       position_closed: 0
-      set_position_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/22/set"
-      set_position_template: '{"instance": 22, "position": {{ position }}}'
+      set_position_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/%%DS_LIVING_NIGHT_CODE%%/set"
+      set_position_template: '{"instance": %%DS_LIVING_NIGHT_CODE%%, "position": {{ position }}}'
       availability_template: >-
         {% if value_json is defined and value_json['motor status definition'] is defined %}
         online
