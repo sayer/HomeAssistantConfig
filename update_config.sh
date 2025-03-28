@@ -153,88 +153,85 @@ CODE_PRE2020_BEDROOM_REAR_DAY="27"
 CODE_PRE2020_BEDROOM_FRONT_NIGHT="29"
 CODE_PRE2020_BEDROOM_REAR_NIGHT="31"
 
-# Function to generate a single shade YAML entry
-generate_shade_entry() {
-    local token=$1
-    local code=$2
-    local name=$(eval echo \$NAME_$token)
-    local uid=$(eval echo \$UID_$token)
+# Create the YAML entries one line at a time instead of using a single string
+create_shade_yaml() {
+    local PREFIX="$1"
+    local SHADE_FILE="$2"
     
-    # Add a comment before the shade entry and fix the YAML formatting
-    # Make sure there's no newline after optimistic: false
-    echo "    # Shade configuration for $name (code: $code)
-    - name: \"$name\"
-      unique_id: \"$uid\"
-      state_topic: \"RVC/WINDOW_SHADE_CONTROL_STATUS/$code\"
-      position_topic: \"RVC/WINDOW_SHADE_CONTROL_STATUS/$code\"
-      value_template: >-
-        {% if not value_json is defined %}closed
-        {% else %}
-        {% set motor = value_json['motor status definition'] | default('inactive') %}
-        {% set last_cmd = value_json['last command definition'] | default('none') %}
-        {% if motor == 'active' %}
-          {% if last_cmd == 'toggle forward' %}opening
-          {% elif last_cmd == 'toggle reverse' %}closing
-          {% else %}closed{% endif %}
-        {% else %}
-          {% if last_cmd == 'toggle forward' %}open
-          {% elif last_cmd == 'toggle reverse' %}closed
-          {% else %}closed{% endif %}
-        {% endif %}
-        {% endif %}
-      command_topic: \"RVC/WINDOW_SHADE_CONTROL_COMMAND/$code/set\"
-      payload_open: '{\"instance\": $code, \"command\": \"open\"}'
-      payload_close: '{\"instance\": $code, \"command\": \"close\"}'
-      payload_stop: '{\"instance\": $code, \"command\": \"stop\"}'
-      payload_available: \"online\"
-      payload_not_available: \"offline\"
-      state_opening: \"opening\"
-      state_closing: \"closing\"
-      state_open: \"open\"
-      state_closed: \"closed\"
-      position_template: >-
-        {% set last_cmd = value_json['last command definition'] %}
-        {% if last_cmd == 'toggle forward' %}
-        100
-        {% elif last_cmd == 'toggle reverse' %}
-        0
-        {% else %}
-        {{ value_json.position | default(value_json['motor duty']) | default(0) }}
-        {% endif %}
-      position_open: 100
-      position_closed: 0
-      set_position_topic: \"RVC/WINDOW_SHADE_CONTROL_COMMAND/$code/set\"
-      set_position_template: '{\"instance\": $code, \"position\": {{ position }}}'
-      availability_template: >-
-        {% if value_json is defined and value_json['motor status definition'] is defined %}
-        online
-        {% else %}
-        offline
-        {% endif %}
-      optimistic: false"
-}
-
-# Function to generate all shade YAML entries
-generate_all_shades() {
-    local prefix=$1
-    local yaml_string=""
+    # Add header
+    echo "    # Window shade configurations for model year $MODEL_YEAR" > "$SHADE_FILE"
     
-    # Add header comment
-    yaml_string+="    # Window shade configurations for model year $MODEL_YEAR\n"
-    
+    # Process each shade
     for token in $ALL_SHADE_TOKENS; do
-        local code_var="${prefix}_${token}"
-        local code=$(eval echo \$$code_var)
+        code_var="${PREFIX}_${token}"
+        code=$(eval echo \$$code_var)
         if [ -n "$code" ]; then
-            # Add an extra newline before each shade (except the first one)
-            if [ -n "$yaml_string" ]; then
-                yaml_string+="\n\n"
+            name=$(eval echo \$NAME_$token)
+            uid=$(eval echo \$UID_$token)
+            
+            # Add spacing between entries (except before the first one)
+            if [ $(wc -l < "$SHADE_FILE") -gt 1 ]; then
+                echo "" >> "$SHADE_FILE"
+                echo "" >> "$SHADE_FILE"
             fi
-            yaml_string+=$(generate_shade_entry "$token" "$code")
+            
+            # Add the shade entry line by line
+            echo "    # Shade configuration for $name (code: $code)" >> "$SHADE_FILE"
+            echo "    - name: \"$name\"" >> "$SHADE_FILE"
+            echo "      unique_id: \"$uid\"" >> "$SHADE_FILE"
+            echo "      state_topic: \"RVC/WINDOW_SHADE_CONTROL_STATUS/$code\"" >> "$SHADE_FILE"
+            echo "      position_topic: \"RVC/WINDOW_SHADE_CONTROL_STATUS/$code\"" >> "$SHADE_FILE"
+            echo "      value_template: >-" >> "$SHADE_FILE"
+            echo "        {% if not value_json is defined %}closed" >> "$SHADE_FILE"
+            echo "        {% else %}" >> "$SHADE_FILE"
+            echo "        {% set motor = value_json['motor status definition'] | default('inactive') %}" >> "$SHADE_FILE"
+            echo "        {% set last_cmd = value_json['last command definition'] | default('none') %}" >> "$SHADE_FILE"
+            echo "        {% if motor == 'active' %}" >> "$SHADE_FILE"
+            echo "          {% if last_cmd == 'toggle forward' %}opening" >> "$SHADE_FILE"
+            echo "          {% elif last_cmd == 'toggle reverse' %}closing" >> "$SHADE_FILE"
+            echo "          {% else %}closed{% endif %}" >> "$SHADE_FILE"
+            echo "        {% else %}" >> "$SHADE_FILE"
+            echo "          {% if last_cmd == 'toggle forward' %}open" >> "$SHADE_FILE"
+            echo "          {% elif last_cmd == 'toggle reverse' %}closed" >> "$SHADE_FILE"
+            echo "          {% else %}closed{% endif %}" >> "$SHADE_FILE"
+            echo "        {% endif %}" >> "$SHADE_FILE"
+            echo "        {% endif %}" >> "$SHADE_FILE"
+            echo "      command_topic: \"RVC/WINDOW_SHADE_CONTROL_COMMAND/$code/set\"" >> "$SHADE_FILE"
+            echo "      payload_open: '{\"instance\": $code, \"command\": \"open\"}'" >> "$SHADE_FILE"
+            echo "      payload_close: '{\"instance\": $code, \"command\": \"close\"}'" >> "$SHADE_FILE"
+            echo "      payload_stop: '{\"instance\": $code, \"command\": \"stop\"}'" >> "$SHADE_FILE"
+            echo "      payload_available: \"online\"" >> "$SHADE_FILE"
+            echo "      payload_not_available: \"offline\"" >> "$SHADE_FILE"
+            echo "      state_opening: \"opening\"" >> "$SHADE_FILE"
+            echo "      state_closing: \"closing\"" >> "$SHADE_FILE"
+            echo "      state_open: \"open\"" >> "$SHADE_FILE"
+            echo "      state_closed: \"closed\"" >> "$SHADE_FILE"
+            echo "      position_template: >-" >> "$SHADE_FILE"
+            echo "        {% set last_cmd = value_json['last command definition'] %}" >> "$SHADE_FILE"
+            echo "        {% if last_cmd == 'toggle forward' %}" >> "$SHADE_FILE"
+            echo "        100" >> "$SHADE_FILE"
+            echo "        {% elif last_cmd == 'toggle reverse' %}" >> "$SHADE_FILE"
+            echo "        0" >> "$SHADE_FILE"
+            echo "        {% else %}" >> "$SHADE_FILE"
+            echo "        {{ value_json.position | default(value_json['motor duty']) | default(0) }}" >> "$SHADE_FILE"
+            echo "        {% endif %}" >> "$SHADE_FILE"
+            echo "      position_open: 100" >> "$SHADE_FILE"
+            echo "      position_closed: 0" >> "$SHADE_FILE"
+            echo "      set_position_topic: \"RVC/WINDOW_SHADE_CONTROL_COMMAND/$code/set\"" >> "$SHADE_FILE"
+            echo "      set_position_template: '{\"instance\": $code, \"position\": {{ position }}}'" >> "$SHADE_FILE"
+            echo "      availability_template: >-" >> "$SHADE_FILE"
+            echo "        {% if value_json is defined and value_json['motor status definition'] is defined %}" >> "$SHADE_FILE"
+            echo "        online" >> "$SHADE_FILE"
+            echo "        {% else %}" >> "$SHADE_FILE"
+            echo "        offline" >> "$SHADE_FILE"
+            echo "        {% endif %}" >> "$SHADE_FILE"
+            echo "      optimistic: false" >> "$SHADE_FILE"
+            # Add an extra blank line at the end of each shade entry
+            echo "" >> "$SHADE_FILE"
         fi
     done
     
-    echo "$yaml_string"
+    echo "Created shade YAML entries for $(grep -c "^    - name:" "$SHADE_FILE") shades."
 }
 
 # Function to set all shade tokens
@@ -296,17 +293,14 @@ configure_pre_2020() {
 if [ "$MODEL_YEAR" -ge 2023 ]; then
     echo "Applying configuration for 2023+ models"
     configure_2023_plus
-    SHADE_YAML=$(generate_all_shades "CODE_2023")
     MODEL_PREFIX="CODE_2023"
 elif [ "$MODEL_YEAR" -ge 2020 ] && [ "$MODEL_YEAR" -le 2022 ]; then
     echo "Applying configuration for 2020-2022 models"
     configure_2020_to_2022
-    SHADE_YAML=$(generate_all_shades "CODE_2020")
     MODEL_PREFIX="CODE_2020"
 else
     echo "Applying configuration for pre-2020 models"
     configure_pre_2020
-    SHADE_YAML=$(generate_all_shades "CODE_PRE2020")
     MODEL_PREFIX="CODE_PRE2020"
 fi
 
@@ -325,34 +319,23 @@ if [ $? -ne 0 ]; then
     fi
 fi
 
-# Another temporary file for the final config
-TEMP_FILE2=$(mktemp)
-if [ $? -ne 0 ]; then
-    # Fallback to local directory if mktemp fails
-    TEMP_FILE2="${CONFIG_DIR}/.temp_config2.$$"
-    touch "$TEMP_FILE2"
-    if [ $? -ne 0 ]; then
-        echo "Error: Unable to create second temporary file"
-        rm -f "$TEMP_FILE"
-        exit 1
-    fi
-fi
-
-# Trap to clean up temporary files on exit
-trap 'rm -f "$TEMP_FILE" "$TEMP_FILE2"' EXIT
-
-# Create an empty file for the ALL_SHADES content
+# Create a temporary file for the shade YAML
 SHADES_FILE=$(mktemp)
 if [ $? -ne 0 ]; then
     SHADES_FILE="${CONFIG_DIR}/.shades_temp.$$"
     touch "$SHADES_FILE"
     if [ $? -ne 0 ]; then
         echo "Error: Unable to create shades temporary file"
-        rm -f "$TEMP_FILE" "$TEMP_FILE2"
+        rm -f "$TEMP_FILE"
         exit 1
     fi
 fi
-echo "$SHADE_YAML" > "$SHADES_FILE"
+
+# Trap to clean up temporary files on exit
+trap 'rm -f "$TEMP_FILE" "$SHADES_FILE"' EXIT
+
+# Create the shade YAML entries in the temporary file
+create_shade_yaml "$MODEL_PREFIX" "$SHADES_FILE"
 
 # Fix the sed unmatched '|' error by using a different approach
 # Replace tokens using compatible sed commands with / as delimiter
@@ -401,9 +384,6 @@ if grep -q "%%ALL_SHADES%%" "$CONFIG_FILE"; then
 else
     echo "Warning: %%ALL_SHADES%% token not found in $CONFIG_FILE"
 fi
-
-# Clean up
-rm -f "$SHADES_FILE"
 
 echo "==============================================="
 echo "Configuration updated for model year $MODEL_YEAR"
