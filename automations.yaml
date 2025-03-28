@@ -278,10 +278,10 @@
 - id: '1679624060266'
   alias: Good Night
   description: ''
-  trigger:
-  - platform: time
-    at: '23:00:00'
-  condition:
+  triggers:
+  - at: '23:00:00'
+    trigger: time
+  conditions:
   - condition: state
     entity_id: input_boolean.busparked
     state: 'on'
@@ -290,11 +290,11 @@
       minutes: 5
       seconds: 0
   - condition: state
-    entity_id: input_boolean.storage
-    state: 'off'
-  action:
-  - service: script.good_night
-    data: {}
+    entity_id: input_boolean.camping
+    state: 'on'
+  actions:
+  - data: {}
+    action: script.good_night
   mode: single
 - id: '1679711956079'
   alias: Set Bus Parked
@@ -799,23 +799,7 @@
     input:
       person_entity: person.stephen_ayers
       zone_entity: zone.home
-      notify_device: 7b4c37b34352f1a27b809745460d4c0d
-- id: '1683228868874'
-  alias: Entry Door - Announce opening
-  description: ''
-  trigger:
-  - type: opened
-    platform: device
-    device_id: d6cedbc49583d517031af19065450111
-    entity_id: binary_sensor.samjin_multi
-    domain: binary_sensor
-  condition: []
-  action:
-  - service: script.notify_home
-    data:
-      title: Foretravel
-      message: Entry door opened.
-  mode: single
+      notify_device: a70f7210cebfb63e75054cac90853d9d
 - id: '1683228964113'
   alias: Entry Door - Announce unlocked
   description: ''
@@ -960,23 +944,26 @@
 - id: '1687536730317'
   alias: Floors - Turn off when outside temp is warm
   description: ''
-  trigger:
-  - platform: numeric_state
-    entity_id: sensor.thermostat_ambient_status
+  triggers:
+  - entity_id: sensor.thermostat_ambient_status
     for:
       hours: 0
       minutes: 10
       seconds: 0
     above: 68
-  condition: []
-  action:
-  - service: homeassistant.turn_off
-    data: {}
+    trigger: numeric_state
+  conditions:
+  - condition: state
+    entity_id: input_boolean.camping
+    state: 'on'
+  actions:
+  - data: {}
     target:
       entity_id:
       - switch.floor_heat_1
       - switch.floor_heat_2
       - switch.floor_heat_3
+    action: homeassistant.turn_off
   mode: single
 - id: '1687537049303'
   alias: Floor - Turn on when cool outside
@@ -1019,114 +1006,76 @@
       title: Foretravel
       message: Floor heat turned on
   mode: single
-- id: '1693703113127'
-  alias: Cargo D/S Locked triggers P/S Lock
-  description: ''
-  trigger:
-  - platform: state
-    entity_id:
-    - lock.cargo_door_1
-    to: locked
-    for:
-      hours: 0
-      minutes: 0
-      seconds: 10
-  condition: []
-  action:
-  - service: lock.lock
-    data: {}
-    target:
-      entity_id: lock.cargo_door_lock_2
-  mode: single
-- id: '1693703365938'
-  alias: Cargo D/S Unlock - Tiggers P/S Unlock
-  description: ''
-  trigger:
-  - platform: state
-    entity_id:
-    - lock.cargo_door_1
-    to: unlocked
-    for:
-      hours: 0
-      minutes: 0
-      seconds: 10
-  condition: []
-  action:
-  - service: lock.unlock
-    data: {}
-    target:
-      entity_id: lock.cargo_door_lock_2
-  mode: single
 - id: '1694061801232'
   alias: Zone - iPhone enters zone
   description: ''
-  trigger:
-  - platform: zone
-    entity_id: device_tracker.iphone_14_pro_max
+  triggers:
+  - entity_id: device_tracker.iphone_15_pro_max
     zone: zone.home
     event: enter
-  - platform: zone
-    entity_id: device_tracker.stephens_iphone
+    trigger: zone
+  - entity_id: device_tracker.stephens_iphone
     zone: zone.home
     event: enter
-  - platform: device
-    device_id: 57ba748df517b4e46487f4c54395a276
+    trigger: zone
+  - device_id: 57ba748df517b4e46487f4c54395a276
     domain: device_tracker
     entity_id: d07b8dc644e3f95e16eb1a2841159346
     type: enters
     zone: zone.home
-  condition:
+    trigger: device
+  conditions:
   - condition: state
     entity_id: input_boolean.busparked
     state: 'on'
-  action:
-  - service: script.notify_home
-    data:
+  actions:
+  - data:
       title: Foretravel
       message: Steve entered bus zone
-  - service: light.turn_on
-    data: {}
+    action: script.notify_home
+  - data: {}
     target:
       entity_id: light.porch_handle
-  - service: notify.notify
-    data:
+    action: light.turn_on
+  - data:
       message: Steve iPhone entered bus zone
       title: Foretravel
+    action: notify.notify
   - condition: state
     entity_id: input_boolean.camping
     state: 'on'
-  - service: lock.unlock
-    data: {}
+  - data: {}
     target:
       entity_id: lock.entry_door_lock_2
+    action: lock.unlock
   mode: single
 - id: '1694146955573'
   alias: Zone - iPhone left bus
   description: ''
-  trigger:
-  - platform: zone
-    entity_id: device_tracker.iphone_14_pro_max
+  triggers:
+  - entity_id: device_tracker.iphone_15_pro_max
     zone: zone.home
     event: leave
-  - platform: zone
-    entity_id: device_tracker.stephens_iphone
+    trigger: zone
+  - entity_id: device_tracker.stephens_iphone
     zone: zone.home
     event: leave
-  - platform: device
-    device_id: 57ba748df517b4e46487f4c54395a276
+    trigger: zone
+  - device_id: 57ba748df517b4e46487f4c54395a276
     domain: device_tracker
     entity_id: d07b8dc644e3f95e16eb1a2841159346
     type: leaves
     zone: zone.home
-  condition:
+    trigger: device
+  conditions:
   - condition: state
     entity_id: input_boolean.busparked
     state: 'on'
-  action:
-  - service: script.notify_home
-    data:
+  actions:
+  - data:
       title: Foretravel
       message: Steve left Bus zone
+    action: script.notify_home
   mode: single
 - id: '1705344019087'
   alias: Kitchen - Fridge temp high
