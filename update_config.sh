@@ -160,7 +160,8 @@ generate_shade_entry() {
     local name=$(eval echo \$NAME_$token)
     local uid=$(eval echo \$UID_$token)
     
-    # Add a comment before the shade entry
+    # Add a comment before the shade entry and fix the YAML formatting
+    # Make sure there's no newline after optimistic: false
     echo "    # Shade configuration for $name (code: $code)
     - name: \"$name\"
       unique_id: \"$uid\"
@@ -210,9 +211,7 @@ generate_shade_entry() {
         {% else %}
         offline
         {% endif %}
-      optimistic: false
-
-"
+      optimistic: false"
 }
 
 # Function to generate all shade YAML entries
@@ -229,7 +228,7 @@ generate_all_shades() {
         if [ -n "$code" ]; then
             # Add an extra newline before each shade (except the first one)
             if [ -n "$yaml_string" ]; then
-                yaml_string+="\n"
+                yaml_string+="\n\n"
             fi
             yaml_string+=$(generate_shade_entry "$token" "$code")
         fi
