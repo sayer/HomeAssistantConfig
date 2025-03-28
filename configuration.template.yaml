@@ -2512,6 +2512,56 @@ mqtt:
       optimistic: false
 
     - name: "D/S Living Room Day"
+      unique_id: "ds_living_day"
+      state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/18"
+      position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/18"
+      value_template: >-
+        {% if not value_json is defined %}closed
+        {% else %}
+        {% set motor = value_json['motor status definition'] | default('inactive') %}
+        {% set last_cmd = value_json['last command definition'] | default('none') %}
+        {% if motor == 'active' %}
+          {% if last_cmd == 'toggle forward' %}opening
+          {% elif last_cmd == 'toggle reverse' %}closing
+          {% else %}closed{% endif %}
+        {% else %}
+          {% if last_cmd == 'toggle forward' %}open
+          {% elif last_cmd == 'toggle reverse' %}closed
+          {% else %}closed{% endif %}
+        {% endif %}
+        {% endif %}
+      command_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/18/set"
+      payload_open: '{"instance": 18, "command": "open"}'
+      payload_close: '{"instance": 18, "command": "close"}'
+      payload_stop: '{"instance": 18, "command": "stop"}'
+      payload_available: "online"
+      payload_not_available: "offline"
+      state_opening: "opening"
+      state_closing: "closing"
+      state_open: "open"
+      state_closed: "closed"
+      position_template: >-
+        {% set last_cmd = value_json['last command definition'] %}
+        {% if last_cmd == 'toggle forward' %}
+        100
+        {% elif last_cmd == 'toggle reverse' %}
+        0
+        {% else %}
+        {{ value_json.position | default(value_json['motor duty']) | default(0) }}
+        {% endif %}
+      position_open: 100
+      position_closed: 0
+      set_position_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/18/set"
+      set_position_template: '{"instance": 18, "position": {{ position }}}'
+      availability_template: >-
+        {% if value_json is defined and value_json['motor status definition'] is defined %}
+        online
+        {% else %}
+        offline
+        {% endif %}
+      optimistic: false
+
+    - name: "D/S Living Room Day - old"
       state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/18"
       position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/18"
       value_template: >-
@@ -2558,10 +2608,60 @@ mqtt:
         {% else %}
          offline
         {% endif %}
-      unique_id: "ds_living_day"
+      unique_id: "ds_living_day_old"
       optimistic: false
 
     - name: "Bedroom Dresser Day"
+      unique_id: "bedroom_dreser_day"
+      state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/20"
+      position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/20"
+      value_template: >-
+        {% if not value_json is defined %}closed
+        {% else %}
+        {% set motor = value_json['motor status definition'] | default('inactive') %}
+        {% set last_cmd = value_json['last command definition'] | default('none') %}
+        {% if motor == 'active' %}
+          {% if last_cmd == 'toggle forward' %}opening
+          {% elif last_cmd == 'toggle reverse' %}closing
+          {% else %}closed{% endif %}
+        {% else %}
+          {% if last_cmd == 'toggle forward' %}open
+          {% elif last_cmd == 'toggle reverse' %}closed
+          {% else %}closed{% endif %}
+        {% endif %}
+        {% endif %}
+      command_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/20/set"
+      payload_open: '{"instance": 20, "command": "open"}'
+      payload_close: '{"instance": 20, "command": "close"}'
+      payload_stop: '{"instance": 20, "command": "stop"}'
+      payload_available: "online"
+      payload_not_available: "offline"
+      state_opening: "opening"
+      state_closing: "closing"
+      state_open: "open"
+      state_closed: "closed"
+      position_template: >-
+        {% set last_cmd = value_json['last command definition'] %}
+        {% if last_cmd == 'toggle forward' %}
+        100
+        {% elif last_cmd == 'toggle reverse' %}
+        0
+        {% else %}
+        {{ value_json.position | default(value_json['motor duty']) | default(0) }}
+        {% endif %}
+      position_open: 100
+      position_closed: 0
+      set_position_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/20/set"
+      set_position_template: '{"instance": 20, "position": {{ position }}}'
+      availability_template: >-
+        {% if value_json is defined and value_json['motor status definition'] is defined %}
+        online
+        {% else %}
+        offline
+        {% endif %}
+      optimistic: false
+
+    - name: "Bedroom Dresser Day - old"
       state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/20"
       position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/20"
       value_template: >-
@@ -2608,10 +2708,60 @@ mqtt:
         {% else %}
          offline
         {% endif %}
-      unique_id: "bedroom_dreser_day"
+      unique_id: "bedroom_dreser_day_old"
       optimistic: false
 
-    - name: "Bottom Bunk Night"
+    - name: "Bedroom Dresser Day"
+      unique_id: "bottom_bunk_night"
+      state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/21"
+      position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/21"
+      value_template: >-
+        {% if not value_json is defined %}closed
+        {% else %}
+        {% set motor = value_json['motor status definition'] | default('inactive') %}
+        {% set last_cmd = value_json['last command definition'] | default('none') %}
+        {% if motor == 'active' %}
+          {% if last_cmd == 'toggle forward' %}opening
+          {% elif last_cmd == 'toggle reverse' %}closing
+          {% else %}closed{% endif %}
+        {% else %}
+          {% if last_cmd == 'toggle forward' %}open
+          {% elif last_cmd == 'toggle reverse' %}closed
+          {% else %}closed{% endif %}
+        {% endif %}
+        {% endif %}
+      command_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/21/set"
+      payload_open: '{"instance": 21, "command": "open"}'
+      payload_close: '{"instance": 21, "command": "close"}'
+      payload_stop: '{"instance": 21, "command": "stop"}'
+      payload_available: "online"
+      payload_not_available: "offline"
+      state_opening: "opening"
+      state_closing: "closing"
+      state_open: "open"
+      state_closed: "closed"
+      position_template: >-
+        {% set last_cmd = value_json['last command definition'] %}
+        {% if last_cmd == 'toggle forward' %}
+        100
+        {% elif last_cmd == 'toggle reverse' %}
+        0
+        {% else %}
+        {{ value_json.position | default(value_json['motor duty']) | default(0) }}
+        {% endif %}
+      position_open: 100
+      position_closed: 0
+      set_position_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/21/set"
+      set_position_template: '{"instance": 21, "position": {{ position }}}'
+      availability_template: >-
+        {% if value_json is defined and value_json['motor status definition'] is defined %}
+        online
+        {% else %}
+        offline
+        {% endif %}
+      optimistic: false
+
+    - name: "Bottom Bunk Night - old"
       state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/21"
       position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/21"
       value_template: >-
@@ -2658,10 +2808,60 @@ mqtt:
         {% else %}
          offline
         {% endif %}
-      unique_id: "bottom_bunk_night"
+      unique_id: "bottom_bunk_night_old"
       optimistic: false
 
     - name: "D/S Living Room Night"
+      unique_id: "ds_living_night"
+      state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/22"
+      position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/22"
+      value_template: >-
+        {% if not value_json is defined %}closed
+        {% else %}
+        {% set motor = value_json['motor status definition'] | default('inactive') %}
+        {% set last_cmd = value_json['last command definition'] | default('none') %}
+        {% if motor == 'active' %}
+          {% if last_cmd == 'toggle forward' %}opening
+          {% elif last_cmd == 'toggle reverse' %}closing
+          {% else %}closed{% endif %}
+        {% else %}
+          {% if last_cmd == 'toggle forward' %}open
+          {% elif last_cmd == 'toggle reverse' %}closed
+          {% else %}closed{% endif %}
+        {% endif %}
+        {% endif %}
+      command_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/22/set"
+      payload_open: '{"instance": 22, "command": "open"}'
+      payload_close: '{"instance": 22, "command": "close"}'
+      payload_stop: '{"instance": 22, "command": "stop"}'
+      payload_available: "online"
+      payload_not_available: "offline"
+      state_opening: "opening"
+      state_closing: "closing"
+      state_open: "open"
+      state_closed: "closed"
+      position_template: >-
+        {% set last_cmd = value_json['last command definition'] %}
+        {% if last_cmd == 'toggle forward' %}
+        100
+        {% elif last_cmd == 'toggle reverse' %}
+        0
+        {% else %}
+        {{ value_json.position | default(value_json['motor duty']) | default(0) }}
+        {% endif %}
+      position_open: 100
+      position_closed: 0
+      set_position_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/22/set"
+      set_position_template: '{"instance": 22, "position": {{ position }}}'
+      availability_template: >-
+        {% if value_json is defined and value_json['motor status definition'] is defined %}
+        online
+        {% else %}
+        offline
+        {% endif %}
+      optimistic: false
+
+    - name: "D/S Living Room Night - old"
       state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/22"
       position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/22"
       value_template: >-
@@ -2708,10 +2908,60 @@ mqtt:
         {% else %}
          offline
         {% endif %}
-      unique_id: "ds_living_night"
+      unique_id: "ds_living_night_old"
       optimistic: false
 
     - name: "Bedroom Dresser Night"
+      unique_id: "bedroom_dresser_night"
+      state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/24"
+      position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/24"
+      value_template: >-
+        {% if not value_json is defined %}closed
+        {% else %}
+        {% set motor = value_json['motor status definition'] | default('inactive') %}
+        {% set last_cmd = value_json['last command definition'] | default('none') %}
+        {% if motor == 'active' %}
+          {% if last_cmd == 'toggle forward' %}opening
+          {% elif last_cmd == 'toggle reverse' %}closing
+          {% else %}closed{% endif %}
+        {% else %}
+          {% if last_cmd == 'toggle forward' %}open
+          {% elif last_cmd == 'toggle reverse' %}closed
+          {% else %}closed{% endif %}
+        {% endif %}
+        {% endif %}
+      command_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/24/set"
+      payload_open: '{"instance": 24, "command": "open"}'
+      payload_close: '{"instance": 24, "command": "close"}'
+      payload_stop: '{"instance": 24, "command": "stop"}'
+      payload_available: "online"
+      payload_not_available: "offline"
+      state_opening: "opening"
+      state_closing: "closing"
+      state_open: "open"
+      state_closed: "closed"
+      position_template: >-
+        {% set last_cmd = value_json['last command definition'] %}
+        {% if last_cmd == 'toggle forward' %}
+        100
+        {% elif last_cmd == 'toggle reverse' %}
+        0
+        {% else %}
+        {{ value_json.position | default(value_json['motor duty']) | default(0) }}
+        {% endif %}
+      position_open: 100
+      position_closed: 0
+      set_position_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/24/set"
+      set_position_template: '{"instance": 24, "position": {{ position }}}'
+      availability_template: >-
+        {% if value_json is defined and value_json['motor status definition'] is defined %}
+        online
+        {% else %}
+        offline
+        {% endif %}
+      optimistic: false
+
+    - name: "Bedroom Dresser Night - old"
       state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/24"
       position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/24"
       value_template: >-
@@ -2758,10 +3008,60 @@ mqtt:
         {% else %}
          offline
         {% endif %}
-      unique_id: "bedroom_dresser_night"
+      unique_id: "bedroom_dresser_night_old"
       optimistic: false
 
     - name: "Bedroom Front Day"
+      unique_id: "bedroom_front_day"
+      state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/25"
+      position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/25"
+      value_template: >-
+        {% if not value_json is defined %}closed
+        {% else %}
+        {% set motor = value_json['motor status definition'] | default('inactive') %}
+        {% set last_cmd = value_json['last command definition'] | default('none') %}
+        {% if motor == 'active' %}
+          {% if last_cmd == 'toggle forward' %}opening
+          {% elif last_cmd == 'toggle reverse' %}closing
+          {% else %}closed{% endif %}
+        {% else %}
+          {% if last_cmd == 'toggle forward' %}open
+          {% elif last_cmd == 'toggle reverse' %}closed
+          {% else %}closed{% endif %}
+        {% endif %}
+        {% endif %}
+      command_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/25/set"
+      payload_open: '{"instance": 25, "command": "open"}'
+      payload_close: '{"instance": 25, "command": "close"}'
+      payload_stop: '{"instance": 25, "command": "stop"}'
+      payload_available: "online"
+      payload_not_available: "offline"
+      state_opening: "opening"
+      state_closing: "closing"
+      state_open: "open"
+      state_closed: "closed"
+      position_template: >-
+        {% set last_cmd = value_json['last command definition'] %}
+        {% if last_cmd == 'toggle forward' %}
+        100
+        {% elif last_cmd == 'toggle reverse' %}
+        0
+        {% else %}
+        {{ value_json.position | default(value_json['motor duty']) | default(0) }}
+        {% endif %}
+      position_open: 100
+      position_closed: 0
+      set_position_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/25/set"
+      set_position_template: '{"instance": 25, "position": {{ position }}}'
+      availability_template: >-
+        {% if value_json is defined and value_json['motor status definition'] is defined %}
+        online
+        {% else %}
+        offline
+        {% endif %}
+      optimistic: false
+
+    - name: "Bedroom Front Day - old"
       state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/25"
       position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/25"
       value_template: >-
@@ -2808,10 +3108,60 @@ mqtt:
         {% else %}
          offline
         {% endif %}
-      unique_id: "bedroom_front_day"
+      unique_id: "bedroom_front_day - old"
       optimistic: false
 
     - name: "Bedroom Rear Day"
+      unique_id: "bedroom_rear_day"
+      state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/27"
+      position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/27"
+      value_template: >-
+        {% if not value_json is defined %}closed
+        {% else %}
+        {% set motor = value_json['motor status definition'] | default('inactive') %}
+        {% set last_cmd = value_json['last command definition'] | default('none') %}
+        {% if motor == 'active' %}
+          {% if last_cmd == 'toggle forward' %}opening
+          {% elif last_cmd == 'toggle reverse' %}closing
+          {% else %}closed{% endif %}
+        {% else %}
+          {% if last_cmd == 'toggle forward' %}open
+          {% elif last_cmd == 'toggle reverse' %}closed
+          {% else %}closed{% endif %}
+        {% endif %}
+        {% endif %}
+      command_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/27/set"
+      payload_open: '{"instance": 27, "command": "open"}'
+      payload_close: '{"instance": 27, "command": "close"}'
+      payload_stop: '{"instance": 27, "command": "stop"}'
+      payload_available: "online"
+      payload_not_available: "offline"
+      state_opening: "opening"
+      state_closing: "closing"
+      state_open: "open"
+      state_closed: "closed"
+      position_template: >-
+        {% set last_cmd = value_json['last command definition'] %}
+        {% if last_cmd == 'toggle forward' %}
+        100
+        {% elif last_cmd == 'toggle reverse' %}
+        0
+        {% else %}
+        {{ value_json.position | default(value_json['motor duty']) | default(0) }}
+        {% endif %}
+      position_open: 100
+      position_closed: 0
+      set_position_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/27/set"
+      set_position_template: '{"instance": 27, "position": {{ position }}}'
+      availability_template: >-
+        {% if value_json is defined and value_json['motor status definition'] is defined %}
+        online
+        {% else %}
+        offline
+        {% endif %}
+      optimistic: false
+
+    - name: "Bedroom Rear Day - old"
       state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/27"
       position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/27"
       value_template: >-
@@ -2858,10 +3208,60 @@ mqtt:
         {% else %}
          offline
         {% endif %}
-      unique_id: "bedroom_rear_day"
+      unique_id: "bedroom_rear_day_old"
       optimistic: false
 
     - name: "Bedroom Front Night"
+      unique_id: "bedroom_front_night"
+      state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/29"
+      position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/29"
+      value_template: >-
+        {% if not value_json is defined %}closed
+        {% else %}
+        {% set motor = value_json['motor status definition'] | default('inactive') %}
+        {% set last_cmd = value_json['last command definition'] | default('none') %}
+        {% if motor == 'active' %}
+          {% if last_cmd == 'toggle forward' %}opening
+          {% elif last_cmd == 'toggle reverse' %}closing
+          {% else %}closed{% endif %}
+        {% else %}
+          {% if last_cmd == 'toggle forward' %}open
+          {% elif last_cmd == 'toggle reverse' %}closed
+          {% else %}closed{% endif %}
+        {% endif %}
+        {% endif %}
+      command_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/29/set"
+      payload_open: '{"instance": 29, "command": "open"}'
+      payload_close: '{"instance": 29, "command": "close"}'
+      payload_stop: '{"instance": 29, "command": "stop"}'
+      payload_available: "online"
+      payload_not_available: "offline"
+      state_opening: "opening"
+      state_closing: "closing"
+      state_open: "open"
+      state_closed: "closed"
+      position_template: >-
+        {% set last_cmd = value_json['last command definition'] %}
+        {% if last_cmd == 'toggle forward' %}
+        100
+        {% elif last_cmd == 'toggle reverse' %}
+        0
+        {% else %}
+        {{ value_json.position | default(value_json['motor duty']) | default(0) }}
+        {% endif %}
+      position_open: 100
+      position_closed: 0
+      set_position_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/29/set"
+      set_position_template: '{"instance": 29, "position": {{ position }}}'
+      availability_template: >-
+        {% if value_json is defined and value_json['motor status definition'] is defined %}
+        online
+        {% else %}
+        offline
+        {% endif %}
+      optimistic: false
+
+    - name: "Bedroom Front Night - old"
       state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/29"
       position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/29"
       value_template: >-
@@ -2908,10 +3308,60 @@ mqtt:
         {% else %}
          offline
         {% endif %}
-      unique_id: "bedroom_front_night"
+      unique_id: "bedroom_front_night_old"
       optimistic: false
 
     - name: "Bedroom Rear Night"
+      unique_id: "bedroom_rear_night"
+      state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/31"
+      position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/31"
+      value_template: >-
+        {% if not value_json is defined %}closed
+        {% else %}
+        {% set motor = value_json['motor status definition'] | default('inactive') %}
+        {% set last_cmd = value_json['last command definition'] | default('none') %}
+        {% if motor == 'active' %}
+          {% if last_cmd == 'toggle forward' %}opening
+          {% elif last_cmd == 'toggle reverse' %}closing
+          {% else %}closed{% endif %}
+        {% else %}
+          {% if last_cmd == 'toggle forward' %}open
+          {% elif last_cmd == 'toggle reverse' %}closed
+          {% else %}closed{% endif %}
+        {% endif %}
+        {% endif %}
+      command_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/31/set"
+      payload_open: '{"instance": 31, "command": "open"}'
+      payload_close: '{"instance": 31, "command": "close"}'
+      payload_stop: '{"instance": 31, "command": "stop"}'
+      payload_available: "online"
+      payload_not_available: "offline"
+      state_opening: "opening"
+      state_closing: "closing"
+      state_open: "open"
+      state_closed: "closed"
+      position_template: >-
+        {% set last_cmd = value_json['last command definition'] %}
+        {% if last_cmd == 'toggle forward' %}
+        100
+        {% elif last_cmd == 'toggle reverse' %}
+        0
+        {% else %}
+        {{ value_json.position | default(value_json['motor duty']) | default(0) }}
+        {% endif %}
+      position_open: 100
+      position_closed: 0
+      set_position_topic: "RVC/WINDOW_SHADE_CONTROL_COMMAND/31/set"
+      set_position_template: '{"instance": 31, "position": {{ position }}}'
+      availability_template: >-
+        {% if value_json is defined and value_json['motor status definition'] is defined %}
+        online
+        {% else %}
+        offline
+        {% endif %}
+      optimistic: false
+
+    - name: "Bedroom Rear Night - old"
       state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/31"
       position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/31"
       value_template: >-
@@ -2958,7 +3408,7 @@ mqtt:
         {% else %}
          offline
         {% endif %}
-      unique_id: "bedroom_rear_night"
+      unique_id: "bedroom_rear_night_old"
       optimistic: false
 
   lock:
