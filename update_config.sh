@@ -160,7 +160,9 @@ generate_shade_entry() {
     local name=$(eval echo \$NAME_$token)
     local uid=$(eval echo \$UID_$token)
     
-    echo "    - name: \"$name\"
+    # Add a comment before the shade entry
+    echo "    # Shade configuration for $name (code: $code)
+    - name: \"$name\"
       unique_id: \"$uid\"
       state_topic: \"RVC/WINDOW_SHADE_CONTROL_STATUS/$code\"
       position_topic: \"RVC/WINDOW_SHADE_CONTROL_STATUS/$code\"
@@ -218,10 +220,17 @@ generate_all_shades() {
     local prefix=$1
     local yaml_string=""
     
+    # Add header comment
+    yaml_string+="    # Window shade configurations for model year $MODEL_YEAR\n"
+    
     for token in $ALL_SHADE_TOKENS; do
         local code_var="${prefix}_${token}"
         local code=$(eval echo \$$code_var)
         if [ -n "$code" ]; then
+            # Add an extra newline before each shade (except the first one)
+            if [ -n "$yaml_string" ]; then
+                yaml_string+="\n"
+            fi
             yaml_string+=$(generate_shade_entry "$token" "$code")
         fi
     done
