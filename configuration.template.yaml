@@ -60,8 +60,8 @@ input_number:
     mode: box
     icon: mdi:rv-truck
 
-  water_heater_setpoint:
-    name: Water Heater Temperature Setpoint
+  aqua_hot_setpoint:
+    name: Aqua-Hot Temperature Setpoint
     min: 38
     max: 65
     step: 1
@@ -74,24 +74,24 @@ input_boolean:
     icon: mdi:toggle-switch
 
 # Input booleans for manual control
-  waterheater_electric_low:
-    name: "Water Heater Electric Low"
+  aqua_hot_electric_low:
+    name: "Aqua-Hot Electric Low"
     icon: mdi:power-plug
     
-  waterheater_electric_high:
-    name: "Water Heater Electric High"
+  aqua_hot_electric_high:
+    name: "Aqua-Hot Electric High"
     icon: mdi:power-plug
     
-  waterheater_burner:
-    name: "Water Heater Burner"
+  aqua_hot_burner:
+    name: "Aqua-Hot Burner"
     icon: mdi:fire
     
-  waterheater_priority_domestic:
-    name: "Water Heater Domestic Priority"
+  aqua_hot_priority_domestic:
+    name: "Aqua-Hot Domestic Priority"
     icon: mdi:water
     
-  waterheater_priority_heating:
-    name: "Water Heater Heating Priority"
+  aqua_hot_priority_heating:
+    name: "Aqua-Hot Heating Priority"
     icon: mdi:radiator
 
 
@@ -104,20 +104,20 @@ input_text:
 # Template entities (Switches, Sensors, etc.)
 template:
   - switch:
-      # Water Heater Switches
-      - name: "Water Heater Combustion"
-        unique_id: water_heater_combustion_switch
+      # Aqua-Hot Switches
+      - name: "Aqua-Hot Combustion"
+        unique_id: aqua_hot_combustion_switch
         icon: mdi:fire
         # State is 'on' if mode is 1 (combustion) or 3 (gas electric)
         value_template: >-
-          {{ states('sensor.water_heater_operating_mode') | int(0) in [1, 3] }}
+          {{ states('sensor.aqua_hot_operating_mode') | int(0) in [1, 3] }}
         turn_on:
           - service: mqtt.publish
             data:
               topic: "RVC/WATERHEATER_COMMAND/1"
               # If electric is ON, set mode to 3 (gas electric), else set to 1 (combustion)
               payload_template: >-
-                {% set electric_on = is_state('switch.water_heater_electric', 'on') %}
+                {% set electric_on = is_state('switch.aqua_hot_electric', 'on') %}
                 {"instance": 1, "operating modes": {{ 3 if electric_on else 1 }} }
         turn_off:
           - service: mqtt.publish
@@ -125,23 +125,23 @@ template:
               topic: "RVC/WATERHEATER_COMMAND/1"
               # If electric is ON, set mode to 2 (electric), else set to 0 (off)
               payload_template: >-
-                {% set electric_on = is_state('switch.water_heater_electric', 'on') %}
+                {% set electric_on = is_state('switch.aqua_hot_electric', 'on') %}
                 {"instance": 1, "operating modes": {{ 2 if electric_on else 0 }} }
-        availability_template: "{{ states('sensor.water_heater_operating_mode') != 'unavailable' }}"
+        availability_template: "{{ states('sensor.aqua_hot_operating_mode') != 'unavailable' }}"
 
-      - name: "Water Heater Electric"
-        unique_id: water_heater_electric_switch
+      - name: "Aqua-Hot Electric"
+        unique_id: aqua_hot_electric_switch
         icon: mdi:lightning-bolt
         # State is 'on' if mode is 2 (electric) or 3 (gas electric)
         value_template: >-
-          {{ states('sensor.water_heater_operating_mode') | int(0) in [2, 3] }}
+          {{ states('sensor.aqua_hot_operating_mode') | int(0) in [2, 3] }}
         turn_on:
           - service: mqtt.publish
             data:
               topic: "RVC/WATERHEATER_COMMAND/1"
               # If combustion is ON, set mode to 3 (gas electric), else set to 2 (electric)
               payload_template: >-
-                {% set combustion_on = is_state('switch.water_heater_combustion', 'on') %}
+                {% set combustion_on = is_state('switch.aqua_hot_combustion', 'on') %}
                 {"instance": 1, "operating modes": {{ 3 if combustion_on else 2 }} }
         turn_off:
           - service: mqtt.publish
@@ -149,9 +149,9 @@ template:
               topic: "RVC/WATERHEATER_COMMAND/1"
               # If combustion is ON, set mode to 1 (combustion), else set to 0 (off)
               payload_template: >-
-                {% set combustion_on = is_state('switch.water_heater_combustion', 'on') %}
+                {% set combustion_on = is_state('switch.aqua_hot_combustion', 'on') %}
                 {"instance": 1, "operating modes": {{ 1 if combustion_on else 0 }} }
-        availability_template: "{{ states('sensor.water_heater_operating_mode') != 'unavailable' }}"
+        availability_template: "{{ states('sensor.aqua_hot_operating_mode') != 'unavailable' }}"
 
 
 sensor:
@@ -1366,29 +1366,29 @@ mqtt:
           {{ value_json['state of health'] }}
         {% endif %}
 
-    # Water Heater Temperature
-    - name: "Water Heater Temperature"
+    # Aqua-Hot Temperature
+    - name: "Aqua-Hot Temperature"
       state_topic: "RVC/WATERHEATER_STATUS/1"
       value_template: "{{ value_json['water temperature'] }}"
       unit_of_measurement: "°C"
       device_class: temperature
       state_class: measurement
 
-    - name: "Water Heater Temperature F"
+    - name: "Aqua-Hot Temperature F"
       state_topic: "RVC/WATERHEATER_STATUS/1"
       value_template: "{{ value_json['water temperature F'] }}"
       unit_of_measurement: "°F"
       device_class: temperature
       state_class: measurement
 
-    - name: "Water Heater Instance"
-      unique_id: "waterheater_instance"
+    - name: "Aqua-Hot Instance"
+      unique_id: "aqua_hot_instance"
       state_topic: "RVC/WATERHEATER_STATUS/1"
       value_template: "{{ value_json['instance'] }}"
       icon: mdi:numeric
 
-    - name: "Water Heater Operating Mode"
-      unique_id: "waterheater_operating_mode"
+    - name: "Aqua-Hot Operating Mode"
+      unique_id: "aqua_hot_operating_mode"
       state_topic: "RVC/WATERHEATER_STATUS/1"
       value_template: >-
         {% set mode = value_json['operating modes'] %}
@@ -1403,24 +1403,24 @@ mqtt:
         {% endif %}
       icon: mdi:water-boiler
 
-    - name: "Water Heater Set Point Temperature"
-      unique_id: "waterheater_set_point_temperature"
+    - name: "Aqua-Hot Set Point Temperature"
+      unique_id: "aqua_hot_set_point_temperature"
       state_topic: "RVC/WATERHEATER_STATUS/1"
       unit_of_measurement: "°C"
       value_template: "{{ value_json['set point temperature'] }}"
       device_class: temperature
       icon: mdi:thermometer-lines
 
-    - name: "Water Heater Water Temperature"
-      unique_id: "waterheater_water_temperature"
+    - name: "Aqua-Hot Water Temperature"
+      unique_id: "aqua_hot_water_temperature"
       state_topic: "RVC/WATERHEATER_STATUS/1"
       unit_of_measurement: "°C"
       value_template: "{{ value_json['water temperature'] }}"
       device_class: temperature
       icon: mdi:thermometer-water
 
-    - name: "Water Heater Thermostat Status"
-      unique_id: "waterheater_thermostat_status"
+    - name: "Aqua-Hot Thermostat Status"
+      unique_id: "aqua_hot_thermostat_status"
       state_topic: "RVC/WATERHEATER_STATUS/1"
       value_template: >-
         {% set status = value_json['thermostat status'] %}
@@ -1430,8 +1430,8 @@ mqtt:
         {% endif %}
       icon: mdi:thermostat
 
-    - name: "Water Heater Burner Status"
-      unique_id: "waterheater_burner_status"
+    - name: "Aqua-Hot Burner Status"
+      unique_id: "aqua_hot_burner_status"
       state_topic: "RVC/WATERHEATER_STATUS/1"
       value_template: >-
         {% set status = value_json['burner status'] %}
@@ -1441,8 +1441,8 @@ mqtt:
         {% endif %}
       icon: mdi:fire
 
-    - name: "Water Heater AC Element Status"
-      unique_id: "waterheater_ac_element_status"
+    - name: "Aqua-Hot AC Element Status"
+      unique_id: "aqua_hot_ac_element_status"
       state_topic: "RVC/WATERHEATER_STATUS/1"
       value_template: >-
         {% set status = value_json['ac element status'] %}
@@ -1452,8 +1452,8 @@ mqtt:
         {% endif %}
       icon: mdi:alert-circle-outline
 
-    - name: "Water Heater High Temp Limit Switch Status"
-      unique_id: "waterheater_high_temp_limit_switch_status"
+    - name: "Aqua-Hot High Temp Limit Switch Status"
+      unique_id: "aqua_hot_high_temp_limit_switch_status"
       state_topic: "RVC/WATERHEATER_STATUS/1"
       value_template: >-
         {% set status = value_json['high temperature limit switch status'] %}
@@ -1463,8 +1463,8 @@ mqtt:
         {% endif %}
       icon: mdi:alert
 
-    - name: "Water Heater Failure To Ignite Status"
-      unique_id: "waterheater_failure_to_ignite_status"
+    - name: "Aqua-Hot Failure To Ignite Status"
+      unique_id: "aqua_hot_failure_to_ignite_status"
       state_topic: "RVC/WATERHEATER_STATUS/1"
       value_template: >-
         {% set status = value_json['failure to ignite status'] %}
@@ -1474,8 +1474,8 @@ mqtt:
         {% endif %}
       icon: mdi:fire-alert
 
-    - name: "Water Heater AC Power Failure Status"
-      unique_id: "waterheater_ac_power_failure_status"
+    - name: "Aqua-Hot AC Power Failure Status"
+      unique_id: "aqua_hot_ac_power_failure_status"
       state_topic: "RVC/WATERHEATER_STATUS/1"
       value_template: >-
         {% set status = value_json['ac power failure status'] %}
@@ -1485,8 +1485,8 @@ mqtt:
         {% endif %}
       icon: mdi:power-plug-off
 
-    - name: "Water Heater DC Power Failure Status"
-      unique_id: "waterheater_dc_power_failure_status"
+    - name: "Aqua-Hot DC Power Failure Status"
+      unique_id: "aqua_hot_dc_power_failure_status"
       state_topic: "RVC/WATERHEATER_STATUS/1"
       value_template: >-
         {% set status = value_json['dc power failure status'] %}
@@ -1747,29 +1747,6 @@ mqtt:
       state_topic: "RVC/DC_DIMMER_STATUS_3/1"
       value_template: "{{ value_json['operating status (brightness)'] }}"
 
-    # Targeting just the last command value
-    - name: "DC Dimmer Last Command"
-      unique_id: "rvc_dc_dimmer_last_command_1"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/1"
-      value_template: "{{ value_json['last command'] }}"
-
-    # Targeting just the command definition
-    - name: "DC Dimmer Command Definition"
-      unique_id: "rvc_dc_dimmer_command_def_1"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/1"
-      value_template: "{{ value_json['last command definition'] }}"
-
-    # Binary sensor to test on/off logic
-    - name: "DC Dimmer Is On"
-      unique_id: "rvc_dc_dimmer_is_on_1"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/1"
-      value_template: >-
-        {% if value_json['operating status (brightness)']|int > 0 %}
-          ON
-        {% else %}
-          OFF
-        {% endif %}
-
   binary_sensor:
     - name: "Water Hookup"
       state_topic: "RVC/WATER_PUMP_STATUS"
@@ -1820,8 +1797,8 @@ mqtt:
       value_template: "{{ value_json['dc power failure status definition'] != 'dc power not present' }}"
       device_class: power
 
-    # Water Heater Status
-    - name: "Water Heater Active"
+    # Aqua-Hot Status
+    - name: "Aqua-Hot Active"
       state_topic: "RVC/WATERHEATER_STATUS/1"
       value_template: "{{ value_json['operating modes'] != 0 }}"
       device_class: heat
