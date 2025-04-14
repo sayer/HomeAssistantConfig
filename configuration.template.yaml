@@ -999,6 +999,7 @@ mqtt:
       state_on: "on"
       state_off: "off"
 
+  
     - name: "Floor Heat 2"
       unique_id: "floor_heat_2"
       state_topic: "RVC/FLOOR_HEAT_STATUS/2"
@@ -1298,6 +1299,122 @@ mqtt:
       unit_of_measurement: "°F"
       device_class: temperature
       state_class: measurement
+
+    - name: "Water Heater Instance"
+      unique_id: "waterheater_instance"
+      state_topic: "RVC/WATERHEATER_STATUS/1"
+      value_template: "{{ value_json['instance'] }}"
+      icon: mdi:numeric
+
+    - name: "Water Heater Operating Mode"
+      unique_id: "waterheater_operating_mode"
+      state_topic: "RVC/WATERHEATER_STATUS/1"
+      value_template: >-
+        {% set mode = value_json['operating modes'] %}
+        {% if mode == 0 %} off
+        {% elif mode == 1 %} combustion
+        {% elif mode == 2 %} electric
+        {% elif mode == 3 %} gas electric
+        {% elif mode == 4 %} automatic
+        {% elif mode == 5 %} test combustion
+        {% elif mode == 6 %} test electric
+        {% else %} unknown
+        {% endif %}
+      icon: mdi:water-boiler
+
+    - name: "Water Heater Set Point Temperature"
+      unique_id: "waterheater_set_point_temperature"
+      state_topic: "RVC/WATERHEATER_STATUS/1"
+      unit_of_measurement: "°C"
+      value_template: "{{ value_json['set point temperature'] }}"
+      device_class: temperature
+      icon: mdi:thermometer-lines
+
+    - name: "Water Heater Water Temperature"
+      unique_id: "waterheater_water_temperature"
+      state_topic: "RVC/WATERHEATER_STATUS/1"
+      unit_of_measurement: "°C"
+      value_template: "{{ value_json['water temperature'] }}"
+      device_class: temperature
+      icon: mdi:thermometer-water
+
+    - name: "Water Heater Thermostat Status"
+      unique_id: "waterheater_thermostat_status"
+      state_topic: "RVC/WATERHEATER_STATUS/1"
+      value_template: >-
+        {% set status = value_json['thermostat status'] %}
+        {% if status == 0 %} set point met
+        {% elif status == 1 %} set point not met
+        {% else %} unknown
+        {% endif %}
+      icon: mdi:thermostat
+
+    - name: "Water Heater Burner Status"
+      unique_id: "waterheater_burner_status"
+      state_topic: "RVC/WATERHEATER_STATUS/1"
+      value_template: >-
+        {% set status = value_json['burner status'] %}
+        {% if status == 0 %} off
+        {% elif status == 1 %} ac element is active
+        {% else %} unknown
+        {% endif %}
+      icon: mdi:fire
+
+    - name: "Water Heater AC Element Status"
+      unique_id: "waterheater_ac_element_status"
+      state_topic: "RVC/WATERHEATER_STATUS/1"
+      value_template: >-
+        {% set status = value_json['ac element status'] %}
+        {% if status == 0 %} no fault
+        {% elif status == 1 %} open neutral fault detected
+        {% else %} unknown
+        {% endif %}
+      icon: mdi:alert-circle-outline
+
+    - name: "Water Heater High Temp Limit Switch Status"
+      unique_id: "waterheater_high_temp_limit_switch_status"
+      state_topic: "RVC/WATERHEATER_STATUS/1"
+      value_template: >-
+        {% set status = value_json['high temperature limit switch status'] %}
+        {% if status == 0 %} limit switch not tripped
+        {% elif status == 1 %} limit switch tripped
+        {% else %} unknown
+        {% endif %}
+      icon: mdi:alert
+
+    - name: "Water Heater Failure To Ignite Status"
+      unique_id: "waterheater_failure_to_ignite_status"
+      state_topic: "RVC/WATERHEATER_STATUS/1"
+      value_template: >-
+        {% set status = value_json['failure to ignite status'] %}
+        {% if status == 0 %} no failure
+        {% elif status == 1 %} failed to ignite
+        {% else %} unknown
+        {% endif %}
+      icon: mdi:fire-alert
+
+    - name: "Water Heater AC Power Failure Status"
+      unique_id: "waterheater_ac_power_failure_status"
+      state_topic: "RVC/WATERHEATER_STATUS/1"
+      value_template: >-
+        {% set status = value_json['ac power failure status'] %}
+        {% if status == 0 %} ac power present
+        {% elif status == 1 %} ac power not present
+        {% else %} unknown
+        {% endif %}
+      icon: mdi:power-plug-off
+
+    - name: "Water Heater DC Power Failure Status"
+      unique_id: "waterheater_dc_power_failure_status"
+      state_topic: "RVC/WATERHEATER_STATUS/1"
+      value_template: >-
+        {% set status = value_json['dc power failure status'] %}
+        {% if status == 0 %} dc power present
+        {% elif status == 1 %} dc power not present
+        {% else %} unknown
+        {% endif %}
+      icon: mdi:battery-alert-variant-outline
+
 
     # Date and Time from RV-C
     - name: "RV-C System Date"
