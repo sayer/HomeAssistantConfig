@@ -80,44 +80,47 @@ good_night:
       hours: 0
       minutes: 5
       seconds: 0
-  - service: light.turn_off
-    data: {}
+  - condition: state
+    entity_id: input_boolean.camping
+    state: 'on'
+  - data: {}
     target:
       entity_id: light.all_ceiling_lights
+    action: light.turn_off
   - delay:
       hours: 0
       minutes: 1
       seconds: 0
       milliseconds: 0
-  - service: light.turn_off
-    data: {}
+  - data: {}
     target:
       entity_id: light.exterior_lights
+    action: light.turn_off
   - delay:
       hours: 0
       minutes: 1
       seconds: 0
       milliseconds: 0
-  - service: light.turn_off
-    data: {}
+  - data: {}
     target:
       entity_id:
       - light.all_lights
       - light.entry_light_2
-  - service: lock.lock
-    data: {}
+    action: light.turn_off
+  - data: {}
     target:
       entity_id: lock.locks
-  - service: cover.close_cover
-    data: {}
+    action: lock.lock
+  - data: {}
     target:
       entity_id: cover.all_night_shades
-  - service: homeassistant.turn_on
-    data: {}
+    action: cover.close_cover
+  - data: {}
     target:
       entity_id:
       - switch.auto_gen
       - switch.auto_gen_5
+    action: homeassistant.turn_on
   mode: single
 good_morning:
   alias: Good Morning
@@ -129,8 +132,10 @@ good_morning:
       hours: 0
       minutes: 5
       seconds: 0
-  - service: light.turn_on
-    data: {}
+  - condition: state
+    entity_id: input_boolean.camping
+    state: 'on'
+  - data: {}
     target:
       entity_id:
       - light.dimmer_3_19
@@ -139,18 +144,19 @@ good_morning:
       - light.rear_bath_accent
       - light.dimmer_3_10
       - light.entry_light_2
+    action: light.turn_on
   - delay:
       hours: 0
       minutes: 5
       seconds: 0
       milliseconds: 0
-  - service: cover.open_cover
-    data: {}
+  - data: {}
     target:
       entity_id:
       - cover.windshield_night
       - cover.d_s_living_room_night
       - cover.dinette_night
+    action: cover.open_cover
   mode: single
 evening:
   alias: Evening
@@ -162,23 +168,26 @@ evening:
       hours: 0
       minutes: 5
       seconds: 0
-  - service: light.turn_on
-    data: {}
+  - condition: state
+    entity_id: input_boolean.camping
+    state: 'on'
+  - data: {}
     target:
       entity_id:
       - light.exterior_accents
       - light.interior_accents
       - light.porch_handle
       - light.awning_lights
+    action: light.turn_on
   - delay:
       hours: 0
       minutes: 0
       seconds: 5
       milliseconds: 0
-  - service: cover.close_cover
-    data: {}
+  - data: {}
     target:
       entity_id: cover.all_day_shades
+    action: cover.close_cover
   mode: single
   icon: mdi:clock-time-seven
 tv_time:

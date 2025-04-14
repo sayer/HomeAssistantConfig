@@ -469,24 +469,27 @@
 - id: '1680468557675'
   alias: Locking door turns off ceiling lights
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - lock.entry_door_lock_2
     to: locked
     for:
       hours: 0
       minutes: 1
       seconds: 30
-  condition:
+    trigger: state
+  conditions:
   - condition: state
     entity_id: input_boolean.busparked
     state: 'on'
-  action:
-  - service: light.turn_off
-    data: {}
+  - condition: state
+    entity_id: input_boolean.camping
+    state: 'on'
+  actions:
+  - data: {}
     target:
       entity_id: light.all_ceiling_lights
+    action: light.turn_off
   mode: single
 - id: '1680576809879'
   alias: House Batteries Critical Low
