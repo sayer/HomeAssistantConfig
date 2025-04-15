@@ -363,12 +363,12 @@
                   "cards": [
                     {
                       "type": "custom:mushroom-fan-card",
-                      "entity": "fan.rear_bath_fan",
+                      "entity": "fan.mid_bath_fan",
                       "icon_animation": true
                     },
                     {
                       "type": "custom:mushroom-fan-card",
-                      "entity": "fan.mid_bath_fan",
+                      "entity": "fan.rear_bath_fan",
                       "icon_animation": true
                     }
                   ]
@@ -885,12 +885,12 @@
                   "cards": [
                     {
                       "type": "custom:mushroom-fan-card",
-                      "entity": "fan.rear_bath_fan",
+                      "entity": "fan.mid_bath_fan",
                       "icon_animation": true
                     },
                     {
                       "type": "custom:mushroom-fan-card",
-                      "entity": "fan.mid_bath_fan",
+                      "entity": "fan.rear_bath_fan",
                       "icon_animation": true
                     }
                   ]
@@ -973,6 +973,20 @@
                   ],
                   "title": "Heat Pumps",
                   "state_color": true
+                },
+                {
+                  "type": "entities",
+                  "entities": [
+                    {
+                      "entity": "switch.aqua_hot_combustion"
+                    },
+                    {
+                      "entity": "switch.aqua_hot_electric"
+                    },
+                    {
+                      "entity": "sensor.aqua_hot_operating_mode"
+                    }
+                  ]
                 }
               ]
             },
