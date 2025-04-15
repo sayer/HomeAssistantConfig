@@ -1387,7 +1387,7 @@ mqtt:
         {% elif mode == 4 %} automatic
         {% elif mode == 5 %} test combustion
         {% elif mode == 6 %} test electric
-        {% else %} unknown
+        {% else %} invalid
         {% endif %}
       icon: mdi:water-boiler
 
@@ -1414,7 +1414,7 @@ mqtt:
         {% set status = value_json['thermostat status'] %}
         {% if status == 0 %} set point met
         {% elif status == 1 %} set point not met
-        {% else %} unknown
+        {% else %} invalid
         {% endif %}
       icon: mdi:thermostat
 
@@ -1425,7 +1425,7 @@ mqtt:
         {% set status = value_json['burner status'] %}
         {% if status == 0 %} off
         {% elif status == 1 %} ac element is active
-        {% else %} unknown
+        {% else %} invalid
         {% endif %}
       icon: mdi:fire
 
@@ -1436,7 +1436,7 @@ mqtt:
         {% set status = value_json['ac element status'] %}
         {% if status == 0 %} no fault
         {% elif status == 1 %} open neutral fault detected
-        {% else %} unknown
+        {% else %} invalid
         {% endif %}
       icon: mdi:alert-circle-outline
 
@@ -1447,7 +1447,7 @@ mqtt:
         {% set status = value_json['high temperature limit switch status'] %}
         {% if status == 0 %} limit switch not tripped
         {% elif status == 1 %} limit switch tripped
-        {% else %} unknown
+        {% else %} invalid
         {% endif %}
       icon: mdi:alert
 
@@ -1458,7 +1458,7 @@ mqtt:
         {% set status = value_json['failure to ignite status'] %}
         {% if status == 0 %} no failure
         {% elif status == 1 %} failed to ignite
-        {% else %} unknown
+        {% else %} invalid
         {% endif %}
       icon: mdi:fire-alert
 
@@ -1469,7 +1469,7 @@ mqtt:
         {% set status = value_json['ac power failure status'] %}
         {% if status == 0 %} ac power present
         {% elif status == 1 %} ac power not present
-        {% else %} unknown
+        {% else %} invalid
         {% endif %}
       icon: mdi:power-plug-off
 
@@ -1480,7 +1480,7 @@ mqtt:
         {% set status = value_json['dc power failure status'] %}
         {% if status == 0 %} dc power present
         {% elif status == 1 %} dc power not present
-        {% else %} unknown
+        {% else %} invalid
         {% endif %}
       icon: mdi:battery-alert-variant-outline
 
@@ -1527,11 +1527,11 @@ mqtt:
         {% if value_json['motor status definition'] == 'active' %}
         {% if value_json['last command definition'] == 'toggle forward' %}opening
         {% elif value_json['last command definition'] == 'toggle reverse' %}closing
-        {% else %}unknown{% endif %}
+        {% else %}invalid{% endif %}
         {% else %}
         {% if value_json['last command definition'] == 'toggle forward' %}open
         {% elif value_json['last command definition'] == 'toggle reverse' %}closed
-        {% else %}unknown{% endif %}
+        {% else %}invalid{% endif %}
         {% endif %}
 
     - name: "DC House Voltage"
