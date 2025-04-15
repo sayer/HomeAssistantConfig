@@ -103,55 +103,6 @@ input_text:
 
 # Template entities (Switches, Sensors, etc.)
 template:
-  - switch:
-      # Aqua-Hot Switches
-      - name: "Aqua-Hot Combustion"
-        unique_id: aqua_hot_combustion_switch
-        icon: mdi:fire
-        # State is 'on' if mode is 1 (combustion) or 3 (gas electric)
-        value_template: >-
-          {{ states('sensor.aqua_hot_operating_mode') | int(0) in [1, 3] }}
-        turn_on:
-          - service: mqtt.publish
-            data:
-              topic: "RVC/WATERHEATER_COMMAND/1"
-              # If electric is ON, set mode to 3 (gas electric), else set to 1 (combustion)
-              payload_template: >-
-                {% set electric_on = is_state('switch.aqua_hot_electric', 'on') %}
-                {"instance": 1, "operating modes": {{ 3 if electric_on else 1 }} }
-        turn_off:
-          - service: mqtt.publish
-            data:
-              topic: "RVC/WATERHEATER_COMMAND/1"
-              # If electric is ON, set mode to 2 (electric), else set to 0 (off)
-              payload_template: >-
-                {% set electric_on = is_state('switch.aqua_hot_electric', 'on') %}
-                {"instance": 1, "operating modes": {{ 2 if electric_on else 0 }} }
-        availability_template: "{{ states('sensor.aqua_hot_operating_mode') != 'unavailable' }}"
-
-      - name: "Aqua-Hot Electric"
-        unique_id: aqua_hot_electric_switch
-        icon: mdi:lightning-bolt
-        # State is 'on' if mode is 2 (electric) or 3 (gas electric)
-        value_template: >-
-          {{ states('sensor.aqua_hot_operating_mode') | int(0) in [2, 3] }}
-        turn_on:
-          - service: mqtt.publish
-            data:
-              topic: "RVC/WATERHEATER_COMMAND/1"
-              # If combustion is ON, set mode to 3 (gas electric), else set to 2 (electric)
-              payload_template: >-
-                {% set combustion_on = is_state('switch.aqua_hot_combustion', 'on') %}
-                {"instance": 1, "operating modes": {{ 3 if combustion_on else 2 }} }
-        turn_off:
-          - service: mqtt.publish
-            data:
-              topic: "RVC/WATERHEATER_COMMAND/1"
-              # If combustion is ON, set mode to 1 (combustion), else set to 0 (off)
-              payload_template: >-
-                {% set combustion_on = is_state('switch.aqua_hot_combustion', 'on') %}
-                {"instance": 1, "operating modes": {{ 1 if combustion_on else 0 }} }
-        availability_template: "{{ states('sensor.aqua_hot_operating_mode') != 'unavailable' }}"
 
 
 sensor:
@@ -958,6 +909,46 @@ mqtt:
       optimistic: %%OPTIMISTIC_MODE%%
 
   switch:
+    - name: "Aqua-Hot Combustion"
+      unique_id: aqua_hot_combustion_switch_mqtt
+      icon: mdi:fire
+      state_topic: "RVC/WATERHEATER_STATUS/1"
+      # State is 'on' if mode is 1 (combustion) or 3 (gas electric)
+      state_template: "{{ value_json['operating modes'] | int(-1) in [1, 3] }}"
+      command_topic: "RVC/WATERHEATER_COMMAND/1"
+      # Use command_template to dynamically set payload based on desired state and other switch state
+      command_template: >-
+        {% set electric_on = is_state('switch.aqua_hot_electric', 'on') %}
+        {% if value == 'ON' %}
+          {"instance": 1, "operating modes": {{ 3 if electric_on else 1 }} }
+        {% else %}
+          {"instance": 1, "operating modes": {{ 2 if electric_on else 0 }} }
+        {% endif %}
+      payload_on: "ON" # Required for command_template
+      payload_off: "OFF" # Required for command_template
+      optimistic: false
+      retain: false
+
+    - name: "Aqua-Hot Electric"
+      unique_id: aqua_hot_electric_switch_mqtt
+      icon: mdi:lightning-bolt
+      state_topic: "RVC/WATERHEATER_STATUS/1"
+      # State is 'on' if mode is 2 (electric) or 3 (gas electric)
+      state_template: "{{ value_json['operating modes'] | int(-1) in [2, 3] }}"
+      command_topic: "RVC/WATERHEATER_COMMAND/1"
+      # Use command_template to dynamically set payload based on desired state and other switch state
+      command_template: >-
+        {% set combustion_on = is_state('switch.aqua_hot_combustion', 'on') %}
+        {% if value == 'ON' %}
+          {"instance": 1, "operating modes": {{ 3 if combustion_on else 2 }} }
+        {% else %}
+          {"instance": 1, "operating modes": {{ 1 if combustion_on else 0 }} }
+        {% endif %}
+      payload_on: "ON" # Required for command_template
+      payload_off: "OFF" # Required for command_template
+      optimistic: false
+      retain: false
+
 
 
     - name: "AC 1"
