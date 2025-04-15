@@ -899,6 +899,8 @@ mqtt:
       # Use command_template to dynamically set payload based on desired state and other switch state
       payload_on: '{"instance": 1, "operating modes": 1}'
       payload_off: '{"instance": 1, "operating modes": 0}'
+      state_on: "on"
+      state_off: "off"
       optimistic: false
       retain: false
 
@@ -912,6 +914,8 @@ mqtt:
       # Use command_template to dynamically set payload based on desired state and other switch state
       payload_on: '{"instance": 1, "operating modes": 2}'
       payload_off: '{"instance": 1, "operating modes": 0}'
+      state_on: "on"
+      state_off: "off"
       optimistic: false
       retain: false
 
