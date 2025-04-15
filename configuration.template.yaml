@@ -921,8 +921,8 @@ mqtt:
     - name: "Aqua-Hot Electric Low"
       unique_id: aqua_hot_electric_low_switch
       icon: mdi:flash
-      state_topic: "RVC/WATERHEATER_COMMAND_2/1"
-      value_template: "{{ 'on' if value_json['command'] == 0 else 'off' }}"
+      state_topic: "RVC/WATERHEATER_COMMAND_2"
+      value_template: "{{ 'on' if value_json['Command'] == 0 else 'off' }}"
       command_topic: "RVC/WATERHEATER_COMMAND_2/1/set"
       payload_on: '{"instance": 1, "command": 0}'
       payload_off: '{"instance": 1, "command": 1}'
@@ -932,8 +932,8 @@ mqtt:
     - name: "Aqua-Hot Electric High"
       unique_id: aqua_hot_electric_high_switch
       icon: mdi:flash
-      state_topic: "RVC/WATERHEATER_COMMAND_2/1"
-      value_template: "{{ 'on' if value_json['command'] == 3 else 'off' }}"
+      state_topic: "RVC/WATERHEATER_COMMAND_2"
+      value_template: "{{ 'on' if value_json['Command'] == 3 else 'off' }}"
       command_topic: "RVC/WATERHEATER_COMMAND_2/1/set"
       payload_on: '{"instance": 1, "command": 3}'
       payload_off: '{"instance": 1, "command": 4}'
@@ -943,8 +943,8 @@ mqtt:
     - name: "Aqua-Hot Burner"
       unique_id: aqua_hot_burner_switch
       icon: mdi:fire
-      state_topic: "RVC/WATERHEATER_COMMAND_2/1"
-      value_template: "{{ 'on' if value_json['command'] == 6 else 'off' }}"
+      state_topic: "RVC/WATERHEATER_COMMAND_2"
+      value_template: "{{ 'on' if value_json['Command'] == 6 else 'off' }}"
       command_topic: "RVC/WATERHEATER_COMMAND_2/1/set"
       payload_on: '{"instance": 1, "command": 6}'
       payload_off: '{"instance": 1, "command": 7}'
