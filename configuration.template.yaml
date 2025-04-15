@@ -926,17 +926,10 @@ mqtt:
         {% elif mode == 6 %} off
         {% else %} invalid
         {% endif %}
-      command_topic: "RVC/WATERHEATER_COMMAND/1"
+      command_topic: "RVC/WATERHEATER_COMMAND/1/set"
       # Use command_template to dynamically set payload based on desired state and other switch state
-      command_template: >-
-        {% set electric_on = is_state('switch.aqua_hot_electric', 'on') %}
-        {% if value == 'ON' %}
-          {"instance": 1, "operating modes": {{ 3 if electric_on else 1 }} }
-        {% else %}
-          {"instance": 1, "operating modes": {{ 2 if electric_on else 0 }} }
-        {% endif %}
-      payload_on: "ON" # Required for command_template
-      payload_off: "OFF" # Required for command_template
+      payload_on: '{"instance": 1, "operating modes": 1}'
+      payload_off: '{"instance": 1, "operating modes": 0}'
       optimistic: false
       retain: false
 
@@ -946,17 +939,10 @@ mqtt:
       state_topic: "RVC/WATERHEATER_STATUS/1"
       # State is 'on' if mode is 2 (electric) or 3 (gas electric)
       value_template: "{{ value_json['operating modes'] | int(-1) in [2, 3] }}"
-      command_topic: "RVC/WATERHEATER_COMMAND/1"
+      command_topic: "RVC/WATERHEATER_COMMAND/1/set"
       # Use command_template to dynamically set payload based on desired state and other switch state
-      command_template: >-
-        {% set combustion_on = is_state('switch.aqua_hot_combustion', 'on') %}
-        {% if value == 'ON' %}
-          {"instance": 1, "operating modes": {{ 3 if combustion_on else 2 }} }
-        {% else %}
-          {"instance": 1, "operating modes": {{ 1 if combustion_on else 0 }} }
-        {% endif %}
-      payload_on: "ON" # Required for command_template
-      payload_off: "OFF" # Required for command_template
+      payload_on: '{"instance": 1, "operating modes": 2}'
+      payload_off: '{"instance": 1, "operating modes": 0}'
       optimistic: false
       retain: false
 
