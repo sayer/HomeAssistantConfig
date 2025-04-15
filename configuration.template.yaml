@@ -897,8 +897,22 @@ mqtt:
       value_template: "{{ 'on' if value_json['operating modes']|int in [1, 3] else 'off' }}"
       command_topic: "RVC/WATERHEATER_COMMAND/1/set"
       # Use command_template to dynamically set payload based on desired state and other switch state
-      payload_on: '{"instance": 1, "operating modes": 1}'
-      payload_off: '{"instance": 1, "operating modes": 0}'
+      command_template: >-
+        {% set current_mode = value_json['operating modes'] | int(-1) %}
+        {% set electric = states('switch.aqua_hot_electric_switch_mqtt') %}
+        {% if value == 'on' %}
+          {% if electric == 'on' %}
+            {"instance": 1, "operating modes": 3}
+          {% else %}
+            {"instance": 1, "operating modes": 1}
+          {% endif %}
+        {% else %}
+          {% if current_mode == 3 and electric == 'on' %}
+            {"instance": 1, "operating modes": 2}
+          {% else %}
+            {"instance": 1, "operating modes": 0}
+          {% endif %}
+        {% endif %}
       state_on: "on"
       state_off: "off"
       optimistic: false
@@ -912,8 +926,22 @@ mqtt:
       value_template: "{{ 'on' if value_json['operating modes']|int in [2, 3] else 'off' }}"
       command_topic: "RVC/WATERHEATER_COMMAND/1/set"
       # Use command_template to dynamically set payload based on desired state and other switch state
-      payload_on: '{"instance": 1, "operating modes": 2}'
-      payload_off: '{"instance": 1, "operating modes": 0}'
+      command_template: >-
+        {% set current_mode = value_json['operating modes'] | int(-1) %}
+        {% set combustion = states('switch.aqua_hot_combustion_switch_mqtt') %}
+        {% if value == 'on' %}
+          {% if combustion == 'on' %}
+            {"instance": 1, "operating modes": 3}
+          {% else %}
+            {"instance": 1, "operating modes": 2}
+          {% endif %}
+        {% else %}
+          {% if current_mode == 3 and combustion == 'on' %}
+            {"instance": 1, "operating modes": 1}
+          {% else %}
+            {"instance": 1, "operating modes": 0}
+          {% endif %}
+        {% endif %}
       state_on: "on"
       state_off: "off"
       optimistic: false
