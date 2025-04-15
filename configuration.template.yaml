@@ -898,7 +898,7 @@ mqtt:
       command_topic: "RVC/WATERHEATER_COMMAND/1/set"
       # Use command_template to dynamically set payload based on desired state and other switch state
       command_template: >-
-        {% set current_mode = value_json['operating modes'] | int(-1) %}
+        {% set current_mode = states('sensor.aqua_hot_operating_mode_raw') | int(-1) %}
         {% set electric = states('switch.aqua_hot_electric_switch_mqtt') %}
         {% if value == 'on' %}
           {% if electric == 'on' %}
@@ -927,7 +927,7 @@ mqtt:
       command_topic: "RVC/WATERHEATER_COMMAND/1/set"
       # Use command_template to dynamically set payload based on desired state and other switch state
       command_template: >-
-        {% set current_mode = value_json['operating modes'] | int(-1) %}
+        {% set current_mode = states('sensor.aqua_hot_operating_mode_raw') | int(-1) %}
         {% set combustion = states('switch.aqua_hot_combustion_switch_mqtt') %}
         {% if value == 'on' %}
           {% if combustion == 'on' %}
@@ -1391,6 +1391,11 @@ mqtt:
         {% else %} invalid
         {% endif %}
       icon: mdi:water-boiler
+
+    - name: "Aqua-Hot Operating Mode Raw"
+      unique_id: "aqua_hot_operating_mode_raw"
+      state_topic: "RVC/WATERHEATER_STATUS/1"
+      value_template: "{{ value_json['operating modes'] }}"
 
     - name: "Aqua-Hot Set Point Temperature"
       unique_id: "aqua_hot_set_point_temperature"
