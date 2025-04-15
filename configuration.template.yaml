@@ -914,7 +914,7 @@ mqtt:
       icon: mdi:fire
       state_topic: "RVC/WATERHEATER_STATUS/1"
       # State is 'on' if mode is 1 (combustion) or 3 (gas electric)
-      state_template: "{{ value_json['operating modes'] | int(-1) in [1, 3] }}"
+      value_template: "{{ value_json['operating modes'] | int(-1) in [1, 3] }}"
       command_topic: "RVC/WATERHEATER_COMMAND/1"
       # Use command_template to dynamically set payload based on desired state and other switch state
       command_template: >-
@@ -934,7 +934,7 @@ mqtt:
       icon: mdi:lightning-bolt
       state_topic: "RVC/WATERHEATER_STATUS/1"
       # State is 'on' if mode is 2 (electric) or 3 (gas electric)
-      state_template: "{{ value_json['operating modes'] | int(-1) in [2, 3] }}"
+      value_template: "{{ value_json['operating modes'] | int(-1) in [2, 3] }}"
       command_topic: "RVC/WATERHEATER_COMMAND/1"
       # Use command_template to dynamically set payload based on desired state and other switch state
       command_template: >-
