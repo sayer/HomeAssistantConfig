@@ -918,6 +918,39 @@ mqtt:
       optimistic: false
       retain: false
 
+    - name: "Aqua-Hot Electric Low"
+      unique_id: aqua_hot_electric_low_switch
+      icon: mdi:flash
+      state_topic: "RVC/WATERHEATER_COMMAND_2"
+      value_template: "{{ 'on' if value_json['command'] == 0 else 'off' }}"
+      command_topic: "RVC/WATERHEATER_COMMAND_2/set"
+      payload_on: '{"instance": 1, "command": 0}'
+      payload_off: '{"instance": 1, "command": 1}'
+      optimistic: false
+      retain: false
+
+    - name: "Aqua-Hot Electric High"
+      unique_id: aqua_hot_electric_high_switch
+      icon: mdi:flash
+      state_topic: "RVC/WATERHEATER_COMMAND_2"
+      value_template: "{{ 'on' if value_json['command'] == 3 else 'off' }}"
+      command_topic: "RVC/WATERHEATER_COMMAND_2/set"
+      payload_on: '{"instance": 1, "command": 3}'
+      payload_off: '{"instance": 1, "command": 4}'
+      optimistic: false
+      retain: false
+
+    - name: "Aqua-Hot Burner"
+      unique_id: aqua_hot_burner_switch
+      icon: mdi:fire
+      state_topic: "RVC/WATERHEATER_COMMAND_2"
+      value_template: "{{ 'on' if value_json['command'] == 6 else 'off' }}"
+      command_topic: "RVC/WATERHEATER_COMMAND_2/set"
+      payload_on: '{"instance": 1, "command": 6}'
+      payload_off: '{"instance": 1, "command": 7}'
+      optimistic: false
+      retain: false
+
     - name: "Aqua-Hot Electric"
       unique_id: aqua_hot_electric_switch_mqtt
       icon: mdi:lightning-bolt
