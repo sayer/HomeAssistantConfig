@@ -73,27 +73,6 @@ input_boolean:
     name: "Use Optimistic Mode"
     icon: mdi:toggle-switch
 
-# Input booleans for manual control
-  aqua_hot_electric_low:
-    name: "Aqua-Hot Electric Low"
-    icon: mdi:power-plug
-    
-  aqua_hot_electric_high:
-    name: "Aqua-Hot Electric High"
-    icon: mdi:power-plug
-    
-  aqua_hot_burner:
-    name: "Aqua-Hot Burner"
-    icon: mdi:fire
-    
-  aqua_hot_priority_domestic:
-    name: "Aqua-Hot Domestic Priority"
-    icon: mdi:water
-    
-  aqua_hot_priority_heating:
-    name: "Aqua-Hot Heating Priority"
-    icon: mdi:radiator
-
 
 input_text:
   owner_name:
@@ -916,15 +895,11 @@ mqtt:
       # State is 'on' if mode is 1 (combustion) or 3 (gas electric)
       #value_template: "{{ value_json['operating modes'] | int(-1) in [1, 3] }}"
       value_template: >-
-        {% set mode = value_json['operating modes'] %}
-        {% if mode == 0 %} off
-        {% elif mode == 1 %} on
-        {% elif mode == 2 %} off
-        {% elif mode == 3 %} on
-        {% elif mode == 4 %} on
-        {% elif mode == 5 %} off
-        {% elif mode == 6 %} off
-        {% else %} invalid
+        {% set mode = value_json['operating modes'] | int(-1) %}
+        {% if mode == 1 %}
+        on
+        {% else %}
+        off
         {% endif %}
       command_topic: "RVC/WATERHEATER_COMMAND/1/set"
       # Use command_template to dynamically set payload based on desired state and other switch state
