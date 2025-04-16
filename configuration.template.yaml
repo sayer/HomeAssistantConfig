@@ -1417,21 +1417,6 @@ mqtt:
 %%ALL_SHADES%%
 
   sensor:
-    - name: "Cargo Lock Group Debug States"
-      state: >-
-        {{ [
-          states.lock.cargo_door_lock1.state,
-          states.lock.cargo_door_lock2.state,
-          states.lock.cargo_door_lock3.state,
-          states.lock.cargo_door_lock4.state
-        ] | join(', ') }}
-      unique_id: "debug_cargo_lock_group_states"
-
-    - name: "Cargo Lock 2 Raw Status"
-      state_topic: "RVC/LOCK_STATUS/3"
-      value_template: "{{ value_json['lock status definition'] | default('MISSING') }}"
-      unique_id: "debug_cargolock2_raw"
-
 
     # Battery Voltage Sensor
     - name: "House Battery Voltage"
