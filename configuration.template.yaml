@@ -1973,9 +1973,10 @@ mqtt:
 
 ##################################################################
 
-group:
-  cargo_door_locks:
+lock:
+  - platform: group
     name: "Cargo Door Locks"
+    unique_id: cargo_door_locks
     entities:
       - lock.cargolock2
       - lock.cargolock3
