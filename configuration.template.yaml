@@ -255,7 +255,7 @@ mqtt:
       state_locked: "locked"
       state_unlocked: "unlocked"
       unique_id: "cargo_door_lock3"
-    - name: "Cargo Door Door 4"
+    - name: "Cargo Door Lock 4"
       icon: mdi:key
       state_topic: "RVC/LOCK_STATUS/5"
       value_template: "{{ value_json['lock status definition'] }}"
@@ -1995,9 +1995,10 @@ lock:
     unique_id: cargo_door_locks
     value_template: >-
       {% set locks = [
-        states.lock.cargolock1,
-        states.lock.cargolock2,
-        states.lock.cargolock3
+        states.lock.cargo_door_lock1,
+        states.lock.cargo_door_lock2,
+        states.lock.cargo_door_lock3,
+        states.lock.cargo_door_lock4,
       ] %}
       {% set available_locks = locks | selectattr('state', 'in', ['locked', 'unlocked']) | list %}
       {% if available_locks | length == 0 %}
