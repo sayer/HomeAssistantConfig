@@ -1442,12 +1442,12 @@ mqtt:
 
     - name: "Aqua-Hot Burner State"
       unique_id: aqua_hot_burner_state
-      state_topic: "RVC/WATERHEATER_COMMAND_2"
+      state_topic: "RVC/WATERHEATER_STATUS/1"
       value_template: >-
-        {% if value_json is defined and value_json['Command'] is defined %}
-          {{ 'on' if value_json['Command'] == 6 else 'off' }}
+        {% if value_json is defined and value_json['burner status'] is defined %}
+          {{ 'on' if value_json['burner status'] == '01' else 'off' }}
         {% else %}
-          invalid: {{ value_json }}
+          invalid 
         {% endif %}
 
     - name: "Aqua-Hot Electric Low State"
@@ -1457,7 +1457,7 @@ mqtt:
         {% if value_json is defined and value_json['Command'] is defined %}
           {{ 'on' if value_json['Command'] == 0 else 'off' }}
         {% else %}
-          invalid: {{ value_json }}
+          invalid
         {% endif %}
 
     - name: "Aqua-Hot Operating Mode Raw"
@@ -1485,10 +1485,14 @@ mqtt:
       unique_id: "aqua_hot_thermostat_status"
       state_topic: "RVC/WATERHEATER_STATUS/1"
       value_template: >-
-        {% set status = value_json['thermostat status'] %}
-        {% if status == 0 %} set point met
-        {% elif status == 1 %} set point not met
-        {% else %} invalid: {{ value_json }}
+        {% if value_json is defined and value_json['thermostat status'] is defined %}
+          {% set status = value_json['thermostat status'] %}
+          {% if status == '00' or status == 0 %} set point met
+          {% elif status == '01' or status == 1 %} set point not met
+          {% else %} unknown
+          {% endif %}
+        {% else %}
+          unknown
         {% endif %}
       icon: mdi:thermostat
 
@@ -1496,10 +1500,14 @@ mqtt:
       unique_id: "aqua_hot_burner_status"
       state_topic: "RVC/WATERHEATER_STATUS/1"
       value_template: >-
-        {% set status = value_json['burner status'] %}
-        {% if status == 0 %} off
-        {% elif status == 1 %} ac element is active
-        {% else %} invalid: {{ value_json }}
+        {% if value_json is defined and value_json['burner status'] is defined %}
+          {% set status = value_json['burner status'] %}
+          {% if status == '00' or status == 0 %} off
+          {% elif status == '01' or status == 1 %} ac element is active
+          {% else %} unknown
+          {% endif %}
+        {% else %}
+          unknown
         {% endif %}
       icon: mdi:fire
 
@@ -1507,10 +1515,14 @@ mqtt:
       unique_id: "aqua_hot_ac_element_status"
       state_topic: "RVC/WATERHEATER_STATUS/1"
       value_template: >-
-        {% set status = value_json['ac element status'] %}
-        {% if status == 0 %} no fault
-        {% elif status == 1 %} open neutral fault detected
-        {% else %} invalid: {{ value_json }}
+        {% if value_json is defined and value_json['ac element status'] is defined %}
+          {% set status = value_json['ac element status'] %}
+          {% if status == '00' or status == 0 %} no fault
+          {% elif status == '11' or status == 1 %} open neutral fault detected
+          {% else %} invalid: {{ status }}
+          {% endif %}
+        {% else %}
+          invalid
         {% endif %}
       icon: mdi:alert-circle-outline
 
@@ -1518,10 +1530,14 @@ mqtt:
       unique_id: "aqua_hot_high_temp_limit_switch_status"
       state_topic: "RVC/WATERHEATER_STATUS/1"
       value_template: >-
-        {% set status = value_json['high temperature limit switch status'] %}
-        {% if status == 0 %} limit switch not tripped
-        {% elif status == 1 %} limit switch tripped
-        {% else %} invalid: {{ value_json }}
+        {% if value_json is defined and value_json['high temperature limit switch status'] is defined %}
+          {% set status = value_json['high temperature limit switch status'] %}
+          {% if status == '00' or status == 0 %} limit switch not tripped
+          {% elif status == '11' or status == 1 %} limit switch tripped
+          {% else %} unknown
+          {% endif %}
+        {% else %}
+          unknown
         {% endif %}
       icon: mdi:alert
 
@@ -1529,10 +1545,14 @@ mqtt:
       unique_id: "aqua_hot_failure_to_ignite_status"
       state_topic: "RVC/WATERHEATER_STATUS/1"
       value_template: >-
-        {% set status = value_json['failure to ignite status'] %}
-        {% if status == 0 %} no failure
-        {% elif status == 1 %} failed to ignite
-        {% else %} invalid: {{ value_json }}
+        {% if value_json is defined and value_json['failure to ignite status'] is defined %}
+          {% set status = value_json['failure to ignite status'] %}
+          {% if status == '00' or status == 0 %} no failure
+          {% elif status == '11' or status == 1 %} failed to ignite
+          {% else %} unknown
+          {% endif %}
+        {% else %}
+          unknown
         {% endif %}
       icon: mdi:fire-alert
 
