@@ -923,11 +923,8 @@ mqtt:
       icon: mdi:flash
       state_topic: "RVC/WATERHEATER_COMMAND_2"
       value_template: >-
-        {% if value_json is defined and value_json['Command'] is defined %}
-          {{ 'on' if value_json['Command'] == 0 else 'off' }}
-        {% else %}
-          invalid
-        {% endif %}
+        {% set s = states('sensor.aqua_hot_electric_low_state') %}
+        {{ 'on' if s == 'on' else 'off' }}
       command_topic: "RVC/WATERHEATER_COMMAND_2/1/set"
       payload_on: '{"instance": 1, "command": 0}'
       payload_off: '{"instance": 1, "command": 1}'
@@ -1429,6 +1426,17 @@ mqtt:
         {% else %} invalid
         {% endif %}
       icon: mdi:water-boiler
+
+
+    - name: "Aqua-Hot Electric Low State"
+      unique_id: aqua_hot_electric_low_state
+      state_topic: "RVC/WATERHEATER_COMMAND_2"
+      value_template: >-
+        {% if value_json is defined and value_json['Command'] is defined %}
+          {{ 'on' if value_json['Command'] == 0 else 'off' }}
+        {% else %}
+          invalid
+        {% endif %}
 
     - name: "Aqua-Hot Operating Mode Raw"
       unique_id: "aqua_hot_operating_mode_raw"
