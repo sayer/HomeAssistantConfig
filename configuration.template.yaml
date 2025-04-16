@@ -98,6 +98,15 @@ sensor:
 
   - platform: template
     sensors:
+      cargo_lock_group_debug_states:
+        friendly_name: "Cargo Lock Group Debug States"
+        value_template: >-
+          {{ [
+            states.lock.cargo_door_lock1.state,
+            states.lock.cargo_door_lock2.state,
+            states.lock.cargo_door_lock3.state,
+            states.lock.cargo_door_lock4.state
+          ] | join(', ') }}
       outback1_voltage:
         friendly_name: "Outback 1 Battery Voltage"
         unit_of_measurement: "Vdc"
