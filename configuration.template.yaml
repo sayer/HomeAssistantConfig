@@ -276,6 +276,7 @@ mqtt:
       state_unlocked: "unlocked"
       unique_id: "cargolock5"
 
+
   climate:
     - name: Living Room
       temperature_unit: "F"
@@ -1407,6 +1408,11 @@ mqtt:
 %%ALL_SHADES%%
 
   sensor:
+
+    - name: "Cargo Lock 2 Raw Status"
+      state_topic: "RVC/LOCK_STATUS/3"
+      value_template: "{{ value_json['lock status definition'] | default('MISSING') }}"
+      unique_id: "debug_cargolock2_raw"
 
 
     # Battery Voltage Sensor
