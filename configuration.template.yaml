@@ -60,14 +60,6 @@ input_number:
     mode: box
     icon: mdi:rv-truck
 
-  aqua_hot_setpoint:
-    name: Aqua-Hot Temperature Setpoint
-    min: 38
-    max: 65
-    step: 1
-    unit_of_measurement: °C
-    icon: mdi:thermometer
-
 input_boolean:
   is_optimistic:
     name: "Use Optimistic Mode"
@@ -935,7 +927,9 @@ mqtt:
       unique_id: aqua_hot_electric_high_switch
       icon: mdi:flash
       state_topic: "RVC/WATERHEATER_COMMAND_2"
-      value_template: "{{ 'on' if value_json['Command'] == 3 else 'off' }}"
+      value_template: >-
+        {% set s = states('sensor.aqua_hot_electric_high_state') %}
+        {{ 'on' if s == 'on' else 'off' }}
       command_topic: "RVC/WATERHEATER_COMMAND_2/1/set"
       payload_on: '{"instance": 1, "command": 3}'
       payload_off: '{"instance": 1, "command": 4}'
@@ -946,7 +940,9 @@ mqtt:
       unique_id: aqua_hot_burner_switch
       icon: mdi:fire
       state_topic: "RVC/WATERHEATER_COMMAND_2"
-      value_template: "{{ 'on' if value_json['Command'] == 6 else 'off' }}"
+      value_template: >-
+        {% set s = states('sensor.aqua_hot_burner_state') %}
+        {{ 'on' if s == 'on' else 'off' }}
       command_topic: "RVC/WATERHEATER_COMMAND_2/1/set"
       payload_on: '{"instance": 1, "command": 6}'
       payload_off: '{"instance": 1, "command": 7}'
@@ -1427,6 +1423,27 @@ mqtt:
         {% endif %}
       icon: mdi:water-boiler
 
+
+
+    - name: "Aqua-Hot Electric High State"
+      unique_id: aqua_hot_electric_high_state
+      state_topic: "RVC/WATERHEATER_COMMAND_2"
+      value_template: >-
+        {% if value_json is defined and value_json['Command'] is defined %}
+          {{ 'on' if value_json['Command'] == 3 else 'off' }}
+        {% else %}
+          invalid
+        {% endif %}
+
+    - name: "Aqua-Hot Burner State"
+      unique_id: aqua_hot_burner_state
+      state_topic: "RVC/WATERHEATER_COMMAND_2"
+      value_template: >-
+        {% if value_json is defined and value_json['Command'] is defined %}
+          {{ 'on' if value_json['Command'] == 6 else 'off' }}
+        {% else %}
+          invalid
+        {% endif %}
 
     - name: "Aqua-Hot Electric Low State"
       unique_id: aqua_hot_electric_low_state
