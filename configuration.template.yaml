@@ -225,7 +225,7 @@ mqtt:
       state_locked: "locked"
       state_unlocked: "unlocked"
 
-    - name: "Cargo Door D/S"
+    - name: "Cargo Door 1"
       icon: mdi:key
       state_topic: "RVC/LOCK_STATUS/2"
       value_template: "{{ value_json['lock status definition'] }}"
@@ -235,7 +235,7 @@ mqtt:
       state_locked: "locked"
       state_unlocked: "unlocked"
       unique_id: "cargolock1"
-    - name: "Cargo Door P/S"
+    - name: "Cargo Door 2"
       icon: mdi:key
       state_topic: "RVC/LOCK_STATUS/3"
       value_template: "{{ value_json['lock status definition'] }}"
@@ -267,7 +267,7 @@ mqtt:
       unique_id: "cargolock4"
     - name: "Cargo Door 5"
       icon: mdi:key
-      state_topic: "RVC/LOCK_STATUS/5"
+      state_topic: "RVC/LOCK_STATUS/6"
       value_template: "{{ value_json['lock status definition'] }}"
       command_topic: "RVCSET/MESSAGE/1FEE4"
       payload_lock: "0601FFFFFFFFFFFF"
@@ -293,7 +293,12 @@ mqtt:
       #      mode_command_template: "{{ value if value=="off" else "on" }}"
       temperature_command_topic: "RVCSET/THERMOSTAT_COMMAND_1_TEMP/2"
       temperature_state_topic: "RVC/THERMOSTAT_COMMAND_1/2"
-      temperature_state_template: "{{ value_json['setpoint temp heat F'] }}"
+      temperature_state_template: >-
+        {% if value_json['setpoint temp heat F'] == "n/a" %}
+          0
+        {% else %}
+          {{ value_json['setpoint temp heat F'] }}
+        {% endif %}
       fan_mode_command_topic: "RVC/THERMOSTAT_COMMAND_1_FAN/2"
       unique_id: "hvac_livingroom"
       precision: 1.0
@@ -316,7 +321,12 @@ mqtt:
       #      mode_command_template: "{{ value if value=="off" else "on" }}"
       temperature_command_topic: "RVCSET/THERMOSTAT_COMMAND_1_TEMP/3"
       temperature_state_topic: "RVC/THERMOSTAT_COMMAND_1/3"
-      temperature_state_template: "{{ value_json['setpoint temp heat F'] }}"
+      temperature_state_template: >-
+        {% if value_json['setpoint temp heat F'] == "n/a" %}
+          0
+        {% else %}
+          {{ value_json['setpoint temp heat F'] }}
+        {% endif %}
       fan_mode_command_topic: "RVC/THERMOSTAT_COMMAND_1_FAN/3"
       unique_id: "hvac_kitchen"
       precision: 1.0
