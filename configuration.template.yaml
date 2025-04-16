@@ -1424,7 +1424,7 @@ mqtt:
         {% elif mode == 4 %} automatic
         {% elif mode == 5 %} test combustion
         {% elif mode == 6 %} test electric
-        {% else %} invalid: {{ value_json }}
+        {% else %} invalid
         {% endif %}
       icon: mdi:water-boiler
 
@@ -1437,7 +1437,7 @@ mqtt:
         {% if value_json is defined and value_json['Command'] is defined %}
           {{ 'on' if value_json['Command'] == 3 else 'off' }}
         {% else %}
-          invalid: {{ value_json }}
+          invalid
         {% endif %}
 
     - name: "Aqua-Hot Burner State"
@@ -1494,7 +1494,7 @@ mqtt:
           {% set status = value_json['thermostat status'] %}
           {% if status == '00' or status == 0 %} set point met
           {% elif status == '01' or status == 1 %} set point not met
-          {% else %} invalid: {{ status }}
+          {% else %} invalid
           {% endif %}
         {% else %}
           invalid
@@ -1638,7 +1638,7 @@ mqtt:
         {% else %}
         {% if value_json['last command definition'] == 'toggle forward' %}open
         {% elif value_json['last command definition'] == 'toggle reverse' %}closed
-        {% else %}invalid: {{ value_json }} {% endif %}
+        {% else %}invalid{% endif %}
         {% endif %}
 
     - name: "DC House Voltage"
@@ -1867,6 +1867,20 @@ mqtt:
       payload_on: "on"
       payload_off: "off"
       unique_id: "water_autofill"
+
+    - name: "Aqua-Hot Active"
+      state_topic: "RVC/WATERHEATER_STATUS/1"
+      value_template: >-
+        {% if value_json is defined and value_json['operating modes'] is defined %}
+          {{ 'on' if value_json['operating modes'] != 0 else 'off' }}
+        {% else %}
+          invalid
+        {% endif %}
+      payload_on: "on"
+      payload_off: "off"
+      device_class: heat
+      unique_id: "aqua_hot_active"
+      
     - name: "Black Waste Dump"
       state_topic: "RVC/WASTEDUMP_STATUS"
       value_template: "{{ value_json['black valve status definition'] }}"
@@ -1892,16 +1906,6 @@ mqtt:
       value_template: "{{ value_json['dc power failure status definition'] != 'dc power not present' }}"
       device_class: power
 
-    # Aqua-Hot Status
-    - name: "Aqua-Hot Active"
-      state_topic: "RVC/WATERHEATER_STATUS/1"
-      value_template: >-
-        {% if value_json is defined and value_json['operating modes'] is defined %}
-          {{ 'on' if value_json['operating modes'] != 0 else 'off' }}
-        {% else %}
-          unknown
-        {% endif %}
-      device_class: heat
 
 ##################################################################
 
