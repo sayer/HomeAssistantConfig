@@ -225,7 +225,7 @@ mqtt:
       state_locked: "locked"
       state_unlocked: "unlocked"
 
-    - name: "Cargo Door 1"
+    - name: "Cargo Door Lock 1"
       icon: mdi:key
       state_topic: "RVC/LOCK_STATUS/2"
       value_template: "{{ value_json['lock status definition'] }}"
@@ -234,8 +234,8 @@ mqtt:
       payload_unlock: "0200FFFFFFFFFFFF"
       state_locked: "locked"
       state_unlocked: "unlocked"
-      unique_id: "cargolock1"
-    - name: "Cargo Door 2"
+      unique_id: "cargo_door_lock1"
+    - name: "Cargo Door Lock 2"
       icon: mdi:key
       state_topic: "RVC/LOCK_STATUS/3"
       value_template: "{{ value_json['lock status definition'] }}"
@@ -244,8 +244,8 @@ mqtt:
       payload_unlock: "0300FFFFFFFFFFFF"
       state_locked: "locked"
       state_unlocked: "unlocked"
-      unique_id: "cargolock2"
-    - name: "Cargo Door 3"
+      unique_id: "cargo_door_lock2"
+    - name: "Cargo Door Lock 3"
       icon: mdi:key
       state_topic: "RVC/LOCK_STATUS/4"
       value_template: "{{ value_json['lock status definition'] }}"
@@ -254,8 +254,8 @@ mqtt:
       payload_unlock: "0400FFFFFFFFFFFF"
       state_locked: "locked"
       state_unlocked: "unlocked"
-      unique_id: "cargolock3"
-    - name: "Cargo Door 4"
+      unique_id: "cargo_door_lock3"
+    - name: "Cargo Door Door 4"
       icon: mdi:key
       state_topic: "RVC/LOCK_STATUS/5"
       value_template: "{{ value_json['lock status definition'] }}"
@@ -264,8 +264,8 @@ mqtt:
       payload_unlock: "0501FFFFFFFFFFFF"
       state_locked: "locked"
       state_unlocked: "unlocked"
-      unique_id: "cargolock4"
-    - name: "Cargo Door 5"
+      unique_id: "cargo_door_lock4"
+    - name: "Cargo Door Lock 5"
       icon: mdi:key
       state_topic: "RVC/LOCK_STATUS/6"
       value_template: "{{ value_json['lock status definition'] }}"
@@ -274,7 +274,7 @@ mqtt:
       payload_unlock: "0601FFFFFFFFFFFF"
       state_locked: "locked"
       state_unlocked: "unlocked"
-      unique_id: "cargolock5"
+      unique_id: "cargolcargo_door_lock5"
 
 
   climate:
@@ -2011,20 +2011,20 @@ lock:
       service: lock.lock
       target:
         entity_id:
-          - lock.cargolock1
-          - lock.cargolock2
-          - lock.cargolock3
-          - lock.cargolock4
-          - lock.cargolock5
+          - lock.cargo_door_lock1
+          - lock.cargo_door_lock2
+          - lock.cargo_door_lock3
+          - lock.cargo_door_lock4
+          - lock.cargo_door_lock5
     unlock:
       service: lock.unlock
       target:
         entity_id:
-          - lock.cargolock1
-          - lock.cargolock2
-          - lock.cargolock3
-          - lock.cargolock4
-          - lock.cargolock5
+          - lock.cargo_door_lock1
+          - lock.cargo_door_lock2
+          - lock.cargo_door_lock3
+          - lock.cargo_door_lock4
+          - lock.cargo_door_lock5
 
 
 light:
