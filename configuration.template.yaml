@@ -76,58 +76,7 @@ input_text:
 template:
 
 
-lock:
-  - name: "Entry Door Lock"
-    icon: mdi:key
-    state_topic: "RVC/LOCK_STATUS/1"
-    unique_id: "EntryDoorLock"
-    value_template: "{{ value_json['lock status definition'] }}"
-    command_topic: "RVCSET/MESSAGE/1FEE4"
-    payload_lock: "0101FFFFFFFFFFFF"
-    payload_unlock: "0100FFFFFFFFFFFF"
-    state_locked: "locked"
-    state_unlocked: "unlocked"
-  - name: "Cargo Door D/S"
-    icon: mdi:key
-    state_topic: "RVC/LOCK_STATUS/2"
-    value_template: "{{ value_json['lock status definition'] }}"
-    command_topic: "RVCSET/MESSAGE/1FEE4"
-    payload_lock: "0201FFFFFFFFFFFF"
-    payload_unlock: "0200FFFFFFFFFFFF"
-    state_locked: "locked"
-    state_unlocked: "unlocked"
-    unique_id: "cargolock2"
-  - name: "Cargo Door P/S"
-    icon: mdi:key
-    state_topic: "RVC/LOCK_STATUS/3"
-    value_template: "{{ value_json['lock status definition'] }}"
-    command_topic: "RVCSET/MESSAGE/1FEE4"
-    payload_lock: "0301FFFFFFFFFFFF"
-    payload_unlock: "0300FFFFFFFFFFFF"
-    state_locked: "locked"
-    state_unlocked: "unlocked"
-    unique_id: "cargolock3"
-  - name: "Cargo Door 3"
-    icon: mdi:key
-    state_topic: "RVC/LOCK_STATUS/4"
-    value_template: "{{ value_json['lock status definition'] }}"
-    command_topic: "RVCSET/MESSAGE/1FEE4"
-    payload_lock: "0401FFFFFFFFFFFF"
-    payload_unlock: "0400FFFFFFFFFFFF"
-    state_locked: "locked"
-    state_unlocked: "unlocked"
-    unique_id: "cargolock4"
-  - name: "Cargo Door 4"
-    icon: mdi:key
-    state_topic: "RVC/LOCK_STATUS/6"
-    value_template: "{{ value_json['lock status definition'] }}"
-    command_topic: "RVCSET/MESSAGE/1FEE4"
-    payload_lock: "0601FFFFFFFFFFFF"
-    payload_unlock: "0601FFFFFFFFFFFF"
-    state_locked: "locked"
-    state_unlocked: "unlocked"
-    unique_id: "cargolock5"
-
+l
 sensor:
   - platform: rest
     name: Current ISP
@@ -269,6 +218,60 @@ notify:
     recipient: "sayer@ayersnet.com"
 
 mqtt:
+
+lock:
+  - name: "Entry Door Lock"
+    icon: mdi:key
+    state_topic: "RVC/LOCK_STATUS/1"
+    unique_id: "EntryDoorLock"
+    value_template: "{{ value_json['lock status definition'] }}"
+    command_topic: "RVCSET/MESSAGE/1FEE4"
+    payload_lock: "0101FFFFFFFFFFFF"
+    payload_unlock: "0100FFFFFFFFFFFF"
+    state_locked: "locked"
+    state_unlocked: "unlocked"
+  - name: "Cargo Door D/S"
+    icon: mdi:key
+    state_topic: "RVC/LOCK_STATUS/2"
+    value_template: "{{ value_json['lock status definition'] }}"
+    command_topic: "RVCSET/MESSAGE/1FEE4"
+    payload_lock: "0201FFFFFFFFFFFF"
+    payload_unlock: "0200FFFFFFFFFFFF"
+    state_locked: "locked"
+    state_unlocked: "unlocked"
+    unique_id: "cargolock2"
+  - name: "Cargo Door P/S"
+    icon: mdi:key
+    state_topic: "RVC/LOCK_STATUS/3"
+    value_template: "{{ value_json['lock status definition'] }}"
+    command_topic: "RVCSET/MESSAGE/1FEE4"
+    payload_lock: "0301FFFFFFFFFFFF"
+    payload_unlock: "0300FFFFFFFFFFFF"
+    state_locked: "locked"
+    state_unlocked: "unlocked"
+    unique_id: "cargolock3"
+  - name: "Cargo Door 3"
+    icon: mdi:key
+    state_topic: "RVC/LOCK_STATUS/4"
+    value_template: "{{ value_json['lock status definition'] }}"
+    command_topic: "RVCSET/MESSAGE/1FEE4"
+    payload_lock: "0401FFFFFFFFFFFF"
+    payload_unlock: "0400FFFFFFFFFFFF"
+    state_locked: "locked"
+    state_unlocked: "unlocked"
+    unique_id: "cargolock4"
+  - name: "Cargo Door 4"
+    icon: mdi:key
+    state_topic: "RVC/LOCK_STATUS/6"
+    value_template: "{{ value_json['lock status definition'] }}"
+    command_topic: "RVCSET/MESSAGE/1FEE4"
+    payload_lock: "0601FFFFFFFFFFFF"
+    payload_unlock: "0601FFFFFFFFFFFF"
+    state_locked: "locked"
+    state_unlocked: "unlocked"
+    unique_id: "cargolock5"
+
+
   climate:
     - name: Living Room
       temperature_unit: "F"
@@ -1965,6 +1968,16 @@ mqtt:
 
 
 ##################################################################
+
+group:
+  cargo_door_locks:
+    name: "Cargo Door Locks"
+    entities:
+      - lock.cargolock2
+      - lock.cargolock3
+      - lock.cargolock4
+      - lock.cargolock5
+
 
 light:
   - platform: group
