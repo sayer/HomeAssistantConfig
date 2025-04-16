@@ -1692,18 +1692,23 @@ mqtt:
       unique_id: "vehiclespeed"
       icon: mdi:speedometer
       state_class: measurement
-      value_template: "{{ ((value_json['vehicle speed'] | float / 256) / 1.609344) | round(0) | int }}"
+      value_template: >-
+        {% if value_json['vehicle speed'] == 65535 %}
+          0
+        {% else %}
+          {{ ((value_json['vehicle speed'] | float / 256) / 1.609344) | round(0) | int }}
+        {% endif %}
     - name: "Vehicle RPM"
       state_topic: "RVC/CHASSIS_MOBILITY_STATUS"
       unique_id: "engine_rpm"
       icon: mdi:speedometer
       state_class: measurement
       value_template: >-
-        {% if ((value_json['engine rpms'] == 'unknown') or (value_json['engine rpms'] == 'unavailable')) %}
+        {% if (value_json['engine rpms'] == 'unknown') or (value_json['engine rpms'] == 'unavailable') or (value_json['engine rpms'] == 65535) %}
           0
-          {% else %}
+        {% else %}
           {{ (((value_json['engine rpms']) | float) * 0.125) | int}}
-          {% endif %}
+        {% endif %}
 
     - name: "Transmision Gear"
       state_topic: "RVC/CHASSIS_MOBILITY_STATUS"
