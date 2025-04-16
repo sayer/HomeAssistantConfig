@@ -1408,6 +1408,15 @@ mqtt:
 %%ALL_SHADES%%
 
   sensor:
+    - name: "Cargo Lock Group Debug States"
+      state: >-
+        {{ [
+          states.lock.cargo_door_lock1.state,
+          states.lock.cargo_door_lock2.state,
+          states.lock.cargo_door_lock3.state,
+          states.lock.cargo_door_lock4.state
+        ] | join(', ') }}
+      unique_id: "debug_cargo_lock_group_states"
 
     - name: "Cargo Lock 2 Raw Status"
       state_topic: "RVC/LOCK_STATUS/3"
@@ -2016,7 +2025,6 @@ lock:
           - lock.cargo_door_lock2
           - lock.cargo_door_lock3
           - lock.cargo_door_lock4
-          - lock.cargo_door_lock5
     unlock:
       service: lock.unlock
       target:
@@ -2025,7 +2033,6 @@ lock:
           - lock.cargo_door_lock2
           - lock.cargo_door_lock3
           - lock.cargo_door_lock4
-          - lock.cargo_door_lock5
 
 
 light:
