@@ -20,6 +20,46 @@ script: !include scripts.yaml
 scene: !include scenes.yaml
 shell_command: !include shell_commands.yaml
 
+script:
+  lock_all_cargo_doors:
+    alias: "Lock All Cargo Doors with Delay"
+    sequence:
+      - service: lock.lock
+        target:
+          entity_id: lock.cargo_door_lock_1
+      - delay: "00:00:02"
+      - service: lock.lock
+        target:
+          entity_id: lock.cargo_door_lock_2
+      - delay: "00:00:02"
+      - service: lock.lock
+        target:
+          entity_id: lock.cargo_door_lock_3
+      - delay: "00:00:02"
+      - service: lock.lock
+        target:
+          entity_id: lock.cargo_door_lock_4
+
+  unlock_all_cargo_doors:
+    alias: "Unlock All Cargo Doors with Delay"
+    sequence:
+      - service: lock.unlock
+        target:
+          entity_id: lock.cargo_door_lock_1
+      - delay: "00:00:02"
+      - service: lock.unlock
+        target:
+          entity_id: lock.cargo_door_lock_2
+      - delay: "00:00:02"
+      - service: lock.unlock
+        target:
+          entity_id: lock.cargo_door_lock_3
+      - delay: "00:00:02"
+      - service: lock.unlock
+        target:
+          entity_id: lock.cargo_door_lock_4
+
+
 homeassistant:
   customize:
     zone.foretravel:
@@ -2013,21 +2053,9 @@ lock:
         locked
       {% endif %}
     lock:
-      service: lock.lock
-      target:
-        entity_id:
-          - lock.cargo_door_lock_1
-          - lock.cargo_door_lock_2
-          - lock.cargo_door_lock_3
-          - lock.cargo_door_lock_4
+      service: script.lock_all_cargo_doors
     unlock:
-      service: lock.unlock
-      target:
-        entity_id:
-          - lock.cargo_door_lock_1
-          - lock.cargo_door_lock_2
-          - lock.cargo_door_lock_3
-          - lock.cargo_door_lock_4
+      service: script.unlock_all_cargo_doors
 
 
 light:
