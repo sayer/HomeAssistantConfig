@@ -71,12 +71,6 @@ input_text:
     name: Owner Name
 
 
-
-# Template entities (Switches, Sensors, etc.)
-template:
-
-
-l
 sensor:
   - platform: rest
     name: Current ISP
