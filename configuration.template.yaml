@@ -1469,7 +1469,12 @@ mqtt:
       unique_id: "aqua_hot_set_point_temperature"
       state_topic: "RVC/WATERHEATER_STATUS/1"
       unit_of_measurement: "°C"
-      value_template: "{{ value_json['set point temperature'] }}"
+      value_template: >-
+        {% if value_json['set point temperature'] == "n/a" %}
+          0
+        {% else %}
+          {{ value_json['set point temperature'] }}
+        {% endif %}
       device_class: temperature
       icon: mdi:thermometer-lines
 
@@ -1560,10 +1565,14 @@ mqtt:
       unique_id: "aqua_hot_ac_power_failure_status"
       state_topic: "RVC/WATERHEATER_STATUS/1"
       value_template: >-
-        {% set status = value_json['ac power failure status'] %}
-        {% if status == 0 %} ac power present
-        {% elif status == 1 %} ac power not present
-        {% else %} invalid: {{ value_json }}
+        {% if value_json is defined and value_json['ac power failure status'] is defined %}
+          {% set status = value_json['ac power failure status'] %}
+          {% if status == '00' or status == 0 %} ac power present
+          {% elif status == '11' or status == 1 %} ac power not present
+          {% else %} invalid: {{ status }}
+          {% endif %}
+        {% else %}
+          invalid
         {% endif %}
       icon: mdi:power-plug-off
 
@@ -1571,10 +1580,14 @@ mqtt:
       unique_id: "aqua_hot_dc_power_failure_status"
       state_topic: "RVC/WATERHEATER_STATUS/1"
       value_template: >-
-        {% set status = value_json['dc power failure status'] %}
-        {% if status == 0 %} dc power present
-        {% elif status == 1 %} dc power not present
-        {% else %} invalid: {{ value_json }}
+        {% if value_json is defined and value_json['dc power failure status'] is defined %}
+          {% set status = value_json['dc power failure status'] %}
+          {% if status == '00' or status == 0 %} dc power present
+          {% elif status == '11' or status == 1 %} dc power not present
+          {% else %} invalid: {{ status }}
+          {% endif %}
+        {% else %}
+          invalid
         {% endif %}
       icon: mdi:battery-alert-variant-outline
 
@@ -1882,7 +1895,12 @@ mqtt:
     # Aqua-Hot Status
     - name: "Aqua-Hot Active"
       state_topic: "RVC/WATERHEATER_STATUS/1"
-      value_template: "{{ value_json['operating modes'] != 0 }}"
+      value_template: >-
+        {% if value_json is defined and value_json['operating modes'] is defined %}
+          {{ 'on' if value_json['operating modes'] != 0 else 'off' }}
+        {% else %}
+          unknown
+        {% endif %}
       device_class: heat
 
 ##################################################################
