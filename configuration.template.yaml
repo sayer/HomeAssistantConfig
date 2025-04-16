@@ -1489,10 +1489,10 @@ mqtt:
           {% set status = value_json['thermostat status'] %}
           {% if status == '00' or status == 0 %} set point met
           {% elif status == '01' or status == 1 %} set point not met
-          {% else %} unknown
+          {% else %} invalid: {{ status }}
           {% endif %}
         {% else %}
-          unknown
+          invalid
         {% endif %}
       icon: mdi:thermostat
 
