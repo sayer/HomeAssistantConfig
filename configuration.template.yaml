@@ -1984,14 +1984,40 @@ mqtt:
 ##################################################################
 
 lock:
-  - platform: group
+  - platform: template
     name: "Cargo Door Locks"
     unique_id: cargo_door_locks
-    entities:
-      - lock.cargolock2
-      - lock.cargolock3
-      - lock.cargolock4
-      - lock.cargolock5
+    value_template: >-
+      {% set locks = [
+        states.lock.cargolock2,
+        states.lock.cargolock3,
+        states.lock.cargolock4,
+        states.lock.cargolock5
+      ] %}
+      {% set available_locks = locks | selectattr('state', 'in', ['locked', 'unlocked']) | list %}
+      {% if available_locks | length == 0 %}
+        unavailable
+      {% elif available_locks | selectattr('state', 'eq', 'unlocked') | list | length > 0 %}
+        unlocked
+      {% else %}
+        locked
+      {% endif %}
+    lock:
+      service: lock.lock
+      target:
+        entity_id:
+          - lock.cargolock2
+          - lock.cargolock3
+          - lock.cargolock4
+          - lock.cargolock5
+    unlock:
+      service: lock.unlock
+      target:
+        entity_id:
+          - lock.cargolock2
+          - lock.cargolock3
+          - lock.cargolock4
+          - lock.cargolock5
 
 
 light:
