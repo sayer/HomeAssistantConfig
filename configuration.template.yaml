@@ -2011,6 +2011,7 @@ lock:
       service: lock.lock
       target:
         entity_id:
+          - lock.cargolock1
           - lock.cargolock2
           - lock.cargolock3
           - lock.cargolock4
@@ -2019,6 +2020,7 @@ lock:
       service: lock.unlock
       target:
         entity_id:
+          - lock.cargolock1
           - lock.cargolock2
           - lock.cargolock3
           - lock.cargolock4
