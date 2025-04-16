@@ -920,6 +920,8 @@ mqtt:
       command_topic: "RVC/WATERHEATER_COMMAND_2/1/set"
       payload_on: '{"instance": 1, "command": 0}'
       payload_off: '{"instance": 1, "command": 1}'
+      state_on: "on"
+      state_off: "off"
       optimistic: false
       retain: false
 
@@ -933,6 +935,8 @@ mqtt:
       command_topic: "RVC/WATERHEATER_COMMAND_2/1/set"
       payload_on: '{"instance": 1, "command": 3}'
       payload_off: '{"instance": 1, "command": 4}'
+      state_on: "on"
+      state_off: "off"
       optimistic: false
       retain: false
 
@@ -946,6 +950,8 @@ mqtt:
       command_topic: "RVC/WATERHEATER_COMMAND_2/1/set"
       payload_on: '{"instance": 1, "command": 6}'
       payload_off: '{"instance": 1, "command": 7}'
+      state_on: "on"
+      state_off: "off"
       optimistic: false
       retain: false
 
@@ -977,7 +983,6 @@ mqtt:
       state_off: "off"
       optimistic: false
       retain: false
-
 
 
     - name: "AC 1"
