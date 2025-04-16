@@ -1995,10 +1995,9 @@ lock:
     unique_id: cargo_door_locks
     value_template: >-
       {% set locks = [
+        states.lock.cargolock1,
         states.lock.cargolock2,
-        states.lock.cargolock3,
-        states.lock.cargolock4,
-        states.lock.cargolock5
+        states.lock.cargolock3
       ] %}
       {% set available_locks = locks | selectattr('state', 'in', ['locked', 'unlocked']) | list %}
       {% if available_locks | length == 0 %}
