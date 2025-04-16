@@ -102,10 +102,11 @@ sensor:
         friendly_name: "Cargo Lock Group Debug States"
         value_template: >-
           {{ [
-            states.lock.cargo_door_lock1.state,
-            states.lock.cargo_door_lock2.state,
-            states.lock.cargo_door_lock3.state,
-            states.lock.cargo_door_lock4.state
+            states.lock.cargo_door_lock_1.state,
+            states.lock.cargo_door_lock_2.state,
+            states.lock.cargo_door_lock_3.state,
+            states.lock.cargo_door_lock_4.state,
+            states.lock.cargo_door_lock_5.state
           ] | join(', ') }}
       outback1_voltage:
         friendly_name: "Outback 1 Battery Voltage"
@@ -243,7 +244,7 @@ mqtt:
       payload_unlock: "0200FFFFFFFFFFFF"
       state_locked: "locked"
       state_unlocked: "unlocked"
-      unique_id: "cargo_door_lock1"
+      unique_id: "cargo_door_lock_1"
     - name: "Cargo Door Lock 2"
       icon: mdi:key
       state_topic: "RVC/LOCK_STATUS/3"
@@ -253,7 +254,7 @@ mqtt:
       payload_unlock: "0300FFFFFFFFFFFF"
       state_locked: "locked"
       state_unlocked: "unlocked"
-      unique_id: "cargo_door_lock2"
+      unique_id: "cargo_door_lock_2"
     - name: "Cargo Door Lock 3"
       icon: mdi:key
       state_topic: "RVC/LOCK_STATUS/4"
@@ -263,7 +264,7 @@ mqtt:
       payload_unlock: "0400FFFFFFFFFFFF"
       state_locked: "locked"
       state_unlocked: "unlocked"
-      unique_id: "cargo_door_lock3"
+      unique_id: "cargo_door_lock_3"
     - name: "Cargo Door Lock 4"
       icon: mdi:key
       state_topic: "RVC/LOCK_STATUS/5"
@@ -273,7 +274,7 @@ mqtt:
       payload_unlock: "0501FFFFFFFFFFFF"
       state_locked: "locked"
       state_unlocked: "unlocked"
-      unique_id: "cargo_door_lock4"
+      unique_id: "cargo_door_lock_4"
     - name: "Cargo Door Lock 5"
       icon: mdi:key
       state_topic: "RVC/LOCK_STATUS/6"
@@ -283,7 +284,7 @@ mqtt:
       payload_unlock: "0601FFFFFFFFFFFF"
       state_locked: "locked"
       state_unlocked: "unlocked"
-      unique_id: "cargolcargo_door_lock5"
+      unique_id: "cargolcargo_door_lock_5"
 
 
   climate:
@@ -1998,10 +1999,10 @@ lock:
     unique_id: cargo_door_locks
     value_template: >-
       {% set locks = [
-        states.lock.cargo_door_lock1,
-        states.lock.cargo_door_lock2,
-        states.lock.cargo_door_lock3,
-        states.lock.cargo_door_lock4,
+        states.lock.cargo_door_lock_1,
+        states.lock.cargo_door_lock_2,
+        states.lock.cargo_door_lock_3,
+        states.lock.cargo_door_lock_4,
       ] %}
       {% set available_locks = locks | selectattr('state', 'in', ['locked', 'unlocked']) | list %}
       {% if available_locks | length == 0 %}
@@ -2015,18 +2016,18 @@ lock:
       service: lock.lock
       target:
         entity_id:
-          - lock.cargo_door_lock1
-          - lock.cargo_door_lock2
-          - lock.cargo_door_lock3
-          - lock.cargo_door_lock4
+          - lock.cargo_door_lock_1
+          - lock.cargo_door_lock_2
+          - lock.cargo_door_lock_3
+          - lock.cargo_door_lock_4
     unlock:
       service: lock.unlock
       target:
         entity_id:
-          - lock.cargo_door_lock1
-          - lock.cargo_door_lock2
-          - lock.cargo_door_lock3
-          - lock.cargo_door_lock4
+          - lock.cargo_door_lock_1
+          - lock.cargo_door_lock_2
+          - lock.cargo_door_lock_3
+          - lock.cargo_door_lock_4
 
 
 light:
