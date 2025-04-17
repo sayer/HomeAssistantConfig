@@ -985,6 +985,15 @@
                     },
                     {
                       "entity": "sensor.aqua_hot_operating_mode"
+                    },
+                    {
+                      "entity": "switch.aqua_hot_electric_low"
+                    },
+                    {
+                      "entity": "switch.aqua_hot_electric_high"
+                    },
+                    {
+                      "entity": "switch.aqua_hot_burner"
                     }
                   ]
                 }
