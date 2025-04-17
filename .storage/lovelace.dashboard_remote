@@ -119,7 +119,7 @@
                       "entity": "lock.entry_door_lock_2"
                     },
                     {
-                      "entity": "lock.cargo_doors"
+                      "entity": "lock.cargo_door_locks"
                     }
                   ],
                   "state_color": true
