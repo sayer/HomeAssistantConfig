@@ -497,3 +497,42 @@ ai_analyze_dash_video:
         hide-thumbnail: false
   description: Analyzes the dash video and updates input_text with the response.
   icon: mdi:cube-scan
+
+
+  lock_all_cargo_doors:
+    alias: "Lock All Cargo Doors with Delay"
+    sequence:
+      - service: lock.lock
+        target:
+          entity_id: lock.cargo_door_lock_1
+      - delay: "00:00:02"
+      - service: lock.lock
+        target:
+          entity_id: lock.cargo_door_lock_2
+      - delay: "00:00:02"
+      - service: lock.lock
+        target:
+          entity_id: lock.cargo_door_lock_3
+      - delay: "00:00:02"
+      - service: lock.lock
+        target:
+          entity_id: lock.cargo_door_lock_4
+
+  unlock_all_cargo_doors:
+    alias: "Unlock All Cargo Doors with Delay"
+    sequence:
+      - service: lock.unlock
+        target:
+          entity_id: lock.cargo_door_lock_1
+      - delay: "00:00:02"
+      - service: lock.unlock
+        target:
+          entity_id: lock.cargo_door_lock_2
+      - delay: "00:00:02"
+      - service: lock.unlock
+        target:
+          entity_id: lock.cargo_door_lock_3
+      - delay: "00:00:02"
+      - service: lock.unlock
+        target:
+          entity_id: lock.cargo_door_lock_4
