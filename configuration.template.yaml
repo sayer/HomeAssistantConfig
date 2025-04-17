@@ -1775,6 +1775,75 @@ mqtt:
       state_topic: "RVC/WATERHEATER_STATUS_2"
       value_template: "{{ value_json['Electric High Element Input Status'] }}"
 
+    # --- CIRCULATION_PUMP_STATUS (PGN 1FE97) MQTT SENSORS ---
+    
+    - name: "Circulation Pump Instance"
+      unique_id: "circulation_pump_instance"
+      state_topic: "RVC/CIRCULATION_PUMP_STATUS"
+      value_template: "{{ value_json['instance'] }}"
+      icon: mdi:pump
+      
+    - name: "Circulation Pump Output Status"
+      unique_id: "circulation_pump_output_status"
+      state_topic: "RVC/CIRCULATION_PUMP_STATUS"
+      value_template: >-
+        {% if value_json is defined and value_json['Output Status'] is defined %}
+          {% set status = value_json['Output Status'] %}
+          {% if status == '0000' or status == 0 %} Off
+          {% elif status == '0001' or status == 1 %} On
+          {% elif status == '0101' or status == 5 %} Test (Forced On)
+          {% else %} Unknown ({{ status }})
+          {% endif %}
+        {% else %}
+          Unknown
+        {% endif %}
+      icon: mdi:pump
+
+    - name: "Circulation Pump Overcurrent Status"
+      unique_id: "circulation_pump_overcurrent_status"
+      state_topic: "RVC/CIRCULATION_PUMP_STATUS"
+      value_template: >-
+        {% if value_json is defined and value_json['Pump Overcurrent Status'] is defined %}
+          {% set status = value_json['Pump Overcurrent Status'] %}
+          {% if status == '00' or status == 0 %} No overcurrent detected
+          {% elif status == '01' or status == 1 %} Overcurrent detected
+          {% else %} Unknown ({{ status }})
+          {% endif %}
+        {% else %}
+          Unknown
+        {% endif %}
+      icon: mdi:alert-circle
+
+    - name: "Circulation Pump Undercurrent Status"
+      unique_id: "circulation_pump_undercurrent_status"
+      state_topic: "RVC/CIRCULATION_PUMP_STATUS"
+      value_template: >-
+        {% if value_json is defined and value_json['Pump Undercurrent Status'] is defined %}
+          {% set status = value_json['Pump Undercurrent Status'] %}
+          {% if status == '00' or status == 0 %} No undercurrent detected
+          {% elif status == '01' or status == 1 %} Undercurrent detected
+          {% else %} Unknown ({{ status }})
+          {% endif %}
+        {% else %}
+          Unknown
+        {% endif %}
+      icon: mdi:alert-circle-outline
+
+    - name: "Circulation Pump Temperature Status"
+      unique_id: "circulation_pump_temperature_status"
+      state_topic: "RVC/CIRCULATION_PUMP_STATUS"
+      value_template: >-
+        {% if value_json is defined and value_json['Pump Temperature Status'] is defined %}
+          {% set status = value_json['Pump Temperature Status'] %}
+          {% if status == '00' or status == 0 %} Temperature normal
+          {% elif status == '01' or status == 1 %} Temperature warning
+          {% else %} Unknown ({{ status }})
+          {% endif %}
+        {% else %}
+          Unknown
+        {% endif %}
+      icon: mdi:thermometer-alert
+
     # Date and Time from RV-C
     - name: "RV-C System Date"
       state_topic: "RVC/DATE_TIME_STATUS"
