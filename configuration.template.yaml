@@ -961,7 +961,7 @@ mqtt:
       schema: "template"
       optimistic: %%OPTIMISTIC_MODE%%
 
-switch:
+  switch:
     - name: "Roof Fan 1 Control"
       unique_id: "roof_fan_1_switch"
       state_topic: "RVC/ROOF_FAN_STATUS_1/129"
