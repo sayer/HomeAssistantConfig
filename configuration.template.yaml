@@ -1385,7 +1385,7 @@ mqtt:
       unique_id: "waterautofill_old"
 
   fan:
-    - name: "Roof Fan"
+    - name: "Roof Fan 1"
       unique_id: "roof_fan_1"
       state_topic: "RVC/ROOF_FAN_STATUS_1/129"
       state_value_template: >-
@@ -1400,7 +1400,7 @@ mqtt:
       optimistic: %%OPTIMISTIC_MODE%%
       icon: "mdi:fan"
 
-    - name: "Roof Fan"
+    - name: "Roof Fan 2"
       unique_id: "roof_fan_2"
       state_topic: "RVC/ROOF_FAN_STATUS_1/130"
       state_value_template: >-
@@ -2106,37 +2106,37 @@ mqtt:
     # === ROOF FAN 1 ===
     # ROOF_FAN_STATUS_1 (FEA7) Sensors for Fan 1
     - name: "Roof Fan 1 System Status"
-      state_topic: "RVC/ROOF_FAN_STATUS_1/1"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/129"
       value_template: "{{ value_json['System Status definition'] }}"
       icon: mdi:fan
       unique_id: "roof_fan_1_system_status"
 
     - name: "Roof Fan 1 Fan Mode"
-      state_topic: "RVC/ROOF_FAN_STATUS_1/1"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/129"
       value_template: "{{ value_json['Fan Mode definition'] }}"
       icon: mdi:fan-auto
       unique_id: "roof_fan_1_fan_mode"
 
     - name: "Roof Fan 1 Speed Mode"
-      state_topic: "RVC/ROOF_FAN_STATUS_1/1"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/129"
       value_template: "{{ value_json['Speed Mode definition'] }}"
       icon: mdi:speedometer
       unique_id: "roof_fan_1_speed_mode"
 
     - name: "Roof Fan 1 Light"
-      state_topic: "RVC/ROOF_FAN_STATUS_1/1"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/129"
       value_template: "{{ value_json['Light definition'] }}"
       icon: mdi:lightbulb
       unique_id: "roof_fan_1_light"
 
     - name: "Roof Fan 1 Wind Direction"
-      state_topic: "RVC/ROOF_FAN_STATUS_1/1"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/129"
       value_template: "{{ value_json['Wind Direction Switch definition'] }}"
       icon: mdi:weather-windy
       unique_id: "roof_fan_1_wind_direction"
 
     - name: "Roof Fan 1 Ambient Temperature"
-      state_topic: "RVC/ROOF_FAN_STATUS_1/1"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/129"
       value_template: >-
         {% if value_json['Ambient Temperature'] == "n/a" %}
           {{ 'unknown' }}
@@ -2150,7 +2150,7 @@ mqtt:
       unique_id: "roof_fan_1_ambient_temperature"
 
     - name: "Roof Fan 1 Ambient Temperature F"
-      state_topic: "RVC/ROOF_FAN_STATUS_1/1"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/129"
       value_template: >-
         {% if value_json['Ambient Temperature F'] == "n/a" %}
           {{ 'unknown' }}
@@ -2164,14 +2164,14 @@ mqtt:
       unique_id: "roof_fan_1_ambient_temperature_f"
 
     - name: "Roof Fan 1 Dead Band"
-      state_topic: "RVC/ROOF_FAN_STATUS_1/1"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/129"
       value_template: "{{ value_json['Dead band'] }}"
       unit_of_measurement: "°C"
       icon: mdi:thermometer-lines
       unique_id: "roof_fan_1_dead_band"
 
     - name: "Roof Fan 1 Set Point"
-      state_topic: "RVC/ROOF_FAN_STATUS_1/1"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/129"
       value_template: "{{ value_json['Set Point'] }}"
       unit_of_measurement: "°C"
       icon: mdi:thermometer-plus
@@ -2179,44 +2179,44 @@ mqtt:
 
     # ROOF_FAN_STATUS_2 (1FDE3) Sensors for Fan 1
     - name: "Roof Fan 1 Dome Mode"
-      state_topic: "RVC/ROOF_FAN_STATUS_2/1"
+      state_topic: "RVC/ROOF_FAN_STATUS_2/129"
       value_template: "{{ value_json['Dome Mode'] }}"
       icon: mdi:dome-light
       unique_id: "roof_fan_1_dome_mode"
 
     - name: "Roof Fan 1 Dome Position"
-      state_topic: "RVC/ROOF_FAN_STATUS_2/1"
+      state_topic: "RVC/ROOF_FAN_STATUS_2/129"
       value_template: "{{ value_json['Dome Position'] }}"
       unit_of_measurement: "%"
       icon: mdi:percent
       unique_id: "roof_fan_1_dome_position"
 
     - name: "Roof Fan 1 Rain Sensor"
-      state_topic: "RVC/ROOF_FAN_STATUS_2/1"
+      state_topic: "RVC/ROOF_FAN_STATUS_2/129"
       value_template: "{{ value_json['Rain Sensor'] }}"
       icon: mdi:weather-rainy
       unique_id: "roof_fan_1_rain_sensor"
 
     - name: "Roof Fan 1 Rain Sensor Override"
-      state_topic: "RVC/ROOF_FAN_STATUS_2/1"
+      state_topic: "RVC/ROOF_FAN_STATUS_2/129"
       value_template: "{{ value_json['Rain Sensor Override'] }}"
       icon: mdi:weather-rainy-off
       unique_id: "roof_fan_1_rain_sensor_override"
 
     - name: "Roof Fan 1 Pump Overcurrent Status"
-      state_topic: "RVC/ROOF_FAN_STATUS_2/1"
+      state_topic: "RVC/ROOF_FAN_STATUS_2/129"
       value_template: "{{ value_json['Pump Overcurrent Status'] }}"
       icon: mdi:current-ac
       unique_id: "roof_fan_1_pump_overcurrent"
 
     - name: "Roof Fan 1 Pump Undercurrent Status"
-      state_topic: "RVC/ROOF_FAN_STATUS_2/1"
+      state_topic: "RVC/ROOF_FAN_STATUS_2/129"
       value_template: "{{ value_json['Pump Undercurrent Status'] }}"
       icon: mdi:current-dc
       unique_id: "roof_fan_1_pump_undercurrent"
 
     - name: "Roof Fan 1 Pump Temperature Status"
-      state_topic: "RVC/ROOF_FAN_STATUS_2/1"
+      state_topic: "RVC/ROOF_FAN_STATUS_2/129"
       value_template: "{{ value_json['Pump Temperature Status'] }}"
       icon: mdi:thermometer-alert
       unique_id: "roof_fan_1_pump_temperature"
@@ -2224,37 +2224,37 @@ mqtt:
     # === ROOF FAN 2 ===
     # ROOF_FAN_STATUS_1 (FEA7) Sensors for Fan 2
     - name: "Roof Fan 2 System Status"
-      state_topic: "RVC/ROOF_FAN_STATUS_1/2"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/130"
       value_template: "{{ value_json['System Status definition'] }}"
       icon: mdi:fan
       unique_id: "roof_fan_2_system_status"
 
     - name: "Roof Fan 2 Fan Mode"
-      state_topic: "RVC/ROOF_FAN_STATUS_1/2"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/130"
       value_template: "{{ value_json['Fan Mode definition'] }}"
       icon: mdi:fan-auto
       unique_id: "roof_fan_2_fan_mode"
 
     - name: "Roof Fan 2 Speed Mode"
-      state_topic: "RVC/ROOF_FAN_STATUS_1/2"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/130"
       value_template: "{{ value_json['Speed Mode definition'] }}"
       icon: mdi:speedometer
       unique_id: "roof_fan_2_speed_mode"
 
     - name: "Roof Fan 2 Light"
-      state_topic: "RVC/ROOF_FAN_STATUS_1/2"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/130"
       value_template: "{{ value_json['Light definition'] }}"
       icon: mdi:lightbulb
       unique_id: "roof_fan_2_light"
 
     - name: "Roof Fan 2 Wind Direction"
-      state_topic: "RVC/ROOF_FAN_STATUS_1/2"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/130"
       value_template: "{{ value_json['Wind Direction Switch definition'] }}"
       icon: mdi:weather-windy
       unique_id: "roof_fan_2_wind_direction"
 
     - name: "Roof Fan 2 Ambient Temperature"
-      state_topic: "RVC/ROOF_FAN_STATUS_1/2"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/130"
       value_template: >-
         {% if value_json['Ambient Temperature'] == "n/a" %}
           {{ 'unknown' }}
@@ -2268,7 +2268,7 @@ mqtt:
       unique_id: "roof_fan_2_ambient_temperature"
 
     - name: "Roof Fan 2 Ambient Temperature F"
-      state_topic: "RVC/ROOF_FAN_STATUS_1/2"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/130"
       value_template: >-
         {% if value_json['Ambient Temperature F'] == "n/a" %}
           {{ 'unknown' }}
@@ -2282,14 +2282,14 @@ mqtt:
       unique_id: "roof_fan_2_ambient_temperature_f"
 
     - name: "Roof Fan 2 Dead Band"
-      state_topic: "RVC/ROOF_FAN_STATUS_1/2"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/130"
       value_template: "{{ value_json['Dead band'] }}"
       unit_of_measurement: "°C"
       icon: mdi:thermometer-lines
       unique_id: "roof_fan_2_dead_band"
 
     - name: "Roof Fan 2 Set Point"
-      state_topic: "RVC/ROOF_FAN_STATUS_1/2"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/130"
       value_template: "{{ value_json['Set Point'] }}"
       unit_of_measurement: "°C"
       icon: mdi:thermometer-plus
@@ -2297,44 +2297,44 @@ mqtt:
 
     # ROOF_FAN_STATUS_2 (1FDE3) Sensors for Fan 2
     - name: "Roof Fan 2 Dome Mode"
-      state_topic: "RVC/ROOF_FAN_STATUS_2/2"
+      state_topic: "RVC/ROOF_FAN_STATUS_2/130"
       value_template: "{{ value_json['Dome Mode'] }}"
       icon: mdi:dome-light
       unique_id: "roof_fan_2_dome_mode"
 
     - name: "Roof Fan 2 Dome Position"
-      state_topic: "RVC/ROOF_FAN_STATUS_2/2"
+      state_topic: "RVC/ROOF_FAN_STATUS_2/130"
       value_template: "{{ value_json['Dome Position'] }}"
       unit_of_measurement: "%"
       icon: mdi:percent
       unique_id: "roof_fan_2_dome_position"
 
     - name: "Roof Fan 2 Rain Sensor"
-      state_topic: "RVC/ROOF_FAN_STATUS_2/2"
+      state_topic: "RVC/ROOF_FAN_STATUS_2/130"
       value_template: "{{ value_json['Rain Sensor'] }}"
       icon: mdi:weather-rainy
       unique_id: "roof_fan_2_rain_sensor"
 
     - name: "Roof Fan 2 Rain Sensor Override"
-      state_topic: "RVC/ROOF_FAN_STATUS_2/2"
+      state_topic: "RVC/ROOF_FAN_STATUS_2/130"
       value_template: "{{ value_json['Rain Sensor Override'] }}"
       icon: mdi:weather-rainy-off
       unique_id: "roof_fan_2_rain_sensor_override"
 
     - name: "Roof Fan 2 Pump Overcurrent Status"
-      state_topic: "RVC/ROOF_FAN_STATUS_2/2"
+      state_topic: "RVC/ROOF_FAN_STATUS_2/130"
       value_template: "{{ value_json['Pump Overcurrent Status'] }}"
       icon: mdi:current-ac
       unique_id: "roof_fan_2_pump_overcurrent"
 
     - name: "Roof Fan 2 Pump Undercurrent Status"
-      state_topic: "RVC/ROOF_FAN_STATUS_2/2"
+      state_topic: "RVC/ROOF_FAN_STATUS_2/130"
       value_template: "{{ value_json['Pump Undercurrent Status'] }}"
       icon: mdi:current-dc
       unique_id: "roof_fan_2_pump_undercurrent"
 
     - name: "Roof Fan 2 Pump Temperature Status"
-      state_topic: "RVC/ROOF_FAN_STATUS_2/2"
+      state_topic: "RVC/ROOF_FAN_STATUS_2/130"
       value_template: "{{ value_json['Pump Temperature Status'] }}"
       icon: mdi:thermometer-alert
       unique_id: "roof_fan_2_pump_temperature"
