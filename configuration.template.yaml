@@ -1387,31 +1387,31 @@ mqtt:
   fan:
     - name: "Roof Fan"
       unique_id: "roof_fan_1"
-      state_topic: "RVC/ROOF_FAN_STATUS_1/1"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/129"
       state_value_template: >-
         {% if value_json['System Status'] == 'On' %}
           on
         {% else %}
           off
         {% endif %}
-      command_topic: "RVC/ROOF_FAN_COMMAND_1/1/set"
-      payload_on: '{"instance": 1, "Direction of movement": "extend"}'
-      payload_off: '{"instance": 1, "Direction of movement": "retract"}'
+      command_topic: "RVC/ROOF_FAN_COMMAND_1/129/set"
+      payload_on: '{"instance": 129, "Direction of movement": "extend"}'
+      payload_off: '{"instance": 129, "Direction of movement": "retract"}'
       optimistic: %%OPTIMISTIC_MODE%%
       icon: "mdi:fan"
 
     - name: "Roof Fan"
       unique_id: "roof_fan_2"
-      state_topic: "RVC/ROOF_FAN_STATUS_1/2"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/130"
       state_value_template: >-
         {% if value_json['System Status'] == 'On' %}
           on
         {% else %}
           off
         {% endif %}
-      command_topic: "RVC/ROOF_FAN_COMMAND_1/2/set"
-      payload_on: '{"instance": 2, "Direction of movement": "extend"}'
-      payload_off: '{"instance": 2, "Direction of movement": "retract"}'
+      command_topic: "RVC/ROOF_FAN_COMMAND_1/130/set"
+      payload_on: '{"instance": 130, "Direction of movement": "extend"}'
+      payload_off: '{"instance": 130, "Direction of movement": "retract"}'
       optimistic: %%OPTIMISTIC_MODE%%
       icon: "mdi:fan"
 
@@ -2407,40 +2407,40 @@ mqtt:
 
 ##################################################################
 
-fan:
-# MQTT Fan Controls with Open/Close Support
+    fan:
+    # MQTT Fan Controls with Open/Close Support
 
     - name: "Roof Fan 1"
       unique_id: "roof_fan_1_control"
-      state_topic: "RVC/ROOF_FAN_STATUS_1/1"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/129"
       state_value_template: >-
         {% if value_json['System Status'] == 'On' %}
           on
         {% else %}
           off
         {% endif %}
-      command_topic: "RVC/ROOF_FAN_COMMAND_1/1/set"
+      command_topic: "RVC/ROOF_FAN_COMMAND_1/129/set"
       payload_on: >-
-        {"instance": 1, "System Status": "On", "Fan Mode": "Force On", "Speed Mode": "Manual", "Fan Speed Setting": 100, "Wind Direction Switch": "Air Out"}
+        {"instance": 129, "System Status": "On", "Fan Mode": "Force On", "Speed Mode": "Manual", "Fan Speed Setting": 100, "Wind Direction Switch": "Air Out"}
       payload_off: >-
-        {"instance": 1, "System Status": "Off", "Fan Mode": "Auto", "Speed Mode": "Auto (Variable)", "Fan Speed Setting": 0, "Wind Direction Switch": "Air Out"}
+        {"instance": 129, "System Status": "Off", "Fan Mode": "Auto", "Speed Mode": "Auto (Variable)", "Fan Speed Setting": 0, "Wind Direction Switch": "Air Out"}
       optimistic: false
       icon: "mdi:fan"
 
     - name: "Roof Fan 2"
       unique_id: "roof_fan_2_control"
-      state_topic: "RVC/ROOF_FAN_STATUS_1/2"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/130"
       state_value_template: >-
         {% if value_json['System Status'] == 'On' %}
           on
         {% else %}
           off
         {% endif %}
-      command_topic: "RVC/ROOF_FAN_COMMAND_1/2/set"
+      command_topic: "RVC/ROOF_FAN_COMMAND_1/130/set"
       payload_on: >-
-        {"instance": 2, "System Status": "On", "Fan Mode": "Force On", "Speed Mode": "Manual", "Fan Speed Setting": 100, "Wind Direction Switch": "Air Out"}
+        {"instance": 130, "System Status": "On", "Fan Mode": "Force On", "Speed Mode": "Manual", "Fan Speed Setting": 100, "Wind Direction Switch": "Air Out"}
       payload_off: >-
-        {"instance": 2, "System Status": "Off", "Fan Mode": "Auto", "Speed Mode": "Auto (Variable)", "Fan Speed Setting": 0, "Wind Direction Switch": "Air Out"}
+        {"instance": 130, "System Status": "Off", "Fan Mode": "Auto", "Speed Mode": "Auto (Variable)", "Fan Speed Setting": 0, "Wind Direction Switch": "Air Out"}
       optimistic: false
       icon: "mdi:fan"
 
