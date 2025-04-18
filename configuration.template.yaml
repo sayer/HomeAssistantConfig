@@ -2407,7 +2407,7 @@ mqtt:
 
 ##################################################################
 
-    fan:
+  fan:
     # MQTT Fan Controls with Open/Close Support
 
     - name: "Roof Fan 1"
