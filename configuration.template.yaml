@@ -1389,7 +1389,7 @@ mqtt:
       unique_id: "roof_fan_1"
       state_topic: "RVC/ROOF_FAN_STATUS_1/129"
       state_value_template: >-
-        {% if value_json['System Status'] == 'On' %}
+        {% if value_json['System Status definition'] == 'On' %}
           on
         {% else %}
           off
@@ -1404,7 +1404,7 @@ mqtt:
       unique_id: "roof_fan_2"
       state_topic: "RVC/ROOF_FAN_STATUS_1/130"
       state_value_template: >-
-        {% if value_json['System Status'] == 'On' %}
+        {% if value_json['System Status definition'] == 'On' %}
           on
         {% else %}
           off
@@ -2414,16 +2414,16 @@ mqtt:
       unique_id: "roof_fan_1_control"
       state_topic: "RVC/ROOF_FAN_STATUS_1/129"
       state_value_template: >-
-        {% if value_json['System Status'] == 'On' %}
+        {% if value_json['System Status definition'] == 'On' %}
           ON
         {% else %}
           OFF
         {% endif %}
       command_topic: "RVC/ROOF_FAN_COMMAND_1/129/set"
       payload_on: >-
-        {"instance": 129, "System Status": "On", "Fan Mode": "Auto", "Speed Mode": 0, "Fan Speed Setting": 100, "Wind Direction Switch": "Air Out"}
+        {"instance": 129, "System Status definition": "On", "Fan Mode": "Auto", "Speed Mode": 0, "Fan Speed Setting": 100, "Wind Direction Switch": "Air Out"}
       payload_off: >-
-        {"instance": 129, "System Status": "Off", "Fan Mode": "Auto", "Speed Mode": 0, "Fan Speed Setting": 0, "Wind Direction Switch": "Air Out"}
+        {"instance": 129, "System Status definition": "Off", "Fan Mode": "Auto", "Speed Mode": 0, "Fan Speed Setting": 0, "Wind Direction Switch": "Air Out"}
       optimistic: false
       icon: "mdi:fan"
 
@@ -2431,14 +2431,14 @@ mqtt:
       unique_id: "roof_fan_2_control"
       state_topic: "RVC/ROOF_FAN_STATUS_1/130"
       state_value_template: >-
-        {% if value_json['System Status'] == 'On' %}
+        {% if value_json['System Status definition'] == 'On' %}
           ON
         {% else %}
           OFF
         {% endif %}
       command_topic: "RVC/ROOF_FAN_COMMAND_1/130/set"
       payload_on: >-
-        {"instance": 130, "System Status": "On", "Fan Mode": "Auto", "Speed Mode": 0, "Fan Speed Setting": 100, "Wind Direction Switch": "Air Out"}
+        {"instance": 130, "System Status definition": "On", "Fan Mode": "Auto", "Speed Mode": 0, "Fan Speed Setting": 100, "Wind Direction Switch": "Air Out"}
       payload_off: >-
         {"instance": 130, "System Status": "Off", "Fan Mode": "Auto", "Speed Mode": 0, "Fan Speed Setting": 0, "Wind Direction Switch": "Air Out"}
       optimistic: false
