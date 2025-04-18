@@ -2426,6 +2426,8 @@ mqtt:
         {"instance": 129, "System Status": "Off", "Fan Mode": "Auto", "Speed Mode": "Auto (Variable)", "Fan Speed Setting": 0, "Wind Direction Switch": "Air Out"}
       optimistic: false
       icon: "mdi:fan"
+      payload_on: "on"
+      payload_off: "off"
 
     - name: "Roof Fan 2"
       unique_id: "roof_fan_2_control"
@@ -2443,6 +2445,8 @@ mqtt:
         {"instance": 130, "System Status": "Off", "Fan Mode": "Auto", "Speed Mode": "Auto (Variable)", "Fan Speed Setting": 0, "Wind Direction Switch": "Air Out"}
       optimistic: false
       icon: "mdi:fan"
+      payload_on: "on"
+      payload_off: "off"
 
 lock:
   - platform: template
