@@ -231,9 +231,9 @@ mqtt:
       state_topic: "RVC/LOCK_STATUS/1"
       unique_id: "EntryDoorLock"
       value_template: "{{ value_json['lock status definition'] }}"
-      command_topic: "RVCSET/MESSAGE/1FEE4"
-      payload_lock: "0101FFFFFFFFFFFF"
-      payload_unlock: "0100FFFFFFFFFFFF"
+      command_topic: "RVC/LOCK_STATUS/1/set"
+      payload_lock: '{"instance": 1, "lock status": 1}'
+      payload_unlock: '{"instance": 1, "lock status": 0}'
       state_locked: "locked"
       state_unlocked: "unlocked"
 
@@ -241,9 +241,9 @@ mqtt:
       icon: mdi:key
       state_topic: "RVC/LOCK_STATUS/2"
       value_template: "{{ value_json['lock status definition'] }}"
-      command_topic: "RVCSET/MESSAGE/1FEE4"
-      payload_lock: "0201FFFFFFFFFFFF"
-      payload_unlock: "0200FFFFFFFFFFFF"
+      command_topic: "RVC/LOCK_STATUS/2/set"
+      payload_lock: '{"instance": 2, "lock status": 1}'
+      payload_unlock: '{"instance": 2, "lock status": 0}'
       state_locked: "locked"
       state_unlocked: "unlocked"
       unique_id: "cargo_door_lock_1"
@@ -251,9 +251,9 @@ mqtt:
       icon: mdi:key
       state_topic: "RVC/LOCK_STATUS/3"
       value_template: "{{ value_json['lock status definition'] }}"
-      command_topic: "RVCSET/MESSAGE/1FEE4"
-      payload_lock: "0301FFFFFFFFFFFF"
-      payload_unlock: "0300FFFFFFFFFFFF"
+      command_topic: "RVC/LOCK_STATUS/3/set"
+      payload_lock: '{"instance": 3, "lock status": 1}'
+      payload_unlock: '{"instance": 3, "lock status": 0}'
       state_locked: "locked"
       state_unlocked: "unlocked"
       unique_id: "cargo_door_lock_2"
@@ -261,9 +261,9 @@ mqtt:
       icon: mdi:key
       state_topic: "RVC/LOCK_STATUS/4"
       value_template: "{{ value_json['lock status definition'] }}"
-      command_topic: "RVCSET/MESSAGE/1FEE4"
-      payload_lock: "0401FFFFFFFFFFFF"
-      payload_unlock: "0400FFFFFFFFFFFF"
+      command_topic: "RVC/LOCK_STATUS/4/set"
+      payload_lock: '{"instance": 4, "lock status": 1}'
+      payload_unlock: '{"instance": 4, "lock status": 0}'
       state_locked: "locked"
       state_unlocked: "unlocked"
       unique_id: "cargo_door_lock_3"
@@ -271,9 +271,9 @@ mqtt:
       icon: mdi:key
       state_topic: "RVC/LOCK_STATUS/5"
       value_template: "{{ value_json['lock status definition'] }}"
-      command_topic: "RVCSET/MESSAGE/1FEE4"
-      payload_lock: "0501FFFFFFFFFFFF"
-      payload_unlock: "0501FFFFFFFFFFFF"
+      command_topic: "RVC/LOCK_STATUS/5/set"
+      payload_lock: '{"instance": 5, "lock status": 1}'
+      payload_unlock: '{"instance": 5, "lock status": 0}'
       state_locked: "locked"
       state_unlocked: "unlocked"
       unique_id: "cargo_door_lock_4"
@@ -281,12 +281,12 @@ mqtt:
       icon: mdi:key
       state_topic: "RVC/LOCK_STATUS/6"
       value_template: "{{ value_json['lock status definition'] }}"
-      command_topic: "RVCSET/MESSAGE/1FEE4"
-      payload_lock: "0601FFFFFFFFFFFF"
-      payload_unlock: "0601FFFFFFFFFFFF"
+      command_topic: "RVC/LOCK_STATUS/6/set"
+      payload_lock: '{"instance": 6, "lock status": 1}'
+      payload_unlock: '{"instance": 6, "lock status": 0}'
       state_locked: "locked"
       state_unlocked: "unlocked"
-      unique_id: "cargolcargo_door_lock_5"
+      unique_id: "cargo_door_lock_5"
 
 
   climate:
