@@ -1393,8 +1393,8 @@
   description: ''
   triggers:
   - entity_id:
-    - sensor.gpsd_127_0_0_1_latitude
-    - sensor.gpsd_127_0_0_1_longitude
+    - sensor.gps_127_0_0_1_latitude
+    - sensor.gps_127_0_0_1_longitude
     trigger: state
     for:
       hours: 0
@@ -1404,37 +1404,11 @@
   - condition: and
     conditions:
     - condition: template
-      value_template: '{{  states(''sensor.gpsd_127_0_0_1_latitude'') is not none  and
-        states(''sensor.gpsd_127_0_0_1_latitude'') != ''unavailable'' and states(''sensor.gpsd_latitude'')
+      value_template: '{{  states(''sensor.gps_127_0_0_1_latitude'') is not none  and
+        states(''sensor.gps_127_0_0_1_latitude'') != ''unavailable'' and states(''sensor.gps_127_0_0_1_latitude'')
         != ''unknown'' }}
 
         '
-    - condition: template
-      value_template: '{{ not is_state(''sensor.gpsd_latitude'', ''unavailable'')
-        }}'
-      enabled: false
-    - condition: template
-      value_template: '{{ not is_state(''sensor.gpsd_longitude'', ''unavailable'')
-        }}'
-      enabled: false
-    - condition: template
-      value_template: '{{ not is_state(''sensor.gpsd_latitude'', ''unknown'') }}'
-      enabled: false
-    - condition: template
-      value_template: '{{ not is_state(''sensor.gpsd_longitude'', ''unknown'') }}'
-      enabled: false
-    - condition: template
-      value_template: '{{ states(''sensor.gpsd_latitude'')|float(-1000) != -1000 }}'
-      enabled: false
-    - condition: template
-      value_template: "{% set current_lat = states('sensor.gpsd_latitude') | float(-1000)
-        %} {% set current_lon = states('sensor.gpsd_longitude') | float(-1000) %}
-        {% set home_lat = states.zone.home.attributes.latitude | float(-1000) %} {%
-        set home_lon = states.zone.home.attributes.longitude | float(-1000) %} {%
-        if current_lat > -999 and current_lon > -999 and home_lat > -999 and home_lon
-        > -999 %} {% set dist = distance(current_lat, current_lon, home_lat, home_lon)
-        %}\n  {{ dist > 0.1 }}\n{% else %}\n  {{ false }}\n{% endif %}\n"
-      enabled: false
   actions:
   - data:
       latitude: '{{ states(''sensor.gps_127_0_0_1_latitude'') | float }}'
@@ -1447,6 +1421,7 @@
 
         '
     action: persistent_notification.create
+    enabled: false
 - id: '1733602676112'
   alias: HA - Start sets shade state
   description: ''
