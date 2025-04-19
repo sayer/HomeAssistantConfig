@@ -300,9 +300,9 @@ mqtt:
     fan_modes:
       - "auto"
       - "on"
-    mode_state_topic: "RVC/THERMOSTAT_STATUS_1/1"
+    mode_state_topic: "RVC/THERMOSTAT_STATUS_1/165"
     mode_state_template: "{{ value_json['operating mode definition'] }}"
-    temperature_state_topic: "RVC/THERMOSTAT_STATUS_1/1"
+    temperature_state_topic: "RVC/THERMOSTAT_STATUS_1/165"
     temperature_state_template: >-
       {% if value_json['setpoint temp heat F'] == "n/a" %}
         0
@@ -311,7 +311,7 @@ mqtt:
       {% endif %}
     current_temperature_topic: "RVC/THERMOSTAT_AMBIENT_STATUS/1"
     current_temperature_template: "{{ value_json['ambient temp F'] }}"
-    mode_command_topic: "RVCSET/THERMOSTAT_COMMAND_1_MODE/1"
+    mode_command_topic: "RVCSET/THERMOSTAT_COMMAND_1_MODE/165"
     mode_command_template: >-
       {"instance":1,
        "operating modes":{{ 
@@ -322,7 +322,7 @@ mqtt:
          4 if hvac_mode=='fan_only' else 5
        }},
        "fan mode":{{ 0 if fan_mode=='auto' else 1 }}}
-    temperature_command_topic: "RVC/THERMOSTAT_COMMAND_1_TEMP/1"
+    temperature_command_topic: "RVC/THERMOSTAT_COMMAND_1_TEMP/165"
     temperature_command_template: >-
       {"instance":1,
        {% if hvac_mode in ['heat','off','fan_only'] %}
@@ -346,9 +346,9 @@ mqtt:
     fan_modes:
       - "auto"
       - "on"
-    mode_state_topic: "RVC/THERMOSTAT_STATUS_1/2"
+    mode_state_topic: "RVC/THERMOSTAT_STATUS_1/166"
     mode_state_template: "{{ value_json['operating mode definition'] }}"
-    temperature_state_topic: "RVC/THERMOSTAT_STATUS_1/2"
+    temperature_state_topic: "RVC/THERMOSTAT_STATUS_1/166"
     temperature_state_template: >-
       {% if value_json['setpoint temp heat F'] == "n/a" %}
         0
@@ -357,7 +357,7 @@ mqtt:
       {% endif %}
     current_temperature_topic: "RVC/THERMOSTAT_AMBIENT_STATUS/2"
     current_temperature_template: "{{ value_json['ambient temp F'] }}"
-    mode_command_topic: "RVCSET/THERMOSTAT_COMMAND_1_MODE/2"
+    mode_command_topic: "RVCSET/THERMOSTAT_COMMAND_1_MODE/166"
     mode_command_template: >-
       {"instance":2,
        "operating modes":{{ 
@@ -368,7 +368,7 @@ mqtt:
          4 if hvac_mode=='fan_only' else 5
        }},
        "fan mode":{{ 0 if fan_mode=='auto' else 1 }}}
-    temperature_command_topic: "RVC/THERMOSTAT_COMMAND_1_TEMP/2"
+    temperature_command_topic: "RVC/THERMOSTAT_COMMAND_1_TEMP/166"
     temperature_command_template: >-
       {"instance":2,
        {% if hvac_mode in ['heat','off','fan_only'] %}
