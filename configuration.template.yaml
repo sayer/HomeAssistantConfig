@@ -311,7 +311,7 @@ mqtt:
       {% else %}
         {{ value_json['setpoint temp heat F'] }}
       {% endif %}
-    current_temperature_topic: "RVC/THERMOSTAT_AMBIENT_STATUS/1"
+    current_temperature_topic: "RVC/THERMOSTAT_AMBIENT_STATUS/%%INDOOR_TEMP%%"
     current_temperature_template: "{{ value_json['ambient temp F'] }}"
     mode_command_topic: "RVCSET/THERMOSTAT_COMMAND_1_MODE/164"
     mode_command_template: >-
@@ -359,7 +359,7 @@ mqtt:
       {% else %}
         {{ value_json['setpoint temp heat F'] }}
       {% endif %}
-    current_temperature_topic: "RVC/THERMOSTAT_AMBIENT_STATUS/2"
+    current_temperature_topic: "RVC/THERMOSTAT_AMBIENT_STATUS/%%INDOOR_TEMP%%"
     current_temperature_template: "{{ value_json['ambient temp F'] }}"
     mode_command_topic: "RVCSET/THERMOSTAT_COMMAND_1_MODE/165"
     mode_command_template: >-
@@ -406,7 +406,7 @@ mqtt:
       {% else %}
         {{ value_json['setpoint temp heat F'] }}
       {% endif %}
-    current_temperature_topic: "RVC/THERMOSTAT_AMBIENT_STATUS/3"
+    current_temperature_topic: "RVC/THERMOSTAT_AMBIENT_STATUS/%%INDOOR_TEMP%%"
     current_temperature_template: "{{ value_json['ambient temp F'] }}"
     mode_command_topic: "RVCSET/THERMOSTAT_COMMAND_1_MODE/166"
     mode_command_template: >-
@@ -1498,7 +1498,7 @@ mqtt:
   # Roof fan switches
       
   # Original fan entities - keeping them commented out for reference
-  fan:
+  #fan:
     # - name: "Roof Fan 1"
     #   unique_id: "roof_fan_1"
     #   state_topic: "RVC/ROOF_FAN_STATUS_1/129"
@@ -2036,13 +2036,13 @@ mqtt:
       state_class: measurement
       value_template: "{{ value_json['charge voltage'] }}"
     - name: "Ambient Temperature"
-      state_topic: "RVC/THERMOSTAT_AMBIENT_STATUS/249"
+      state_topic: "RVC/THERMOSTAT_AMBIENT_STATUS/%%AMBIANT_TEMP%%"
       unique_id: "THERMOSTAT_AMBIENT_STATUS"
       unit_of_measurement: "F"
       state_class: measurement
       value_template: "{{ value_json['ambient temp F'] }}"
     - name: "Inside Temperature"
-      state_topic: "RVC/THERMOSTAT_AMBIENT_STATUS/250"
+      state_topic: "RVC/THERMOSTAT_AMBIENT_STATUS/%%INDOOR_TEMP%%"
       unique_id: "THERMOSTAT_INDOOR_TEMP"
       unit_of_measurement: "F"
       state_class: measurement

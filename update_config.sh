@@ -257,6 +257,8 @@ configure_2023_plus() {
     VENT_FAN1="62"
     VENT_FAN2="62"
     OPTIMISTIC_MODE="true"
+    AMBIANT_TEMP="1"
+    INDOOR_TEMP="2"
     
     # Set shade codes
     set_shade_tokens "CODE_2023"
@@ -271,6 +273,8 @@ configure_2020_to_2022() {
     VENT_FAN1="62"
     VENT_FAN2="62"
     OPTIMISTIC_MODE="true"
+    AMBIANT_TEMP="249"
+    INDOOR_TEMP="250"
     
     # Set shade codes
     set_shade_tokens "CODE_2020"
@@ -285,6 +289,8 @@ configure_pre_2020() {
     VENT_FAN1="55"
     VENT_FAN2="56"
     OPTIMISTIC_MODE="false"
+    AMBIANT_TEMP="249"
+    INDOOR_TEMP="250"
     
     # Set shade codes
     set_shade_tokens "CODE_PRE2020"
@@ -358,6 +364,12 @@ mv "$TEMP_FILE" "$CONFIG_FILE"
 cat "$CONFIG_FILE" | sed "s/%%OPTIMISTIC_MODE%%/$OPTIMISTIC_MODE/g" > "$TEMP_FILE"
 mv "$TEMP_FILE" "$CONFIG_FILE"
 
+cat "$CONFIG_FILE" | sed "s/%%AMBIANT_TEMP%%/$AMBIANT_TEMP/g" > "$TEMP_FILE"
+mv "$TEMP_FILE" "$CONFIG_FILE"
+
+cat "$CONFIG_FILE" | sed "s/%%INDOOR_TEMP%%/$INDOOR_TEMP/g" > "$TEMP_FILE"
+mv "$TEMP_FILE" "$CONFIG_FILE"
+
 # Replace shade tokens
 echo "Replacing shade tokens..."
 for token in $ALL_SHADE_TOKENS; do
@@ -398,6 +410,8 @@ echo "  %%EXTERIOR_ACCENT_LIGHTS%% -> $EXTERIOR_ACCENT_LIGHTS"
 echo "  %%VENT_FAN1%% -> $VENT_FAN1"
 echo "  %%VENT_FAN2%% -> $VENT_FAN2"
 echo "  %%OPTIMISTIC_MODE%% -> $OPTIMISTIC_MODE"
+echo "  %%AMBIANT_TEMP%% -> $AMBIANT_TEMP"
+echo "  %%INDOOR_TEMP%% -> $INDOOR_TEMP"
 echo ""
 echo "Window shade entries have been added with actual numeric codes:"
 for token in $ALL_SHADE_TOKENS; do
