@@ -1393,8 +1393,8 @@
   description: ''
   triggers:
   - entity_id:
-    - sensor.gpsd_127_0_0_1_latitude
-    - sensor.gpsd_127_0_0_1_longitude
+    - sensor.gps_127_0_0_1_latitude
+    - sensor.gps_127_0_0_1_longitude
     trigger: state
     for:
       hours: 0
@@ -1405,7 +1405,7 @@
     conditions:
     - condition: template
       value_template: '{{  states(''sensor.gpsd_127_0_0_1_latitude'') is not none  and
-        states(''sensor.gpsd_127_0_0_1_latitude'') != ''unavailable'' and states(''sensor.gpsd_latitude'')
+        states(''sensor.gpsd_127_0_0_1_latitude'') != ''unavailable'' and states(''sensor.gpsd_127_0_0_1_latitude'')
         != ''unknown'' }}
 
         '
