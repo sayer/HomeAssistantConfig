@@ -290,12 +290,62 @@ mqtt:
 
 
   climate:
-  - name: "Living Room"
+  
+  - name: "Front Thermostat"
     temperature_unit: "F"
     modes:
       - "off"
       - "cool"
       - "heat"
+      - "auto"
+      - "fan_only"
+    fan_modes:
+      - "auto"
+      - "on"
+    mode_state_topic: "RVC/THERMOSTAT_STATUS_1/164"
+    mode_state_template: "{{ value_json['operating mode definition'] }}"
+    temperature_state_topic: "RVC/THERMOSTAT_STATUS_1/164"
+    temperature_state_template: >-
+      {% if value_json['setpoint temp heat F'] == "n/a" %}
+        0
+      {% else %}
+        {{ value_json['setpoint temp heat F'] }}
+      {% endif %}
+    current_temperature_topic: "RVC/THERMOSTAT_AMBIENT_STATUS/1"
+    current_temperature_template: "{{ value_json['ambient temp F'] }}"
+    mode_command_topic: "RVCSET/THERMOSTAT_COMMAND_1_MODE/164"
+    mode_command_template: >-
+      {"instance":1,
+       "operating modes":{{ 
+         0 if hvac_mode=='off' else
+         1 if hvac_mode=='cool' else
+         2 if hvac_mode=='heat' else
+         3 if hvac_mode=='auto' else
+         4 if hvac_mode=='fan_only' else 5
+       }},
+       "fan mode":{{ 0 if fan_mode=='auto' else 1 }}}
+    temperature_command_topic: "RVC/THERMOSTAT_COMMAND_1_TEMP/164"
+    temperature_command_template: >-
+      {"instance":1,
+       {% if hvac_mode in ['heat','off','fan_only'] %}
+         "setpoint heat":{{ (temperature) | int }}
+       {% else %}
+         "setpoint cool":{{ (temperature) | int }}
+       {% endif %}}
+    unique_id: "hvac_front_thermostat"
+    precision: 1.0
+    min_temp: 50
+    max_temp: 90
+    initial: 72
+
+  
+  - name: "Mid Thermostat"
+    temperature_unit: "F"
+    modes:
+      - "off"
+      - "cool"
+      - "heat"
+      - "auto"
       - "fan_only"
     fan_modes:
       - "auto"
@@ -309,7 +359,7 @@ mqtt:
       {% else %}
         {{ value_json['setpoint temp heat F'] }}
       {% endif %}
-    current_temperature_topic: "RVC/THERMOSTAT_AMBIENT_STATUS/1"
+    current_temperature_topic: "RVC/THERMOSTAT_AMBIENT_STATUS/2"
     current_temperature_template: "{{ value_json['ambient temp F'] }}"
     mode_command_topic: "RVCSET/THERMOSTAT_COMMAND_1_MODE/165"
     mode_command_template: >-
@@ -321,7 +371,7 @@ mqtt:
          3 if hvac_mode=='auto' else
          4 if hvac_mode=='fan_only' else 5
        }},
-       "fan mode":{{ 0 if fan_mode=='auto' else 1 }}}
+       "fan mode":{{ 0 if fan_mode=='auto' else 1 if fan_mode=='on' else 11 }}}
     temperature_command_topic: "RVC/THERMOSTAT_COMMAND_1_TEMP/165"
     temperature_command_template: >-
       {"instance":1,
@@ -330,18 +380,19 @@ mqtt:
        {% else %}
          "setpoint cool":{{ (temperature) | int }}
        {% endif %}}
-    unique_id: "hvac_livingroom"
+    unique_id: "hvac_mid_thermostat"
     precision: 1.0
     min_temp: 50
     max_temp: 90
     initial: 72
 
-  - name: "Kitchen"
+  - name: "Bedroom Thermostat"
     temperature_unit: "F"
     modes:
       - "off"
       - "cool"
       - "heat"
+      - "auto"
       - "fan_only"
     fan_modes:
       - "auto"
@@ -355,7 +406,7 @@ mqtt:
       {% else %}
         {{ value_json['setpoint temp heat F'] }}
       {% endif %}
-    current_temperature_topic: "RVC/THERMOSTAT_AMBIENT_STATUS/2"
+    current_temperature_topic: "RVC/THERMOSTAT_AMBIENT_STATUS/3"
     current_temperature_template: "{{ value_json['ambient temp F'] }}"
     mode_command_topic: "RVCSET/THERMOSTAT_COMMAND_1_MODE/166"
     mode_command_template: >-
@@ -367,7 +418,7 @@ mqtt:
          3 if hvac_mode=='auto' else
          4 if hvac_mode=='fan_only' else 5
        }},
-       "fan mode":{{ 0 if fan_mode=='auto' else 1 }}}
+       "fan mode":{{ 0 if fan_mode=='auto' else 1 if fan_mode=='on' else 11 }}}
     temperature_command_topic: "RVC/THERMOSTAT_COMMAND_1_TEMP/166"
     temperature_command_template: >-
       {"instance":2,
@@ -376,7 +427,7 @@ mqtt:
        {% else %}
          "setpoint cool":{{ (temperature) | int }}
        {% endif %}}
-    unique_id: "hvac_kitchen"
+    unique_id: "hvac_bedroom_thermostat"
     precision: 1.0
     min_temp: 50
     max_temp: 90
