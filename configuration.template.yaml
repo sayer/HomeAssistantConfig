@@ -1053,8 +1053,8 @@ mqtt:
       state_topic: "RVC/ROOF_FAN_STATUS_1/129"
       value_template: "{{ value_json['System Status definition'] }}"
       command_topic: "RVC/ROOF_FAN_COMMAND_1/129/set"
-      payload_on: '{"instance": 129, "System Status": 1, "Fan Speed Setting": 80, "Dome Position [Deprecated]": 15}'
-      payload_off: '{"instance": 129, "System Status": 0, "Fan Speed Setting": 0, "Dome Position [Deprecated]": 0}'
+      payload_on: '{"instance": 129, "System Status": 1, "Fan Speed Setting": 80, "Dome Position [Deprecated]": 4}'
+      payload_off: '{"instance": 129, "System Status": 0, "Fan Speed Setting": 0, "Dome Position [Deprecated]": 0, "Rain Sensor [Deprecated]": 0, "Speed Mode": 3, "Fan Mode": 3}'
       state_on: "On"
       state_off: "Off"
       optimistic: false
@@ -1065,8 +1065,8 @@ mqtt:
       state_topic: "RVC/ROOF_FAN_STATUS_1/130"
       value_template: "{{ value_json['System Status definition'] }}"
       command_topic: "RVC/ROOF_FAN_COMMAND_1/130/set"
-      payload_on: '{"instance": 130, "System Status": 1, "Fan Speed Setting": 80, "Dome Position [Deprecated]": 15}'
-      payload_off: '{"instance": 130, "System Status": 0, "Fan Speed Setting": 0, "Dome Position [Deprecated]": 0}'
+      payload_on: '{"instance": 130, "System Status": 1, "Fan Speed Setting": 80, "Dome Position [Deprecated]": 4}'
+      payload_off: '{"instance": 130, "System Status": 0, "Fan Speed Setting": 0, "Dome Position [Deprecated]": 0, "Rain Sensor [Deprecated]": 0, "Speed Mode": 3, "Fan Mode": 3}'
       state_on: "On"
       state_off: "Off"
       optimistic: false
