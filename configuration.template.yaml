@@ -232,8 +232,8 @@ mqtt:
       unique_id: "EntryDoorLock"
       value_template: "{{ value_json['lock status definition'] }}"
       command_topic: "RVC/DOOR_COMMAND/1/set"
-      payload_lock: '{"instance": 1, "lock status": 1}'
-      payload_unlock: '{"instance": 1, "lock status": 0}'
+      payload_lock: '{"instance": 1, "Lock Command": 1}'
+      payload_unlock: '{"instance": 1, "Lock Command": 0}'
       state_locked: "locked"
       state_unlocked: "unlocked"
 
@@ -243,8 +243,8 @@ mqtt:
       state_topic: "RVC/DOOR_STATUS/0"
       value_template: "{{ value_json['lock status definition'] }}"
       command_topic: "RVC/DOOR_COMMAND/0/set"
-      payload_lock: '{"instance": 0, "lock status": 1}'
-      payload_unlock: '{"instance": 0, "lock status": 0}'
+      payload_lock: '{"instance": 0, "Lock Command": 1}'
+      payload_unlock: '{"instance": 0, "Lock Command": 0}'
       state_locked: "locked"
       state_unlocked: "unlocked"
       unique_id: "cargo_door_lock_all"
@@ -255,8 +255,8 @@ mqtt:
       state_topic: "RVC/DOOR_STATUS/2"
       value_template: "{{ value_json['lock status definition'] }}"
       command_topic: "RVC/DOOR_COMMAND/2/set"
-      payload_lock: '{"instance": 2, "lock status": 1}'
-      payload_unlock: '{"instance": 2, "lock status": 0}'
+      payload_lock: '{"instance": 2, "Lock Command": 1}'
+      payload_unlock: '{"instance": 2, "Lock Command": 0}'
       state_locked: "locked"
       state_unlocked: "unlocked"
       unique_id: "cargo_door_lock_1"
@@ -266,8 +266,8 @@ mqtt:
       state_topic: "RVC/DOOR_STATUS/3"
       value_template: "{{ value_json['lock status definition'] }}"
       command_topic: "RVC/DOOR_COMMAND/3/set"
-      payload_lock: '{"instance": 3, "lock status": 1}'
-      payload_unlock: '{"instance": 3, "lock status": 0}'
+      payload_lock: '{"instance": 3, "Lock Command": 1}'
+      payload_unlock: '{"instance": 3, "Lock Command": 0}'
       state_locked: "locked"
       state_unlocked: "unlocked"
       unique_id: "cargo_door_lock_2"
@@ -277,8 +277,8 @@ mqtt:
       state_topic: "RVC/DOOR_STATUS/4"
       value_template: "{{ value_json['lock status definition'] }}"
       command_topic: "RVC/DOOR_COMMAND/4/set"
-      payload_lock: '{"instance": 4, "lock status": 1}'
-      payload_unlock: '{"instance": 4, "lock status": 0}'
+      payload_lock: '{"instance": 4, "Lock Command": 1}'
+      payload_unlock: '{"instance": 4, "Lock Command": 0}'
       state_locked: "locked"
       state_unlocked: "unlocked"
       unique_id: "cargo_door_lock_3"
@@ -288,8 +288,8 @@ mqtt:
       state_topic: "RVC/DOOR_STATUS/5"
       value_template: "{{ value_json['lock status definition'] }}"
       command_topic: "RVC/DOOR_COMMAND/5/set"
-      payload_lock: '{"instance": 5, "lock status": 1}'
-      payload_unlock: '{"instance": 5, "lock status": 0}'
+      payload_lock: '{"instance": 5, "Lock Command": 1}'
+      payload_unlock: '{"instance": 5, "Lock Command": 0}'
       state_locked: "locked"
       state_unlocked: "unlocked"
       unique_id: "cargo_door_lock_4"
@@ -299,8 +299,8 @@ mqtt:
       state_topic: "RVC/DOOR_STATUS/6"
       value_template: "{{ value_json['lock status definition'] }}"
       command_topic: "RVC/DOOR_COMMAND/6/set"
-      payload_lock: '{"instance": 6, "lock status": 1}'
-      payload_unlock: '{"instance": 6, "lock status": 0}'
+      payload_lock: '{"instance": 6, "Lock Command": 1}'
+      payload_unlock: '{"instance": 6, "Lock Command": 0}'
       state_locked: "locked"
       state_unlocked: "unlocked"
       unique_id: "cargo_door_lock_5"
