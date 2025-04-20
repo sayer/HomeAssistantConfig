@@ -2580,19 +2580,25 @@ lock:
     name: "Cargo Door Locks"
     unique_id: cargo_door_locks
     value_template: >-
-      {% set locks = [
-        states.lock.cargo_door_lock_1,
-        states.lock.cargo_door_lock_2,
-        states.lock.cargo_door_lock_3,
-        states.lock.cargo_door_lock_4,
-      ] %}
-      {% set available_locks = locks | selectattr('state', 'in', ['locked', 'unlocked']) | list %}
-      {% if available_locks | length == 0 %}
-        unavailable
-      {% elif available_locks | selectattr('state', 'eq', 'unlocked') | list | length > 0 %}
-        unlocked
+      {% set all_lock = states.lock.cargo_door_lock_all %}
+      {% if all_lock is defined and all_lock.state in ['locked', 'unlocked'] %}
+        {{ all_lock.state }}
       {% else %}
-        locked
+        {% set locks = [
+          states.lock.cargo_door_lock_1,
+          states.lock.cargo_door_lock_2,
+          states.lock.cargo_door_lock_3,
+          states.lock.cargo_door_lock_4,
+        ] %}
+        {% set available_locks = locks | selectattr('state', 'in', ['locked', 'unlocked']) | list %}
+        {% if available_locks | length == 0 %}
+          unavailable
+        {% elif available_locks | selectattr('state', 'eq', 'unlocked') | list | length > 0 %}
+          unlocked
+        {% else %}
+          locked
+        {% endif %}
+      {% endif %}
       {% endif %}
     lock:
       service: script.lock_all_cargo_doors
