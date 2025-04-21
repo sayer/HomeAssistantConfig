@@ -2624,29 +2624,31 @@ cover:
       all_day_shades:
         friendly_name: "All Day Shades"
         value_template: >
-          {% set cover_names = [
-            'windshield_day',
-            'driver_day',
-            'passenger_day',
-            'entry_door_day',
-            'dinette_day',
-            'ds_living_day',
-            'bedroom_dresser_day',
-            'bedroom_front_day',
-            'bedroom_rear_day'
+          {% set cover_entities = [
+            'cover.windshield_day',
+            'cover.driver_day',
+            'cover.passenger_day',
+            'cover.entry_door_day',
+            'cover.dinette_day',
+            'cover.ds_living_day',
+            'cover.bedroom_dresser_day',
+            'cover.bedroom_front_day',
+            'cover.bedroom_rear_day'
           ] %}
-          {% set covers = cover_names | map('regex_replace', '^', 'cover.') | map('states') | list %}
-          {% set states_list = covers | map(attribute='state') | list %}
+          {% set states_list = [] %}
+          {% for entity_id in cover_entities %}
+            {% set _ = states_list.append(states(entity_id)) %}
+          {% endfor %}
           {% if 'opening' in states_list %}
             opening
           {% elif 'closing' in states_list %}
             closing
-          {% elif states_list | select('eq', 'open') | list | length == covers | length %}
+          {% elif states_list | select('eq', 'open') | list | length == cover_entities | length %}
             open
-          {% elif states_list | select('eq', 'closed') | list | length == covers | length %}
+          {% elif states_list | select('eq', 'closed') | list | length == cover_entities | length %}
             closed
           {% else %}
-            unknown: {{ cover_names | map('regex_replace', '^', 'cover.') | map('states') | map(attribute='entity_id') | zip(states_list) | map('join', '=') | join(', ') }}
+            unknown: {{ cover_entities | zip(states_list) | map('join', '=') | join(', ') }}
           {% endif %}
         open_cover:
           service: cover.open_cover
