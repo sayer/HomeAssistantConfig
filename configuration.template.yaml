@@ -2613,7 +2613,11 @@ light:
     name: Exterior Lights
     unique_id: exterior_lights
     entities:
-
+      - light.docking_lights
+      - light.awning_lights
+      - light.exterior_accents
+      - light.porch_handle
+      
 group:
  all_day_shades:
    name: All Day Shades
@@ -2627,7 +2631,7 @@ group:
      - cover.bedroom_dresser_day
      - cover.bedroom_front_day
      - cover.bedroom_rear_day
-     
+
  all_night_shades:
    name: All Night Shades
    entities:
@@ -2641,10 +2645,6 @@ group:
      - cover.bedroom_front_night
      - cover.bedroom_rear_night
 
-      - light.docking_lights
-      - light.awning_lights
-      - light.exterior_accents
-      - light.porch_handle
 
 fan:
   - platform: template
