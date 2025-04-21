@@ -2717,32 +2717,75 @@ cover:
               - cover.bedroom_front_night
               - cover.bedroom_rear_night
 
-group:
- all_day_shades:
-   name: All Day Shades
-   entities:
-     - cover.windshield_day
-     - cover.driver_day
-     - cover.passenger_day
-     - cover.entry_door_day
-     - cover.dinette_day
-     - cover.ds_living_day
-     - cover.bedroom_dresser_day
-     - cover.bedroom_front_day
-     - cover.bedroom_rear_day
+  - platform: template
+    covers:
+      cockpit_day_shades:
+        friendly_name: "Cockpit Day Shades"
+        value_template: >
+          {% set covers = [
+            states.cover.windshield_day,
+            states.cover.driver_day,
+            states.cover.passenger_day,
+            states.cover.entry_door_day
+          ] %}
+          {% if covers | selectattr('state', 'eq', 'open') | list | length == covers | length %}
+            open
+          {% elif covers | selectattr('state', 'eq', 'closed') | list | length == covers | length %}
+            closed
+          {% else %}
+            opening
+          {% endif %}
+        open_cover:
+          service: cover.open_cover
+          target:
+            entity_id:
+              - cover.windshield_day
+              - cover.driver_day
+              - cover.passenger_day
+              - cover.entry_door_day
+        close_cover:
+          service: cover.close_cover
+          target:
+            entity_id:
+              - cover.windshield_day
+              - cover.driver_day
+              - cover.passenger_day
+              - cover.entry_door_day
 
- all_night_shades:
-   name: All Night Shades
-   entities:
-     - cover.windshield_night
-     - cover.driver_night
-     - cover.passenger_night
-     - cover.entry_door_night
-     - cover.dinette_night
-     - cover.ds_living_night
-     - cover.bedroom_dresser_night
-     - cover.bedroom_front_night
-     - cover.bedroom_rear_night
+  - platform: template
+    covers:
+      cockpit_night_shades:
+        friendly_name: "Cockpit Night Shades"
+        value_template: >
+          {% set covers = [
+            states.cover.windshield_night,
+            states.cover.driver_night,
+            states.cover.passenger_night,
+            states.cover.entry_door_night
+          ] %}
+          {% if covers | selectattr('state', 'eq', 'open') | list | length == covers | length %}
+            open
+          {% elif covers | selectattr('state', 'eq', 'closed') | list | length == covers | length %}
+            closed
+          {% else %}
+            opening
+          {% endif %}
+        open_cover:
+          service: cover.open_cover
+          target:
+            entity_id:
+              - cover.windshield_night
+              - cover.driver_night
+              - cover.passenger_night
+              - cover.entry_door_night
+        close_cover:
+          service: cover.close_cover
+          target:
+            entity_id:
+              - cover.windshield_night
+              - cover.driver_night
+              - cover.passenger_night
+              - cover.entry_door_night
 
 
 fan:
