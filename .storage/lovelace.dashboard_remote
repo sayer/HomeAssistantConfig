@@ -342,14 +342,20 @@
                   "cards": [
                     {
                       "type": "custom:mushroom-climate-card",
-                      "entity": "climate.living_room",
+                      "entity": "climate.front_thermostat",
                       "show_temperature_control": true,
                       "collapsible_controls": false,
                       "fill_container": false
                     },
                     {
                       "type": "custom:mushroom-climate-card",
-                      "entity": "climate.kitchen",
+                      "entity": "climate.mid_thermostat",
+                      "show_temperature_control": true,
+                      "collapsible_controls": true
+                    },
+                    {
+                      "type": "custom:mushroom-climate-card",
+                      "entity": "climate.bedroom_thermostat",
                       "show_temperature_control": true,
                       "collapsible_controls": true
                     }
