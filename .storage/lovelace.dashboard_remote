@@ -901,7 +901,7 @@
                   "cards": [
                     {
                       "type": "custom:mushroom-climate-card",
-                      "entity": "climate.living_room",
+                      "entity": "climate.front_thermostat",
                       "show_temperature_control": true,
                       "collapsible_controls": false,
                       "fill_container": true,
@@ -909,7 +909,13 @@
                     },
                     {
                       "type": "custom:mushroom-climate-card",
-                      "entity": "climate.kitchen",
+                      "entity": "climate.mid_thermostat",
+                      "show_temperature_control": true,
+                      "collapsible_controls": true
+                    },
+                    {
+                      "type": "custom:mushroom-climate-card",
+                      "entity": "climate.bedroom_thermostat",
                       "show_temperature_control": true,
                       "collapsible_controls": true
                     }
@@ -1406,10 +1412,12 @@
               "type": "glance",
               "entities": [
                 {
-                  "entity": "cover.d_s_living_room_day"
+                  "entity": "cover.d_s_living_room_day",
+                  "name": "D/S Slide Day"
                 },
                 {
-                  "entity": "cover.dinette_day"
+                  "entity": "cover.dinette_day",
+                  "name": "P/S Slide Day"
                 }
               ],
               "state_color": true
@@ -1421,13 +1429,16 @@
               "type": "glance",
               "entities": [
                 {
-                  "entity": "cover.bedroom_dresser_day"
+                  "entity": "cover.bedroom_dresser_day",
+                  "name": "Dresser Day"
                 },
                 {
-                  "entity": "cover.bedroom_front_day"
+                  "entity": "cover.bedroom_front_day",
+                  "name": "Bed Front Day"
                 },
                 {
-                  "entity": "cover.bedroom_rear_day"
+                  "entity": "cover.bedroom_rear_day",
+                  "name": "Bed Rear Day"
                 }
               ],
               "state_color": true
@@ -1457,13 +1468,16 @@
               "type": "glance",
               "entities": [
                 {
-                  "entity": "cover.bedroom_dresser_night"
+                  "entity": "cover.bedroom_dresser_night",
+                  "name": "Dresser Night"
                 },
                 {
-                  "entity": "cover.bedroom_front_night"
+                  "entity": "cover.bedroom_front_night",
+                  "name": "Bed Front Night"
                 },
                 {
-                  "entity": "cover.bedroom_rear_night"
+                  "entity": "cover.bedroom_rear_night",
+                  "name": "Bed Rear Night"
                 }
               ],
               "state_color": true
@@ -1475,10 +1489,12 @@
               "type": "glance",
               "entities": [
                 {
-                  "entity": "cover.d_s_living_room_night"
+                  "entity": "cover.d_s_living_room_night",
+                  "name": "D/S Slide Night"
                 },
                 {
-                  "entity": "cover.dinette_night"
+                  "entity": "cover.dinette_night",
+                  "name": "P/S Slide Night"
                 }
               ],
               "state_color": true
