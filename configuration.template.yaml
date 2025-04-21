@@ -2624,23 +2624,29 @@ cover:
       all_day_shades:
         friendly_name: "All Day Shades"
         value_template: >
-          {% set covers = [
-            states.cover.windshield_day,
-            states.cover.driver_day,
-            states.cover.passenger_day,
-            states.cover.entry_door_day,
-            states.cover.dinette_day,
-            states.cover.ds_living_day,
-            states.cover.bedroom_dresser_day,
-            states.cover.bedroom_front_day,
-            states.cover.bedroom_rear_day
+          {% set cover_names = [
+            'windshield_day',
+            'driver_day',
+            'passenger_day',
+            'entry_door_day',
+            'dinette_day',
+            'ds_living_day',
+            'bedroom_dresser_day',
+            'bedroom_front_day',
+            'bedroom_rear_day'
           ] %}
-          {% if covers | selectattr('state', 'eq', 'open') | list | length == covers | length %}
+          {% set covers = cover_names | map('regex_replace', '^', 'cover.') | map('states') | list %}
+          {% set states_list = covers | map(attribute='state') | list %}
+          {% if 'opening' in states_list %}
+            opening
+          {% elif 'closing' in states_list %}
+            closing
+          {% elif states_list | select('eq', 'open') | list | length == covers | length %}
             open
-          {% elif covers | selectattr('state', 'eq', 'closed') | list | length == covers | length %}
+          {% elif states_list | select('eq', 'closed') | list | length == covers | length %}
             closed
           {% else %}
-            opening
+            unknown: {{ cover_names | map('regex_replace', '^', 'cover.') | map('states') | map(attribute='entity_id') | zip(states_list) | map('join', '=') | join(', ') }}
           {% endif %}
         open_cover:
           service: cover.open_cover
@@ -2672,23 +2678,29 @@ cover:
       all_night_shades:
         friendly_name: "All Night Shades"
         value_template: >
-          {% set covers = [
-            states.cover.windshield_night,
-            states.cover.driver_night,
-            states.cover.passenger_night,
-            states.cover.entry_door_night,
-            states.cover.dinette_night,
-            states.cover.ds_living_night,
-            states.cover.bedroom_dresser_night,
-            states.cover.bedroom_front_night,
-            states.cover.bedroom_rear_night
+          {% set cover_names = [
+            'windshield_night',
+            'driver_night',
+            'passenger_night',
+            'entry_door_night',
+            'dinette_night',
+            'ds_living_night',
+            'bedroom_dresser_night',
+            'bedroom_front_night',
+            'bedroom_rear_night'
           ] %}
-          {% if covers | selectattr('state', 'eq', 'open') | list | length == covers | length %}
+          {% set covers = cover_names | map('regex_replace', '^', 'cover.') | map('states') | list %}
+          {% set states_list = covers | map(attribute='state') | list %}
+          {% if 'opening' in states_list %}
+            opening
+          {% elif 'closing' in states_list %}
+            closing
+          {% elif states_list | select('eq', 'open') | list | length == covers | length %}
             open
-          {% elif covers | selectattr('state', 'eq', 'closed') | list | length == covers | length %}
+          {% elif states_list | select('eq', 'closed') | list | length == covers | length %}
             closed
           {% else %}
-            opening
+            unknown: {{ cover_names | map('regex_replace', '^', 'cover.') | map('states') | map(attribute='entity_id') | zip(states_list) | map('join', '=') | join(', ') }}
           {% endif %}
         open_cover:
           service: cover.open_cover
