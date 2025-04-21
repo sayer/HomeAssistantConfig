@@ -2612,7 +2612,7 @@ mqtt:
       optimistic: false
 
     - name: "Bedroom Dresser Day"
-      unique_id: "bedroom_dreser_day"
+      unique_id: "bedroom_dresser_day"
       state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/20"
       position_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/20"
       value_template: >-
