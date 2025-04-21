@@ -104,6 +104,7 @@ sensor:
         friendly_name: "Cargo Lock Group Debug States"
         value_template: >-
           {{ [
+            states.lock.cargo_door_lock_all.state
             states.lock.cargo_door_lock_1.state,
             states.lock.cargo_door_lock_2.state,
             states.lock.cargo_door_lock_3.state,
@@ -2598,8 +2599,6 @@ lock:
         {% else %}
           locked
         {% endif %}
-      {% endif %}
-      {% endif %}
     lock:
       service: script.lock_all_cargo_doors
     unlock:
