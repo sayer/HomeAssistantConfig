@@ -2618,6 +2618,105 @@ light:
       - light.exterior_accents
       - light.porch_handle
       
+cover:
+  - platform: template
+    covers:
+      all_day_shades:
+        friendly_name: "All Day Shades"
+        value_template: >
+          {% set covers = [
+            states.cover.windshield_day,
+            states.cover.driver_day,
+            states.cover.passenger_day,
+            states.cover.entry_door_day,
+            states.cover.dinette_day,
+            states.cover.ds_living_day,
+            states.cover.bedroom_dresser_day,
+            states.cover.bedroom_front_day,
+            states.cover.bedroom_rear_day
+          ] %}
+          {% if covers | selectattr('state', 'eq', 'open') | list | length == covers | length %}
+            open
+          {% elif covers | selectattr('state', 'eq', 'closed') | list | length == covers | length %}
+            closed
+          {% else %}
+            opening
+          {% endif %}
+        open_cover:
+          service: cover.open_cover
+          target:
+            entity_id:
+              - cover.windshield_day
+              - cover.driver_day
+              - cover.passenger_day
+              - cover.entry_door_day
+              - cover.dinette_day
+              - cover.ds_living_day
+              - cover.bedroom_dresser_day
+              - cover.bedroom_front_day
+              - cover.bedroom_rear_day
+        close_cover:
+          service: cover.close_cover
+          target:
+            entity_id:
+              - cover.windshield_day
+              - cover.driver_day
+              - cover.passenger_day
+              - cover.entry_door_day
+              - cover.dinette_day
+              - cover.ds_living_day
+              - cover.bedroom_dresser_day
+              - cover.bedroom_front_day
+              - cover.bedroom_rear_day
+
+      all_night_shades:
+        friendly_name: "All Night Shades"
+        value_template: >
+          {% set covers = [
+            states.cover.windshield_night,
+            states.cover.driver_night,
+            states.cover.passenger_night,
+            states.cover.entry_door_night,
+            states.cover.dinette_night,
+            states.cover.ds_living_night,
+            states.cover.bedroom_dresser_night,
+            states.cover.bedroom_front_night,
+            states.cover.bedroom_rear_night
+          ] %}
+          {% if covers | selectattr('state', 'eq', 'open') | list | length == covers | length %}
+            open
+          {% elif covers | selectattr('state', 'eq', 'closed') | list | length == covers | length %}
+            closed
+          {% else %}
+            opening
+          {% endif %}
+        open_cover:
+          service: cover.open_cover
+          target:
+            entity_id:
+              - cover.windshield_night
+              - cover.driver_night
+              - cover.passenger_night
+              - cover.entry_door_night
+              - cover.dinette_night
+              - cover.ds_living_night
+              - cover.bedroom_dresser_night
+              - cover.bedroom_front_night
+              - cover.bedroom_rear_night
+        close_cover:
+          service: cover.close_cover
+          target:
+            entity_id:
+              - cover.windshield_night
+              - cover.driver_night
+              - cover.passenger_night
+              - cover.entry_door_night
+              - cover.dinette_night
+              - cover.ds_living_night
+              - cover.bedroom_dresser_night
+              - cover.bedroom_front_night
+              - cover.bedroom_rear_night
+
 group:
  all_day_shades:
    name: All Day Shades
