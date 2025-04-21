@@ -1551,6 +1551,33 @@ mqtt:
   
 %%ALL_SHADES%%
 
+  - platform: group
+    name: All Day Shades
+    entities:
+      - cover.windshield_day
+      - cover.driver_day
+      - cover.passenger_day
+      - cover.entry_door_day
+      - cover.dinette_day
+      - cover.ds_living_day
+      - cover.bedroom_dresser_day
+      - cover.bedroom_front_day
+      - cover.bedroom_rear_day
+
+  - platform: group
+    name: All Night Shades
+    entities:
+      - cover.windshield_night
+      - cover.driver_night
+      - cover.passenger_night
+      - cover.entry_door_night
+      - cover.dinette_night
+      - cover.ds_living_night
+      - cover.bedroom_dresser_night
+      - cover.bedroom_front_night
+      - cover.bedroom_rear_night
+
+
   sensor:
 
     # Battery Voltage Sensor
