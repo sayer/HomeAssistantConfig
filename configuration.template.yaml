@@ -20,7 +20,10 @@ script: !include scripts.yaml
 scene: !include scenes.yaml
 shell_command: !include shell_commands.yaml
 
-
+notify:
+  - name: write_coach_year
+    platform: file
+    filename: /config/coach_model_year.txt
 
 homeassistant:
   customize:
@@ -2623,6 +2626,7 @@ cover:
     covers:
       all_day_shades:
         friendly_name: "All Day Shades"
+        unique_id: "all_day_shades"
         value_template: >
           {% set cover_entities = [
             'cover.windshield_day',
