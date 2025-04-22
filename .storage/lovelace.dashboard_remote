@@ -908,6 +908,7 @@
                     {
                       "type": "custom:mushroom-climate-card",
                       "entity": "climate.front_thermostat",
+                      "name": "Front Zone",
                       "show_temperature_control": true,
                       "collapsible_controls": false,
                       "fill_container": true,
