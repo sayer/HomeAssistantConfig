@@ -1463,3 +1463,23 @@
   action:
   - service: shell_command.update_model_config
   - service: homeassistant.restart
+- id: '1745356403346'
+  alias: Write Coach Model Year on Startup
+  description: ''
+  triggers:
+  - event: start
+    trigger: homeassistant
+  actions:
+  - data_template:
+      message: '{{ states(''input_text.coach_model_year'') }}'
+    action: notify.write_coach_year
+- id: '1745356452458'
+  alias: Update Coach Model Year on Change
+  description: ''
+  triggers:
+  - entity_id: input_text.coach_model_year
+    trigger: state
+  actions:
+  - data_template:
+      message: '{{ states(''input_text.coach_model_year'') }}'
+    action: notify.write_coach_year
