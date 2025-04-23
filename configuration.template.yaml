@@ -21,15 +21,9 @@ scene: !include scenes.yaml
 shell_command: !include shell_commands.yaml
 
 notify:
-  - name: "HA_Email_Notify"
-    platform: smtp
-    sender: "sayer@ayersnet.com"
-    recipient: "sayer@ayersnet.com"
-
-  - name: "write_coach_year"
-    platform: file
+  - platform: file
+    name: write_coach_year
     filename: /config/coach_model_year.txt
-
 
 homeassistant:
   customize:
