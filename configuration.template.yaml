@@ -223,7 +223,7 @@ notify:
     sender: "sayer@ayersnet.com"
     recipient: "sayer@ayersnet.com"
 
-  - name: write_coach_year
+  - name: "write_coach_year"
     platform: file
     filename: /config/coach_model_year.txt
 
