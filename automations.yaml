@@ -1457,7 +1457,7 @@
       {% else %} input_boolean.turn_off {% endif %}'
       
 - alias: "Update Coach Year File on Model Year Change or HA Start"
-  id: "updatr_coach_year"
+  id: "update_coach_year"
   trigger:
     - platform: state
       entity_id: input_number.model_year
@@ -1465,7 +1465,7 @@
       event: start
   action:
     - delay: "00:00:10"
-    - service: notify.write_coach_year
+    - service: shell_command.write_coach_year
       data:
-        message: "{{ states('input_number.model_year') | int }}"
+        year: "{{ states('input_number.model_year') | int }}"
   mode: single
