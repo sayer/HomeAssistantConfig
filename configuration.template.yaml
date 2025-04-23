@@ -5,7 +5,8 @@ logger:
   default: warning
   logs:
     homeassistant.components.mqtt: debug
-    homeassistant.components.light: debug
+   # homeassistant.components.light: debug
+    homeassistant.components.shell_command: debug
 
 # Load frontend themes from the themes folder
 frontend:
