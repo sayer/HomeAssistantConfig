@@ -20,10 +20,7 @@ script: !include scripts.yaml
 scene: !include scenes.yaml
 shell_command: !include shell_commands.yaml
 
-notify:
-  - name: write_coach_year
-    platform: file
-    filename: /config/coach_model_year.txt
+
 
 homeassistant:
   customize:
@@ -220,12 +217,16 @@ sensor:
           {{ relative_time(states.switch.generatorstatus.last_changed) | timestamp_custom('%-H hours and %-M minutes', false) }}
           {% endif %}
 
-# Example configuration.yaml entry
 notify:
   - name: "HA_Email_Notify"
     platform: smtp
     sender: "sayer@ayersnet.com"
     recipient: "sayer@ayersnet.com"
+
+  - name: write_coach_year
+    platform: file
+    filename: /config/coach_model_year.txt
+
 
 mqtt:
 
