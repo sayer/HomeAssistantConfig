@@ -1,2 +1,2 @@
 # shell_commands.yaml
-write_coach_year: 'touch /config/coach_model_year.txt && echo "{{ year }}" > /config/coach_model_year.txt 2>> /config/coach_model_year_error.log'
+write_coach_year: 'touch /tmp/coach_model_year.txt && echo "{{ year }}" > /tmp/coach_model_year.txt 2>> /tmp/coach_model_year_error.log'
