@@ -1,2 +1,2 @@
 # shell_commands.yaml
-write_coach_year: touch coach_model_year.txt
+write_coach_year: ./update_coach_year.sh {{ year }}
