@@ -20,11 +20,6 @@ script: !include scripts.yaml
 scene: !include scenes.yaml
 shell_command: !include shell_commands.yaml
 
-notify:
-  - platform: file
-    name: write_coach_year
-    filename: /config/coach_model_year.txt
-
 homeassistant:
   customize:
     zone.foretravel:
