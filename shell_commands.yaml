@@ -1,2 +1,2 @@
 # shell_commands.yaml
-write_coach_year: "echo {{ year }} > /config/coach_model_year.txt"
+write_coach_year: 'echo "{{ year }}" > /config/coach_model_year.txt'

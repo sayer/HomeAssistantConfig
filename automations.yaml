@@ -1456,26 +1456,15 @@
     action: '{% if states(''input_number.model_year'') | int > 2017 | int %} input_boolean.turn_on
       {% else %} input_boolean.turn_off {% endif %}'
       
-- id: '1745356403346'
-  alias: Write Coach Model Year on Startup
+- alias: "Update Coach Year File on Model Year Change or HA Start"
   trigger:
+    - platform: state
+      entity_id: input_number.model_year
     - platform: homeassistant
       event: start
   action:
     - delay: "00:00:10"
     - service: shell_command.write_coach_year
       data:
-        year: "{{ states('input_number.model_year') }}"
-  mode: single
-
-- id: '1745356452458'
-  alias: Update Coach Model Year When Changed
-  trigger:
-    - platform: state
-      entity_id: input_number.model_year
-  action:
-    - delay: "00:00:10"
-    - service: shell_command.write_coach_year
-      data:
-        year: "{{ states('input_number.model_year') }}"
+        year: "{{ states('input_number.model_year') | int }}"
   mode: single
