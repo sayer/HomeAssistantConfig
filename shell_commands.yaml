@@ -1,2 +1,2 @@
 # shell_commands.yaml
-update_model_config: /config/update_config.sh {{ states('input_number.model_year') }}
+write_coach_year: "echo '{{ year }}' > /config/coach_model_year.txt"
