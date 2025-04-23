@@ -55,11 +55,15 @@ else
 fi
 
 # Get the model year from Home Assistant helper
-log_message "Getting model year from Home Assistant helper..."
-MODEL_YEAR=$(ha state get input_number.model_year | grep state | cut -d'"' -f4 | cut -d'.' -f1)
+log_message "Getting model year from /config/coach_model_year.txt..."
+if [ -f "/config/coach_model_year.txt" ]; then
+  MODEL_YEAR=$(cat /config/coach_model_year.txt | tr -d '[:space:]')
+else
+  MODEL_YEAR=""
+fi
 
 if [ -z "$MODEL_YEAR" ]; then
-  log_message "WARNING: Could not get model year from Home Assistant, defaulting to 2020"
+  log_message "WARNING: Could not get model year from /config/coach_model_year.txt, defaulting to 2020"
   MODEL_YEAR="2020"
 fi
 
@@ -82,7 +86,7 @@ if ha core check; then
   
   # Reload all YAML
   log_message "Reloading Home Assistant YAML configuration..."
-  RELOAD_OUTPUT=$(ha core reload 2>&1)
+  RELOAD_OUTPUT=$(ha core restart 2>&1)
   RELOAD_STATUS=$?
   
   if [ $RELOAD_STATUS -eq 0 ]; then
