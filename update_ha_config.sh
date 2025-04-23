@@ -56,15 +56,17 @@ fi
 
 # Get the model year from Home Assistant helper
 log_message "Getting model year from /config/coach_model_year.txt..."
-if [ -f "/config/coach_model_year.txt" ]; then
-  MODEL_YEAR=$(cat /config/coach_model_year.txt | tr -d '[:space:]')
-else
-  MODEL_YEAR=""
+if [ ! -f "/config/coach_model_year.txt" ]; then
+  log_message "/config/coach_model_year.txt not found, creating with default value 2020"
+  echo "2020" > /config/coach_model_year.txt
 fi
 
+MODEL_YEAR=$(cat /config/coach_model_year.txt | tr -d '[:space:]')
+
 if [ -z "$MODEL_YEAR" ]; then
-  log_message "WARNING: Could not get model year from /config/coach_model_year.txt, defaulting to 2020"
+  log_message "WARNING: /config/coach_model_year.txt is empty, defaulting to 2020"
   MODEL_YEAR="2020"
+  echo "2020" > /config/coach_model_year.txt
 fi
 
 log_message "Model year: $MODEL_YEAR"
