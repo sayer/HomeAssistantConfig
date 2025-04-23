@@ -1455,32 +1455,27 @@
   - entity_id: input_boolean.is_optimistic
     action: '{% if states(''input_number.model_year'') | int > 2017 | int %} input_boolean.turn_on
       {% else %} input_boolean.turn_off {% endif %}'
-- id: update_model_configuration
-  alias: Update Model Configuration
-  trigger:
-  - platform: state
-    entity_id: input_number.model_year
-  action:
-  - service: shell_command.update_model_config
-  - service: homeassistant.restart
+      
 - id: '1745356403346'
   alias: Write Coach Model Year on Startup
   trigger:
     - platform: homeassistant
       event: start
   action:
+    - delay: "00:00:10"
     - service: shell_command.write_coach_year
       data:
-        year: "{{ states('input_text.coach_model_year') }}"
+        year: "{{ states('input_number.model_year') }}"
   mode: single
 
 - id: '1745356452458'
   alias: Update Coach Model Year When Changed
   trigger:
     - platform: state
-      entity_id: input_text.coach_model_year
+      entity_id: input_number.model_year
   action:
+    - delay: "00:00:10"
     - service: shell_command.write_coach_year
       data:
-        year: "{{ states('input_text.coach_model_year') }}"
+        year: "{{ states('input_number.model_year') }}"
   mode: single
