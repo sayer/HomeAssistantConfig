@@ -1469,13 +1469,15 @@
       data:
         year: "{{ states('input_number.model_year') | int }}"
   mode: single
-
 - id: '1750000000001'
   alias: Map DC Shade Status to WINDOW_SHADE_CONTROL_STATUS
   description: Map DC_COMPONENT_DRIVER_STATUS_6 payload into WINDOW_SHADE_CONTROL_STATUS topics
   trigger:
     - platform: mqtt
       topic: "RVC/DC_COMPONENT_DRIVER_STATUS_6"
+  condition:
+    - condition: template
+      value_template: "{{ trigger.payload_json.driver_index != 255 }}"
   action:
     - service: mqtt.publish
       data_template:
@@ -1493,6 +1495,6 @@
             "reverse status definition": "{{ rev }}",
             "last command definition": "{{ last }}",
             "position": {{ trigger.payload_json.duration_remaining }},
-            "motor duty": {{ '100' if motor == 'active' else '0' }},
+            "motor duty": {{ '100' if motor == 'active' else '0' }}
           }
   mode: single
