@@ -104,7 +104,6 @@ for HOST in "${HOSTS[@]}"; do
       fi
     elif [ "$CMD" = "/config/update_ha_config.sh" ]; then
       echo "Running: update_ha_config"
-      echo "Note: If you see 'Permission denied' for /config/update_ha_config.log, check permissions on the remote host."
       ssh -t -p $SSH_PORT -o ConnectTimeout=10 -o StrictHostKeyChecking=no "$SSH_USER@$HOST" "bash -l -c '$CMD'"
       if [ $? -ne 0 ]; then
         echo "Error: Failed to run '$CMD' on $HOST"
