@@ -1469,32 +1469,4 @@
       data:
         year: "{{ states('input_number.model_year') | int }}"
   mode: single
-- id: '1750000000001'
-  alias: Map DC Shade Status to WINDOW_SHADE_CONTROL_STATUS
-  description: Map DC_COMPONENT_DRIVER_STATUS_6 payload into WINDOW_SHADE_CONTROL_STATUS topics
-  trigger:
-    - platform: mqtt
-      topic: "RVC/DC_COMPONENT_DRIVER_STATUS_6"
-  condition:
-    - condition: template
-      value_template: "{{ trigger.payload_json.driver_index != 255 }}"
-  action:
-    - service: mqtt.publish
-      data_template:
-        topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/{{ trigger.payload_json.driver_index }}"
-        payload: >-
-          {% set dir = trigger.payload_json['driver_direction definition'] %}
-          {% set motor = 'active' if dir != 'not_active' else 'inactive' %}
-          {% set fwd = 'active' if dir == 'forward' else 'inactive' %}
-          {% set rev = 'active' if dir == 'reverse' else 'inactive' %}
-          {% set last = 'toggle ' ~ dir if dir != 'not_active' else 'none' %}
-          {
-            "instance": {{ trigger.payload_json.driver_index }},
-            "motor status definition": "{{ motor }}",
-            "forward status definition": "{{ fwd }}",
-            "reverse status definition": "{{ rev }}",
-            "last command definition": "{{ last }}",
-            "position": {{ trigger.payload_json.duration_remaining }},
-            "motor duty": {{ '100' if motor == 'active' else '0' }}
-          }
-  mode: single
+
