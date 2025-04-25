@@ -1440,7 +1440,14 @@ mqtt:
     - name: "Black Waste Dump"
       unique_id: "blackwastedump"
       state_topic: "RVC/WASTEDUMP_STATUS"
-      value_template: "{{ value_json['black valve definition'] }}"
+      value_template: >-
+        {% if value_json is defined and 'black valve definition' in value_json %}
+          {{ value_json['black valve definition'] }}
+        {% elif value_json is defined and 'black valve status definition' in value_json %}
+          {{ value_json['black valve status definition'] }}
+        {% else %}
+          closed
+        {% endif %}
       command_topic: "RVC/WASTEDUMP_COMMAND/set"
       payload_on: '{"black valve": 5}'
       payload_off: '{"black valve": 0}'
@@ -1449,7 +1456,14 @@ mqtt:
 
     - name: "Black Waste Dump - old"
       state_topic: "RVC/WASTEDUMP_COMMAND"
-      value_template: "{{ value_json['black valve definition'] }}"
+      value_template: >-
+        {% if value_json is defined and 'black valve definition' in value_json %}
+          {{ value_json['black valve definition'] }}
+        {% elif value_json is defined and 'black valve status definition' in value_json %}
+          {{ value_json['black valve status definition'] }}
+        {% else %}
+          closed
+        {% endif %}
       payload_on: "05FFFFFFFFFFFFFF"
       payload_off: "00FFFFFFFFFFFFFF"
       command_topic: "RVCSET/MESSAGE/1FFAE"
@@ -1460,7 +1474,14 @@ mqtt:
     - name: "Gray Water Bypass"
       unique_id: "graywaterbypass"
       state_topic: "RVC/WASTEDUMP_STATUS"
-      value_template: "{{ value_json['gray valve definition'] }}"
+      value_template: >-
+        {% if value_json is defined and 'gray valve definition' in value_json %}
+          {{ value_json['gray valve definition'] }}
+        {% elif value_json is defined and 'gray valve status definition' in value_json %}
+          {{ value_json['gray valve status definition'] }}
+        {% else %}
+          closed
+        {% endif %}
       command_topic: "RVC/WASTEDUMP_COMMAND/255/set"
       payload_on: '{"Command - Gray tank": 1}'
       payload_off: '{"Command - Gray tank": 0}'
@@ -1469,7 +1490,14 @@ mqtt:
 
     - name: "Gray Water Bypass - old"
       state_topic: "RVC/WASTEDUMP_COMMAND"
-      value_template: "{{ value_json['gray valve definition'] }}"
+      value_template: >-
+        {% if value_json is defined and 'gray valve definition' in value_json %}
+          {{ value_json['gray valve definition'] }}
+        {% elif value_json is defined and 'gray valve status definition' in value_json %}
+          {{ value_json['gray valve status definition'] }}
+        {% else %}
+          closed
+        {% endif %}
       payload_on: "FF01FFFFFFFFFFFF"
       payload_off: "FF00FFFFFFFFFFFF"
       command_topic: "RVCSET/MESSAGE/1FFAE"
@@ -2005,20 +2033,25 @@ mqtt:
     - name: "Shade Full State"
       state_topic: "RVC/WINDOW_SHADE_CONTROL_STATUS/1"
       value_template: >-
-        Pos: {{ value_json.position | default(value_json['motor duty']) | default(0) }},
-        LastCmd: {{ value_json['last command definition'] }},
-        Motor: {{ value_json['motor status definition'] }},
-        Forward: {{ value_json['forward status definition'] }},
-        Reverse: {{ value_json['reverse status definition'] }}
-        State: 
-        {% if value_json['motor status definition'] == 'active' %}
-        {% if value_json['last command definition'] == 'toggle forward' %}opening
-        {% elif value_json['last command definition'] == 'toggle reverse' %}closing
-        {% else %}invalid{% endif %}
+        {% if value_json is defined %}
+          {% set pos = value_json.position | default(value_json['motor duty'] if 'motor duty' in value_json else 0) | default(0) %}
+          {% set last_cmd = value_json['last command definition'] | default('unknown') %}
+          {% set motor = value_json['motor status definition'] | default('unknown') %}
+          {% set forward = value_json['forward status definition'] | default('unknown') %}
+          {% set reverse = value_json['reverse status definition'] | default('unknown') %}
+          
+          Pos: {{ pos }}, LastCmd: {{ last_cmd }}, Motor: {{ motor }}, Forward: {{ forward }}, Reverse: {{ reverse }} State:
+          {% if motor == 'active' %}
+            {% if last_cmd == 'toggle forward' %}opening
+            {% elif last_cmd == 'toggle reverse' %}closing
+            {% else %}invalid{% endif %}
+          {% else %}
+            {% if last_cmd == 'toggle forward' %}open
+            {% elif last_cmd == 'toggle reverse' %}closed
+            {% else %}invalid{% endif %}
+          {% endif %}
         {% else %}
-        {% if value_json['last command definition'] == 'toggle forward' %}open
-        {% elif value_json['last command definition'] == 'toggle reverse' %}closed
-        {% else %}invalid{% endif %}
+          unavailable
         {% endif %}
 
     - name: "DC House Voltage"
@@ -2630,20 +2663,36 @@ cover:
             'cover.bedroom_front_day',
             'cover.bedroom_rear_day'
           ] %}
-          {% set states_list = [] %}
+          {% set is_opening = false %}
+          {% set is_closing = false %}
+          {% set open_count = 0 %}
+          {% set closed_count = 0 %}
+          {% set status_list = namespace(values=[]) %}
+          
           {% for entity_id in cover_entities %}
-            {% set _ = states_list.append(states(entity_id)) %}
+            {% set cover_state = states(entity_id) %}
+            {% if cover_state == 'opening' %}
+              {% set is_opening = true %}
+            {% elif cover_state == 'closing' %}
+              {% set is_closing = true %}
+            {% elif cover_state == 'open' %}
+              {% set open_count = open_count + 1 %}
+            {% elif cover_state == 'closed' %}
+              {% set closed_count = closed_count + 1 %}
+            {% endif %}
+            {% set status_list.values = status_list.values + [entity_id ~ '=' ~ cover_state] %}
           {% endfor %}
-          {% if 'opening' in states_list %}
+          
+          {% if is_opening %}
             opening
-          {% elif 'closing' in states_list %}
+          {% elif is_closing %}
             closing
-          {% elif states_list | select('eq', 'open') | list | length == cover_entities | length %}
+          {% elif open_count == cover_entities | length %}
             open
-          {% elif states_list | select('eq', 'closed') | list | length == cover_entities | length %}
+          {% elif closed_count == cover_entities | length %}
             closed
           {% else %}
-            unknown: {{ cover_entities | zip(states_list) | map('join', '=') | join(', ') }}
+            unknown: {{ status_list.values | join(', ') }}
           {% endif %}
         open_cover:
           service: cover.open_cover
@@ -2675,29 +2724,47 @@ cover:
       all_night_shades:
         friendly_name: "All Night Shades"
         value_template: >
-          {% set cover_names = [
-            'windshield_night',
-            'driver_night',
-            'passenger_night',
-            'entry_door_night',
-            'dinette_night',
-            'ds_living_night',
-            'bedroom_dresser_night',
-            'bedroom_front_night',
-            'bedroom_rear_night'
+          {% set cover_entities = [
+            'cover.windshield_night',
+            'cover.driver_night',
+            'cover.passenger_night',
+            'cover.entry_door_night',
+            'cover.dinette_night',
+            'cover.ds_living_night',
+            'cover.bedroom_dresser_night',
+            'cover.bedroom_front_night',
+            'cover.bedroom_rear_night'
           ] %}
-          {% set covers = cover_names | map('regex_replace', '^', 'cover.') | map('states') | list %}
-          {% set states_list = covers | map(attribute='state') | list %}
-          {% if 'opening' in states_list %}
+          {% set is_opening = false %}
+          {% set is_closing = false %}
+          {% set open_count = 0 %}
+          {% set closed_count = 0 %}
+          {% set status_list = namespace(values=[]) %}
+          
+          {% for entity_id in cover_entities %}
+            {% set cover_state = states(entity_id) %}
+            {% if cover_state == 'opening' %}
+              {% set is_opening = true %}
+            {% elif cover_state == 'closing' %}
+              {% set is_closing = true %}
+            {% elif cover_state == 'open' %}
+              {% set open_count = open_count + 1 %}
+            {% elif cover_state == 'closed' %}
+              {% set closed_count = closed_count + 1 %}
+            {% endif %}
+            {% set status_list.values = status_list.values + [entity_id ~ '=' ~ cover_state] %}
+          {% endfor %}
+          
+          {% if is_opening %}
             opening
-          {% elif 'closing' in states_list %}
+          {% elif is_closing %}
             closing
-          {% elif states_list | select('eq', 'open') | list | length == covers | length %}
+          {% elif open_count == cover_entities | length %}
             open
-          {% elif states_list | select('eq', 'closed') | list | length == covers | length %}
+          {% elif closed_count == cover_entities | length %}
             closed
           {% else %}
-            unknown: {{ cover_names | map('regex_replace', '^', 'cover.') | map('states') | map(attribute='entity_id') | zip(states_list) | map('join', '=') | join(', ') }}
+            unknown: {{ status_list.values | join(', ') }}
           {% endif %}
         open_cover:
           service: cover.open_cover

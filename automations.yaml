@@ -1241,10 +1241,14 @@
   action:
   - service: script.notify_home
     data_template:
-      message: '{% set sensor = trigger.entity_id.split(''.'')[1] %}  The state of
-        Outback {{ sensor }} changed to {{ trigger.to_state.state }}.
-
-        '
+      message: >-
+        {% set sensor = trigger.entity_id.split('.')[-1] %}
+        The state of Outback {{ sensor }} changed to
+        {% if trigger.to_state is defined and trigger.to_state is not none %}
+          {{ trigger.to_state.state }}
+        {% else %}
+          unknown
+        {% endif %}
       title: Foretravel
   - service: script.notify_iphone
     metadata: {}
