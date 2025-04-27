@@ -1083,26 +1083,6 @@ mqtt:
       state_off: "Off"
       optimistic: false
       icon: "mdi:fan"
-  
-
-    - name: "All Fans Control"
-      unique_id: "all_fans_control"
-      icon: mdi:fan
-      state_topic: "RVC/ROOF_FAN_STATUS_1/129"
-      value_template: >-
-        {% set roof_fan = states('switch.roof_fan_1_control') %}
-        {% set bath_fan = states('switch.mid_bath_fan_switch') %}
-        {% if roof_fan == 'on' or bath_fan == 'on' %}
-          On
-        {% else %}
-          Off
-        {% endif %}
-      command_topic: "homeassistant/switch/all_fans/set"
-      state_on: "On"
-      state_off: "Off"
-      payload_on: "ON"
-      payload_off: "OFF"
-      optimistic: true
 
     - name: "Aqua-Hot Combustion"
       unique_id: aqua_hot_combustion_switch_mqtt
