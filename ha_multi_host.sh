@@ -6,6 +6,7 @@ HOSTS=(
   "homeassistant-12.tail73c84.ts.net"
   "homeassistant-13.tail73c84.ts.net"
   "homeassistant-3.tail73c84.ts.net"
+  "homeassistant-8.tail73c84.ts.net"
 )
 
 SSH_USER="hassio"
