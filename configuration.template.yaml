@@ -1085,6 +1085,25 @@ mqtt:
       icon: "mdi:fan"
   
 
+    - name: "All Fans Control"
+      unique_id: "all_fans_control"
+      icon: mdi:fan
+      state_topic: "RVC/ROOF_FAN_STATUS_1/129"
+      value_template: >-
+        {% set roof_fan = states('switch.roof_fan_1_control') %}
+        {% set bath_fan = states('switch.mid_bath_fan_switch') %}
+        {% if roof_fan == 'on' or bath_fan == 'on' %}
+          On
+        {% else %}
+          Off
+        {% endif %}
+      command_topic: "homeassistant/switch/all_fans/set"
+      state_on: "On"
+      state_off: "Off"
+      payload_on: "ON"
+      payload_off: "OFF"
+      optimistic: true
+
     - name: "Aqua-Hot Combustion"
       unique_id: aqua_hot_combustion_switch_mqtt
       icon: mdi:fire
@@ -2605,6 +2624,29 @@ mqtt:
       optimistic: false
       icon: "mdi:fan"
 
+# Fan control that toggles both fans simultaneously
+switch:
+  - platform: template
+    switches:
+      all_fans_control:
+        friendly_name: "All Fans Control"
+        unique_id: "all_fans_control_template"
+        icon: mdi:fan
+        value_template: >-
+          {{ is_state('switch.roof_fan_1_control', 'on') or is_state('switch.mid_bath_fan_switch', 'on') }}
+        turn_on:
+          service: switch.turn_on
+          data:
+            entity_id:
+              - switch.roof_fan_1_control
+              - switch.mid_bath_fan_switch
+        turn_off:
+          service: switch.turn_off
+          data:
+            entity_id:
+              - switch.roof_fan_1_control
+              - switch.mid_bath_fan_switch
+
 lock:
   - platform: template
     name: "Cargo Door Locks"
@@ -2870,36 +2912,45 @@ fan:
       # Fan definition using the key 'mid_bath_fan'
       mid_bath_fan:
         friendly_name: "Mid Bath Fan"
-        unique_id: "mid_bath_fan_55_template_wrapper_old_syntax" # Use a unique ID
+        unique_id: "mid_bath_fan" # Updated unique ID
 
-        # State mirrors the backend switch
-        value_template: "{{ states('switch.mid_bath_fan_switch') }}" # Ensure this switch ID is correct
+        # State is ON if either fan is ON
+        value_template: >-
+          {{ is_state('switch.mid_bath_fan_switch', 'on') or is_state('switch.roof_fan_1_control', 'on') }}
 
-        # Actions call the backend switch's services
+        # Actions control both fans
         turn_on:
           service: switch.turn_on
           target:
-            entity_id: switch.mid_bath_fan_switch
+            entity_id:
+              - switch.mid_bath_fan_switch
+              - switch.roof_fan_1_control
         turn_off:
           service: switch.turn_off
           target:
             entity_id:
-              switch.mid_bath_fan_switch
+              - switch.mid_bath_fan_switch
+              - switch.roof_fan_1_control
 
               # Fan definition using the key 'rear_bath_fan'
       rear_bath_fan:
         friendly_name: "Rear Bath Fan"
-        unique_id: "rear_bath_fan_56_template_wrapper_old_syntax" # Use a unique ID
+        unique_id: "rear_bath_fan" # Updated unique ID
 
-        # State mirrors the backend switch
-        value_template: "{{ states('switch.rear_bath_fan_switch') }}" # Ensure this switch ID is correct
+        # State is ON if either fan is ON
+        value_template: >-
+          {{ is_state('switch.rear_bath_fan_switch', 'on') or is_state('switch.roof_fan_2_control', 'on') }}
 
-        # Actions call the backend switch's services
+        # Actions control both fans
         turn_on:
           service: switch.turn_on
           target:
-            entity_id: switch.rear_bath_fan_switch
+            entity_id:
+              - switch.rear_bath_fan_switch
+              - switch.roof_fan_2_control
         turn_off:
           service: switch.turn_off
           target:
-            entity_id: switch.rear_bath_fan_switch
+            entity_id:
+              - switch.rear_bath_fan_switch
+              - switch.roof_fan_2_control
