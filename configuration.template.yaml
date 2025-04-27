@@ -2604,28 +2604,6 @@ mqtt:
       optimistic: false
       icon: "mdi:fan"
 
-# Fan control that toggles both fans simultaneously
-switch:
-  - platform: template
-    switches:
-      all_fans_control:
-        friendly_name: "All Fans Control"
-        unique_id: "all_fans_control_template"
-        icon: mdi:fan
-        value_template: >-
-          {{ is_state('switch.roof_fan_1_control', 'on') or is_state('switch.mid_bath_fan_switch', 'on') }}
-        turn_on:
-          service: switch.turn_on
-          data:
-            entity_id:
-              - switch.roof_fan_1_control
-              - switch.mid_bath_fan_switch
-        turn_off:
-          service: switch.turn_off
-          data:
-            entity_id:
-              - switch.roof_fan_1_control
-              - switch.mid_bath_fan_switch
 
 lock:
   - platform: template
