@@ -76,10 +76,15 @@ NAME_BEDROOM_FRONT_DAY="Bedroom Front Day"; UID_BEDROOM_FRONT_DAY="bedroom_front
 NAME_BEDROOM_REAR_DAY="Bedroom Rear Day"; UID_BEDROOM_REAR_DAY="bedroom_rear_day"
 NAME_BEDROOM_FRONT_NIGHT="Bedroom Front Night"; UID_BEDROOM_FRONT_NIGHT="bedroom_front_night"
 NAME_BEDROOM_REAR_NIGHT="Bedroom Rear Night"; UID_BEDROOM_REAR_NIGHT="bedroom_rear_night"
+NAME_KITCHEN_DAY="Kitchen Day"; UID_KITCHEN_DAY="kitchen_day"
+NAME_KITCHEN_NIGHT="Kitchen Night"; UID_KITCHEN_NIGHT="kitchen_night"
+NAME_DS_WINDOW1_DAY="D/S Window 1 Day"; UID_DS_WINDOW1_DAY="ds_window1_day"
+NAME_DS_WINDOW2_DAY="D/S Window 2 Day"; UID_DS_WINDOW2_DAY="ds_window2_day"
+NAME_DS_WINDOW1_NIGHT="D/S Window 1 Night"; UID_DS_WINDOW1_NIGHT="ds_window1_night"
+NAME_DS_WINDOW2_NIGHT="D/S Window 2 Night"; UID_DS_WINDOW2_NIGHT="ds_window2_night"
 
 # Define all shade tokens (used for looping)
-ALL_SHADE_TOKENS="WINDSHIELD_DAY DRIVER_DAY PASSENGER_DAY ENTRY_DOOR_DAY WINDSHIELD_NIGHT DRIVER_NIGHT PASSENGER_NIGHT ENTRY_DOOR_NIGHT DINETTE_DAY MID_BATH_NIGHT DINETTE_NIGHT REAR_BATH_NIGHT TOP_BUNK_NIGHT DS_LIVING_DAY BEDROOM_DRESSER_DAY BOTTOM_BUNK_NIGHT DS_LIVING_NIGHT BEDROOM_DRESSER_NIGHT BEDROOM_FRONT_DAY BEDROOM_REAR_DAY BEDROOM_FRONT_NIGHT BEDROOM_REAR_NIGHT"
-
+ALL_SHADE_TOKENS="WINDSHIELD_DAY DRIVER_DAY PASSENGER_DAY ENTRY_DOOR_DAY WINDSHIELD_NIGHT DRIVER_NIGHT PASSENGER_NIGHT ENTRY_DOOR_NIGHT DINETTE_DAY MID_BATH_NIGHT DINETTE_NIGHT REAR_BATH_NIGHT TOP_BUNK_NIGHT DS_LIVING_DAY BEDROOM_DRESSER_DAY BOTTOM_BUNK_NIGHT DS_LIVING_NIGHT BEDROOM_DRESSER_NIGHT BEDROOM_FRONT_DAY BEDROOM_REAR_DAY BEDROOM_FRONT_NIGHT BEDROOM_REAR_NIGHT KITCHEN_DAY KITCHEN_NIGHT DS_WINDOW1_DAY DS_WINDOW2_DAY DS_WINDOW1_NIGHT DS_WINDOW2_NIGHT"
 # Shade configurations for different model years
 # 2023+ Model codes
 CODE_2023_WINDSHIELD_DAY="73" 
@@ -89,14 +94,14 @@ CODE_2023_WINDSHIELD_NIGHT="81"
 CODE_2023_DRIVER_NIGHT="83"
 CODE_2023_PASSENGER_NIGHT="85"
 CODE_2023_ENTRY_DOOR_NIGHT="87"
-CODE_2023_DINETTE_DAY="121" # P/S S/O
-CODE_2023_DINETTE_NIGHT="129" # P/S S/O
+CODE_2023_DINETTE_DAY="89"
+CODE_2023_DINETTE_NIGHT="97"
 CODE_2023_MID_BATH_NIGHT="95"
 CODE_2023_REAR_BATH_NIGHT="103"
-CODE_2023_BEDROOM_DRESSER_DAY="107" # 107
-CODE_2023_DS_LIVING_NIGHT="99" # 99 D/S S/O
-CODE_2023_DS_LIVING_DAY="91" # 91 D/S S/O
-CODE_2023_BEDROOM_DRESSER_NIGHT="115" # 115
+CODE_2023_BEDROOM_DRESSER_DAY="107"
+CODE_2023_DS_LIVING_NIGHT="99"
+CODE_2023_DS_LIVING_DAY="91"
+CODE_2023_BEDROOM_DRESSER_NIGHT="115"
 CODE_2023_BEDROOM_FRONT_DAY="109" 
 CODE_2023_BEDROOM_REAR_DAY="111"
 CODE_2023_BEDROOM_FRONT_NIGHT="117" 
@@ -104,6 +109,13 @@ CODE_2023_BEDROOM_REAR_NIGHT="119"
 CODE_2023_ENTRY_DOOR_DAY="4"
 CODE_2023_BOTTOM_BUNK_NIGHT="21"
 CODE_2023_TOP_BUNK_NIGHT="17"
+CODE_2023_KITCHEN_DAY="121"
+CODE_2023_KITCHEN_NIGHT="129"
+CODE_2023_DS_WINDOW1_DAY="93"
+CODE_2023_DS_WINDOW2_DAY="105"
+CODE_2023_DS_WINDOW1_NIGHT="101"
+CODE_2023_DS_WINDOW2_NIGHT="113"
+
 
 # 2020-2022 Model codes (same as 2023+ in this case, but kept separate for possible future differences)
 CODE_2020_WINDSHIELD_DAY="73"
@@ -141,7 +153,7 @@ CODE_PRE2020_ENTRY_DOOR_NIGHT="8"
 CODE_PRE2020_DINETTE_DAY="10"
 CODE_PRE2020_MID_BATH_NIGHT="12"
 CODE_PRE2020_DINETTE_NIGHT="14"
-CODE_PRE2020 FRONT_SLIDE_NIGHT="15"
+CODE_PRE2020_FRONT_SLIDE_NIGHT="15"
 CODE_PRE2020_REAR_BATH_NIGHT="16"
 CODE_PRE2020_TOP_BUNK_NIGHT="17"
 CODE_PRE2020_DS_LIVING_DAY="18"
@@ -413,7 +425,10 @@ echo "  %%OPTIMISTIC_MODE%% -> $OPTIMISTIC_MODE"
 echo "  %%AMBIANT_TEMP%% -> $AMBIANT_TEMP"
 echo "  %%INDOOR_TEMP%% -> $INDOOR_TEMP"
 echo ""
-echo "Window shade entries have been added with actual numeric codes:"
+echo "Window shade entries for model year $MODEL_YEAR:"
+echo ""
+echo "Included shades (configured in this model year):"
+included_count=0
 for token in $ALL_SHADE_TOKENS; do
     # Get the appropriate code based on model year
     code_var="${MODEL_PREFIX}_${token}"
@@ -422,8 +437,32 @@ for token in $ALL_SHADE_TOKENS; do
     
     if [ -n "$code" ] && [ -n "$name" ]; then
         echo "  $name: $code"
+        ((included_count++))
     fi
 done
+
+if [ $included_count -eq 0 ]; then
+    echo "  (None found)"
+fi
+
+echo ""
+echo "Excluded shades (not configured for this model year):"
+excluded_count=0
+for token in $ALL_SHADE_TOKENS; do
+    # Get the appropriate code based on model year
+    code_var="${MODEL_PREFIX}_${token}"
+    code=$(eval echo \$$code_var)
+    name=$(eval echo \$NAME_$token)
+    
+    if [ -z "$code" ] && [ -n "$name" ]; then
+        echo "  $name: (not available for this model year)"
+        ((excluded_count++))
+    fi
+done
+
+if [ $excluded_count -eq 0 ]; then
+    echo "  (None)"
+fi
 echo ""
 echo "To apply these changes:"
 echo "1. Restart Home Assistant"
