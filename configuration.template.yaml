@@ -2646,6 +2646,9 @@ light:
       - light.porch_handle
       
 cover:
+
+%%ALL_SHADE_GROUPS%%
+
   - platform: template
     covers:
       all_day_shades:

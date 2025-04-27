@@ -166,6 +166,189 @@ CODE_PRE2020_BEDROOM_REAR_DAY="27"
 CODE_PRE2020_BEDROOM_FRONT_NIGHT="29"
 CODE_PRE2020_BEDROOM_REAR_NIGHT="31"
 
+# Create shade groups YAML with only available shades for the current model year
+create_shade_groups_yaml() {
+    local PREFIX="$1"
+    local GROUPS_FILE="$2"
+    
+    # Initialize arrays for day and night shades
+    day_shades=()
+    night_shades=()
+    
+    # Populate arrays with available shades for this model year
+    for token in $ALL_SHADE_TOKENS; do
+        code_var="${PREFIX}_${token}"
+        code=$(eval echo \$$code_var)
+        if [ -n "$code" ]; then
+            uid=$(eval echo \$UID_$token)
+            # Sort into day and night groups
+            if [[ "$token" == *"_DAY" ]]; then
+                day_shades+=("cover.$uid")
+            elif [[ "$token" == *"_NIGHT" ]]; then
+                night_shades+=("cover.$uid")
+            fi
+        fi
+    done
+    
+    # Start with the platform header
+    echo "  - platform: template" > "$GROUPS_FILE"
+    echo "    covers:" >> "$GROUPS_FILE"
+    
+    # Create all_day_shades group if we have day shades
+    if [ ${#day_shades[@]} -gt 0 ]; then
+        echo "      all_day_shades:" >> "$GROUPS_FILE"
+        echo "        friendly_name: \"All Day Shades\"" >> "$GROUPS_FILE"
+        echo "        unique_id: \"all_day_shades\"" >> "$GROUPS_FILE"
+        echo "        value_template: >" >> "$GROUPS_FILE"
+        echo "          {% set cover_entities = [" >> "$GROUPS_FILE"
+        
+        # Add each available day shade entity
+        for i in "${!day_shades[@]}"; do
+            if [ $i -lt $((${#day_shades[@]} - 1)) ]; then
+                echo "            '${day_shades[$i]}'," >> "$GROUPS_FILE"
+            else
+                echo "            '${day_shades[$i]}'" >> "$GROUPS_FILE"
+            fi
+        done
+        
+        # Add the template logic
+        echo "          ] %}" >> "$GROUPS_FILE"
+        echo "          {% set is_opening = false %}" >> "$GROUPS_FILE"
+        echo "          {% set is_closing = false %}" >> "$GROUPS_FILE"
+        echo "          {% set open_count = 0 %}" >> "$GROUPS_FILE"
+        echo "          {% set closed_count = 0 %}" >> "$GROUPS_FILE"
+        echo "          {% set status_list = namespace(values=[]) %}" >> "$GROUPS_FILE"
+        echo "          " >> "$GROUPS_FILE"
+        echo "          {% for entity_id in cover_entities %}" >> "$GROUPS_FILE"
+        echo "            {% set cover_state = states(entity_id) %}" >> "$GROUPS_FILE"
+        echo "            {% if cover_state == 'opening' %}" >> "$GROUPS_FILE"
+        echo "              {% set is_opening = true %}" >> "$GROUPS_FILE"
+        echo "            {% elif cover_state == 'closing' %}" >> "$GROUPS_FILE"
+        echo "              {% set is_closing = true %}" >> "$GROUPS_FILE"
+        echo "            {% elif cover_state == 'open' %}" >> "$GROUPS_FILE"
+        echo "              {% set open_count = open_count + 1 %}" >> "$GROUPS_FILE"
+        echo "            {% elif cover_state == 'closed' %}" >> "$GROUPS_FILE"
+        echo "              {% set closed_count = closed_count + 1 %}" >> "$GROUPS_FILE"
+        echo "            {% endif %}" >> "$GROUPS_FILE"
+        echo "            {% set status_list.values = status_list.values + [entity_id ~ '=' ~ cover_state] %}" >> "$GROUPS_FILE"
+        echo "          {% endfor %}" >> "$GROUPS_FILE"
+        echo "          " >> "$GROUPS_FILE"
+        echo "          {% if is_opening %}" >> "$GROUPS_FILE"
+        echo "            opening" >> "$GROUPS_FILE"
+        echo "          {% elif is_closing %}" >> "$GROUPS_FILE"
+        echo "            closing" >> "$GROUPS_FILE"
+        echo "          {% elif open_count == cover_entities | length %}" >> "$GROUPS_FILE"
+        echo "            open" >> "$GROUPS_FILE"
+        echo "          {% elif closed_count == cover_entities | length %}" >> "$GROUPS_FILE"
+        echo "            closed" >> "$GROUPS_FILE"
+        echo "          {% else %}" >> "$GROUPS_FILE"
+        echo "            unknown: {{ status_list.values | join(', ') }}" >> "$GROUPS_FILE"
+        echo "          {% endif %}" >> "$GROUPS_FILE"
+        
+        # Add open_cover service
+        echo "        open_cover:" >> "$GROUPS_FILE"
+        echo "          service: cover.open_cover" >> "$GROUPS_FILE"
+        echo "          target:" >> "$GROUPS_FILE"
+        echo "            entity_id:" >> "$GROUPS_FILE"
+        
+        # Add each available day shade entity to service call
+        for shade in "${day_shades[@]}"; do
+            echo "              - $shade" >> "$GROUPS_FILE"
+        done
+        
+        # Add close_cover service
+        echo "        close_cover:" >> "$GROUPS_FILE"
+        echo "          service: cover.close_cover" >> "$GROUPS_FILE"
+        echo "          target:" >> "$GROUPS_FILE"
+        echo "            entity_id:" >> "$GROUPS_FILE"
+        
+        # Add each available day shade entity to service call
+        for shade in "${day_shades[@]}"; do
+            echo "              - $shade" >> "$GROUPS_FILE"
+        done
+        
+        # Add spacing for next group
+        echo "" >> "$GROUPS_FILE"
+    fi
+    
+    # Create all_night_shades group if we have night shades
+    if [ ${#night_shades[@]} -gt 0 ]; then
+        echo "      all_night_shades:" >> "$GROUPS_FILE"
+        echo "        friendly_name: \"All Night Shades\"" >> "$GROUPS_FILE"
+        echo "        unique_id: \"all_night_shades\"" >> "$GROUPS_FILE"
+        echo "        value_template: >" >> "$GROUPS_FILE"
+        echo "          {% set cover_entities = [" >> "$GROUPS_FILE"
+        
+        # Add each available night shade entity
+        for i in "${!night_shades[@]}"; do
+            if [ $i -lt $((${#night_shades[@]} - 1)) ]; then
+                echo "            '${night_shades[$i]}'," >> "$GROUPS_FILE"
+            else
+                echo "            '${night_shades[$i]}'" >> "$GROUPS_FILE"
+            fi
+        done
+        
+        # Add the template logic
+        echo "          ] %}" >> "$GROUPS_FILE"
+        echo "          {% set is_opening = false %}" >> "$GROUPS_FILE"
+        echo "          {% set is_closing = false %}" >> "$GROUPS_FILE"
+        echo "          {% set open_count = 0 %}" >> "$GROUPS_FILE"
+        echo "          {% set closed_count = 0 %}" >> "$GROUPS_FILE"
+        echo "          {% set status_list = namespace(values=[]) %}" >> "$GROUPS_FILE"
+        echo "          " >> "$GROUPS_FILE"
+        echo "          {% for entity_id in cover_entities %}" >> "$GROUPS_FILE"
+        echo "            {% set cover_state = states(entity_id) %}" >> "$GROUPS_FILE"
+        echo "            {% if cover_state == 'opening' %}" >> "$GROUPS_FILE"
+        echo "              {% set is_opening = true %}" >> "$GROUPS_FILE"
+        echo "            {% elif cover_state == 'closing' %}" >> "$GROUPS_FILE"
+        echo "              {% set is_closing = true %}" >> "$GROUPS_FILE"
+        echo "            {% elif cover_state == 'open' %}" >> "$GROUPS_FILE"
+        echo "              {% set open_count = open_count + 1 %}" >> "$GROUPS_FILE"
+        echo "            {% elif cover_state == 'closed' %}" >> "$GROUPS_FILE"
+        echo "              {% set closed_count = closed_count + 1 %}" >> "$GROUPS_FILE"
+        echo "            {% endif %}" >> "$GROUPS_FILE"
+        echo "            {% set status_list.values = status_list.values + [entity_id ~ '=' ~ cover_state] %}" >> "$GROUPS_FILE"
+        echo "          {% endfor %}" >> "$GROUPS_FILE"
+        echo "          " >> "$GROUPS_FILE"
+        echo "          {% if is_opening %}" >> "$GROUPS_FILE"
+        echo "            opening" >> "$GROUPS_FILE"
+        echo "          {% elif is_closing %}" >> "$GROUPS_FILE"
+        echo "            closing" >> "$GROUPS_FILE"
+        echo "          {% elif open_count == cover_entities | length %}" >> "$GROUPS_FILE"
+        echo "            open" >> "$GROUPS_FILE"
+        echo "          {% elif closed_count == cover_entities | length %}" >> "$GROUPS_FILE"
+        echo "            closed" >> "$GROUPS_FILE"
+        echo "          {% else %}" >> "$GROUPS_FILE"
+        echo "            unknown: {{ status_list.values | join(', ') }}" >> "$GROUPS_FILE"
+        echo "          {% endif %}" >> "$GROUPS_FILE"
+        
+        # Add open_cover service
+        echo "        open_cover:" >> "$GROUPS_FILE"
+        echo "          service: cover.open_cover" >> "$GROUPS_FILE"
+        echo "          target:" >> "$GROUPS_FILE"
+        echo "            entity_id:" >> "$GROUPS_FILE"
+        
+        # Add each available night shade entity to service call
+        for shade in "${night_shades[@]}"; do
+            echo "              - $shade" >> "$GROUPS_FILE"
+        done
+        
+        # Add close_cover service
+        echo "        close_cover:" >> "$GROUPS_FILE"
+        echo "          service: cover.close_cover" >> "$GROUPS_FILE"
+        echo "          target:" >> "$GROUPS_FILE"
+        echo "            entity_id:" >> "$GROUPS_FILE"
+        
+        # Add each available night shade entity to service call
+        for shade in "${night_shades[@]}"; do
+            echo "              - $shade" >> "$GROUPS_FILE"
+        done
+    fi
+    
+    # Report what we created
+    echo "Created shade group configurations with ${#day_shades[@]} day shades and ${#night_shades[@]} night shades."
+}
+
 # Create the YAML entries one line at a time instead of using a single string
 create_shade_yaml() {
     local PREFIX="$1"
@@ -338,23 +521,26 @@ if [ $? -ne 0 ]; then
     fi
 fi
 
-# Create a temporary file for the shade YAML
+# Create temporary files for the shade YAML
 SHADES_FILE=$(mktemp)
+SHADE_GROUPS_FILE=$(mktemp)
 if [ $? -ne 0 ]; then
     SHADES_FILE="${CONFIG_DIR}/.shades_temp.$$"
-    touch "$SHADES_FILE"
+    SHADE_GROUPS_FILE="${CONFIG_DIR}/.shade_groups_temp.$$"
+    touch "$SHADES_FILE" "$SHADE_GROUPS_FILE"
     if [ $? -ne 0 ]; then
-        echo "Error: Unable to create shades temporary file"
+        echo "Error: Unable to create shades temporary files"
         rm -f "$TEMP_FILE"
         exit 1
     fi
 fi
 
 # Trap to clean up temporary files on exit
-trap 'rm -f "$TEMP_FILE" "$SHADES_FILE"' EXIT
+trap 'rm -f "$TEMP_FILE" "$SHADES_FILE" "$SHADE_GROUPS_FILE"' EXIT
 
-# Create the shade YAML entries in the temporary file
+# Create the shade YAML entries and shade groups in the temporary files
 create_shade_yaml "$MODEL_PREFIX" "$SHADES_FILE"
+create_shade_groups_yaml "$MODEL_PREFIX" "$SHADE_GROUPS_FILE"
 
 # Fix the sed unmatched '|' error by using a different approach
 # Replace tokens using compatible sed commands with / as delimiter
@@ -393,7 +579,7 @@ for token in $ALL_SHADE_TOKENS; do
     mv "$TEMP_FILE" "$CONFIG_FILE"
 done
 
-# Replace %%ALL_SHADES%% with the generated shade YAML
+# Replace %%ALL_SHADES%% and %%ALL_SHADE_GROUPS%% with the generated YAML
 echo "Inserting shade YAML entries..."
 if grep -q "%%ALL_SHADES%%" "$CONFIG_FILE"; then
     # Use awk for safer multi-line replacement
@@ -408,6 +594,22 @@ if grep -q "%%ALL_SHADES%%" "$CONFIG_FILE"; then
     echo "Added window shade entries to configuration"
 else
     echo "Warning: %%ALL_SHADES%% token not found in $CONFIG_FILE"
+fi
+
+echo "Inserting shade group YAML entries..."
+if grep -q "%%ALL_SHADE_GROUPS%%" "$CONFIG_FILE"; then
+    # Use awk for safer multi-line replacement
+    awk -v groupsfile="$SHADE_GROUPS_FILE" '
+    /%%ALL_SHADE_GROUPS%%/ {
+        system("cat " groupsfile)
+        next
+    }
+    { print }
+    ' "$CONFIG_FILE" > "$TEMP_FILE"
+    mv "$TEMP_FILE" "$CONFIG_FILE"
+    echo "Added shade group entries to configuration"
+else
+    echo "Warning: %%ALL_SHADE_GROUPS%% token not found in $CONFIG_FILE"
 fi
 
 echo "==============================================="
