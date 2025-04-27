@@ -104,10 +104,10 @@ for HOST in "${HOSTS[@]}"; do
         echo "Ping failed: Unable to connect to $HOST via SSH."
       fi
     elif [ "$CMD" = "/config/update_ha_config.sh" ]; then
-      echo "Running: update_ha_config"
-      ssh -t -p $SSH_PORT -o ConnectTimeout=10 -o StrictHostKeyChecking=no "$SSH_USER@$HOST" "bash -l -c '$CMD'"
+      echo "Running: update_ha_config (with sudo)"
+      ssh -t -p $SSH_PORT -o ConnectTimeout=10 -o StrictHostKeyChecking=no "$SSH_USER@$HOST" "sudo bash -l -c '$CMD'"
       if [ $? -ne 0 ]; then
-        echo "Error: Failed to run '$CMD' on $HOST"
+        echo "Error: Failed to run '$CMD' with sudo on $HOST"
       fi
     else
       echo "Running: $CMD"
