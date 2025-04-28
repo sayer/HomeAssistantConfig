@@ -271,6 +271,64 @@ create_shade_groups_yaml() {
         echo "" >> "$GROUPS_FILE"
     fi
     
+    # Create cockpit_day_shades group
+    # Check if entry_door_day code is defined for this model year
+    entry_door_day_code=$(eval echo \$${PREFIX}_ENTRY_DOOR_DAY)
+    
+    echo "      cockpit_day_shades:" >> "$GROUPS_FILE"
+    echo "        friendly_name: \"Cockpit Day Shades\"" >> "$GROUPS_FILE"
+    echo "        value_template: >" >> "$GROUPS_FILE"
+    
+    # Start with base covers common to all models
+    echo "          {% set covers = [" >> "$GROUPS_FILE"
+    echo "            states.cover.windshield_day," >> "$GROUPS_FILE"
+    echo "            states.cover.driver_day," >> "$GROUPS_FILE"
+    echo "            states.cover.passenger_day" >> "$GROUPS_FILE"
+    
+    # Conditionally add entry_door_day to the template if it exists for this model year
+    if [ -n "$entry_door_day_code" ]; then
+        echo "            ,states.cover.entry_door_day" >> "$GROUPS_FILE"
+    fi
+    
+    echo "          ] %}" >> "$GROUPS_FILE"
+    echo "          {% if covers | selectattr('state', 'eq', 'open') | list | length == covers | length %}" >> "$GROUPS_FILE"
+    echo "            open" >> "$GROUPS_FILE"
+    echo "          {% elif covers | selectattr('state', 'eq', 'closed') | list | length == covers | length %}" >> "$GROUPS_FILE"
+    echo "            closed" >> "$GROUPS_FILE"
+    echo "          {% else %}" >> "$GROUPS_FILE"
+    echo "            opening" >> "$GROUPS_FILE"
+    echo "          {% endif %}" >> "$GROUPS_FILE"
+    
+    # Add open_cover service
+    echo "        open_cover:" >> "$GROUPS_FILE"
+    echo "          service: cover.open_cover" >> "$GROUPS_FILE"
+    echo "          target:" >> "$GROUPS_FILE"
+    echo "            entity_id:" >> "$GROUPS_FILE"
+    echo "              - cover.windshield_day" >> "$GROUPS_FILE"
+    echo "              - cover.driver_day" >> "$GROUPS_FILE"
+    echo "              - cover.passenger_day" >> "$GROUPS_FILE"
+    
+    # Only include entry_door_day in service calls if it's defined for this model
+    if [ -n "$entry_door_day_code" ]; then
+        echo "              - cover.entry_door_day" >> "$GROUPS_FILE"
+    fi
+    
+    # Add close_cover service
+    echo "        close_cover:" >> "$GROUPS_FILE"
+    echo "          service: cover.close_cover" >> "$GROUPS_FILE"
+    echo "          target:" >> "$GROUPS_FILE"
+    echo "            entity_id:" >> "$GROUPS_FILE"
+    echo "              - cover.windshield_day" >> "$GROUPS_FILE"
+    echo "              - cover.driver_day" >> "$GROUPS_FILE"
+    echo "              - cover.passenger_day" >> "$GROUPS_FILE"
+    
+    # Only include entry_door_day in service calls if it's defined for this model
+    if [ -n "$entry_door_day_code" ]; then
+        echo "              - cover.entry_door_day" >> "$GROUPS_FILE"
+    fi
+    
+    echo "" >> "$GROUPS_FILE"
+    
     # Create all_night_shades group if we have night shades
     if [ ${#night_shades[@]} -gt 0 ]; then
         echo "      all_night_shades:" >> "$GROUPS_FILE"
