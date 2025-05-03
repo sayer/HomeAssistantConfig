@@ -345,19 +345,22 @@
                       "entity": "climate.front_thermostat",
                       "show_temperature_control": true,
                       "collapsible_controls": false,
-                      "fill_container": false
+                      "fill_container": false,
+                      "name": "Front Zone"
                     },
                     {
                       "type": "custom:mushroom-climate-card",
                       "entity": "climate.mid_thermostat",
                       "show_temperature_control": true,
-                      "collapsible_controls": true
+                      "collapsible_controls": true,
+                      "name": "Mid Zone"
                     },
                     {
                       "type": "custom:mushroom-climate-card",
                       "entity": "climate.bedroom_thermostat",
                       "show_temperature_control": true,
-                      "collapsible_controls": true
+                      "collapsible_controls": true,
+                      "name": "Bedroom Zone"
                     }
                   ],
                   "columns": 2
