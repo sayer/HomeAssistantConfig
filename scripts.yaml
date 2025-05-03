@@ -346,26 +346,23 @@ set_current_location_as_home:
   alias: Set Current location as home
   sequence:
   - condition: state
-    entity_id: sensor.latitude
+    entity_id: sensor.gps_127_0_0_1_latitude
     state: '{% if sensor.latitude | is_number %}'
     enabled: false
   - data:
-      latitude: '{{ states(''sensor.latitude'') | float }}'
-      longitude: '{{ states(''sensor.longitude'') | float }}'
+      latitude: '{{ states(''sensor.gps_127_0_0_1_latitude'') | float }}'
+      longitude: '{{ states(''sensor.gps_127_0_0_1_longitude'') | float }}'
     enabled: false
     action: homeassistant.set_location
   - data:
-      latitude: '{{ states(''sensor.gpsd_latitude'') | float }}'
-      longitude: '{{ states(''sensor.gpsd_longitude'') | float }}'
+      latitude: '{{ states(''sensor.gps_127_0_0_1_latitude'') | float }}'
+      longitude: '{{ states(''sensor.gps_127_0_0_1_longitude'') | float }}'
     action: homeassistant.set_location
   mode: single
 notify_iphone:
   alias: Notify iPhone
   sequence:
-  - data:
-      message: '{{message}}'
-      title: '{{title}} — {{ states(''input_number.coach_number'') | int }}'
-    action: notify.mobile_app_ipad_mini
+
   - data:
       message: '{{message}}'
       title: '{{title}} — {{ states(''input_number.coach_number'') | int }}'
