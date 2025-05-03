@@ -512,6 +512,10 @@ lock_all_cargo_doors:
               target:
                 entity_id: lock.cargo_door_lock_all
       default:
+
+        - service: lock.lock
+          target:
+            entity_id: lock.cargo_door_lock_0
         - service: lock.lock
           target:
             entity_id: lock.cargo_door_lock_1
@@ -543,9 +547,13 @@ unlock_all_cargo_doors:
       default:
         - service: lock.unlock
           target:
-            entity_id: lock.cargo_door_lock_1
+            entity_id: lock.cargo_door_lock_0
         - delay: "00:00:02"
         - service: lock.unlock
+          target:
+            entity_id: lock.cargo_door_lock_1
+        - delay: "00:00:02"
+        - service: lock.unlock  
           target:
             entity_id: lock.cargo_door_lock_2
         - delay: "00:00:02"
