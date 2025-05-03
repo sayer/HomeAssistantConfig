@@ -245,6 +245,17 @@ mqtt:
       unique_id: "cargo_door_lock_all"
 
 
+    - name: "Cargo Door Lock 0"
+      icon: mdi:key
+      state_topic: "RVC/DOOR_STATUS/0"
+      value_template: "{{ value_json['lock status definition'] }}"
+      command_topic: "RVC/DOOR_COMMAND/0/set"
+      payload_lock: '{"instance": 0, "Lock Command": 1, "Command": 0}'
+      payload_unlock: '{"instance": 0, "Lock Command": 0, "Command": 0}'
+      state_locked: "locked"
+      state_unlocked: "unlocked"
+      unique_id: "cargo_door_lock_0"
+
     - name: "Cargo Door Lock 1"
       icon: mdi:key
       state_topic: "RVC/DOOR_STATUS/2"
@@ -1328,54 +1339,6 @@ mqtt:
       state_on: "on"
       state_off: "off"
 
-    - name: "Floor Heat 1 - old"
-      state_topic: "RVC/FLOOR_HEAT_STATUS/1"
-      value_template: "{{ value_json['operating status definition'] }}"
-      payload_on: "01D43025FFFFFFFF"
-      payload_off: "01C00000FFFFFFFF"
-      command_topic: "RVCSET/MESSAGE/1FEFB"
-      state_on: "on"
-      state_off: "off"
-      unique_id: "floor_heat_1_old"
-
-    - name: "Floor Heat 2 - old"
-      state_topic: "RVC/FLOOR_HEAT_STATUS/2"
-      value_template: "{{ value_json['operating status definition'] }}"
-      payload_on: "02D43025FFFFFFFF"
-      payload_off: "02C00000FFFFFFFF"
-      command_topic: "RVCSET/MESSAGE/1FEFB"
-      state_on: "on"
-      state_off: "off"
-      unique_id: "floor_heat_2_old"
-    - name: "Floor Heat 3 - old"
-      state_topic: "RVC/FLOOR_HEAT_STATUS/3"
-      value_template: "{{ value_json['operating status definition'] }}"
-      payload_on: "03D48025FFFFFFFF"
-      payload_off: "03C00000FFFFFFFF"
-      command_topic: "RVCSET/MESSAGE/1FEFB"
-      state_on: "on"
-      state_off: "off"
-      unique_id: "floor_heat_3_old"
-
-
-    - name: "Mid Bath Fan - old working"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/55"
-      value_template: "{{ value_json['operating status (brightness)'] }}"
-      command_topic: "RVCSET/DC_DIMMER_STATUS_3/55"
-      payload_on: "100"
-      payload_off: "0"
-      state_on: "100"
-      state_off: "0"
-      unique_id: "dimmer_3_55"
-    - name: "Rear Bath Fan"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/56"
-      value_template: "{{ value_json['operating status (brightness)'] }}"
-      payload_on: "100"
-      payload_off: "0"
-      command_topic: "RVCSET/DC_DIMMER_STATUS_3/56"
-      state_on: "100"
-      state_off: "0"
-      unique_id: "dimmer_3_56"
 
     - name: "Mid Bath Fan Switch"
       unique_id: "mid_bath_fan_switch"
@@ -1415,16 +1378,6 @@ mqtt:
       json_attributes_topic: "RVC/DC_DIMMER_STATUS_3/%%VENT_FAN1%%"
       unique_id: "rear_bath_fan_switch"
       icon: mdi:fan
-
-    - name: "Mid Bath Fan - old"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/%%VENT_FAN1%%"
-      value_template: "{{ value_json['operating status (brightness)'] }}"
-      command_topic: "RVCSET/DC_DIMMER_STATUS_3/%%VENT_FAN1%%"
-      payload_on: "100"
-      payload_off: "0"
-      state_on: "100"
-      state_off: "0"
-      unique_id: "dimmer_3_55 - old"
 
     - name: "Water Pump"
       unique_id: "waterpump"
@@ -1533,40 +1486,7 @@ mqtt:
       state_on: "open"
       state_off: "closed"
       unique_id: "waterautofill_old"
-
-  # Roof fan switches
       
-  # Original fan entities - keeping them commented out for reference
-  #fan:
-    # - name: "Roof Fan 1"
-    #   unique_id: "roof_fan_1"
-    #   state_topic: "RVC/ROOF_FAN_STATUS_1/129"
-    #   state_value_template: >-
-    #     {% if value_json['System Status definition'] == 'On' %}
-    #       on
-    #     {% else %}
-    #       off
-    #     {% endif %}
-    #   command_topic: "RVC/ROOF_FAN_COMMAND_1/129/set"
-    #   payload_on: '{"instance": 129, "Direction of movement": "extend"}'
-    #   payload_off: '{"instance": 129, "Direction of movement": "retract"}'
-    #   optimistic: %%OPTIMISTIC_MODE%%
-    #   icon: "mdi:fan"
-    #
-    # - name: "Roof Fan 2"
-    #   unique_id: "roof_fan_2"
-    #   state_topic: "RVC/ROOF_FAN_STATUS_1/130"
-    #   state_value_template: >-
-    #     {% if value_json['System Status definition'] == 'On' %}
-    #       on
-    #     {% else %}
-    #       off
-    #     {% endif %}
-    #   command_topic: "RVC/ROOF_FAN_COMMAND_1/130/set"
-    #   payload_on: '{"instance": 130, "Direction of movement": "extend"}'
-    #   payload_off: '{"instance": 130, "Direction of movement": "retract"}'
-    #   optimistic: %%OPTIMISTIC_MODE%%
-    #   icon: "mdi:fan"
 
   cover:
   
@@ -2615,6 +2535,7 @@ lock:
         {{ all_lock.state }}
       {% else %}
         {% set locks = [
+          states.lock.cargo_door_lock_0
           states.lock.cargo_door_lock_1,
           states.lock.cargo_door_lock_2,
           states.lock.cargo_door_lock_3,
