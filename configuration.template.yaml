@@ -1073,11 +1073,13 @@ mqtt:
   switch:
     - name: "Roof Fan 1 Control"
       unique_id: "roof_fan_1_switch"
-      state_topic: "RVC/ROOF_FAN_STATUS_1/129"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/%%VENT_FAN_1%%"
       value_template: "{{ value_json['System Status definition'] }}"
-      command_topic: "RVC/ROOF_FAN_COMMAND_1/129/set"
-      payload_on: '{"instance": 129, "System Status": 1, "Fan Speed Setting": 80, "Dome Position [Deprecated]": 4}'
-      payload_off: '{"instance": 129, "System Status": 0, "Fan Speed Setting": 0, "Dome Position [Deprecated]": 0, "Rain Sensor [Deprecated]": 0, "Speed Mode": 3, "Fan Mode": 3}'
+      command_topic: "RVC/ROOF_FAN_COMMAND_1/%%VENT_FAN_1%%/set"
+      payload_on: >-
+        {"instance": %%VENT_FAN_1%%, "System Status": 1, "Fan Mode": 3, "Speed Mode": 3, "Fan Speed Setting": 140, "Wind Direction": 3, Dome Position [Deprecated]": 15, "Light": 3}
+      payload_off: >-
+        {"instance": %%VENT_FAN_1%%, "System Status": 0, "Fan Mode": 3, "Speed Mode": 3, "Fan Speed Setting": 0, "Wind Direction": 3,  "Dome Position [Deprecated]" : 0, "Light": 3}
       state_on: "On"
       state_off: "Off"
       optimistic: false
@@ -1085,11 +1087,13 @@ mqtt:
       
     - name: "Roof Fan 2 Control"
       unique_id: "roof_fan_2_switch"
-      state_topic: "RVC/ROOF_FAN_STATUS_1/130"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/%%VENT_FAN_2%%"
       value_template: "{{ value_json['System Status definition'] }}"
-      command_topic: "RVC/ROOF_FAN_COMMAND_1/130/set"
-      payload_on: '{"instance": 130, "System Status": 1, "Fan Speed Setting": 80, "Dome Position [Deprecated]": 4}'
-      payload_off: '{"instance": 130, "System Status": 0, "Fan Speed Setting": 0, "Dome Position [Deprecated]": 0, "Rain Sensor [Deprecated]": 0, "Speed Mode": 3, "Fan Mode": 3}'
+      command_topic: "RVC/ROOF_FAN_COMMAND_1/%%VENT_FAN_2%%/set"
+      payload_on: >-
+        {"instance": %%VENT_FAN_2%%, "System Status": 1, "Fan Mode": 3, "Speed Mode": 3, "Fan Speed Setting": 140, "Wind Direction": 3, Dome Position [Deprecated]": 15, "Light": 3}
+      payload_off: >-
+        {"instance": %%VENT_FAN_2%%, "System Status": 0, "Fan Mode": 3, "Speed Mode": 3, "Fan Speed Setting": 0, "Wind Direction": 3,  "Dome Position [Deprecated]" : 0, "Light": 3}
       state_on: "On"
       state_off: "Off"
       optimistic: false
@@ -1342,8 +1346,8 @@ mqtt:
 
     - name: "Mid Bath Fan Switch"
       unique_id: "mid_bath_fan_switch"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/%%VENT_FAN1%%"
-      command_topic: "RVC/DC_DIMMER_COMMAND_2/%%VENT_FAN1%%/set"
+      state_topic: "RVC/DC_DIMMER_STATUS_3/%%VENT_FAN_1%%"
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/%%VENT_FAN_1%%/set"
       value_template: >-
         {# Ensure brightness key exists and is a number before converting to string #}
         {% if value_json['operating status (brightness)'] is number %}
@@ -1354,15 +1358,15 @@ mqtt:
       # state_on/state_off compare the *result* of the value_template
       state_on: "100" # Fan is ON if the template returns the string "100"
       state_off: "0" # Fan is OFF if the template returns the string "0"
-      payload_on: '{"instance": %%VENT_FAN1%%, "desired level": 100, "command": 0}'
-      payload_off: '{"instance": %%VENT_FAN1%%, "desired level": 0, "command": 3}'
-      json_attributes_topic: "RVC/DC_DIMMER_STATUS_3/%%VENT_FAN1%%"
+      payload_on: '{"instance": %%VENT_FAN_1%%, "desired level": 100, "command": 0}'
+      payload_off: '{"instance": %%VENT_FAN_1%%, "desired level": 0, "command": 3}'
+      json_attributes_topic: "RVC/DC_DIMMER_STATUS_3/%%VENT_FAN_1%%"
       optimistic: %%OPTIMISTIC_MODE%%
       icon: mdi:fan
 
     - name: "Rear Bath Fan Switch"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/%%VENT_FAN2%%"
-      command_topic: "RVC/DC_DIMMER_COMMAND_2/%%VENT_FAN2%%/set"
+      state_topic: "RVC/DC_DIMMER_STATUS_3/%%VENT_FAN_2%%"
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/%%VENT_FAN_2%%/set"
       value_template: >-
         {# Ensure brightness key exists and is a number before converting to string #}
         {% if value_json['operating status (brightness)'] is number %}
@@ -1373,9 +1377,9 @@ mqtt:
       # state_on/state_off compare the *result* of the value_template
       state_on: "100" # Fan is ON if the template returns the string "100"
       state_off: "0" # Fan is OFF if the template returns the string "0"
-      payload_on: '{"instance": %%VENT_FAN2%%, "desired level": 100, "command": 0}'
-      payload_off: '{"instance": %%VENT_FAN2%%, "desired level": 0, "command": 3}'
-      json_attributes_topic: "RVC/DC_DIMMER_STATUS_3/%%VENT_FAN1%%"
+      payload_on: '{"instance": %%VENT_FAN_2%%, "desired level": 100, "command": 0}'
+      payload_off: '{"instance": %%VENT_FAN_2%%, "desired level": 0, "command": 3}'
+      json_attributes_topic: "RVC/DC_DIMMER_STATUS_3/%%VENT_FAN_1%%"
       unique_id: "rear_bath_fan_switch"
       icon: mdi:fan
 
@@ -2186,37 +2190,37 @@ mqtt:
     # === ROOF FAN 1 ===
     # ROOF_FAN_STATUS_1 (FEA7) Sensors for Fan 1
     - name: "Roof Fan 1 System Status"
-      state_topic: "RVC/ROOF_FAN_STATUS_1/129"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/%%VENT_FAN_1%%"
       value_template: "{{ value_json['System Status definition'] }}"
       icon: mdi:fan
       unique_id: "roof_fan_1_system_status"
 
     - name: "Roof Fan 1 Fan Mode"
-      state_topic: "RVC/ROOF_FAN_STATUS_1/129"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/%%VENT_FAN_1%%"
       value_template: "{{ value_json['Fan Mode definition'] }}"
       icon: mdi:fan-auto
       unique_id: "roof_fan_1_fan_mode"
 
     - name: "Roof Fan 1 Speed Mode"
-      state_topic: "RVC/ROOF_FAN_STATUS_1/129"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/%%VENT_FAN_1%%"
       value_template: "{{ value_json['Speed Mode definition'] }}"
       icon: mdi:speedometer
       unique_id: "roof_fan_1_speed_mode"
 
     - name: "Roof Fan 1 Light"
-      state_topic: "RVC/ROOF_FAN_STATUS_1/129"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/%%VENT_FAN_1%%"
       value_template: "{{ value_json['Light definition'] }}"
       icon: mdi:lightbulb
       unique_id: "roof_fan_1_light"
 
     - name: "Roof Fan 1 Wind Direction"
-      state_topic: "RVC/ROOF_FAN_STATUS_1/129"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/%%VENT_FAN_1%%"
       value_template: "{{ value_json['Wind Direction Switch definition'] }}"
       icon: mdi:weather-windy
       unique_id: "roof_fan_1_wind_direction"
 
     - name: "Roof Fan 1 Ambient Temperature"
-      state_topic: "RVC/ROOF_FAN_STATUS_1/129"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/%%VENT_FAN_1%%"
       value_template: >-
         {% if value_json['Ambient Temperature'] == "n/a" %}
           {{ 'unknown' }}
@@ -2230,7 +2234,7 @@ mqtt:
       unique_id: "roof_fan_1_ambient_temperature"
 
     - name: "Roof Fan 1 Ambient Temperature F"
-      state_topic: "RVC/ROOF_FAN_STATUS_1/129"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/%%VENT_FAN_1%%"
       value_template: >-
         {% if value_json['Ambient Temperature F'] == "n/a" %}
           {{ 'unknown' }}
@@ -2244,14 +2248,14 @@ mqtt:
       unique_id: "roof_fan_1_ambient_temperature_f"
 
     - name: "Roof Fan 1 Dead Band"
-      state_topic: "RVC/ROOF_FAN_STATUS_1/129"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/%%VENT_FAN_1%%"
       value_template: "{{ value_json['Dead band'] }}"
       unit_of_measurement: "°C"
       icon: mdi:thermometer-lines
       unique_id: "roof_fan_1_dead_band"
 
     - name: "Roof Fan 1 Set Point"
-      state_topic: "RVC/ROOF_FAN_STATUS_1/129"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/%%VENT_FAN_1%%"
       value_template: "{{ value_json['Set Point'] }}"
       unit_of_measurement: "°C"
       icon: mdi:thermometer-plus
@@ -2259,44 +2263,44 @@ mqtt:
 
     # ROOF_FAN_STATUS_2 (1FDE3) Sensors for Fan 1
     - name: "Roof Fan 1 Dome Mode"
-      state_topic: "RVC/ROOF_FAN_STATUS_2/129"
+      state_topic: "RVC/ROOF_FAN_STATUS_2%%VENT_FAN_1%%"
       value_template: "{{ value_json['Dome Mode'] }}"
       icon: mdi:dome-light
       unique_id: "roof_fan_1_dome_mode"
 
     - name: "Roof Fan 1 Dome Position"
-      state_topic: "RVC/ROOF_FAN_STATUS_2/129"
+      state_topic: "RVC/ROOF_FAN_STATUS_2/%%VENT_FAN_1%%"
       value_template: "{{ value_json['Dome Position'] }}"
       unit_of_measurement: "%"
       icon: mdi:percent
       unique_id: "roof_fan_1_dome_position"
 
     - name: "Roof Fan 1 Rain Sensor"
-      state_topic: "RVC/ROOF_FAN_STATUS_2/129"
+      state_topic: "RVC/ROOF_FAN_STATUS_2/%%VENT_FAN_1%%"
       value_template: "{{ value_json['Rain Sensor'] }}"
       icon: mdi:weather-rainy
       unique_id: "roof_fan_1_rain_sensor"
 
     - name: "Roof Fan 1 Rain Sensor Override"
-      state_topic: "RVC/ROOF_FAN_STATUS_2/129"
+      state_topic: "RVC/ROOF_FAN_STATUS_2/%%VENT_FAN_1%%"
       value_template: "{{ value_json['Rain Sensor Override'] }}"
       icon: mdi:weather-rainy-off
       unique_id: "roof_fan_1_rain_sensor_override"
 
     - name: "Roof Fan 1 Pump Overcurrent Status"
-      state_topic: "RVC/ROOF_FAN_STATUS_2/129"
+      state_topic: "RVC/ROOF_FAN_STATUS_2/%%VENT_FAN_1%%"
       value_template: "{{ value_json['Pump Overcurrent Status'] }}"
       icon: mdi:current-ac
       unique_id: "roof_fan_1_pump_overcurrent"
 
     - name: "Roof Fan 1 Pump Undercurrent Status"
-      state_topic: "RVC/ROOF_FAN_STATUS_2/129"
+      state_topic: "RVC/ROOF_FAN_STATUS_2/%%VENT_FAN_1%%"
       value_template: "{{ value_json['Pump Undercurrent Status'] }}"
       icon: mdi:current-dc
       unique_id: "roof_fan_1_pump_undercurrent"
 
     - name: "Roof Fan 1 Pump Temperature Status"
-      state_topic: "RVC/ROOF_FAN_STATUS_2/129"
+      state_topic: "RVC/ROOF_FAN_STATUS_2/%%VENT_FAN_1%%"
       value_template: "{{ value_json['Pump Temperature Status'] }}"
       icon: mdi:thermometer-alert
       unique_id: "roof_fan_1_pump_temperature"
@@ -2304,37 +2308,37 @@ mqtt:
     # === ROOF FAN 2 ===
     # ROOF_FAN_STATUS_1 (FEA7) Sensors for Fan 2
     - name: "Roof Fan 2 System Status"
-      state_topic: "RVC/ROOF_FAN_STATUS_1/130"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/%%VENT_FAN_2%%"
       value_template: "{{ value_json['System Status definition'] }}"
       icon: mdi:fan
       unique_id: "roof_fan_2_system_status"
 
     - name: "Roof Fan 2 Fan Mode"
-      state_topic: "RVC/ROOF_FAN_STATUS_1/130"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/%%VENT_FAN_2%%"
       value_template: "{{ value_json['Fan Mode definition'] }}"
       icon: mdi:fan-auto
       unique_id: "roof_fan_2_fan_mode"
 
     - name: "Roof Fan 2 Speed Mode"
-      state_topic: "RVC/ROOF_FAN_STATUS_1/130"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/%%VENT_FAN_2%%"
       value_template: "{{ value_json['Speed Mode definition'] }}"
       icon: mdi:speedometer
       unique_id: "roof_fan_2_speed_mode"
 
     - name: "Roof Fan 2 Light"
-      state_topic: "RVC/ROOF_FAN_STATUS_1/130"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/%%VENT_FAN_2%%"
       value_template: "{{ value_json['Light definition'] }}"
       icon: mdi:lightbulb
       unique_id: "roof_fan_2_light"
 
     - name: "Roof Fan 2 Wind Direction"
-      state_topic: "RVC/ROOF_FAN_STATUS_1/130"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/%%VENT_FAN_2%%"
       value_template: "{{ value_json['Wind Direction Switch definition'] }}"
       icon: mdi:weather-windy
       unique_id: "roof_fan_2_wind_direction"
 
     - name: "Roof Fan 2 Ambient Temperature"
-      state_topic: "RVC/ROOF_FAN_STATUS_1/130"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/%%VENT_FAN_2%%"
       value_template: >-
         {% if value_json['Ambient Temperature'] == "n/a" %}
           {{ 'unknown' }}
@@ -2348,7 +2352,7 @@ mqtt:
       unique_id: "roof_fan_2_ambient_temperature"
 
     - name: "Roof Fan 2 Ambient Temperature F"
-      state_topic: "RVC/ROOF_FAN_STATUS_1/130"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/%%VENT_FAN_2%%"
       value_template: >-
         {% if value_json['Ambient Temperature F'] == "n/a" %}
           {{ 'unknown' }}
@@ -2362,14 +2366,14 @@ mqtt:
       unique_id: "roof_fan_2_ambient_temperature_f"
 
     - name: "Roof Fan 2 Dead Band"
-      state_topic: "RVC/ROOF_FAN_STATUS_1/130"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/%%VENT_FAN_2%%"
       value_template: "{{ value_json['Dead band'] }}"
       unit_of_measurement: "°C"
       icon: mdi:thermometer-lines
       unique_id: "roof_fan_2_dead_band"
 
     - name: "Roof Fan 2 Set Point"
-      state_topic: "RVC/ROOF_FAN_STATUS_1/130"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/%%VENT_FAN_2%%"
       value_template: "{{ value_json['Set Point'] }}"
       unit_of_measurement: "°C"
       icon: mdi:thermometer-plus
@@ -2377,44 +2381,44 @@ mqtt:
 
     # ROOF_FAN_STATUS_2 (1FDE3) Sensors for Fan 2
     - name: "Roof Fan 2 Dome Mode"
-      state_topic: "RVC/ROOF_FAN_STATUS_2/130"
+      state_topic: "RVC/ROOF_FAN_STATUS_2/%%VENT_FAN_2%%"
       value_template: "{{ value_json['Dome Mode'] }}"
       icon: mdi:dome-light
       unique_id: "roof_fan_2_dome_mode"
 
     - name: "Roof Fan 2 Dome Position"
-      state_topic: "RVC/ROOF_FAN_STATUS_2/130"
+      state_topic: "RVC/ROOF_FAN_STATUS_2/%%VENT_FAN_2%%"
       value_template: "{{ value_json['Dome Position'] }}"
       unit_of_measurement: "%"
       icon: mdi:percent
       unique_id: "roof_fan_2_dome_position"
 
     - name: "Roof Fan 2 Rain Sensor"
-      state_topic: "RVC/ROOF_FAN_STATUS_2/130"
+      state_topic: "RVC/ROOF_FAN_STATUS_2/%%VENT_FAN_2%%"
       value_template: "{{ value_json['Rain Sensor'] }}"
       icon: mdi:weather-rainy
       unique_id: "roof_fan_2_rain_sensor"
 
     - name: "Roof Fan 2 Rain Sensor Override"
-      state_topic: "RVC/ROOF_FAN_STATUS_2/130"
+      state_topic: "RVC/ROOF_FAN_STATUS_2/%%VENT_FAN_2%%"
       value_template: "{{ value_json['Rain Sensor Override'] }}"
       icon: mdi:weather-rainy-off
       unique_id: "roof_fan_2_rain_sensor_override"
 
     - name: "Roof Fan 2 Pump Overcurrent Status"
-      state_topic: "RVC/ROOF_FAN_STATUS_2/130"
+      state_topic: "RVC/ROOF_FAN_STATUS_2/%%VENT_FAN_2%%"
       value_template: "{{ value_json['Pump Overcurrent Status'] }}"
       icon: mdi:current-ac
       unique_id: "roof_fan_2_pump_overcurrent"
 
     - name: "Roof Fan 2 Pump Undercurrent Status"
-      state_topic: "RVC/ROOF_FAN_STATUS_2/130"
+      state_topic: "RVC/ROOF_FAN_STATUS_2/%%VENT_FAN_2%%"
       value_template: "{{ value_json['Pump Undercurrent Status'] }}"
       icon: mdi:current-dc
       unique_id: "roof_fan_2_pump_undercurrent"
 
     - name: "Roof Fan 2 Pump Temperature Status"
-      state_topic: "RVC/ROOF_FAN_STATUS_2/130"
+      state_topic: "RVC/ROOF_FAN_STATUS_2/%%VENT_FAN_2%%"
       value_template: "{{ value_json['Pump Temperature Status'] }}"
       icon: mdi:thermometer-alert
       unique_id: "roof_fan_2_pump_temperature"
@@ -2492,35 +2496,35 @@ mqtt:
 
     - name: "Roof Fan 1"
       unique_id: "roof_fan_1_control"
-      state_topic: "RVC/ROOF_FAN_STATUS_1/129"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/%%VENT_FAN_1%%"
       state_value_template: >-
         {% if value_json['System Status definition'] == 'On' %}
           ON
         {% else %}
           OFF
         {% endif %}
-      command_topic: "RVC/ROOF_FAN_COMMAND_1/129/set"
+      command_topic: "RVC/ROOF_FAN_COMMAND_1/%%VENT_FAN_1%%/set"
       payload_on: >-
-        {"instance": 129, "System Status definition": "On", "Fan Mode": "Auto", "Speed Mode": 0, "Fan Speed Setting": 100, "Wind Direction Switch": "Air Out"}
+        {"instance": %%VENT_FAN_1%%, "System Status": 1, "Fan Mode": 3, "Speed Mode": 3, "Fan Speed Setting": 140, "Wind Direction": 3, Dome Position [Deprecated]": 15, "Light": 3}
       payload_off: >-
-        {"instance": 129, "System Status definition": "Off", "Fan Mode": "Auto", "Speed Mode": 0, "Fan Speed Setting": 0, "Wind Direction Switch": "Air Out"}
+        {"instance": %%VENT_FAN_1%%, "System Status": 0, "Fan Mode": 3, "Speed Mode": 3, "Fan Speed Setting": 0, "Wind Direction": 3,  "Dome Position [Deprecated]" : 0, "Light": 3}
       optimistic: false
       icon: "mdi:fan"
 
     - name: "Roof Fan 2"
       unique_id: "roof_fan_2_control"
-      state_topic: "RVC/ROOF_FAN_STATUS_1/130"
+      state_topic: "RVC/ROOF_FAN_STATUS_1/%%VENT_FAN_2%%"
       state_value_template: >-
         {% if value_json['System Status definition'] == 'On' %}
           ON
         {% else %}
           OFF
         {% endif %}
-      command_topic: "RVC/ROOF_FAN_COMMAND_1/130/set"
+      command_topic: "RVC/ROOF_FAN_COMMAND_1/%%VENT_FAN_2%%/set"
       payload_on: >-
-        {"instance": 130, "System Status definition": "On", "Fan Mode": "Auto", "Speed Mode": 0, "Fan Speed Setting": 100, "Wind Direction Switch": "Air Out"}
+        {"instance": %%VENT_FAN_2%%, "System Status": 0, "Fan Mode": 3, "Speed Mode": 3, "Fan Speed Setting": 0, "Wind Direction": 3,  "Dome Position [Deprecated]" : 0, "Light": 3}
       payload_off: >-
-        {"instance": 130, "System Status": "Off", "Fan Mode": "Auto", "Speed Mode": 0, "Fan Speed Setting": 0, "Wind Direction Switch": "Air Out"}
+        {"instance": %%VENT_FAN_2%%, "System Status": 0, "Fan Mode": 3, "Speed Mode": 3, "Fan Speed Setting": 0, "Wind Direction": 3,  "Dome Position [Deprecated]" : 0, "Light": 3}
       optimistic: false
       icon: "mdi:fan"
 
