@@ -472,7 +472,50 @@ mqtt:
       command_off_template: '{"instance": %%DOCKING_LIGHTS_CODE%%, "desired level": 0, "command": 3}'
       schema: "template"
       optimistic: %%OPTIMISTIC_MODE%%
-      #entity_category: "diagnostic" # Hidden from UI
+
+    - name: "Under Slide Lights 1"
+      unique_id: "under_slide_lights_1"
+      state_topic: "RVC/DC_DIMMER_STATUS_3/%%UNDER_SLIDE_LIGHTS_1%%"
+      state_template: >-
+        {% if value_json['operating status (brightness)']|int > 0 %}
+          on
+        {% else %}
+          off
+        {% endif %}
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/%%UNDER_SLIDE_LIGHTS_1%%/set"
+      command_on_template: '{"instance": %%UNDER_SLIDE_LIGHTS_1%%, "desired level": 100, "command": 0}'
+      command_off_template: '{"instance": %%UNDER_SLIDE_LIGHTS_1%%, "desired level": 0, "command": 3}'
+      schema: "template"
+      optimistic: %%OPTIMISTIC_MODE%%
+      
+    - name: "Under Slide Lights 2"
+      unique_id: "under_slide_lights_2"
+      state_topic: "RVC/DC_DIMMER_STATUS_3/%%UNDER_SLIDE_LIGHTS_2%%"
+      state_template: >-
+        {% if value_json['operating status (brightness)']|int > 0 %}
+          on
+        {% else %}
+          off
+        {% endif %}
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/%%UNDER_SLIDE_LIGHTS_2%%/set"
+      command_on_template: '{"instance": %%UNDER_SLIDE_LIGHTS_2%%, "desired level": 100, "command": 0}'
+      command_off_template: '{"instance": %%UNDER_SLIDE_LIGHTS_2%%, "desired level": 0, "command": 3}'
+      schema: "template"
+      optimistic: %%OPTIMISTIC_MODE%%
+    - name: "Porch Light"
+      unique_id: "porch_light"
+      state_topic: "RVC/DC_DIMMER_STATUS_3/%%PORCH_LIGHT%%"
+      state_template: >-
+        {% if value_json['operating status (brightness)']|int > 0 %}
+          on
+        {% else %}
+          off
+        {% endif %}
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/%%PORCH_LIGHT%%/set"
+      command_on_template: '{"instance": %%PORCH_LIGHT%%, "desired level": 100, "command": 0}'
+      command_off_template: '{"instance": %%PORCH_LIGHT%%, "desired level": 0, "command": 3}'
+      schema: "template"
+      optimistic: %%OPTIMISTIC_MODE%%
 
     - name: "Panel Light"
       unique_id: "panel_lights"
@@ -497,6 +540,7 @@ mqtt:
       payload_off: "FF7E00FFFFFF00FF"
       optimistic: %%OPTIMISTIC_MODE%%
       unique_id: "panel_lights_old"
+
 
     - name: "Entry Light"
       unique_id: "dimmer_3_1"
@@ -1042,16 +1086,16 @@ mqtt:
 
     - name: "Porch Handle"
       unique_id: "dimmer_3_127"
-      state_topic: "RVC/DC_DIMMER_STATUS_3/127"
+      state_topic: "RVC/DC_DIMMER_STATUS_3/%%PORCH_LIGHT%%"
       state_template: >-
         {% if value_json['operating status (brightness)']|int > 0 %}
           on
         {% else %}
           off
         {% endif %}
-      command_topic: "RVC/DC_DIMMER_COMMAND_2/127/set"
-      command_on_template: '{"instance": 127, "desired level": 100, "command": 0}'
-      command_off_template: '{"instance": 127, "desired level": 0, "command": 3}'
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/%%PORCH_LIGHT%%/set"
+      command_on_template: '{"instance": %%PORCH_LIGHT%%, "desired level": 100, "command": 0}'
+      command_off_template: '{"instance": %%PORCH_LIGHT%%, "desired level": 0, "command": 3}'
       schema: "template"
       optimistic: %%OPTIMISTIC_MODE%%
 
