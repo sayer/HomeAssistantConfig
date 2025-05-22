@@ -148,7 +148,7 @@ CODE_2020_BEDROOM_REAR_DAY="27"
 CODE_2020_BEDROOM_FRONT_NIGHT="29"
 CODE_2020_BEDROOM_REAR_NIGHT="31"
 #CODE_2020_UNDER_SLIDE_LIGHTS="127"
-CODE_2020_PORCH_LIGHT="127"
+CODE_2020_PORCH_LIGHT="71"
 
 # Pre-2020 Model codes (same as others in this case, but kept separate for possible future differences)
 CODE_PRE2020_WINDSHIELD_DAY="1"
@@ -523,7 +523,8 @@ configure_2023_plus() {
     OPTIMISTIC_MODE="true"
     AMBIANT_TEMP="1"
     INDOOR_TEMP="2"
-    
+    LIGHT_COMMAND_ON="0"
+    LIGHT_COMMAND_OFF="3"
     # Set shade codes
     set_shade_tokens "CODE_2023"
 }
@@ -532,14 +533,15 @@ configure_2023_plus() {
 configure_2020_to_2022() {
     # General device codes
     DOCKING_LIGHTS_CODE="43"
-    AWNING_LIGHTS="44"
-    EXTERIOR_ACCENT_LIGHTS="45"
-    VENT_FAN1="62"
-    VENT_FAN2="62"
+    AWNING_LIGHTS="66"
+    EXTERIOR_ACCENT_LIGHTS="67"
+    VENT_FAN1="55"
+    VENT_FAN2="56"
     OPTIMISTIC_MODE="true"
     AMBIANT_TEMP="249"
     INDOOR_TEMP="250"
-    
+    LIGHT_COMMAND_ON="18"
+    LIGHT_COMMAND_OFF="18"
     # Set shade codes
     set_shade_tokens "CODE_2020"
 }
@@ -555,7 +557,8 @@ configure_pre_2020() {
     OPTIMISTIC_MODE="false"
     AMBIANT_TEMP="249"
     INDOOR_TEMP="250"
-    
+    LIGHT_COMMAND_ON="0"
+    LIGHT_COMMAND_OFF="3"
     # Set shade codes
     set_shade_tokens "CODE_PRE2020"
 }
@@ -637,6 +640,12 @@ mv "$TEMP_FILE" "$CONFIG_FILE"
 cat "$CONFIG_FILE" | sed "s/%%INDOOR_TEMP%%/$INDOOR_TEMP/g" > "$TEMP_FILE"
 mv "$TEMP_FILE" "$CONFIG_FILE"
 
+cat "$CONFIG_FILE" | sed "s/%%LIGHT_COMMAND_ON%%/$LIGHT_COMMAND_ON/g" > "$TEMP_FILE"
+mv "$TEMP_FILE" "$CONFIG_FILE"
+
+cat "$CONFIG_FILE" | sed "s/%%LIGHT_COMMAND_OFF%%/$LIGHT_COMMAND_OFF/g" > "$TEMP_FILE"
+mv "$TEMP_FILE" "$CONFIG_FILE"
+
 # Replace shade tokens
 echo "Replacing shade tokens..."
 for token in $ALL_SHADE_TOKENS; do
@@ -695,6 +704,8 @@ echo "  %%VENT_FAN2%% -> $VENT_FAN2"
 echo "  %%OPTIMISTIC_MODE%% -> $OPTIMISTIC_MODE"
 echo "  %%AMBIANT_TEMP%% -> $AMBIANT_TEMP"
 echo "  %%INDOOR_TEMP%% -> $INDOOR_TEMP"
+echo "  %%LIGHT_COMMAND_ON%% -> $LIGHT_COMMAND_ON"
+echo "  %%LIGHT_COMMAND_OFF%% -> $LIGHT_COMMAND_OFF"
 echo ""
 echo "Window shade entries for model year $MODEL_YEAR:"
 echo ""
