@@ -713,7 +713,7 @@ mqtt:
           off
         {% endif %}
       command_topic: "RVC/DC_DIMMER_COMMAND_2/13/set"
-      command_on_template: '{"instance": 13, "desired level": 100, "command": %%LIGHT_COMMAND_ON%% }'
+      command_on_template: '{"instance": 13, "desired level": 125, "command": %%LIGHT_COMMAND_ON%% }'
       command_off_template: '{"instance": 13, "desired level": 0, "command": %%LIGHT_COMMAND_OFF%% }'
       schema: "template"
       optimistic: %%OPTIMISTIC_MODE%%
@@ -793,7 +793,7 @@ mqtt:
           off
         {% endif %}
       command_topic: "RVC/DC_DIMMER_COMMAND_2/18/set"
-      command_on_template: '{"instance": 18, "desired level": 100, "command": %%LIGHT_COMMAND_ON%% }'
+      command_on_template: '{"instance": 18, "desired level": 125, "command": %%LIGHT_COMMAND_ON%% }'
       command_off_template: '{"instance": 18, "desired level": 0, "command": %%LIGHT_COMMAND_OFF%% }'
       schema: "template"
       optimistic: %%OPTIMISTIC_MODE%%
@@ -905,7 +905,7 @@ mqtt:
           off
         {% endif %}
       command_topic: "RVC/DC_DIMMER_COMMAND_2/27/set"
-      command_on_template: '{"instance": 27, "desired level": 100, "command": %%LIGHT_COMMAND_ON%% }'
+      command_on_template: '{"instance": 27, "desired level": 125, "command": %%LIGHT_COMMAND_ON%% }'
       command_off_template: '{"instance": 27, "desired level": 0, "command": %%LIGHT_COMMAND_OFF%% }'
       schema: "template"
       optimistic: %%OPTIMISTIC_MODE%%
@@ -921,7 +921,7 @@ mqtt:
           off
         {% endif %}
       command_topic: "RVC/DC_DIMMER_COMMAND_2/28/set"
-      command_on_template: '{"instance": 28, "desired level": 100, "command": %%LIGHT_COMMAND_ON%% }'
+      command_on_template: '{"instance": 28, "desired level": 125, "command": %%LIGHT_COMMAND_ON%% }'
       command_off_template: '{"instance": 28, "desired level": 0, "command": %%LIGHT_COMMAND_OFF%% }'
       schema: "template"
       optimistic: %%OPTIMISTIC_MODE%%
@@ -953,7 +953,7 @@ mqtt:
           off
         {% endif %}
       command_topic: "RVC/DC_DIMMER_COMMAND_2/30/set"
-      command_on_template: '{"instance": 30, "desired level": 100, "command": %%LIGHT_COMMAND_ON%% }'
+      command_on_template: '{"instance": 30, "desired level": 125, "command": %%LIGHT_COMMAND_ON%% }'
       command_off_template: '{"instance": 30, "desired level": 0, "command": %%LIGHT_COMMAND_OFF%% }'
       schema: "template"
       optimistic: %%OPTIMISTIC_MODE%%
