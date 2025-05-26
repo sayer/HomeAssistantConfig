@@ -585,8 +585,8 @@ mqtt:
           off
         {% endif %}
       command_topic: "RVC/DC_DIMMER_COMMAND_2/3/set"
-      command_on_template: '{"instance": 3, "desired level": 100, "interlock" : 00, "command": %%LIGHT_COMMAND_ON%% }'
-      command_off_template: '{"instance": 3, "desired level": 0, "interlock" : 00, "command": %%LIGHT_COMMAND_OFF%% }'
+      command_on_template: '{"instance": 3, "desired level": 100, "interlock": 00, "command": %%LIGHT_COMMAND_ON%% }'
+      command_off_template: '{"instance": 3, "desired level": 0, "interlock": 00, "command": %%LIGHT_COMMAND_OFF%% }'
       schema: "template"
       optimistic: %%OPTIMISTIC_MODE%%
 
