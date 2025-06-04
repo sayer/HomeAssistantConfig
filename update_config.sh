@@ -593,8 +593,8 @@ configure_2017_to_2019() {
     OPTIMISTIC_MODE="false"
     AMBIANT_TEMP="249"
     INDOOR_TEMP="250"
-    LIGHT_COMMAND_ON="18"
-    LIGHT_COMMAND_OFF="18"
+    LIGHT_COMMAND_ON="13"
+    LIGHT_COMMAND_OFF="14"
     # Set shade codes
     set_shade_tokens "CODE_2017"
 }
