@@ -573,8 +573,8 @@ configure_2020_to_2022() {
     OPTIMISTIC_MODE="true"
     AMBIANT_TEMP="249"
     INDOOR_TEMP="250"
-    LIGHT_COMMAND_ON="18"
-    LIGHT_COMMAND_OFF="18"
+    LIGHT_COMMAND_ON="0"
+    LIGHT_COMMAND_OFF="3"
     # Set shade codes
     set_shade_tokens "CODE_2020"
 }
@@ -613,8 +613,8 @@ configure_pre_2016() {
     OPTIMISTIC_MODE="false"
     AMBIANT_TEMP="249"
     INDOOR_TEMP="250"
-    LIGHT_COMMAND_ON="5" # Toggle
-    LIGHT_COMMAND_OFF="5" # Toggle
+    LIGHT_COMMAND_ON="0" # Toggle
+    LIGHT_COMMAND_OFF="3" # Toggle
     # Set shade codes
     set_shade_tokens "CODE_PRE2016"
 }
