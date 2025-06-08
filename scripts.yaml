@@ -561,3 +561,170 @@ unlock_all_cargo_doors:
         - service: lock.unlock
           target:
             entity_id: lock.cargo_door_lock_4
+
+save_scene:
+  alias: "Save Current Scene"
+  description: "Saves the current state of all lights and shades as a scene with the given name"
+  fields:
+    scene_name:
+      name: Scene Name
+      description: Name to save this scene as
+      required: true
+      selector:
+        text:
+  sequence:
+    # First, collect all light states
+    - variables:
+        light_entities: >
+          {% set all_lights = states.light | map(attribute='entity_id') | list %}
+          {{ all_lights }}
+        cover_entities: >
+          {% set all_covers = states.cover | map(attribute='entity_id') | list %}
+          {{ all_covers }}
+        scene_data: {}
+    
+    # Process all lights
+    - repeat:
+        for_each: "{{ light_entities }}"
+        sequence:
+          - variables:
+              entity_id: "{{ repeat.item }}"
+              entity_state: >
+                {% if is_state(repeat.item, 'on') %}
+                  100
+                {% else %}
+                  0
+                {% endif %}
+          - variables:
+              scene_data: >
+                {% set updated_data = scene_data %}
+                {% set updated_data = dict(scene_data, **{repeat.item: entity_state}) %}
+                {{ updated_data }}
+    
+    # Process all covers/shades
+    - repeat:
+        for_each: "{{ cover_entities }}"
+        sequence:
+          - variables:
+              entity_id: "{{ repeat.item }}"
+              entity_state: >
+                {% if is_state(repeat.item, 'open') %}
+                  100
+                {% elif is_state(repeat.item, 'closed') %}
+                  0
+                {% elif is_state(repeat.item, 'opening') %}
+                  75
+                {% elif is_state(repeat.item, 'closing') %}
+                  25
+                {% else %}
+                  50
+                {% endif %}
+          - variables:
+              scene_data: >
+                {% set updated_data = scene_data %}
+                {% set updated_data = dict(scene_data, **{repeat.item: entity_state}) %}
+                {{ updated_data }}
+    
+    # Store the scene data
+    - service: persistent_notification.create
+      data:
+        title: "Scene: {{ scene_name }}"
+        message: "{{ scene_data | to_json }}"
+        notification_id: "scene_{{ scene_name | replace(' ', '_') | lower }}"
+    
+    # Notify user
+    - service: notify.notify
+      data:
+        title: "Scene Saved"
+        message: "Scene '{{ scene_name }}' has been saved with {{ scene_data | length }} entities"
+
+load_scene:
+  alias: "Load Saved Scene"
+  description: "Loads a previously saved scene and applies it to all lights and shades"
+  fields:
+    scene_name:
+      name: Scene Name
+      description: Name of the scene to load
+      required: true
+      selector:
+        text:
+  sequence:
+    # Get the scene data from persistent storage
+    - variables:
+        notification_id: "scene_{{ scene_name | replace(' ', '_') | lower }}"
+        scene_data: >
+          {% set notification = states('persistent_notification.' + notification_id) %}
+          {% if notification != 'unknown' and notification != 'unavailable' %}
+            {% set data_json = state_attr('persistent_notification.' + notification_id, 'message') %}
+            {{ data_json | from_json }}
+          {% else %}
+            {}
+          {% endif %}
+    
+    # Check if scene exists
+    - condition: template
+      value_template: "{{ scene_data != {} }}"
+    
+    # Apply the scene data to all entities
+    - repeat:
+        for_each: "{{ scene_data | dict2items }}"
+        sequence:
+          - variables:
+              entity_id: "{{ repeat.item.key }}"
+              entity_state: "{{ repeat.item.value }}"
+              entity_domain: "{{ repeat.item.key.split('.')[0] }}"
+          
+          # Handle lights
+          - choose:
+              - conditions:
+                  - condition: template
+                    value_template: "{{ entity_domain == 'light' }}"
+                sequence:
+                  - choose:
+                      - conditions:
+                          - condition: template
+                            value_template: "{{ entity_state | int > 0 }}"
+                        sequence:
+                          - service: light.turn_on
+                            target:
+                              entity_id: "{{ entity_id }}"
+                            data:
+                              brightness_pct: "{{ entity_state }}"
+                    default:
+                      - service: light.turn_off
+                        target:
+                          entity_id: "{{ entity_id }}"
+              
+              # Handle covers/shades
+              - conditions:
+                  - condition: template
+                    value_template: "{{ entity_domain == 'cover' }}"
+                sequence:
+                  - choose:
+                      - conditions:
+                          - condition: template
+                            value_template: "{{ entity_state | int >= 75 }}"
+                        sequence:
+                          - service: cover.open_cover
+                            target:
+                              entity_id: "{{ entity_id }}"
+                      - conditions:
+                          - condition: template
+                            value_template: "{{ entity_state | int <= 25 }}"
+                        sequence:
+                          - service: cover.close_cover
+                            target:
+                              entity_id: "{{ entity_id }}"
+                      - conditions:
+                          - condition: template
+                            value_template: "{{ entity_state | int > 25 and entity_state | int < 75 }}"
+                        sequence:
+                          - service: cover.open_cover
+                            target:
+                              entity_id: "{{ entity_id }}"
+    
+    # Notify user
+    - service: notify.notify
+      data:
+        title: "Scene Loaded"
+        message: "Scene '{{ scene_name }}' has been loaded with {{ scene_data | length }} entities"
