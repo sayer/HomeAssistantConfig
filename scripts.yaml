@@ -641,6 +641,8 @@ save_scene:
 load_scene:
   alias: "Load Saved Scene"
   description: "Loads a previously saved scene and applies it to all lights and shades"
+  icon: mdi:palette
+  mode: single
   fields:
     scene_name:
       name: Scene Name
@@ -649,82 +651,14 @@ load_scene:
       selector:
         text:
   sequence:
-    # Get the scene data from persistent storage
-    - variables:
-        notification_id: "scene_{{ scene_name | replace(' ', '_') | lower }}"
-        scene_data: >
-          {% set notification = states('persistent_notification.' + notification_id) %}
-          {% if notification != 'unknown' and notification != 'unavailable' %}
-            {% set data_json = state_attr('persistent_notification.' + notification_id, 'message') %}
-            {{ data_json | from_json }}
-          {% else %}
-            {}
-          {% endif %}
-    
-    # Check if scene exists
-    - condition: template
-      value_template: "{{ scene_data != {} }}"
-    
-    # Apply the scene data to all entities
-    - repeat:
-        for_each: "{{ scene_data | dict2items }}"
-        sequence:
-          - variables:
-              entity_id: "{{ repeat.item.key }}"
-              entity_state: "{{ repeat.item.value }}"
-              entity_domain: "{{ repeat.item.key.split('.')[0] }}"
-          
-          # Handle lights
-          - choose:
-              - conditions:
-                  - condition: template
-                    value_template: "{{ entity_domain == 'light' }}"
-                sequence:
-                  - choose:
-                      - conditions:
-                          - condition: template
-                            value_template: "{{ entity_state | int > 0 }}"
-                        sequence:
-                          - service: light.turn_on
-                            target:
-                              entity_id: "{{ entity_id }}"
-                            data:
-                              brightness_pct: "{{ entity_state }}"
-                    default:
-                      - service: light.turn_off
-                        target:
-                          entity_id: "{{ entity_id }}"
-              
-              # Handle covers/shades
-              - conditions:
-                  - condition: template
-                    value_template: "{{ entity_domain == 'cover' }}"
-                sequence:
-                  - choose:
-                      - conditions:
-                          - condition: template
-                            value_template: "{{ entity_state | int >= 75 }}"
-                        sequence:
-                          - service: cover.open_cover
-                            target:
-                              entity_id: "{{ entity_id }}"
-                      - conditions:
-                          - condition: template
-                            value_template: "{{ entity_state | int <= 25 }}"
-                        sequence:
-                          - service: cover.close_cover
-                            target:
-                              entity_id: "{{ entity_id }}"
-                      - conditions:
-                          - condition: template
-                            value_template: "{{ entity_state | int > 25 and entity_state | int < 75 }}"
-                        sequence:
-                          - service: cover.open_cover
-                            target:
-                              entity_id: "{{ entity_id }}"
+    # Simple test version
+    - service: persistent_notification.create
+      data:
+        title: "Loading Scene"
+        message: "Attempting to load scene: {{ scene_name }}"
     
     # Notify user
     - service: notify.notify
       data:
-        title: "Scene Loaded"
-        message: "Scene '{{ scene_name }}' has been loaded with {{ scene_data | length }} entities"
+        title: "Scene Test"
+        message: "Scene '{{ scene_name }}' test function"
