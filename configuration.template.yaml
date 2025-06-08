@@ -329,17 +329,25 @@ mqtt:
     mode_state_template: "{{ value_json['operating mode definition'] }}"
     temperature_state_topic: "RVC/THERMOSTAT_STATUS_1/164"
     temperature_state_template: >-
-      {% if value_json['setpoint temp heat F'] == "n/a" %}
-        0
+      {% if value_json['operating mode definition'] == 'cool' or value_json['operating mode definition'] == 'auto' %}
+        {% if value_json['setpoint temp cool F'] == "n/a" %}
+          0
+        {% else %}
+          {{ value_json['setpoint temp cool F'] }}
+        {% endif %}
       {% else %}
-        {{ value_json['setpoint temp heat F'] }}
+        {% if value_json['setpoint temp heat F'] == "n/a" %}
+          0
+        {% else %}
+          {{ value_json['setpoint temp heat F'] }}
+        {% endif %}
       {% endif %}
-    current_temperature_topic: "RVC/THERMOSTAT_AMBIENT_STATUS/%%INDOOR_TEMP%%"
+    current_temperature_topic: "RVC/THERMOSTAT_AMBIENT_STATUS/164"
     current_temperature_template: "{{ value_json['ambient temp F'] }}"
-    mode_command_topic: "RVCSET/THERMOSTAT_COMMAND_1_MODE/164"
+    mode_command_topic: "RVC/THERMOSTAT_COMMAND_1_MODE/164/set"
     mode_command_template: >-
-      {"instance":1,
-       "operating modes":{{ 
+      {"instance":164,
+       "operating modes":{{
          0 if hvac_mode=='off' else
          1 if hvac_mode=='cool' else
          2 if hvac_mode=='heat' else
@@ -347,9 +355,9 @@ mqtt:
          4 if hvac_mode=='fan_only' else 5
        }},
        "fan mode":{{ 0 if fan_mode=='auto' else 1 }}}
-    temperature_command_topic: "RVC/THERMOSTAT_COMMAND_1_TEMP/164"
+    temperature_command_topic: "RVC/THERMOSTAT_COMMAND_1_TEMP/164/set"
     temperature_command_template: >-
-      {"instance":1,
+      {"instance":164,
        {% if hvac_mode in ['heat','off','fan_only'] %}
          "setpoint heat":{{ (temperature) | int }}
        {% else %}
@@ -377,17 +385,25 @@ mqtt:
     mode_state_template: "{{ value_json['operating mode definition'] }}"
     temperature_state_topic: "RVC/THERMOSTAT_STATUS_1/165"
     temperature_state_template: >-
-      {% if value_json['setpoint temp heat F'] == "n/a" %}
-        0
+      {% if value_json['operating mode definition'] == 'cool' or value_json['operating mode definition'] == 'auto' %}
+        {% if value_json['setpoint temp cool F'] == "n/a" %}
+          0
+        {% else %}
+          {{ value_json['setpoint temp cool F'] }}
+        {% endif %}
       {% else %}
-        {{ value_json['setpoint temp heat F'] }}
+        {% if value_json['setpoint temp heat F'] == "n/a" %}
+          0
+        {% else %}
+          {{ value_json['setpoint temp heat F'] }}
+        {% endif %}
       {% endif %}
-    current_temperature_topic: "RVC/THERMOSTAT_AMBIENT_STATUS/%%INDOOR_TEMP%%"
+    current_temperature_topic: "RVC/THERMOSTAT_AMBIENT_STATUS/165"
     current_temperature_template: "{{ value_json['ambient temp F'] }}"
-    mode_command_topic: "RVCSET/THERMOSTAT_COMMAND_1_MODE/165"
+    mode_command_topic: "RVC/THERMOSTAT_COMMAND_1_MODE/165/set"
     mode_command_template: >-
-      {"instance":1,
-       "operating modes":{{ 
+      {"instance":165,
+       "operating modes":{{
          0 if hvac_mode=='off' else
          1 if hvac_mode=='cool' else
          2 if hvac_mode=='heat' else
@@ -395,9 +411,9 @@ mqtt:
          4 if hvac_mode=='fan_only' else 5
        }},
        "fan mode":{{ 0 if fan_mode=='auto' else 1 if fan_mode=='on' else 11 }}}
-    temperature_command_topic: "RVC/THERMOSTAT_COMMAND_1_TEMP/165"
+    temperature_command_topic: "RVC/THERMOSTAT_COMMAND_1_TEMP/165/set"
     temperature_command_template: >-
-      {"instance":1,
+      {"instance":165,
        {% if hvac_mode in ['heat','off','fan_only'] %}
          "setpoint heat":{{ (temperature) | int }}
        {% else %}
@@ -424,17 +440,25 @@ mqtt:
     mode_state_template: "{{ value_json['operating mode definition'] }}"
     temperature_state_topic: "RVC/THERMOSTAT_STATUS_1/166"
     temperature_state_template: >-
-      {% if value_json['setpoint temp heat F'] == "n/a" %}
-        0
+      {% if value_json['operating mode definition'] == 'cool' or value_json['operating mode definition'] == 'auto' %}
+        {% if value_json['setpoint temp cool F'] == "n/a" %}
+          0
+        {% else %}
+          {{ value_json['setpoint temp cool F'] }}
+        {% endif %}
       {% else %}
-        {{ value_json['setpoint temp heat F'] }}
+        {% if value_json['setpoint temp heat F'] == "n/a" %}
+          0
+        {% else %}
+          {{ value_json['setpoint temp heat F'] }}
+        {% endif %}
       {% endif %}
-    current_temperature_topic: "RVC/THERMOSTAT_AMBIENT_STATUS/%%INDOOR_TEMP%%"
+    current_temperature_topic: "RVC/THERMOSTAT_AMBIENT_STATUS/166"
     current_temperature_template: "{{ value_json['ambient temp F'] }}"
-    mode_command_topic: "RVCSET/THERMOSTAT_COMMAND_1_MODE/166"
+    mode_command_topic: "RVC/THERMOSTAT_COMMAND_1_MODE/166/set"
     mode_command_template: >-
-      {"instance":2,
-       "operating modes":{{ 
+      {"instance":166,
+       "operating modes":{{
          0 if hvac_mode=='off' else
          1 if hvac_mode=='cool' else
          2 if hvac_mode=='heat' else
@@ -442,9 +466,9 @@ mqtt:
          4 if hvac_mode=='fan_only' else 5
        }},
        "fan mode":{{ 0 if fan_mode=='auto' else 1 if fan_mode=='on' else 11 }}}
-    temperature_command_topic: "RVC/THERMOSTAT_COMMAND_1_TEMP/166"
+    temperature_command_topic: "RVC/THERMOSTAT_COMMAND_1_TEMP/166/set"
     temperature_command_template: >-
-      {"instance":2,
+      {"instance":166,
        {% if hvac_mode in ['heat','off','fan_only'] %}
          "setpoint heat":{{ (temperature) | int }}
        {% else %}
@@ -1249,84 +1273,64 @@ mqtt:
 
 
     - name: "AC 1"
-      state_topic: "RVC/THERMOSTAT_COMMAND_1/1"
+      state_topic: "RVC/THERMOSTAT_STATUS_1/164"
       value_template: "{{ value_json['operating mode definition'] }}"
-      payload_on: "01C1FFFFFFFFFFFF"
-      payload_off: "01F0FFFFFFFFFFFF"
-      command_topic: "RVCSET/MESSAGE/1FEF9"
+      command_topic: "RVC/THERMOSTAT_COMMAND_1_MODE/164/set"
+      payload_on: '{"instance": 164, "operating modes": 1, "fan mode": 0}'
+      payload_off: '{"instance": 164, "operating modes": 0, "fan mode": 0}'
       state_on: "cool"
       state_off: "off"
       unique_id: "AC1"
 
     - name: "AC 2"
-      state_topic: "RVC/THERMOSTAT_COMMAND_1/2"
+      state_topic: "RVC/THERMOSTAT_STATUS_1/165"
       value_template: "{{ value_json['operating mode definition'] }}"
-      payload_on: "02C1FFFFFFFFFFFF"
-      payload_off: "02C0FFFFFFFFFFFF"
-      command_topic: "RVCSET/MESSAGE/1FEF9"
+      command_topic: "RVC/THERMOSTAT_COMMAND_1_MODE/165/set"
+      payload_on: '{"instance": 165, "operating modes": 1, "fan mode": 0}'
+      payload_off: '{"instance": 165, "operating modes": 0, "fan mode": 0}'
       state_on: "cool"
       state_off: "off"
       unique_id: "AC2"
 
     - name: "AC 3"
-      state_topic: "RVC/THERMOSTAT_COMMAND_1/3"
+      state_topic: "RVC/THERMOSTAT_STATUS_1/166"
       value_template: "{{ value_json['operating mode definition'] }}"
-      payload_on: "03C1FFFFFFFFFFFF"
-      payload_off: "03C0FFFFFFFFFFFF"
-      command_topic: "RVCSET/MESSAGE/1FEF9"
+      command_topic: "RVC/THERMOSTAT_COMMAND_1_MODE/166/set"
+      payload_on: '{"instance": 166, "operating modes": 1, "fan mode": 0}'
+      payload_off: '{"instance": 166, "operating modes": 0, "fan mode": 0}'
       state_on: "cool"
       state_off: "off"
       unique_id: "AC3"
 
-    - name: "AC 4"
-      state_topic: "RVC/THERMOSTAT_COMMAND_1/4"
-      value_template: "{{ value_json['operating mode definition'] }}"
-      payload_on: "04C1FFFFFFFFFFFF" # 04FFFFFFFF4F25FF - Set to 78
-      payload_off: "04C0FFFFFFFFFFFF"
-      command_topic: "RVCSET/MESSAGE/1FEF9"
-      state_on: "cool"
-      state_off: "off"
-      unique_id: "AC4"
-
     - name: "Heat 1"
-      state_topic: "RVC/THERMOSTAT_COMMAND_1/1"
+      state_topic: "RVC/THERMOSTAT_STATUS_1/164"
       value_template: "{{ value_json['operating mode definition'] }}"
-      payload_on: "01F2FFFFFFFFFFFF"
-      payload_off: "01F0FFFFFFFFFFFF"
-      command_topic: "RVCSET/MESSAGE/1FEF9"
+      command_topic: "RVC/THERMOSTAT_COMMAND_1_MODE/164/set"
+      payload_on: '{"instance": 164, "operating modes": 2, "fan mode": 0}'
+      payload_off: '{"instance": 164, "operating modes": 0, "fan mode": 0}'
       state_on: "heat"
       state_off: "off"
       unique_id: "HEAT1"
 
     - name: "Heat 2"
-      state_topic: "RVC/THERMOSTAT_COMMAND_1/2"
+      state_topic: "RVC/THERMOSTAT_STATUS_1/165"
       value_template: "{{ value_json['operating mode definition'] }}"
-      payload_on: "02F2FFFFFFFFFFFF"
-      payload_off: "02F0FFFFFFFFFFFF"
-      command_topic: "RVCSET/MESSAGE/1FEF9"
+      command_topic: "RVC/THERMOSTAT_COMMAND_1_MODE/165/set"
+      payload_on: '{"instance": 165, "operating modes": 2, "fan mode": 0}'
+      payload_off: '{"instance": 165, "operating modes": 0, "fan mode": 0}'
       state_on: "heat"
       state_off: "off"
       unique_id: "HEAT2"
 
     - name: "Heat 3"
-      state_topic: "RVC/THERMOSTAT_COMMAND_1/3"
+      state_topic: "RVC/THERMOSTAT_STATUS_1/166"
       value_template: "{{ value_json['operating mode definition'] }}"
-      payload_on: "03F2FFFFFFFFFFFF"
-      payload_off: "03F0FFFFFFFFFFFF"
-      command_topic: "RVCSET/MESSAGE/1FEF9"
+      command_topic: "RVC/THERMOSTAT_COMMAND_1_MODE/166/set"
+      payload_on: '{"instance": 166, "operating modes": 2, "fan mode": 0}'
+      payload_off: '{"instance": 166, "operating modes": 0, "fan mode": 0}'
       state_on: "heat"
       state_off: "off"
       unique_id: "HEAT3"
-
-    - name: "Heat 4"
-      state_topic: "RVC/THERMOSTAT_COMMAND_1/4"
-      value_template: "{{ value_json['operating mode definition'] }}"
-      payload_on: "04F2FFFFFFFFFFFF"
-      payload_off: "04F0FFFFFFFFFFFF"
-      command_topic: "RVCSET/MESSAGE/1FEF9"
-      state_on: "heat"
-      state_off: "off"
-      unique_id: "HEAT4"
 
     - name: "Auto Gen"
       state_topic: "RVC/AGS_CRITERION_STATUS/1"
@@ -2053,12 +2057,14 @@ mqtt:
       state_topic: "RVC/THERMOSTAT_AMBIENT_STATUS/%%AMBIANT_TEMP%%"
       unique_id: "THERMOSTAT_AMBIENT_STATUS"
       unit_of_measurement: "F"
+      device_class: temperature
       state_class: measurement
       value_template: "{{ value_json['ambient temp F'] }}"
     - name: "Inside Temperature"
       state_topic: "RVC/THERMOSTAT_AMBIENT_STATUS/%%INDOOR_TEMP%%"
       unique_id: "THERMOSTAT_INDOOR_TEMP"
       unit_of_measurement: "F"
+      device_class: temperature
       state_class: measurement
       value_template: "{{ value_json['ambient temp F'] }}"
     - name: "Parking Brake"
