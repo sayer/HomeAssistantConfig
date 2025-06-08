@@ -651,14 +651,124 @@ load_scene:
       selector:
         text:
   sequence:
-    # Simple test version
-    - service: persistent_notification.create
+    # Get the scene data from persistent storage
+    - variables:
+        notification_id: "scene_{{ scene_name | replace(' ', '_') | lower }}"
+        scene_data: >
+          {% set notification = states('persistent_notification.' + notification_id) %}
+          {% if notification != 'unknown' and notification != 'unavailable' %}
+            {% set data_json = state_attr('persistent_notification.' + notification_id, 'message') %}
+            {{ data_json | from_json }}
+          {% else %}
+            {}
+          {% endif %}
+    
+    # Check if scene exists
+    - condition: template
+      value_template: "{{ scene_data != {} }}"
+    
+    # Process all lights
+    - service: script.turn_on
+      target:
+        entity_id: script.process_scene_lights
       data:
-        title: "Loading Scene"
-        message: "Attempting to load scene: {{ scene_name }}"
+        variables:
+          scene_data: "{{ scene_data }}"
+    
+    # Process all covers
+    - service: script.turn_on
+      target:
+        entity_id: script.process_scene_covers
+      data:
+        variables:
+          scene_data: "{{ scene_data }}"
     
     # Notify user
     - service: notify.notify
       data:
-        title: "Scene Test"
-        message: "Scene '{{ scene_name }}' test function"
+        title: "Scene Loaded"
+        message: "Scene '{{ scene_name }}' has been loaded"
+
+# Helper script to process lights
+process_scene_lights:
+  alias: "Process Scene Lights"
+  mode: parallel
+  sequence:
+    - variables:
+        light_entities: >
+          {% set all_lights = states.light | map(attribute='entity_id') | list %}
+          {{ all_lights }}
+    
+    # Process each light
+    - repeat:
+        for_each: "{{ light_entities }}"
+        sequence:
+          - variables:
+              entity_id: "{{ repeat.item }}"
+              entity_state: "{{ scene_data[entity_id] if entity_id in scene_data else 'skip' }}"
+          
+          # Skip if not in scene data
+          - condition: template
+            value_template: "{{ entity_state != 'skip' }}"
+          
+          # Turn on or off based on state
+          - choose:
+              - conditions:
+                  - condition: template
+                    value_template: "{{ entity_state | int > 0 }}"
+                sequence:
+                  - service: light.turn_on
+                    target:
+                      entity_id: "{{ entity_id }}"
+                    data:
+                      brightness_pct: "{{ entity_state }}"
+            default:
+              - service: light.turn_off
+                target:
+                  entity_id: "{{ entity_id }}"
+
+# Helper script to process covers
+process_scene_covers:
+  alias: "Process Scene Covers"
+  mode: parallel
+  sequence:
+    - variables:
+        cover_entities: >
+          {% set all_covers = states.cover | map(attribute='entity_id') | list %}
+          {{ all_covers }}
+    
+    # Process each cover
+    - repeat:
+        for_each: "{{ cover_entities }}"
+        sequence:
+          - variables:
+              entity_id: "{{ repeat.item }}"
+              entity_state: "{{ scene_data[entity_id] if entity_id in scene_data else 'skip' }}"
+          
+          # Skip if not in scene data
+          - condition: template
+            value_template: "{{ entity_state != 'skip' }}"
+          
+          # Open or close based on state
+          - choose:
+              - conditions:
+                  - condition: template
+                    value_template: "{{ entity_state | int >= 75 }}"
+                sequence:
+                  - service: cover.open_cover
+                    target:
+                      entity_id: "{{ entity_id }}"
+              - conditions:
+                  - condition: template
+                    value_template: "{{ entity_state | int <= 25 }}"
+                sequence:
+                  - service: cover.close_cover
+                    target:
+                      entity_id: "{{ entity_id }}"
+              - conditions:
+                  - condition: template
+                    value_template: "{{ entity_state | int > 25 and entity_state | int < 75 }}"
+                sequence:
+                  - service: cover.open_cover
+                    target:
+                      entity_id: "{{ entity_id }}"
