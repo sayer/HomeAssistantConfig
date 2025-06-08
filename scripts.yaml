@@ -651,37 +651,80 @@ load_scene:
       selector:
         text:
   sequence:
-    # Get the scene data from persistent storage
+    # Get the notification ID
     - variables:
-        notification_id: "scene_{{ scene_name | replace(' ', '_') | lower }}"
-        scene_data: >
-          {% set notification = states('persistent_notification.' + notification_id) %}
-          {% if notification != 'unknown' and notification != 'unavailable' %}
-            {% set data_json = state_attr('persistent_notification.' + notification_id, 'message') %}
-            {{ data_json | from_json }}
-          {% else %}
-            {}
-          {% endif %}
+        notification_id: >
+          {% set scene_id = scene_name | replace(' ', '_') | lower %}
+          {{ 'scene_' ~ scene_id }}
     
     # Check if scene exists
     - condition: template
-      value_template: "{{ scene_data != {} }}"
+      value_template: >
+        {% set notification = 'persistent_notification.' ~ notification_id %}
+        {{ states(notification) != 'unknown' and states(notification) != 'unavailable' }}
     
-    # Process all lights
-    - service: script.turn_on
-      target:
-        entity_id: script.process_scene_lights
+    # Get the scene data
+    - service: persistent_notification.create
       data:
-        variables:
-          scene_data: "{{ scene_data }}"
+        title: "Loading Scene"
+        message: "Loading scene: {{ scene_name }}"
+        notification_id: "loading_scene"
     
-    # Process all covers
-    - service: script.turn_on
+    # Turn on lights that are on in the scene
+    - service: light.turn_on
       target:
-        entity_id: script.process_scene_covers
-      data:
-        variables:
-          scene_data: "{{ scene_data }}"
+        entity_id: >
+          {% set notification = 'persistent_notification.' ~ notification_id %}
+          {% set message = state_attr(notification, 'message') %}
+          {% set lights = [] %}
+          {% for entity_id, value in message.items() %}
+            {% if entity_id.startswith('light.') and value == 100 %}
+              {% set lights = lights + [entity_id] %}
+            {% endif %}
+          {% endfor %}
+          {{ lights }}
+    
+    # Turn off lights that are off in the scene
+    - service: light.turn_off
+      target:
+        entity_id: >
+          {% set notification = 'persistent_notification.' ~ notification_id %}
+          {% set message = state_attr(notification, 'message') %}
+          {% set lights = [] %}
+          {% for entity_id, value in message.items() %}
+            {% if entity_id.startswith('light.') and value == 0 %}
+              {% set lights = lights + [entity_id] %}
+            {% endif %}
+          {% endfor %}
+          {{ lights }}
+    
+    # Open covers that are open in the scene
+    - service: cover.open_cover
+      target:
+        entity_id: >
+          {% set notification = 'persistent_notification.' ~ notification_id %}
+          {% set message = state_attr(notification, 'message') %}
+          {% set covers = [] %}
+          {% for entity_id, value in message.items() %}
+            {% if entity_id.startswith('cover.') and value >= 75 %}
+              {% set covers = covers + [entity_id] %}
+            {% endif %}
+          {% endfor %}
+          {{ covers }}
+    
+    # Close covers that are closed in the scene
+    - service: cover.close_cover
+      target:
+        entity_id: >
+          {% set notification = 'persistent_notification.' ~ notification_id %}
+          {% set message = state_attr(notification, 'message') %}
+          {% set covers = [] %}
+          {% for entity_id, value in message.items() %}
+            {% if entity_id.startswith('cover.') and value <= 25 %}
+              {% set covers = covers + [entity_id] %}
+            {% endif %}
+          {% endfor %}
+          {{ covers }}
     
     # Notify user
     - service: notify.notify
