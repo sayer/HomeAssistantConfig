@@ -657,9 +657,7 @@ load_scene:
           {% set scene_id = scene_name | replace(' ', '_') | lower %}
           {{ 'scene_' ~ scene_id }}
     
-    # Check if scene exists - simplified condition
-    - condition: template
-      value_template: "{{ states('persistent_notification.' ~ notification_id) != 'unknown' }}"
+    # Skip the condition check for now
     
     # Get the scene data
     - service: persistent_notification.create
