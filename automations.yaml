@@ -333,9 +333,8 @@
 - id: '1679712196386'
   alias: Clear Bus Parked
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - sensor.parking_brake
     for:
       hours: 0
@@ -343,16 +342,17 @@
       seconds: 0
     from: park brake engaged
     to: park brake released
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - sensor.transmision_gear
     from: neutral
-    enabled: false
-  - platform: numeric_state
-    entity_id: sensor.vehicle_speed
+    enabled: true
+    trigger: state
+  - entity_id: sensor.vehicle_speed
     above: 1
     enabled: false
-  condition:
+    trigger: numeric_state
+  conditions:
   - condition: template
     value_template: '{{ states(''sensor.parking_brake'') != ''unknown'' and states(''sensor.parking_brake'')
       != ''unavailable'' and states(''sensor.transmision_gear'') != ''unknown'' and
@@ -363,11 +363,11 @@
     - '{{ trigger.from_state.state not in [''unknown'', ''unavailable''] }}'
     - '{{ trigger.to_state.state not in [''unknown'', ''unavailable''] }}'
     enabled: false
-  action:
-  - service: homeassistant.turn_off
-    data: {}
+  actions:
+  - data: {}
     target:
       entity_id: input_boolean.busparked
+    action: homeassistant.turn_off
   mode: single
 - id: '1680467480278'
   alias: Motion Turns on front accents
@@ -614,28 +614,35 @@
 - id: '1681101104068'
   alias: Engine off - Lights on
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - input_boolean.engineon
     from: 'on'
     to: 'off'
-  condition:
+    trigger: state
+  conditions:
   - condition: state
     entity_id: input_boolean.busparked
     state: 'on'
-  action:
-  - service: homeassistant.turn_on
-    data: {}
+    enabled: false
+  actions:
+  - data: {}
     target:
       entity_id:
       - light.dimmer_3_17
       - light.front_accents
       - light.dimmer_3_19
-  - service: script.notify_home
-    data:
+    action: homeassistant.turn_on
+  - data:
       title: Foretravel
       message: Main engine off
+    action: script.notify_home
+  - action: automation.trigger
+    metadata: {}
+    data:
+      skip_condition: true
+    target:
+      entity_id: automation.set_bus_parked
   mode: single
 - id: '1681103295361'
   alias: Engine started
@@ -912,16 +919,17 @@
 - id: '1686707309457'
   alias: Apple TV Play - TV Time
   description: ''
-  trigger:
-  - platform: device
-    device_id: 2e34140e2c5b8fb54977e7d77cc7ae5e
+  triggers:
+  - device_id: 2e34140e2c5b8fb54977e7d77cc7ae5e
     domain: media_player
     entity_id: media_player.home_theater_2
     type: playing
-  condition: []
-  action:
-  - service: script.tv_time
-    data: {}
+    trigger: device
+  conditions: []
+  actions:
+  - data: {}
+    action: script.tv_time
+    enabled: false
   mode: single
 - id: '1687185322291'
   alias: Fans - Limit time on
@@ -1243,14 +1251,10 @@
   action:
   - service: script.notify_home
     data_template:
-      message: >-
-        {% set sensor = trigger.entity_id.split('.')[-1] %}
-        The state of Outback {{ sensor }} changed to
-        {% if trigger.to_state is defined and trigger.to_state is not none %}
-          {{ trigger.to_state.state }}
-        {% else %}
-          unknown
-        {% endif %}
+      message: "{% set sensor = trigger.entity_id.split('.')[-1] %} The state of Outback
+        {{ sensor }} changed to {% if trigger.to_state is defined and trigger.to_state
+        is not none %}\n  {{ trigger.to_state.state }}\n{% else %}\n  unknown\n{%
+        endif %}"
       title: Foretravel
   - service: script.notify_iphone
     metadata: {}
@@ -1429,7 +1433,6 @@
         '
     action: persistent_notification.create
     enabled: false
-
 - id: '1741325651131'
   alias: Set Optimistic at Startup
   description: Update Optimistic Mode Based on Model Year
@@ -1442,18 +1445,16 @@
   - entity_id: input_boolean.is_optimistic
     action: '{% if states(''input_number.model_year'') | int > 2017 | int %} input_boolean.turn_on
       {% else %} input_boolean.turn_off {% endif %}'
-      
-- alias: "Update Coach Year File on Model Year Change or HA Start"
-  id: "update_coach_year"
+- alias: Update Coach Year File on Model Year Change or HA Start
+  id: update_coach_year
   trigger:
-    - platform: state
-      entity_id: input_number.model_year
-    - platform: homeassistant
-      event: start
+  - platform: state
+    entity_id: input_number.model_year
+  - platform: homeassistant
+    event: start
   action:
-    - delay: "00:00:10"
-    - service: shell_command.write_coach_year
-      data:
-        year: "{{ states('input_number.model_year') | int }}"
+  - delay: 00:00:10
+  - service: shell_command.write_coach_year
+    data:
+      year: '{{ states(''input_number.model_year'') | int }}'
   mode: single
-

@@ -481,6 +481,101 @@
                     }
                   ],
                   "columns": 2
+                },
+                {
+                  "square": true,
+                  "type": "grid",
+                  "cards": [
+                    {
+                      "show_name": true,
+                      "show_icon": true,
+                      "type": "button",
+                      "entity": "script.save_scene",
+                      "name": "Scene 1",
+                      "tap_action": {
+                        "action": "perform-action",
+                        "perform_action": "script.save_scene",
+                        "target": {},
+                        "data": {
+                          "scene_name": "Scene 1"
+                        }
+                      }
+                    },
+                    {
+                      "show_name": true,
+                      "show_icon": true,
+                      "type": "button",
+                      "entity": "script.save_scene",
+                      "name": "Scene 2",
+                      "tap_action": {
+                        "action": "perform-action",
+                        "perform_action": "script.save_scene",
+                        "target": {},
+                        "data": {
+                          "scene_name": "Scene 2"
+                        }
+                      }
+                    },
+                    {
+                      "show_name": true,
+                      "show_icon": true,
+                      "type": "button",
+                      "entity": "script.save_scene",
+                      "name": "Scene 3",
+                      "tap_action": {
+                        "action": "perform-action",
+                        "perform_action": "script.save_scene",
+                        "target": {},
+                        "data": {
+                          "scene_name": "Scene 3"
+                        }
+                      }
+                    }
+                  ],
+                  "title": "Save Scene"
+                },
+                {
+                  "square": true,
+                  "type": "grid",
+                  "cards": [
+                    {
+                      "show_name": true,
+                      "show_icon": true,
+                      "type": "button",
+                      "entity": "script.load_saved_scene",
+                      "name": "Scene 1",
+                      "tap_action": {
+                        "action": "perform-action",
+                        "perform_action": "script.load_scene",
+                        "target": {}
+                      }
+                    },
+                    {
+                      "show_name": true,
+                      "show_icon": true,
+                      "type": "button",
+                      "entity": "script.load_saved_scene",
+                      "name": "Scene 2",
+                      "tap_action": {
+                        "action": "perform-action",
+                        "perform_action": "script.load_scene",
+                        "target": {}
+                      }
+                    },
+                    {
+                      "show_name": true,
+                      "show_icon": true,
+                      "type": "button",
+                      "entity": "script.load_saved_scene",
+                      "name": "Scene 3",
+                      "tap_action": {
+                        "action": "perform-action",
+                        "perform_action": "script.load_scene",
+                        "target": {}
+                      }
+                    }
+                  ],
+                  "title": "Load Scene"
                 }
               ]
             },
