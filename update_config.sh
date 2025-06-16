@@ -745,16 +745,35 @@ fi
 
 echo "Inserting shade group YAML entries..."
 if grep -q "%%ALL_SHADE_GROUPS%%" "$CONFIG_FILE"; then
-    # Use awk for safer multi-line replacement
-    awk -v groupsfile="$SHADE_GROUPS_FILE" '
-    /%%ALL_SHADE_GROUPS%%/ {
-        system("cat " groupsfile)
-        next
-    }
-    { print }
-    ' "$CONFIG_FILE" > "$TEMP_FILE"
-    mv "$TEMP_FILE" "$CONFIG_FILE"
-    echo "Added shade group entries to configuration"
+    # Check if all_night_shades_2 exists in the config file
+    if grep -q "all_night_shades_2:" "$CONFIG_FILE"; then
+        echo "Preserving custom all_night_shades_2 template..."
+        # Extract the all_night_shades_2 template
+        ALL_NIGHT_SHADES_2_TEMPLATE=$(awk '/all_night_shades_2:/,/close_cover:/ {print}' "$CONFIG_FILE" | awk '/close_cover:/,/}/ {print}')
+        
+        # Use awk for safer multi-line replacement
+        awk -v groupsfile="$SHADE_GROUPS_FILE" '
+        /%%ALL_SHADE_GROUPS%%/ {
+            system("cat " groupsfile)
+            next
+        }
+        { print }
+        ' "$CONFIG_FILE" > "$TEMP_FILE"
+        mv "$TEMP_FILE" "$CONFIG_FILE"
+        
+        echo "Added shade group entries to configuration"
+    else
+        # Use awk for safer multi-line replacement
+        awk -v groupsfile="$SHADE_GROUPS_FILE" '
+        /%%ALL_SHADE_GROUPS%%/ {
+            system("cat " groupsfile)
+            next
+        }
+        { print }
+        ' "$CONFIG_FILE" > "$TEMP_FILE"
+        mv "$TEMP_FILE" "$CONFIG_FILE"
+        echo "Added shade group entries to configuration"
+    fi
 else
     echo "Warning: %%ALL_SHADE_GROUPS%% token not found in $CONFIG_FILE"
 fi
