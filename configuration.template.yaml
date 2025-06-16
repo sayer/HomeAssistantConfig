@@ -4,7 +4,7 @@ default_config:
 logger:
   default: warning
   logs:
-    homeassistant.components.mqtt: debug
+    homeassistant.components.mqtt: warning
    # homeassistant.components.light: debug
     homeassistant.components.shell_command: debug
 
