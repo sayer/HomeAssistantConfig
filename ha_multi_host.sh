@@ -3,6 +3,8 @@
 # List of Home Assistant hosts
 HOSTS=(
   "192.168.100.192"
+  "homeassistant-16.tail73c84.ts.net"
+  "homeassistant-15.tail73c84.ts.net"
   "homeassistant-14.tail73c84.ts.net"
   "homeassistant-12.tail73c84.ts.net"
   "homeassistant-13.tail73c84.ts.net"
