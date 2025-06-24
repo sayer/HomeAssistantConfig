@@ -2650,7 +2650,79 @@ light:
       - light.awning_lights
       - light.exterior_accents
       - light.porch_handle
+
+   # Bedroom lights group that works even if bedroom_sconce is unavailable
+   - platform: template
+     lights:
+       bedroom_lights:
+         friendly_name: "Bedroom Lights"
+         unique_id: bedroom_lights
+         value_template: >-
+           {% set core_lights = [
+             'light.bedroom_ceiling_2',
+             'light.dimmer_3_19',
+             'light.bedroom_d_s_accent',
+             'light.bedroom_dresser_accent',
+             'light.dimmer_3_21',
+             'light.dimmer_3_22',
+             'light.bedroom_recess_ceiling',
+             'light.bedroom_dresser_ceiling',
+             'light.dimmer_3_14'
+           ] %}
+           {% set on_count = namespace(value=0) %}
+           {% set total = namespace(value=0) %}
+           
+           {% for light in core_lights %}
+             {% if states(light) != 'unavailable' and states(light) != 'unknown' %}
+               {% set total.value = total.value + 1 %}
+               {% if states(light) == 'on' %}
+                 {% set on_count.value = on_count.value + 1 %}
+               {% endif %}
+             {% endif %}
+           {% endfor %}
+           
+           {% if states('light.bedroom_sconce') != 'unavailable' and states('light.bedroom_sconce') != 'unknown' %}
+             {% set total.value = total.value + 1 %}
+             {% if states('light.bedroom_sconce') == 'on' %}
+               {% set on_count.value = on_count.value + 1 %}
+             {% endif %}
+           {% endif %}
+           
+           {% if on_count.value > 0 %}
+             on
+           {% else %}
+             off
+           {% endif %}
+         turn_on:
+           service: light.turn_on
+           target:
+             entity_id:
+               - light.bedroom_ceiling_2
+               - light.dimmer_3_19
+               - light.bedroom_d_s_accent
+               - light.bedroom_dresser_accent
+               - light.dimmer_3_21
+               - light.dimmer_3_22
+               - light.bedroom_recess_ceiling
+               - light.bedroom_dresser_ceiling
+               - light.dimmer_3_14
+               - light.bedroom_sconce
+         turn_off:
+           service: light.turn_off
+           target:
+             entity_id:
+               - light.bedroom_ceiling_2
+               - light.dimmer_3_19
+               - light.bedroom_d_s_accent
+               - light.bedroom_dresser_accent
+               - light.dimmer_3_21
+               - light.dimmer_3_22
+               - light.bedroom_recess_ceiling
+               - light.bedroom_dresser_ceiling
+               - light.dimmer_3_14
+               - light.bedroom_sconce
       
+
 cover:
 
 %%ALL_SHADE_GROUPS%%
