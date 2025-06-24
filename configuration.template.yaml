@@ -2651,13 +2651,13 @@ light:
       - light.exterior_accents
       - light.porch_handle
 
-   # Bedroom lights group that works even if bedroom_sconce is unavailable
-   - platform: template
-     lights:
-       bedroom_lights:
-         friendly_name: "Bedroom Lights"
-         unique_id: bedroom_lights
-         value_template: >-
+  # Bedroom lights group that works even if bedroom_sconce is unavailable
+  - platform: template
+    lights:
+      bedroom_lights:
+        friendly_name: "Bedroom Lights"
+        unique_id: bedroom_lights
+        value_template: >-
            {% set core_lights = [
              'light.bedroom_ceiling_2',
              'light.dimmer_3_19',
