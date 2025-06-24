@@ -547,7 +547,10 @@
                       "tap_action": {
                         "action": "perform-action",
                         "perform_action": "script.load_scene",
-                        "target": {}
+                        "target": {},
+                        "data": {
+                          "scene_name": "Scene 1"
+                        }
                       }
                     },
                     {
@@ -559,7 +562,10 @@
                       "tap_action": {
                         "action": "perform-action",
                         "perform_action": "script.load_scene",
-                        "target": {}
+                        "target": {},
+                        "data": {
+                          "scene_name": "Scene 2"
+                        }
                       }
                     },
                     {
@@ -571,7 +577,10 @@
                       "tap_action": {
                         "action": "perform-action",
                         "perform_action": "script.load_scene",
-                        "target": {}
+                        "target": {},
+                        "data": {
+                          "scene_name": "Scene 3"
+                        }
                       }
                     }
                   ],
@@ -1342,6 +1351,9 @@
                 },
                 {
                   "entity": "light.dimmer_3_22"
+                },
+                {
+                  "entity": "light.bedroom_sconce"
                 }
               ],
               "title": "Bedroom",
