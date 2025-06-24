@@ -853,6 +853,22 @@ mqtt:
       schema: "template"
       optimistic: %%OPTIMISTIC_MODE%%
 
+    - name: "Bedroom Sconce"
+      unique_id: "dimmer_3_20"
+      icon: mdi:light-recessed
+      state_topic: "RVC/DC_DIMMER_STATUS_3/20"
+      state_template: >-
+        {% if value_json['operating status (brightness)']|int > 0 %}
+          on
+        {% else %}
+          off
+        {% endif %}
+      command_topic: "RVC/DC_DIMMER_COMMAND_2/20/set"
+      command_on_template: '{"instance": 20, "desired level": 100, "command": %%LIGHT_COMMAND_ON%% }'
+      command_off_template: '{"instance": 20, "desired level": 0, "command": %%LIGHT_COMMAND_OFF%% }'
+      schema: "template"
+      optimistic: %%OPTIMISTIC_MODE%%
+
     - name: "Bedroom right reading"
       unique_id: "dimmer_3_21"
       icon: mdi:light-recessed
