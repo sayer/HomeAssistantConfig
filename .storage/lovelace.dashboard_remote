@@ -549,11 +549,8 @@
                       "name": "Scene 1",
                       "tap_action": {
                         "action": "perform-action",
-                        "perform_action": "script.load_saved_scene",
-                        "target": {},
-                        "data": {
-                          "scene_name": "Scene 1"
-                        }
+                        "perform_action": "script.load_scene",
+                        "target": {}
                       }
                     },
                     {
@@ -564,11 +561,8 @@
                       "name": "Scene 2",
                       "tap_action": {
                         "action": "perform-action",
-                        "perform_action": "script.load_saved_scene",
-                        "target": {},
-                        "data": {
-                          "scene_name": "Scene 2"
-                        }
+                        "perform_action": "script.load_scene",
+                        "target": {}
                       }
                     },
                     {
@@ -579,11 +573,8 @@
                       "name": "Scene 3",
                       "tap_action": {
                         "action": "perform-action",
-                        "perform_action": "script.load_saved_scene",
-                        "target": {},
-                        "data": {
-                          "scene_name": "Scene 3"
-                        }
+                        "perform_action": "script.load_scene",
+                        "target": {}
                       },
                       "show_state": false
                     }
