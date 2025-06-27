@@ -372,12 +372,12 @@
                   "cards": [
                     {
                       "type": "custom:mushroom-fan-card",
-                      "entity": "fan.mid_bath_fan",
+                      "entity": "fan.mid_bath_fan_2",
                       "icon_animation": true
                     },
                     {
                       "type": "custom:mushroom-fan-card",
-                      "entity": "fan.rear_bath_fan",
+                      "entity": "fan.rear_bath_fan_2",
                       "icon_animation": true
                     }
                   ]
