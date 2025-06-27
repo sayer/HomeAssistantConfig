@@ -373,12 +373,15 @@
                     {
                       "type": "custom:mushroom-fan-card",
                       "entity": "fan.mid_bath_fan",
-                      "icon_animation": true
+                      "icon_animation": true,
+                      "name": "Mid Bath Fan"
                     },
                     {
                       "type": "custom:mushroom-fan-card",
                       "entity": "fan.rear_bath_fan_2",
-                      "icon_animation": true
+                      "icon_animation": true,
+                      "show_oscillate_control": false,
+                      "name": "Rear Bath Fan"
                     }
                   ]
                 },
