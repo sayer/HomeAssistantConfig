@@ -545,7 +545,7 @@
                       "show_name": true,
                       "show_icon": true,
                       "type": "button",
-                      "entity": "script.load_saved_scene",
+                      "entity": "script.load_scene",
                       "name": "Scene 1",
                       "tap_action": {
                         "action": "perform-action",
@@ -560,7 +560,7 @@
                       "show_name": true,
                       "show_icon": true,
                       "type": "button",
-                      "entity": "script.load_saved_scene",
+                      "entity": "script.load_scene",
                       "name": "Scene 2",
                       "tap_action": {
                         "action": "perform-action",
@@ -575,7 +575,7 @@
                       "show_name": true,
                       "show_icon": true,
                       "type": "button",
-                      "entity": "script.load_saved_scene",
+                      "entity": "script.load_scene",
                       "name": "Scene 3",
                       "tap_action": {
                         "action": "perform-action",
