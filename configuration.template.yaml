@@ -2657,7 +2657,7 @@ light:
       bedroom_lights:
         friendly_name: "Bedroom Lights"
         unique_id: bedroom_lights
-        icon: mdi:lightbulb-group
+        #icon: mdi:lightbulb-group
         value_template: >-
           {% set core_lights = [
             'light.bedroom_ceiling_2',
