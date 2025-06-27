@@ -372,7 +372,7 @@
                   "cards": [
                     {
                       "type": "custom:mushroom-fan-card",
-                      "entity": "fan.mid_bath_fan_2",
+                      "entity": "fan.mid_bath_fan",
                       "icon_animation": true
                     },
                     {
@@ -581,7 +581,8 @@
                         "data": {
                           "scene_name": "Scene 3"
                         }
-                      }
+                      },
+                      "show_state": false
                     }
                   ],
                   "title": "Load Scene"
