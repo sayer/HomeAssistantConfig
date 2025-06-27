@@ -378,7 +378,7 @@
                     },
                     {
                       "type": "custom:mushroom-fan-card",
-                      "entity": "fan.rear_bath_fan_2",
+                      "entity": "fan.rear_bath_fan",
                       "icon_animation": true,
                       "show_oscillate_control": false,
                       "name": "Rear Bath Fan"
