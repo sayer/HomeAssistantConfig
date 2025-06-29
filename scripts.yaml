@@ -606,7 +606,13 @@ save_scene:
     # Store the scene data in an input_text entity
     - variables:
         scene_entity_id: "input_text.scene_{{ scene_name | replace(' ', '_') | lower }}"
-        scene_data_json: "{{ scene_data | to_json }}"
+        # Convert scene_data to a string representation manually
+        scene_data_str: >-
+          {
+          {% for key, value in scene_data.items() %}
+            "{{ key }}": {{ value }}{% if not loop.last %},{% endif %}
+          {% endfor %}
+          }
     
     # Log the entity we're trying to use
     - service: system_log.write
@@ -616,14 +622,14 @@ save_scene:
           Entity ID: {{ scene_entity_id }}
           Entity exists: {{ states(scene_entity_id) != 'unavailable' }}
           Current value: {{ states(scene_entity_id) }}
-          JSON data length: {{ scene_data_json | length }}
+          Data length: {{ scene_data | length }}
         level: info
     
     # Set the value in the input_text entity
     - service: input_text.set_value
       data:
         entity_id: "{{ scene_entity_id }}"
-        value: "{{ scene_data_json }}"
+        value: "{{ scene_data_str }}"
     
     # Log the scene data
     - service: system_log.write
