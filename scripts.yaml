@@ -708,12 +708,7 @@ load_scene:
     
     # Parse the scene data
     - variables:
-        scene_data: >-
-          {% if scene_data_raw and scene_data_raw != '{}' %}
-            {{ scene_data_raw | from_json }}
-          {% else %}
-            {}
-          {% endif %}
+        scene_data: "{{ scene_data_raw | from_json if scene_data_raw and scene_data_raw != '{}' else {} }}"
     
     # Log the scene data for debugging
     - service: system_log.write
@@ -799,8 +794,16 @@ load_scene:
                 Condition 3 (position): {{ entity_state != 'unknown' and entity_state | int > 25 and entity_state | int < 75 }}
               level: info
           
-          # Apply the cover state
+          # Apply the cover state - skip group covers to avoid errors
           - choose:
+              - conditions:
+                  - condition: template
+                    value_template: "{{ entity_id.endswith('_2') or entity_id.endswith('_3') }}"
+                sequence:
+                  - service: system_log.write
+                    data:
+                      message: "Skipping group cover {{ entity_id }}"
+                      level: info
               - conditions:
                   - condition: template
                     value_template: "{{ entity_state != 'unknown' and entity_state | int >= 75 }}"
