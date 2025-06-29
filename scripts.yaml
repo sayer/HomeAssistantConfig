@@ -655,15 +655,29 @@ load_scene:
     - variables:
         notification_id: "scene_{{ scene_name | replace(' ', '_') | lower }}"
     
-    # Check if the scene exists
+    # Check if the scene exists - use a more robust check
     - condition: template
-      value_template: "{{ 'persistent_notification.' ~ notification_id in states.persistent_notification | map(attribute='entity_id') | list }}"
+      value_template: >-
+        {% set found = false %}
+        {% for notification in states.persistent_notification %}
+          {% if notification.entity_id == 'persistent_notification.' ~ notification_id %}
+            {% set found = true %}
+          {% endif %}
+        {% endfor %}
+        {{ found }}
       
     # Get the scene data from the notification
     - variables:
         scene_entity: "persistent_notification.{{ notification_id }}"
-        scene_data_json: "{{ state_attr(scene_entity, 'message') }}"
-        scene_data: "{{ scene_data_json | from_json }}"
+        # Extract the JSON data from the message, handling potential string formatting
+        scene_data: >-
+          {% set message = state_attr(scene_entity, 'message') %}
+          {% if message.startswith('"') and message.endswith('"') %}
+            {% set json_str = message[1:-1] %}
+          {% else %}
+            {% set json_str = message %}
+          {% endif %}
+          {{ json_str | from_json }}
         # Get all entity IDs from the scene data
         entity_ids: "{{ scene_data.keys() | list }}"
     
