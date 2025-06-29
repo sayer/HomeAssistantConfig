@@ -638,7 +638,7 @@ save_scene:
         title: "Scene Saved"
         message: "Scene '{{ scene_name }}' has been saved with {{ scene_data | length }} entities"
 
-load_scene:
+load_saved_scene:
   alias: "Load Saved Scene"
   description: "Loads a previously saved scene and applies it to all lights and shades"
   icon: mdi:palette
