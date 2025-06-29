@@ -373,12 +373,15 @@
                     {
                       "type": "custom:mushroom-fan-card",
                       "entity": "fan.mid_bath_fan",
-                      "icon_animation": true
+                      "icon_animation": true,
+                      "name": "Mid Bath Fan"
                     },
                     {
                       "type": "custom:mushroom-fan-card",
-                      "entity": "fan.rear_bath_fan_2",
-                      "icon_animation": true
+                      "entity": "fan.rear_bath_fan",
+                      "icon_animation": true,
+                      "show_oscillate_control": false,
+                      "name": "Rear Bath Fan"
                     }
                   ]
                 },
@@ -547,10 +550,7 @@
                       "tap_action": {
                         "action": "perform-action",
                         "perform_action": "script.load_scene",
-                        "target": {},
-                        "data": {
-                          "scene_name": "Scene 1"
-                        }
+                        "target": {}
                       }
                     },
                     {
@@ -562,10 +562,7 @@
                       "tap_action": {
                         "action": "perform-action",
                         "perform_action": "script.load_scene",
-                        "target": {},
-                        "data": {
-                          "scene_name": "Scene 2"
-                        }
+                        "target": {}
                       }
                     },
                     {
@@ -577,10 +574,7 @@
                       "tap_action": {
                         "action": "perform-action",
                         "perform_action": "script.load_scene",
-                        "target": {},
-                        "data": {
-                          "scene_name": "Scene 3"
-                        }
+                        "target": {}
                       },
                       "show_state": false
                     }
