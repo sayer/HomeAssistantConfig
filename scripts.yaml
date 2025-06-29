@@ -675,13 +675,40 @@ load_scene:
     
     # Get the scene data from the persistent notification
     - variables:
+        notification_entity: "persistent_notification.{{ notification_id }}"
+    
+    # Log notification entity state
+    - service: system_log.write
+      data:
+        message: >
+          NOTIFICATION DEBUG:
+          Notification ID: {{ notification_id }}
+          Notification entity: {{ notification_entity }}
+          Notification exists: {{ states(notification_entity) != 'unknown' }}
+          Notification attributes: {{ state_attr(notification_entity, 'message') if states(notification_entity) != 'unknown' else 'none' }}
+        level: info
+    
+    # Get the raw scene data
+    - variables:
         scene_data_raw: >-
-          {% set notification_entity = 'persistent_notification.' ~ notification_id %}
           {% if states(notification_entity) != 'unknown' %}
             {{ state_attr(notification_entity, 'message') }}
           {% else %}
             {}
           {% endif %}
+    
+    # Log raw scene data
+    - service: system_log.write
+      data:
+        message: >
+          RAW DATA DEBUG:
+          Raw scene data: {{ scene_data_raw }}
+          Raw scene data type: {{ scene_data_raw.__class__.__name__ if scene_data_raw is defined else 'undefined' }}
+          Raw scene data length: {{ scene_data_raw | length if scene_data_raw is defined else 0 }}
+        level: info
+    
+    # Parse the scene data
+    - variables:
         scene_data: >-
           {% if scene_data_raw and scene_data_raw != '{}' %}
             {{ scene_data_raw | from_json }}
@@ -708,6 +735,18 @@ load_scene:
                   unknown
                 {% endif %}
           
+          # Log the light state for debugging
+          - service: system_log.write
+            data:
+              message: >
+                LIGHT DEBUG:
+                Entity: {{ entity_id }}
+                In scene data: {{ entity_id in scene_data }}
+                Entity state: {{ entity_state }}
+                Condition 1 (turn on): {{ entity_state != 'unknown' and entity_state | int > 0 }}
+                Condition 2 (turn off): {{ entity_state != 'unknown' and entity_state | int == 0 }}
+              level: info
+          
           # Apply the light state
           - choose:
               - conditions:
@@ -719,6 +758,10 @@ load_scene:
                       entity_id: "{{ entity_id }}"
                     data:
                       brightness_pct: "{{ entity_state }}"
+                  - service: system_log.write
+                    data:
+                      message: "Turning ON {{ entity_id }} with brightness {{ entity_state }}"
+                      level: info
               - conditions:
                   - condition: template
                     value_template: "{{ entity_state != 'unknown' and entity_state | int == 0 }}"
@@ -726,6 +769,10 @@ load_scene:
                   - service: light.turn_off
                     target:
                       entity_id: "{{ entity_id }}"
+                  - service: system_log.write
+                    data:
+                      message: "Turning OFF {{ entity_id }}"
+                      level: info
     
     # Process all covers in the scene data
     - repeat:
@@ -740,6 +787,19 @@ load_scene:
                   unknown
                 {% endif %}
           
+          # Log the cover state for debugging
+          - service: system_log.write
+            data:
+              message: >
+                COVER DEBUG:
+                Entity: {{ entity_id }}
+                In scene data: {{ entity_id in scene_data }}
+                Entity state: {{ entity_state }}
+                Condition 1 (open): {{ entity_state != 'unknown' and entity_state | int >= 75 }}
+                Condition 2 (close): {{ entity_state != 'unknown' and entity_state | int <= 25 }}
+                Condition 3 (position): {{ entity_state != 'unknown' and entity_state | int > 25 and entity_state | int < 75 }}
+              level: info
+          
           # Apply the cover state
           - choose:
               - conditions:
@@ -749,6 +809,10 @@ load_scene:
                   - service: cover.open_cover
                     target:
                       entity_id: "{{ entity_id }}"
+                  - service: system_log.write
+                    data:
+                      message: "Opening cover {{ entity_id }}"
+                      level: info
               - conditions:
                   - condition: template
                     value_template: "{{ entity_state != 'unknown' and entity_state | int <= 25 }}"
@@ -756,6 +820,10 @@ load_scene:
                   - service: cover.close_cover
                     target:
                       entity_id: "{{ entity_id }}"
+                  - service: system_log.write
+                    data:
+                      message: "Closing cover {{ entity_id }}"
+                      level: info
               - conditions:
                   - condition: template
                     value_template: "{{ entity_state != 'unknown' and entity_state | int > 25 and entity_state | int < 75 }}"
@@ -765,6 +833,10 @@ load_scene:
                       entity_id: "{{ entity_id }}"
                     data:
                       position: "{{ entity_state }}"
+                  - service: system_log.write
+                    data:
+                      message: "Setting cover {{ entity_id }} position to {{ entity_state }}"
+                      level: info
     
     # Notify user
     - service: notify.notify
