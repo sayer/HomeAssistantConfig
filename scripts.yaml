@@ -638,7 +638,7 @@ save_scene:
         title: "Scene Saved"
         message: "Scene '{{ scene_name }}' has been saved with {{ scene_data | length }} entities"
 
-load_saved_scene:
+load_scene:
   alias: "Load Saved Scene"
   description: "Loads a previously saved scene and applies it to all lights and shades"
   icon: mdi:palette
@@ -673,6 +673,10 @@ load_saved_scene:
           {% set scene_entity = 'persistent_notification.' ~ notification_id %}
           {% set json_str = state_attr(scene_entity, 'message') %}
           {{ json_str | from_json }}
+        # Get all entity IDs from the scene data
+        entity_ids: >
+          {% set keys = scene_data.keys() %}
+          {{ keys | list }}
     
     # Create a loading notification
     - service: persistent_notification.create
@@ -681,13 +685,13 @@ load_saved_scene:
         message: "Loading scene: {{ scene_name }} with {{ scene_data | length }} entities"
         notification_id: "loading_scene"
     
-    # Process lights
+    # Process all entities in the scene
     - repeat:
-        for_each: "{{ scene_data | dict2items }}"
+        for_each: "{{ entity_ids }}"
         sequence:
           - variables:
-              entity_id: "{{ repeat.item.key }}"
-              entity_state: "{{ repeat.item.value }}"
+              entity_id: "{{ repeat.item }}"
+              entity_state: "{{ scene_data[entity_id] }}"
           
           # Handle lights
           - choose:
