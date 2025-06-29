@@ -595,51 +595,29 @@ save_scene:
         sequence:
           - variables:
               entity_id: "{{ repeat.item }}"
-              entity_state: >-
-                {{ 100 if is_state(repeat.item, 'open') else
-                   0 if is_state(repeat.item, 'closed') else
-                   75 if is_state(repeat.item, 'opening') else
-                   25 if is_state(repeat.item, 'closing') else
-                   50 }}
+              entity_state: "{{ 100 if is_state(repeat.item, 'open') else
+                                0 if is_state(repeat.item, 'closed') else
+                                75 if is_state(repeat.item, 'opening') else
+                                25 if is_state(repeat.item, 'closing') else
+                                50 }}"
           - variables:
               scene_data: "{{ dict(scene_data, **{repeat.item: entity_state}) }}"
     
-    # Log the scene data before storing
+    # Store the scene data in an input_text entity
+    - service: input_text.set_value
+      data:
+        entity_id: "input_text.scene_{{ scene_name | replace(' ', '_') | lower }}"
+        value: "{{ scene_data | to_json }}"
+    
+    # Log the scene data
     - service: system_log.write
       data:
         message: >
-          SAVE SCENE DEBUG:
+          SAVE SCENE:
           Scene name: {{ scene_name }}
-          Scene name processed: {{ scene_name | replace(' ', '_') | lower }}
-          Notification ID: scene_{{ scene_name | replace(' ', '_') | lower }}
-          Full entity ID: persistent_notification.scene_{{ scene_name | replace(' ', '_') | lower }}
-          Scene data: {{ scene_data | to_json }}
-          Scene data length: {{ scene_data | length }}
-          Has light entities: {{ scene_data.keys() | select('match', '^light\\.') | list | count > 0 }}
-          Has cover entities: {{ scene_data.keys() | select('match', '^cover\\.') | list | count > 0 }}
-        level: info
-    
-    # Store the scene data
-    - service: persistent_notification.create
-      data:
-        title: "Scene: {{ scene_name }}"
-        message: "{{ scene_data | to_json }}"
-        notification_id: "scene_{{ scene_name | replace(' ', '_') | lower }}"
-    
-    # Check if the notification was created successfully
-    - variables:
-        notification_entity: "persistent_notification.scene_{{ scene_name | replace(' ', '_') | lower }}"
-        notification_exists: "{{ states(notification_entity) != 'unknown' and states(notification_entity) != 'unavailable' }}"
-    
-    # Log the notification status
-    - service: system_log.write
-      data:
-        message: >
-          NOTIFICATION CREATION DEBUG:
-          Notification entity: {{ notification_entity }}
-          Notification exists: {{ notification_exists }}
-          Notification state: {{ states(notification_entity) }}
-          Notification attributes: {{ state_attr(notification_entity, 'message') if states(notification_entity) != 'unknown' and states(notification_entity) != 'unavailable' else 'none' }}
+          Scene data length: {{ scene_data | length }} entities
+          Light entities: {{ scene_data.keys() | select('match', '^light\\.') | list | count }}
+          Cover entities: {{ scene_data.keys() | select('match', '^cover\\.') | list | count }}
         level: info
     
     # Notify user
@@ -661,273 +639,31 @@ load_scene:
       selector:
         text:
   sequence:
-    # Log detailed information for debugging
-    - service: system_log.write
-      data:
-        message: >
-          Debug info:
-          scene_name defined: {{ scene_name is defined }}
-          scene_name value: {{ scene_name if scene_name is defined else 'undefined' }}
-        level: info
-    
-    # Get the notification ID - match the format used in save_scene
+    # Get the scene data from the input_text entity
     - variables:
-        scene_name_processed: "{{ scene_name | replace(' ', '_') | lower }}"
-        notification_id: "scene_{{ scene_name | replace(' ', '_') | lower }}"
+        scene_entity_id: "input_text.scene_{{ scene_name | replace(' ', '_') | lower }}"
+        scene_data_json: "{{ states(scene_entity_id) }}"
     
-    # Log the notification ID for debugging
+    # Log the scene data
     - service: system_log.write
       data:
         message: >
-          NOTIFICATION ID DEBUG:
+          LOAD SCENE:
           Scene name: {{ scene_name }}
-          Scene name processed: {{ scene_name_processed }}
-          Notification ID: {{ notification_id }}
-          Expected entity ID: persistent_notification.{{ notification_id }}
+          Scene entity: {{ scene_entity_id }}
+          Scene data exists: {{ states(scene_entity_id) != 'unknown' and states(scene_entity_id) != 'unavailable' }}
+          Scene data length: {{ scene_data_json | length if scene_data_json is defined else 0 }}
         level: info
     
-    # Create a loading notification
-    - service: persistent_notification.create
-      data:
-        title: "Loading Scene"
-        message: "Attempting to load scene: {{ scene_name }}"
-        notification_id: "loading_scene"
-    
-    # Check if the loading notification was created successfully
+    # Parse the scene data
     - variables:
-        loading_notification_entity: "persistent_notification.loading_scene"
-        loading_notification_exists: "{{ states(loading_notification_entity) != 'unknown' and states(loading_notification_entity) != 'unavailable' }}"
-    
-    # Log the loading notification status
-    - service: system_log.write
-      data:
-        message: >
-          LOADING NOTIFICATION DEBUG:
-          Loading notification entity: {{ loading_notification_entity }}
-          Loading notification exists: {{ loading_notification_exists }}
-          Loading notification state: {{ states(loading_notification_entity) }}
-          Loading notification attributes: {{ state_attr(loading_notification_entity, 'message') if states(loading_notification_entity) != 'unknown' and states(loading_notification_entity) != 'unavailable' else 'none' }}
-        level: info
-    
-    # Note: We don't dismiss the notification so it can be reused
-    
-    # Get the scene data from the persistent notification
-    - variables:
-        notification_entity: "persistent_notification.{{ notification_id }}"
-        # Try to find the notification directly in the states object
-        notification_exists: "{{ notification_entity in states.persistent_notification | map(attribute='entity_id') | list }}"
-    
-    # Create a test notification to check if persistent notifications are working
-    - service: persistent_notification.create
-      data:
-        title: "Test Notification"
-        message: "This is a test notification"
-        notification_id: "test_notification"
-    
-    # Check if the test notification was created successfully
-    - variables:
-        test_notification_entity: "persistent_notification.test_notification"
-        test_notification_exists: "{{ states(test_notification_entity) != 'unknown' and states(test_notification_entity) != 'unavailable' }}"
-    
-    # Log the test notification status
-    - service: system_log.write
-      data:
-        message: >
-          TEST NOTIFICATION DEBUG:
-          Test notification entity: {{ test_notification_entity }}
-          Test notification exists: {{ test_notification_exists }}
-          Test notification state: {{ states(test_notification_entity) }}
-          Test notification attributes: {{ state_attr(test_notification_entity, 'message') if states(test_notification_entity) != 'unknown' and states(test_notification_entity) != 'unavailable' else 'none' }}
-        level: info
-    
-    # Log notification entity state
-    - service: system_log.write
-      data:
-        message: >
-          NOTIFICATION DEBUG:
-          Notification ID: {{ notification_id }}
-          Notification entity: {{ notification_entity }}
-          Notification state: {{ states(notification_entity) }}
-          Notification exists (state check): {{ states(notification_entity) != 'unknown' and states(notification_entity) != 'unavailable' }}
-          Notification exists (direct check): {{ notification_exists }}
-          All persistent notifications: {{ states.persistent_notification | map(attribute='entity_id') | list }}
-          All notification IDs: {{ states.persistent_notification | map(attribute='entity_id') | map('replace', 'persistent_notification.', '') | list }}
-          Notification attributes: {{ state_attr(notification_entity, 'message') if states(notification_entity) != 'unknown' and states(notification_entity) != 'unavailable' else 'none' }}
-        level: info
-    
-    # Clean up the test notification
-    - service: persistent_notification.dismiss
-      data:
-        notification_id: "test_notification"
-    
-    # Try to create a notification with the same ID as the scene notification
-    - service: persistent_notification.create
-      data:
-        title: "Test Scene Notification"
-        message: "This is a test scene notification"
-        notification_id: "{{ notification_id }}"
-    
-    # Check if the scene notification was created successfully
-    - variables:
-        scene_notification_exists_after_recreation: "{{ states(notification_entity) != 'unknown' and states(notification_entity) != 'unavailable' }}"
-    
-    # Log the scene notification status
-    - service: system_log.write
-      data:
-        message: >
-          SCENE NOTIFICATION RECREATION DEBUG:
-          Scene notification entity: {{ notification_entity }}
-          Scene notification exists after recreation: {{ scene_notification_exists_after_recreation }}
-          Scene notification state: {{ states(notification_entity) }}
-          Scene notification attributes: {{ state_attr(notification_entity, 'message') if states(notification_entity) != 'unknown' and states(notification_entity) != 'unavailable' else 'none' }}
-        level: info
-    
-    # Try to access the notification by various methods
-    - variables:
-        direct_notification_message: >-
-          {{ states.persistent_notification | selectattr('entity_id', 'eq', notification_entity) | map(attribute='attributes.message') | first | default('') }}
-        
-        # Try to find the notification by exact title
-        title_notification_message: >-
-          {{ states.persistent_notification | selectattr('attributes.title', 'eq', 'Scene: ' ~ scene_name) | map(attribute='attributes.message') | first | default('') }}
-        
-        # Try to find the notification by partial title match
-        partial_title_notification_message: >-
-          {{ states.persistent_notification | selectattr('attributes.title', 'defined') | selectattr('attributes.title', 'search', scene_name) | map(attribute='attributes.message') | first | default('') }}
-        
-        # List all notification titles for debugging
-        all_notification_titles: >-
-          {{ states.persistent_notification | selectattr('attributes.title', 'defined') | map(attribute='attributes.title') | list }}
-        
-        # Try to find any notification that contains scene data
-        any_scene_notification: >-
-          {{ states.persistent_notification | selectattr('attributes.message', 'defined') |
-             selectattr('attributes.message', 'string') |
-             rejectattr('attributes.message', 'eq', '') |
-             map(attribute='attributes.message') |
-             select('search', '"light.') |
-             first | default('') }}
-        
-        # Try to find any notification that contains the scene name in the message
-        scene_name_in_message_notification: >-
-          {{ states.persistent_notification | selectattr('attributes.message', 'defined') |
-             selectattr('attributes.message', 'string') |
-             rejectattr('attributes.message', 'eq', '') |
-             map(attribute='attributes.message') |
-             select('search', scene_name) |
-             first | default('') }}
-        
-        # Try to find any notification with an ID that contains the scene name
-        scene_name_in_id_notification: >-
-          {% set scene_name_lower = scene_name | lower %}
-          {% set matching_id = states.persistent_notification | map(attribute='entity_id') |
-             select('search', scene_name_lower) | first | default('') %}
-          {{ state_attr(matching_id, 'message') if matching_id else '' }}
-    
-    # Get the raw scene data
-    - variables:
-        scene_data_raw: "{{ state_attr(notification_entity, 'message') if scene_notification_exists_after_recreation else
-                            state_attr(notification_entity, 'message') if states(notification_entity) != 'unknown' and states(notification_entity) != 'unavailable' else
-                            direct_notification_message if direct_notification_message | trim != '' else
-                            title_notification_message if title_notification_message | trim != '' else
-                            partial_title_notification_message if partial_title_notification_message | trim != '' else
-                            scene_name_in_message_notification if scene_name_in_message_notification | trim != '' else
-                            scene_name_in_id_notification if scene_name_in_id_notification | trim != '' else
-                            any_scene_notification if any_scene_notification | trim != '' else
-                            '{}' }}"
-    
-    # Log direct notification access
-    - service: system_log.write
-      data:
-        message: >
-          NOTIFICATION ACCESS DEBUG:
-          Direct notification message: {{ direct_notification_message }}
-          Direct notification message length: {{ direct_notification_message | length if direct_notification_message is defined else 0 }}
-          Direct notification message type: {{ direct_notification_message | type_of }}
-          Title notification message: {{ title_notification_message }}
-          Title notification message length: {{ title_notification_message | length if title_notification_message is defined else 0 }}
-          Title notification message type: {{ title_notification_message | type_of }}
-          Partial title notification message: {{ partial_title_notification_message }}
-          Partial title notification message length: {{ partial_title_notification_message | length if partial_title_notification_message is defined else 0 }}
-          Any scene notification: {{ any_scene_notification | truncate(100) }}
-          Any scene notification length: {{ any_scene_notification | length if any_scene_notification is defined else 0 }}
-          Scene name in message notification: {{ scene_name_in_message_notification | truncate(100) }}
-          Scene name in message notification length: {{ scene_name_in_message_notification | length if scene_name_in_message_notification is defined else 0 }}
-          Scene name in ID notification: {{ scene_name_in_id_notification | truncate(100) }}
-          Scene name in ID notification length: {{ scene_name_in_id_notification | length if scene_name_in_id_notification is defined else 0 }}
-          All notification titles: {{ all_notification_titles }}
-        level: info
-    
-    # Log raw scene data
-    - service: system_log.write
-      data:
-        message: >
-          RAW DATA DEBUG:
-          Scene notification exists after recreation: {{ scene_notification_exists_after_recreation }}
-          Raw scene data: {{ scene_data_raw }}
-          Raw scene data type: {{ scene_data_raw | type_of }}
-          Raw scene data length: {{ scene_data_raw | length if scene_data_raw is defined else 0 }}
-          Has quotes: {{ has_quotes }}
-          Is JSON: {{ scene_data_raw is string and (scene_data_raw | trim).startswith('{') and (scene_data_raw | trim).endswith('}') }}
-          First 10 chars: {{ scene_data_raw[:10] if scene_data_raw is string and scene_data_raw | length > 10 else scene_data_raw }}
-          Last 10 chars: {{ scene_data_raw[-10:] if scene_data_raw is string and scene_data_raw | length > 10 else scene_data_raw }}
-          Contains light entities: {{ '"light.' in scene_data_raw if scene_data_raw is string else false }}
-          Contains cover entities: {{ '"cover.' in scene_data_raw if scene_data_raw is string else false }}
-          Data source: "{{ 'recreated notification' if scene_notification_exists_after_recreation else
-                           'original notification' if states(notification_entity) != 'unknown' and states(notification_entity) != 'unavailable' else
-                           'direct access' if direct_notification_message | trim != '' else
-                           'title match' if title_notification_message | trim != '' else
-                           'partial title match' if partial_title_notification_message | trim != '' else
-                           'scene name in message' if scene_name_in_message_notification | trim != '' else
-                           'scene name in ID' if scene_name_in_id_notification | trim != '' else
-                           'any scene data' if any_scene_notification | trim != '' else
-                           'none' }}"
-        level: info
-    
-    # Parse the scene data - handle quotes properly
-    - variables:
-        # First, remove any surrounding quotes if present
-        has_quotes: "{{ scene_data_raw and scene_data_raw != '{}' and scene_data_raw[0] == '\"' and scene_data_raw[-1] == '\"' }}"
-        scene_data_clean: "{{ scene_data_raw[1:-1] if scene_data_raw and scene_data_raw != '{}' and scene_data_raw[0] == '\"' and scene_data_raw[-1] == '\"' else
-                              scene_data_raw if scene_data_raw and scene_data_raw != '{}' else
-                              '{}' }}"
-        # Then parse the JSON with error handling
         scene_data: "{% try %}
-                      {{ scene_data_clean | from_json if scene_data_clean and scene_data_clean != '{}' else {} }}
+                      {{ scene_data_json | from_json if scene_data_json and scene_data_json != '' else {} }}
                     {% except %}
                       {% set error = exception() %}
                       {{ log('JSON parsing error: ' ~ error, level='error') }}
                       {}
                     {% endtry %}"
-    
-    # Log the cleaned scene data for debugging
-    - service: system_log.write
-      data:
-        message: >
-          CLEANED DATA DEBUG:
-          Scene data clean: {{ scene_data_clean }}
-          Scene data clean type: {{ scene_data_clean | type_of }}
-          Scene data clean length: {{ scene_data_clean | length if scene_data_clean is defined else 0 }}
-          First 10 chars: {{ scene_data_clean[:10] if scene_data_clean is string and scene_data_clean | length > 10 else scene_data_clean }}
-          Last 10 chars: {{ scene_data_clean[-10:] if scene_data_clean is string and scene_data_clean | length > 10 else scene_data_clean }}
-          Is valid JSON: {{ scene_data_clean is string and (scene_data_clean | trim).startswith('{') and (scene_data_clean | trim).endswith('}') }}
-          Contains light entities: {{ '"light.' in scene_data_clean if scene_data_clean is string else false }}
-          Contains cover entities: {{ '"cover.' in scene_data_clean if scene_data_clean is string else false }}
-        level: info
-    
-    # Log the parsed scene data for debugging
-    - service: system_log.write
-      data:
-        message: >
-          PARSED DATA DEBUG:
-          Scene data type: {{ scene_data | type_of }}
-          Retrieved scene data for '{{ scene_name }}': {{ scene_data | length }} entities
-          First few keys: {% for key in scene_data.keys() | list | slice(0, 5) %}{{ key }}, {% endfor %}
-          Has light entities: {{ scene_data.keys() | select('match', '^light\\.') | list | count > 0 }}
-          Has cover entities: {{ scene_data.keys() | select('match', '^cover\\.') | list | count > 0 }}
-          Light entities count: {{ scene_data.keys() | select('match', '^light\\.') | list | count }}
-          Cover entities count: {{ scene_data.keys() | select('match', '^cover\\.') | list | count }}
-        level: info
     
     # Process all lights in the scene data
     - repeat:
@@ -935,23 +671,8 @@ load_scene:
         sequence:
           - variables:
               entity_id: "{{ repeat.item }}"
-              # Check if the entity is in the scene data using a simpler approach
               entity_in_scene_data: "{{ entity_id in scene_data }}"
-              # Get the entity state
               entity_state: "{{ scene_data[entity_id] if entity_in_scene_data else 'missing' }}"
-          
-          # Log the light state for debugging
-          - service: system_log.write
-            data:
-              message: >
-                LIGHT DEBUG:
-                Entity: {{ entity_id }}
-                In scene data: {{ entity_in_scene_data }}
-                Scene data keys (first 5): {% for key in scene_data.keys() | list | slice(0, 5) %}{{ key }}, {% endfor %}
-                Entity state: {{ entity_state }}
-                Condition 1 (turn on): {{ entity_state != 'missing' and entity_state | int > 0 }}
-                Condition 2 (turn off): {{ entity_state != 'missing' and entity_state | int == 0 }}
-              level: info
           
           # Apply the light state
           - choose:
@@ -986,24 +707,8 @@ load_scene:
         sequence:
           - variables:
               entity_id: "{{ repeat.item }}"
-              # Check if the entity is in the scene data using a different approach
               entity_in_scene_data: "{{ entity_id in scene_data }}"
-              # Get the entity state
               entity_state: "{{ scene_data[entity_id] if entity_in_scene_data else 'missing' }}"
-          
-          # Log the cover state for debugging
-          - service: system_log.write
-            data:
-              message: >
-                COVER DEBUG:
-                Entity: {{ entity_id }}
-                In scene data: {{ entity_in_scene_data }}
-                Scene data keys (first 5): {% for key in scene_data.keys() | list | slice(0, 5) %}{{ key }}, {% endfor %}
-                Entity state: {{ entity_state }}
-                Condition 1 (open): {{ entity_state != 'missing' and entity_state | int >= 75 }}
-                Condition 2 (close): {{ entity_state != 'missing' and entity_state | int <= 25 }}
-                Condition 3 (position): {{ entity_state != 'missing' and entity_state | int > 25 and entity_state | int < 75 }}
-              level: info
           
           # Apply the cover state - skip group covers to avoid errors
           - choose:
@@ -1056,87 +761,3 @@ load_scene:
       data:
         title: "Scene Loaded"
         message: "Scene '{{ scene_name }}' has been loaded"
-
-# Helper script to process lights
-process_scene_lights:
-  alias: "Process Scene Lights"
-  mode: parallel
-  sequence:
-    - variables:
-        light_entities: >
-          {% set all_lights = states.light | map(attribute='entity_id') | list %}
-          {{ all_lights }}
-    
-    # Process each light
-    - repeat:
-        for_each: "{{ light_entities }}"
-        sequence:
-          - variables:
-              entity_id: "{{ repeat.item }}"
-              entity_state: "{{ scene_data[entity_id] if entity_id in scene_data else 'skip' }}"
-          
-          # Skip if not in scene data
-          - condition: template
-            value_template: "{{ entity_state != 'skip' }}"
-          
-          # Turn on or off based on state
-          - choose:
-              - conditions:
-                  - condition: template
-                    value_template: "{{ entity_state | int > 0 }}"
-                sequence:
-                  - service: light.turn_on
-                    target:
-                      entity_id: "{{ entity_id }}"
-                    data:
-                      brightness_pct: "{{ entity_state }}"
-            default:
-              - service: light.turn_off
-                target:
-                  entity_id: "{{ entity_id }}"
-
-# Helper script to process covers
-process_scene_covers:
-  alias: "Process Scene Covers"
-  mode: parallel
-  sequence:
-    - variables:
-        cover_entities: >
-          {% set all_covers = states.cover | map(attribute='entity_id') | list %}
-          {{ all_covers }}
-    
-    # Process each cover
-    - repeat:
-        for_each: "{{ cover_entities }}"
-        sequence:
-          - variables:
-              entity_id: "{{ repeat.item }}"
-              entity_state: "{{ scene_data[entity_id] if entity_id in scene_data else 'skip' }}"
-          
-          # Skip if not in scene data
-          - condition: template
-            value_template: "{{ entity_state != 'skip' }}"
-          
-          # Open or close based on state
-          - choose:
-              - conditions:
-                  - condition: template
-                    value_template: "{{ entity_state | int >= 75 }}"
-                sequence:
-                  - service: cover.open_cover
-                    target:
-                      entity_id: "{{ entity_id }}"
-              - conditions:
-                  - condition: template
-                    value_template: "{{ entity_state | int <= 25 }}"
-                sequence:
-                  - service: cover.close_cover
-                    target:
-                      entity_id: "{{ entity_id }}"
-              - conditions:
-                  - condition: template
-                    value_template: "{{ entity_state | int > 25 and entity_state | int < 75 }}"
-                sequence:
-                  - service: cover.open_cover
-                    target:
-                      entity_id: "{{ entity_id }}"

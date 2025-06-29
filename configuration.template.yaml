@@ -71,6 +71,15 @@ input_text:
   owner_name:
     name: Owner Name
 
+  scene_scene_1:
+    name: Scene 1
+    max: 5000
+  scene_scene_2:
+    name: Scene 2
+    max: 5000
+  scene_scene_3:
+    name: Scene 3
+    max: 5000
 
 sensor:
   - platform: rest
