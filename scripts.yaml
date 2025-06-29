@@ -658,7 +658,6 @@ load_scene:
           Debug info:
           scene_name defined: {{ scene_name is defined }}
           scene_name value: {{ scene_name if scene_name is defined else 'undefined' }}
-          scene_name type: {{ scene_name | type_of if scene_name is defined else 'undefined' }}
         level: info
     
     # Get the notification ID
