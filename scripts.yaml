@@ -801,56 +801,40 @@ load_scene:
         
         # Try to find any notification that contains scene data
         any_scene_notification: >-
-          {% set matching_entity = namespace(found=none) %}
-          {% for entity in states.persistent_notification %}
-            {% if entity.attributes.message is defined and entity.attributes.message is string %}
-              {% if '"light.' in entity.attributes.message or '"cover.' in entity.attributes.message %}
-                {% if matching_entity.found is none %}
-                  {% set matching_entity.found = entity.attributes.message %}
-                {% endif %}
-              {% endif %}
-            {% endif %}
-          {% endfor %}
-          {{ matching_entity.found if matching_entity.found is not none else '' }}
+          {{ states.persistent_notification | selectattr('attributes.message', 'defined') |
+             selectattr('attributes.message', 'string') |
+             rejectattr('attributes.message', 'eq', '') |
+             map(attribute='attributes.message') |
+             select('search', '"light.') |
+             first | default('') }}
         
         # Try to find any notification that contains the scene name in the message
         scene_name_in_message_notification: >-
-          {% set matching_entity = namespace(found=none) %}
-          {% for entity in states.persistent_notification %}
-            {% if entity.attributes.message is defined and entity.attributes.message is string %}
-              {% if scene_name in entity.attributes.message %}
-                {% if matching_entity.found is none %}
-                  {% set matching_entity.found = entity.attributes.message %}
-                {% endif %}
-              {% endif %}
-            {% endif %}
-          {% endfor %}
-          {{ matching_entity.found if matching_entity.found is not none else '' }}
+          {{ states.persistent_notification | selectattr('attributes.message', 'defined') |
+             selectattr('attributes.message', 'string') |
+             rejectattr('attributes.message', 'eq', '') |
+             map(attribute='attributes.message') |
+             select('search', scene_name) |
+             first | default('') }}
         
         # Try to find any notification with an ID that contains the scene name
         scene_name_in_id_notification: >-
           {% set scene_name_lower = scene_name | lower %}
-          {% set matching_entity = namespace(found=none) %}
-          {% for entity in states.persistent_notification %}
-            {% set entity_id = entity.entity_id | replace('persistent_notification.', '') %}
-            {% if scene_name_lower in entity_id and matching_entity.found is none %}
-              {% set matching_entity.found = entity.entity_id %}
-            {% endif %}
-          {% endfor %}
-          {{ state_attr(matching_entity.found, 'message') if matching_entity.found is not none else '' }}
+          {% set matching_id = states.persistent_notification | map(attribute='entity_id') |
+             select('search', scene_name_lower) | first | default('') %}
+          {{ state_attr(matching_id, 'message') if matching_id else '' }}
     
     # Get the raw scene data
     - variables:
-        scene_data_raw: >-
-          {{ state_attr(notification_entity, 'message') if scene_notification_exists_after_recreation else
-             state_attr(notification_entity, 'message') if states(notification_entity) != 'unknown' and states(notification_entity) != 'unavailable' else
-             direct_notification_message if direct_notification_message | trim != '' else
-             title_notification_message if title_notification_message | trim != '' else
-             partial_title_notification_message if partial_title_notification_message | trim != '' else
-             scene_name_in_message_notification if scene_name_in_message_notification | trim != '' else
-             scene_name_in_id_notification if scene_name_in_id_notification | trim != '' else
-             any_scene_notification if any_scene_notification | trim != '' else
-             '{}' }}
+        scene_data_raw: "{{ state_attr(notification_entity, 'message') if scene_notification_exists_after_recreation else
+                            state_attr(notification_entity, 'message') if states(notification_entity) != 'unknown' and states(notification_entity) != 'unavailable' else
+                            direct_notification_message if direct_notification_message | trim != '' else
+                            title_notification_message if title_notification_message | trim != '' else
+                            partial_title_notification_message if partial_title_notification_message | trim != '' else
+                            scene_name_in_message_notification if scene_name_in_message_notification | trim != '' else
+                            scene_name_in_id_notification if scene_name_in_id_notification | trim != '' else
+                            any_scene_notification if any_scene_notification | trim != '' else
+                            '{}' }}"
     
     # Log direct notification access
     - service: system_log.write
@@ -889,45 +873,32 @@ load_scene:
           Last 10 chars: {{ scene_data_raw[-10:] if scene_data_raw is string and scene_data_raw | length > 10 else scene_data_raw }}
           Contains light entities: {{ '"light.' in scene_data_raw if scene_data_raw is string else false }}
           Contains cover entities: {{ '"cover.' in scene_data_raw if scene_data_raw is string else false }}
-          Data source: >-
-            {{ 'recreated notification' if scene_notification_exists_after_recreation else
-               'original notification' if states(notification_entity) != 'unknown' and states(notification_entity) != 'unavailable' else
-               'direct access' if direct_notification_message | trim != '' else
-               'title match' if title_notification_message | trim != '' else
-               'partial title match' if partial_title_notification_message | trim != '' else
-               'scene name in message' if scene_name_in_message_notification | trim != '' else
-               'scene name in ID' if scene_name_in_id_notification | trim != '' else
-               'any scene data' if any_scene_notification | trim != '' else
-               'none' }}
+          Data source: "{{ 'recreated notification' if scene_notification_exists_after_recreation else
+                           'original notification' if states(notification_entity) != 'unknown' and states(notification_entity) != 'unavailable' else
+                           'direct access' if direct_notification_message | trim != '' else
+                           'title match' if title_notification_message | trim != '' else
+                           'partial title match' if partial_title_notification_message | trim != '' else
+                           'scene name in message' if scene_name_in_message_notification | trim != '' else
+                           'scene name in ID' if scene_name_in_id_notification | trim != '' else
+                           'any scene data' if any_scene_notification | trim != '' else
+                           'none' }}"
         level: info
     
     # Parse the scene data - handle quotes properly
     - variables:
         # First, remove any surrounding quotes if present
         has_quotes: "{{ scene_data_raw and scene_data_raw != '{}' and scene_data_raw[0] == '\"' and scene_data_raw[-1] == '\"' }}"
-        scene_data_clean: >-
-          {% if scene_data_raw and scene_data_raw != '{}' %}
-            {% if scene_data_raw[0] == '"' and scene_data_raw[-1] == '"' %}
-              {{ scene_data_raw[1:-1] }}
-            {% else %}
-              {{ scene_data_raw }}
-            {% endif %}
-          {% else %}
-            {}
-          {% endif %}
+        scene_data_clean: "{{ scene_data_raw[1:-1] if scene_data_raw and scene_data_raw != '{}' and scene_data_raw[0] == '\"' and scene_data_raw[-1] == '\"' else
+                              scene_data_raw if scene_data_raw and scene_data_raw != '{}' else
+                              '{}' }}"
         # Then parse the JSON with error handling
-        scene_data: >-
-          {% try %}
-            {% if scene_data_clean and scene_data_clean != '{}' %}
-              {{ scene_data_clean | from_json }}
-            {% else %}
-              {}
-            {% endif %}
-          {% except %}
-            {% set error = exception() %}
-            {{ log('JSON parsing error: ' ~ error, level='error') }}
-            {}
-          {% endtry %}
+        scene_data: "{% try %}
+                      {{ scene_data_clean | from_json if scene_data_clean and scene_data_clean != '{}' else {} }}
+                    {% except %}
+                      {% set error = exception() %}
+                      {{ log('JSON parsing error: ' ~ error, level='error') }}
+                      {}
+                    {% endtry %}"
     
     # Log the cleaned scene data for debugging
     - service: system_log.write
@@ -967,12 +938,7 @@ load_scene:
               # Check if the entity is in the scene data using a simpler approach
               entity_in_scene_data: "{{ entity_id in scene_data }}"
               # Get the entity state
-              entity_state: >-
-                {% if entity_in_scene_data %}
-                  {{ scene_data[entity_id] }}
-                {% else %}
-                  missing
-                {% endif %}
+              entity_state: "{{ scene_data[entity_id] if entity_in_scene_data else 'missing' }}"
           
           # Log the light state for debugging
           - service: system_log.write
@@ -1023,12 +989,7 @@ load_scene:
               # Check if the entity is in the scene data using a different approach
               entity_in_scene_data: "{{ entity_id in scene_data }}"
               # Get the entity state
-              entity_state: >-
-                {% if entity_in_scene_data %}
-                  {{ scene_data[entity_id] }}
-                {% else %}
-                  missing
-                {% endif %}
+              entity_state: "{{ scene_data[entity_id] if entity_in_scene_data else 'missing' }}"
           
           # Log the cover state for debugging
           - service: system_log.write
