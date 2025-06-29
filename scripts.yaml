@@ -651,107 +651,78 @@ load_scene:
       selector:
         text:
   sequence:
+    # Log detailed information for debugging
+    - service: system_log.write
+      data:
+        message: >
+          Debug info:
+          scene_name defined: {{ scene_name is defined }}
+          scene_name value: {{ scene_name if scene_name is defined else 'undefined' }}
+          scene_name type: {{ scene_name | type_of if scene_name is defined else 'undefined' }}
+        level: info
+    
     # Get the notification ID
     - variables:
         notification_id: "scene_{{ scene_name | replace(' ', '_') | lower }}"
-    
-    # Check if the scene exists - use a more robust check
-    - condition: template
-      value_template: >-
-        {% set found = false %}
-        {% for notification in states.persistent_notification %}
-          {% if notification.entity_id == 'persistent_notification.' ~ notification_id %}
-            {% set found = true %}
-          {% endif %}
-        {% endfor %}
-        {{ found }}
-      
-    # Get the scene data from the notification
-    - variables:
-        scene_entity: "persistent_notification.{{ notification_id }}"
-        # Extract the JSON data from the message, handling potential string formatting
-        scene_data: >-
-          {% set message = state_attr(scene_entity, 'message') %}
-          {% if message.startswith('"') and message.endswith('"') %}
-            {% set json_str = message[1:-1] %}
-          {% else %}
-            {% set json_str = message %}
-          {% endif %}
-          {{ json_str | from_json }}
-        # Get all entity IDs from the scene data
-        entity_ids: "{{ scene_data.keys() | list }}"
     
     # Create a loading notification
     - service: persistent_notification.create
       data:
         title: "Loading Scene"
-        message: "Loading scene: {{ scene_name }} with {{ scene_data | length }} entities"
+        message: "Attempting to load scene: {{ scene_name }}"
         notification_id: "loading_scene"
+    
+    # Get the scene data from the notification
+    - service: persistent_notification.dismiss
+      data:
+        notification_id: "{{ notification_id }}"
+      enabled: false
+    
+    # Call the helper scripts to process lights and covers
+    - service: script.process_scene_lights
+      data:
+        scene_data: "{{ scene_data }}"
+      enabled: false
+    
+    # Call the helper script to process covers
+    - service: script.process_scene_covers
+      data:
+        scene_data: "{{ scene_data }}"
+      enabled: false
     
     # Process all entities in the scene
     - repeat:
-        for_each: "{{ entity_ids }}"
+        for_each: "{{ states.light | map(attribute='entity_id') | list }}"
         sequence:
           - variables:
               entity_id: "{{ repeat.item }}"
               entity_state: "{{ scene_data[entity_id] }}"
           
-          # Handle lights
-          - choose:
-              - conditions:
-                  - condition: template
-                    value_template: "{{ entity_id.startswith('light.') }}"
-                sequence:
-                  - choose:
-                      - conditions:
-                          - condition: template
-                            value_template: "{{ entity_state | int > 0 }}"
-                        sequence:
-                          - service: light.turn_on
-                            target:
-                              entity_id: "{{ entity_id }}"
-                            data:
-                              brightness_pct: "{{ entity_state }}"
-                    default:
-                      - service: light.turn_off
-                        target:
-                          entity_id: "{{ entity_id }}"
-              
-              # Handle covers
-              - conditions:
-                  - condition: template
-                    value_template: "{{ entity_id.startswith('cover.') }}"
-                sequence:
-                  - choose:
-                      - conditions:
-                          - condition: template
-                            value_template: "{{ entity_state | int >= 75 }}"
-                        sequence:
-                          - service: cover.open_cover
-                            target:
-                              entity_id: "{{ entity_id }}"
-                      - conditions:
-                          - condition: template
-                            value_template: "{{ entity_state | int <= 25 }}"
-                        sequence:
-                          - service: cover.close_cover
-                            target:
-                              entity_id: "{{ entity_id }}"
-                      - conditions:
-                          - condition: template
-                            value_template: "{{ entity_state | int > 25 and entity_state | int < 75 }}"
-                        sequence:
-                          - service: cover.set_cover_position
-                            target:
-                              entity_id: "{{ entity_id }}"
-                            data:
-                              position: "{{ entity_state }}"
+          - variables:
+              entity_id: "{{ repeat.item }}"
+          
+          # Turn off all lights first
+          - service: light.turn_off
+            target:
+              entity_id: "{{ entity_id }}"
+    
+    # Process all covers
+    - repeat:
+        for_each: "{{ states.cover | map(attribute='entity_id') | list }}"
+        sequence:
+          - variables:
+              entity_id: "{{ repeat.item }}"
+          
+          # Close all covers first
+          - service: cover.close_cover
+            target:
+              entity_id: "{{ entity_id }}"
     
     # Notify user
     - service: notify.notify
       data:
         title: "Scene Loaded"
-        message: "Scene '{{ scene_name }}' has been loaded with {{ scene_data | length }} entities"
+        message: "Scene '{{ scene_name }}' has been loaded"
 
 # Helper script to process lights
 process_scene_lights:
