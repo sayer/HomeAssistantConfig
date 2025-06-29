@@ -671,43 +671,100 @@ load_scene:
         message: "Attempting to load scene: {{ scene_name }}"
         notification_id: "loading_scene"
     
-    # Get the scene data from the notification
-    - service: persistent_notification.dismiss
+    # Note: We don't dismiss the notification so it can be reused
+    
+    # Get the scene data from the persistent notification
+    - variables:
+        scene_data_raw: >-
+          {% set notification_entity = 'persistent_notification.' ~ notification_id %}
+          {% if states(notification_entity) != 'unknown' %}
+            {{ state_attr(notification_entity, 'message') }}
+          {% else %}
+            {}
+          {% endif %}
+        scene_data: >-
+          {% if scene_data_raw and scene_data_raw != '{}' %}
+            {{ scene_data_raw | from_json }}
+          {% else %}
+            {}
+          {% endif %}
+    
+    # Log the scene data for debugging
+    - service: system_log.write
       data:
-        notification_id: "{{ notification_id }}"
-      enabled: false
+        message: "Retrieved scene data for '{{ scene_name }}': {{ scene_data | length }} entities"
+        level: info
     
-    # These helper scripts are disabled
-    - service: script.process_scene_lights
-      enabled: false
-    
-    # This helper script is disabled
-    - service: script.process_scene_covers
-      enabled: false
-    
-    # Process all entities in the scene
+    # Process all lights in the scene data
     - repeat:
         for_each: "{{ states.light | map(attribute='entity_id') | list }}"
         sequence:
           - variables:
               entity_id: "{{ repeat.item }}"
+              entity_state: >-
+                {% if entity_id in scene_data %}
+                  {{ scene_data[entity_id] }}
+                {% else %}
+                  unknown
+                {% endif %}
           
-          # Turn off all lights first
-          - service: light.turn_off
-            target:
-              entity_id: "{{ entity_id }}"
+          # Apply the light state
+          - choose:
+              - conditions:
+                  - condition: template
+                    value_template: "{{ entity_state != 'unknown' and entity_state | int > 0 }}"
+                sequence:
+                  - service: light.turn_on
+                    target:
+                      entity_id: "{{ entity_id }}"
+                    data:
+                      brightness_pct: "{{ entity_state }}"
+              - conditions:
+                  - condition: template
+                    value_template: "{{ entity_state != 'unknown' and entity_state | int == 0 }}"
+                sequence:
+                  - service: light.turn_off
+                    target:
+                      entity_id: "{{ entity_id }}"
     
-    # Process all covers
+    # Process all covers in the scene data
     - repeat:
         for_each: "{{ states.cover | map(attribute='entity_id') | list }}"
         sequence:
           - variables:
               entity_id: "{{ repeat.item }}"
+              entity_state: >-
+                {% if entity_id in scene_data %}
+                  {{ scene_data[entity_id] }}
+                {% else %}
+                  unknown
+                {% endif %}
           
-          # Close all covers first
-          - service: cover.close_cover
-            target:
-              entity_id: "{{ entity_id }}"
+          # Apply the cover state
+          - choose:
+              - conditions:
+                  - condition: template
+                    value_template: "{{ entity_state != 'unknown' and entity_state | int >= 75 }}"
+                sequence:
+                  - service: cover.open_cover
+                    target:
+                      entity_id: "{{ entity_id }}"
+              - conditions:
+                  - condition: template
+                    value_template: "{{ entity_state != 'unknown' and entity_state | int <= 25 }}"
+                sequence:
+                  - service: cover.close_cover
+                    target:
+                      entity_id: "{{ entity_id }}"
+              - conditions:
+                  - condition: template
+                    value_template: "{{ entity_state != 'unknown' and entity_state | int > 25 and entity_state | int < 75 }}"
+                sequence:
+                  - service: cover.set_cover_position
+                    target:
+                      entity_id: "{{ entity_id }}"
+                    data:
+                      position: "{{ entity_state }}"
     
     # Notify user
     - service: notify.notify
