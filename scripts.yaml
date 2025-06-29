@@ -603,16 +603,12 @@ save_scene:
           - variables:
               scene_data: "{{ dict(scene_data, **{repeat.item: entity_state}) }}"
     
-    # Store the scene data in an input_text entity
+    # Store the scene data in an input_text entity using a simple format
     - variables:
         scene_entity_id: "input_text.scene_{{ scene_name | replace(' ', '_') | lower }}"
-        # Convert scene_data to a string representation manually
-        scene_data_str: >-
-          {
-          {% for key, value in scene_data.items() %}
-            "{{ key }}": {{ value }}{% if not loop.last %},{% endif %}
-          {% endfor %}
-          }
+        # Create a simple string format: entity_id=value|entity_id=value|...
+        simple_data: >-
+          {% for entity_id, state in scene_data.items() %}{{ entity_id }}={{ state }}{% if not loop.last %}|{% endif %}{% endfor %}
     
     # Log the entity we're trying to use
     - service: system_log.write
@@ -621,15 +617,16 @@ save_scene:
           SAVE SCENE - Target entity:
           Entity ID: {{ scene_entity_id }}
           Entity exists: {{ states(scene_entity_id) != 'unavailable' }}
-          Current value: {{ states(scene_entity_id) }}
-          Data length: {{ scene_data | length }}
+          Data length: {{ scene_data | length }} entities
+          String length: {{ simple_data | length }} characters
+          First 200 chars: {{ simple_data[:200] }}
         level: info
     
     # Set the value in the input_text entity
     - service: input_text.set_value
       data:
         entity_id: "{{ scene_entity_id }}"
-        value: "{{ scene_data_str }}"
+        value: "{{ simple_data }}"
     
     # Log the scene data
     - service: system_log.write
@@ -664,7 +661,7 @@ load_scene:
     # Get the scene data from the input_text entity
     - variables:
         scene_entity_id: "input_text.scene_{{ scene_name | replace(' ', '_') | lower }}"
-        scene_data_json: "{{ states(scene_entity_id) }}"
+        simple_data: "{{ states(scene_entity_id) }}"
     
     # Log the scene data
     - service: system_log.write
@@ -674,27 +671,38 @@ load_scene:
           Scene name: {{ scene_name }}
           Scene entity: {{ scene_entity_id }}
           Scene data exists: {{ states(scene_entity_id) != 'unknown' and states(scene_entity_id) != 'unavailable' }}
-          Scene data length: {{ scene_data_json | length if scene_data_json is defined else 0 }}
+          Scene data length: {{ simple_data | length if simple_data is defined else 0 }} characters
+          First 200 chars: {{ simple_data[:200] if simple_data is defined else 'undefined' }}
         level: info
     
-    # Parse the scene data
+    # Parse the simple data format into a dictionary
     - variables:
-        scene_data_valid: "{{ scene_data_json is defined and scene_data_json and scene_data_json != '' and scene_data_json[0] == '{' }}"
+        # Initialize an empty dictionary
+        scene_data: {}
+        # Split the string by '|' to get entity_id=value pairs
+        entity_pairs: "{{ simple_data.split('|') if simple_data is defined and simple_data != '' else [] }}"
     
-    # Log JSON validation
+    # Process each entity pair and add to scene_data
+    - repeat:
+        for_each: "{{ entity_pairs }}"
+        sequence:
+          - variables:
+              # Split the pair by '=' to get entity_id and value
+              pair_parts: "{{ repeat.item.split('=') }}"
+              entity_id: "{{ pair_parts[0] }}"
+              entity_state: "{{ pair_parts[1] | int }}"
+              # Add to scene_data dictionary
+              scene_data: "{{ dict(scene_data, **{entity_id: entity_state}) }}"
+    
+    # Log parsing result
     - service: system_log.write
       data:
         message: >
-          JSON VALIDATION:
-          JSON data is defined: {{ scene_data_json is defined }}
-          JSON data is not empty: {{ scene_data_json != '' }}
-          JSON data starts with '{': {{ scene_data_json[0] == '{' if scene_data_json is defined and scene_data_json != '' else false }}
-          First 100 chars: {{ scene_data_json[:100] if scene_data_json is defined else 'undefined' }}
+          PARSE SCENE DATA:
+          Pairs found: {{ entity_pairs | length }}
+          Scene data parsed successfully: {{ scene_data is mapping }}
+          Scene data keys: {{ scene_data.keys() | list | count if scene_data is mapping else 0 }}
         level: info
-    
-    # Parse the JSON data
-    - variables:
-        scene_data: "{{ scene_data_json | from_json if scene_data_valid else {} }}"
     
     # Log parsing result
     - service: system_log.write
