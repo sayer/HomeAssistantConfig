@@ -706,9 +706,21 @@ load_scene:
           Raw scene data length: {{ scene_data_raw | length if scene_data_raw is defined else 0 }}
         level: info
     
-    # Parse the scene data
+    # Parse the scene data - handle quotes properly
     - variables:
-        scene_data: "{{ scene_data_raw | from_json if scene_data_raw and scene_data_raw != '{}' else {} }}"
+        # First, remove any surrounding quotes if present
+        scene_data_clean: >-
+          {% if scene_data_raw and scene_data_raw != '{}' %}
+            {% if scene_data_raw[0] == '"' and scene_data_raw[-1] == '"' %}
+              {{ scene_data_raw[1:-1] }}
+            {% else %}
+              {{ scene_data_raw }}
+            {% endif %}
+          {% else %}
+            {}
+          {% endif %}
+        # Then parse the JSON
+        scene_data: "{{ scene_data_clean | from_json if scene_data_clean and scene_data_clean != '{}' else {} }}"
     
     # Log the scene data for debugging
     - service: system_log.write
