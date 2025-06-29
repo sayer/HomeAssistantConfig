@@ -677,26 +677,18 @@ load_scene:
         notification_id: "{{ notification_id }}"
       enabled: false
     
-    # Call the helper scripts to process lights and covers
+    # These helper scripts are disabled
     - service: script.process_scene_lights
-      data:
-        scene_data: "{{ scene_data }}"
       enabled: false
     
-    # Call the helper script to process covers
+    # This helper script is disabled
     - service: script.process_scene_covers
-      data:
-        scene_data: "{{ scene_data }}"
       enabled: false
     
     # Process all entities in the scene
     - repeat:
         for_each: "{{ states.light | map(attribute='entity_id') | list }}"
         sequence:
-          - variables:
-              entity_id: "{{ repeat.item }}"
-              entity_state: "{{ scene_data[entity_id] }}"
-          
           - variables:
               entity_id: "{{ repeat.item }}"
           
