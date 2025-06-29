@@ -734,11 +734,21 @@ load_scene:
         sequence:
           - variables:
               entity_id: "{{ repeat.item }}"
+              # Check if the entity is in the scene data using a different approach
+              entity_in_scene_data: >-
+                {% set found = false %}
+                {% for key in scene_data.keys() %}
+                  {% if key == entity_id %}
+                    {% set found = true %}
+                  {% endif %}
+                {% endfor %}
+                {{ found }}
+              # Get the entity state
               entity_state: >-
-                {% if entity_id in scene_data %}
+                {% if entity_in_scene_data %}
                   {{ scene_data[entity_id] }}
                 {% else %}
-                  unknown
+                  missing
                 {% endif %}
           
           # Log the light state for debugging
@@ -747,17 +757,17 @@ load_scene:
               message: >
                 LIGHT DEBUG:
                 Entity: {{ entity_id }}
-                In scene data: {{ entity_id in scene_data }}
+                In scene data: {{ entity_in_scene_data }}
                 Entity state: {{ entity_state }}
-                Condition 1 (turn on): {{ entity_state != 'unknown' and entity_state | int > 0 }}
-                Condition 2 (turn off): {{ entity_state != 'unknown' and entity_state | int == 0 }}
+                Condition 1 (turn on): {{ entity_state != 'missing' and entity_state | int > 0 }}
+                Condition 2 (turn off): {{ entity_state != 'missing' and entity_state | int == 0 }}
               level: info
           
           # Apply the light state
           - choose:
               - conditions:
                   - condition: template
-                    value_template: "{{ entity_state != 'unknown' and entity_state | int > 0 }}"
+                    value_template: "{{ entity_state != 'missing' and entity_state | int > 0 }}"
                 sequence:
                   - service: light.turn_on
                     target:
@@ -770,7 +780,7 @@ load_scene:
                       level: info
               - conditions:
                   - condition: template
-                    value_template: "{{ entity_state != 'unknown' and entity_state | int == 0 }}"
+                    value_template: "{{ entity_state != 'missing' and entity_state | int == 0 }}"
                 sequence:
                   - service: light.turn_off
                     target:
@@ -786,11 +796,21 @@ load_scene:
         sequence:
           - variables:
               entity_id: "{{ repeat.item }}"
+              # Check if the entity is in the scene data using a different approach
+              entity_in_scene_data: >-
+                {% set found = false %}
+                {% for key in scene_data.keys() %}
+                  {% if key == entity_id %}
+                    {% set found = true %}
+                  {% endif %}
+                {% endfor %}
+                {{ found }}
+              # Get the entity state
               entity_state: >-
-                {% if entity_id in scene_data %}
+                {% if entity_in_scene_data %}
                   {{ scene_data[entity_id] }}
                 {% else %}
-                  unknown
+                  missing
                 {% endif %}
           
           # Log the cover state for debugging
@@ -799,11 +819,11 @@ load_scene:
               message: >
                 COVER DEBUG:
                 Entity: {{ entity_id }}
-                In scene data: {{ entity_id in scene_data }}
+                In scene data: {{ entity_in_scene_data }}
                 Entity state: {{ entity_state }}
-                Condition 1 (open): {{ entity_state != 'unknown' and entity_state | int >= 75 }}
-                Condition 2 (close): {{ entity_state != 'unknown' and entity_state | int <= 25 }}
-                Condition 3 (position): {{ entity_state != 'unknown' and entity_state | int > 25 and entity_state | int < 75 }}
+                Condition 1 (open): {{ entity_state != 'missing' and entity_state | int >= 75 }}
+                Condition 2 (close): {{ entity_state != 'missing' and entity_state | int <= 25 }}
+                Condition 3 (position): {{ entity_state != 'missing' and entity_state | int > 25 and entity_state | int < 75 }}
               level: info
           
           # Apply the cover state - skip group covers to avoid errors
@@ -818,7 +838,7 @@ load_scene:
                       level: info
               - conditions:
                   - condition: template
-                    value_template: "{{ entity_state != 'unknown' and entity_state | int >= 75 }}"
+                    value_template: "{{ entity_state != 'missing' and entity_state | int >= 75 }}"
                 sequence:
                   - service: cover.open_cover
                     target:
@@ -829,7 +849,7 @@ load_scene:
                       level: info
               - conditions:
                   - condition: template
-                    value_template: "{{ entity_state != 'unknown' and entity_state | int <= 25 }}"
+                    value_template: "{{ entity_state != 'missing' and entity_state | int <= 25 }}"
                 sequence:
                   - service: cover.close_cover
                     target:
@@ -840,7 +860,7 @@ load_scene:
                       level: info
               - conditions:
                   - condition: template
-                    value_template: "{{ entity_state != 'unknown' and entity_state | int > 25 and entity_state | int < 75 }}"
+                    value_template: "{{ entity_state != 'missing' and entity_state | int > 25 and entity_state | int < 75 }}"
                 sequence:
                   - service: cover.set_cover_position
                     target:
