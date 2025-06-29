@@ -653,30 +653,19 @@ load_scene:
   sequence:
     # Get the notification ID
     - variables:
-        notification_id: >
-          {% set scene_id = scene_name | replace(' ', '_') | lower %}
-          {{ 'scene_' ~ scene_id }}
+        notification_id: "scene_{{ scene_name | replace(' ', '_') | lower }}"
     
     # Check if the scene exists
     - condition: template
-      value_template: >
-        {% set notifications = states.persistent_notification | map(attribute='entity_id') | list %}
-        {% set scene_entity = 'persistent_notification.' ~ notification_id %}
-        {{ scene_entity in notifications }}
+      value_template: "{{ 'persistent_notification.' ~ notification_id in states.persistent_notification | map(attribute='entity_id') | list }}"
       
     # Get the scene data from the notification
     - variables:
-        scene_data_json: >
-          {% set scene_entity = 'persistent_notification.' ~ notification_id %}
-          {{ state_attr(scene_entity, 'message') }}
-        scene_data: >
-          {% set scene_entity = 'persistent_notification.' ~ notification_id %}
-          {% set json_str = state_attr(scene_entity, 'message') %}
-          {{ json_str | from_json }}
+        scene_entity: "persistent_notification.{{ notification_id }}"
+        scene_data_json: "{{ state_attr(scene_entity, 'message') }}"
+        scene_data: "{{ scene_data_json | from_json }}"
         # Get all entity IDs from the scene data
-        entity_ids: >
-          {% set keys = scene_data.keys() %}
-          {{ keys | list }}
+        entity_ids: "{{ scene_data.keys() | list }}"
     
     # Create a loading notification
     - service: persistent_notification.create
