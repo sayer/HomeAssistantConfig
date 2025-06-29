@@ -657,13 +657,16 @@ load_scene:
     
     # Parse the scene data
     - variables:
-        scene_data: "{% try %}
-                      {{ scene_data_json | from_json if scene_data_json and scene_data_json != '' else {} }}
-                    {% except %}
-                      {% set error = exception() %}
-                      {{ log('JSON parsing error: ' ~ error, level='error') }}
-                      {}
-                    {% endtry %}"
+        scene_data: "{{ scene_data_json | from_json if scene_data_json and scene_data_json != '' and scene_data_json[0] == '{' else {} }}"
+    
+    # Log parsing result
+    - service: system_log.write
+      data:
+        message: >
+          PARSE SCENE DATA:
+          Scene data parsed successfully: {{ scene_data is mapping }}
+          Scene data keys: {{ scene_data.keys() | list | count if scene_data is mapping else 0 }}
+        level: info
     
     # Process all lights in the scene data
     - repeat:
