@@ -703,7 +703,6 @@ load_scene:
         message: >
           RAW DATA DEBUG:
           Raw scene data: {{ scene_data_raw }}
-          Raw scene data type: {{ scene_data_raw.__class__.__name__ if scene_data_raw is defined else 'undefined' }}
           Raw scene data length: {{ scene_data_raw | length if scene_data_raw is defined else 0 }}
         level: info
     
