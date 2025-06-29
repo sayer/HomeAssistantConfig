@@ -660,9 +660,9 @@ load_scene:
           scene_name value: {{ scene_name if scene_name is defined else 'undefined' }}
         level: info
     
-    # Get the notification ID
+    # Get the notification ID - fix the double "scene_" prefix
     - variables:
-        notification_id: "scene_{{ scene_name | replace(' ', '_') | lower }}"
+        notification_id: "{{ scene_name | replace(' ', '_') | lower }}"
     
     # Create a loading notification
     - service: persistent_notification.create
