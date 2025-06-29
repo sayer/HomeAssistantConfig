@@ -657,45 +657,94 @@ load_scene:
           {% set scene_id = scene_name | replace(' ', '_') | lower %}
           {{ 'scene_' ~ scene_id }}
     
-    # Skip the condition check for now
+    # Check if the scene exists
+    - condition: template
+      value_template: >
+        {% set notifications = states.persistent_notification | map(attribute='entity_id') | list %}
+        {% set scene_entity = 'persistent_notification.' ~ notification_id %}
+        {{ scene_entity in notifications }}
+      
+    # Get the scene data from the notification
+    - variables:
+        scene_data_json: >
+          {% set scene_entity = 'persistent_notification.' ~ notification_id %}
+          {{ state_attr(scene_entity, 'message') }}
+        scene_data: >
+          {% set scene_entity = 'persistent_notification.' ~ notification_id %}
+          {% set json_str = state_attr(scene_entity, 'message') %}
+          {{ json_str | from_json }}
     
-    # Get the scene data
+    # Create a loading notification
     - service: persistent_notification.create
       data:
         title: "Loading Scene"
-        message: "Loading scene: {{ scene_name }}"
+        message: "Loading scene: {{ scene_name }} with {{ scene_data | length }} entities"
         notification_id: "loading_scene"
     
-    # Use a simpler approach - turn on specific lights for evening scene
-    - service: light.turn_on
-      target:
-        entity_id:
-          - light.exterior_accents
-          - light.interior_accents
-          - light.porch_handle
-          - light.awning_lights
-          - light.rear_bath_accent
-          - light.dimmer_3_10
-          - light.dimmer_3_13
-          - light.cockpit_accents
-          - light.living_room_accents
-          - light.d_s_front_accent
-    
-    # Close day shades
-    - service: cover.close_cover
-      target:
-        entity_id: cover.all_day_shades
-    
-    # Open night shades
-    - service: cover.open_cover
-      target:
-        entity_id: cover.all_night_shades
+    # Process lights
+    - repeat:
+        for_each: "{{ scene_data | dict2items }}"
+        sequence:
+          - variables:
+              entity_id: "{{ repeat.item.key }}"
+              entity_state: "{{ repeat.item.value }}"
+          
+          # Handle lights
+          - choose:
+              - conditions:
+                  - condition: template
+                    value_template: "{{ entity_id.startswith('light.') }}"
+                sequence:
+                  - choose:
+                      - conditions:
+                          - condition: template
+                            value_template: "{{ entity_state | int > 0 }}"
+                        sequence:
+                          - service: light.turn_on
+                            target:
+                              entity_id: "{{ entity_id }}"
+                            data:
+                              brightness_pct: "{{ entity_state }}"
+                    default:
+                      - service: light.turn_off
+                        target:
+                          entity_id: "{{ entity_id }}"
+              
+              # Handle covers
+              - conditions:
+                  - condition: template
+                    value_template: "{{ entity_id.startswith('cover.') }}"
+                sequence:
+                  - choose:
+                      - conditions:
+                          - condition: template
+                            value_template: "{{ entity_state | int >= 75 }}"
+                        sequence:
+                          - service: cover.open_cover
+                            target:
+                              entity_id: "{{ entity_id }}"
+                      - conditions:
+                          - condition: template
+                            value_template: "{{ entity_state | int <= 25 }}"
+                        sequence:
+                          - service: cover.close_cover
+                            target:
+                              entity_id: "{{ entity_id }}"
+                      - conditions:
+                          - condition: template
+                            value_template: "{{ entity_state | int > 25 and entity_state | int < 75 }}"
+                        sequence:
+                          - service: cover.set_cover_position
+                            target:
+                              entity_id: "{{ entity_id }}"
+                            data:
+                              position: "{{ entity_state }}"
     
     # Notify user
     - service: notify.notify
       data:
         title: "Scene Loaded"
-        message: "Scene '{{ scene_name }}' has been loaded"
+        message: "Scene '{{ scene_name }}' has been loaded with {{ scene_data | length }} entities"
 
 # Helper script to process lights
 process_scene_lights:
