@@ -629,6 +629,29 @@ save_scene:
         payload: "{{ simple_data }}"
         retain: true
     
+    # Wait a moment for MQTT to process
+    - delay:
+        seconds: 2
+    
+    # Verify the scene was saved by checking the corresponding text entity
+    - variables:
+        text_entity: "text.scene_{{ scene_name | replace(' ', '_') | lower }}"
+        saved_data: "{{ states(text_entity) }}"
+        save_successful: "{{ saved_data != 'unknown' and saved_data != 'unavailable' and saved_data | length > 0 }}"
+    
+    # Log the verification result
+    - service: system_log.write
+      data:
+        message: >
+          SAVE SCENE VERIFICATION:
+          Scene name: {{ scene_name }}
+          Text entity: {{ text_entity }}
+          Save successful: {{ save_successful }}
+          Saved data length: {{ saved_data | length if saved_data is defined else 0 }} characters
+          Original data length: {{ simple_data | length }} characters
+          Data matches: {{ saved_data == simple_data if save_successful else false }}
+        level: info
+    
     # Log the scene data
     - service: system_log.write
       data:
@@ -640,11 +663,12 @@ save_scene:
           Cover entities: {{ scene_data.keys() | select('match', '^cover\\.') | list | count }}
         level: info
     
-    # Notify user
+    # Notify user with verification status
     - service: notify.notify
       data:
-        title: "Scene Saved"
-        message: "Scene '{{ scene_name }}' has been saved with {{ scene_data | length }} entities"
+        title: "Scene {{ 'Saved Successfully' if save_successful else 'Save Failed' }}"
+        message: >
+          Scene '{{ scene_name }}' {{ 'has been saved with ' + (scene_data | length | string) + ' entities and verified in MQTT' if save_successful else 'failed to save to MQTT - check logs for details' }}
 
 load_scene:
   alias: "Load Saved Scene"
