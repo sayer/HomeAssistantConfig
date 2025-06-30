@@ -573,24 +573,54 @@ save_scene:
       selector:
         text:
   sequence:
-    # First, collect all light states, filtering out group entities
+    # Filter light entities using the new group filtering approach
     - variables:
         light_entities: >-
-          {% set filtered_lights = [] %}
+          {% set filtered = [] %}
           {% for entity_state in states.light %}
-            {% if not entity_state.attributes.get('entity_id') %}
-              {% set filtered_lights = filtered_lights + [entity_state.entity_id] %}
+            {% set entity_id = entity_state.entity_id %}
+            {% set is_group_member = false %}
+            
+            {# Check if this entity is a member of any group #}
+            {% for group_state in states.group %}
+              {% if group_state.attributes.get('entity_id') and entity_id in group_state.attributes.entity_id %}
+                {% set is_group_member = true %}
+              {% endif %}
+            {% endfor %}
+            
+            {# Check if this entity is a light group (has entity_id attribute) #}
+            {% set is_light_group = entity_state.attributes.get('entity_id') is not none %}
+            
+            {# Only include if it's not a group member and not a light group #}
+            {% if not is_group_member and not is_light_group %}
+              {% set filtered = filtered + [entity_id] %}
             {% endif %}
           {% endfor %}
-          {{ filtered_lights }}
+          {{ filtered }}
+        
+        # Filter cover entities using the new group filtering approach
         cover_entities: >-
-          {% set filtered_covers = [] %}
+          {% set filtered = [] %}
           {% for entity_state in states.cover %}
-            {% if not entity_state.attributes.get('entity_id') %}
-              {% set filtered_covers = filtered_covers + [entity_state.entity_id] %}
+            {% set entity_id = entity_state.entity_id %}
+            {% set is_group_member = false %}
+            
+            {# Check if this entity is a member of any group #}
+            {% for group_state in states.group %}
+              {% if group_state.attributes.get('entity_id') and entity_id in group_state.attributes.entity_id %}
+                {% set is_group_member = true %}
+              {% endif %}
+            {% endfor %}
+            
+            {# Check if this entity is a cover group (has entity_id attribute) #}
+            {% set is_cover_group = entity_state.attributes.get('entity_id') is not none %}
+            
+            {# Only include if it's not a group member and not a cover group #}
+            {% if not is_group_member and not is_cover_group %}
+              {% set filtered = filtered + [entity_id] %}
             {% endif %}
           {% endfor %}
-          {{ filtered_covers }}
+          {{ filtered }}
         scene_data: {}
     
     # Process all lights
@@ -751,17 +781,33 @@ load_scene:
           Scene data keys: {{ scene_data.keys() | list | count if scene_data is mapping else 0 }}
         level: info
     
-    # Process only lights that are in the scene data, filtering out group entities
+    # Process only lights that are in the scene data, using new group filtering
     - variables:
         light_entities_in_scene: "{{ scene_data.keys() | select('match', '^light\\.') | list }}"
+        
+    # Filter the light entities using the new approach
+    - variables:
         filtered_light_entities: >-
-          {% set filtered_lights = [] %}
+          {% set filtered = [] %}
           {% for entity_id in light_entities_in_scene %}
-            {% if not state_attr(entity_id, 'entity_id') %}
-              {% set filtered_lights = filtered_lights + [entity_id] %}
+            {% set is_group_member = false %}
+            
+            {# Check if this entity is a member of any group #}
+            {% for group_state in states.group %}
+              {% if group_state.attributes.get('entity_id') and entity_id in group_state.attributes.entity_id %}
+                {% set is_group_member = true %}
+              {% endif %}
+            {% endfor %}
+            
+            {# Check if this entity is a light group (has entity_id attribute) #}
+            {% set is_light_group = states[entity_id].attributes.get('entity_id') is not none %}
+            
+            {# Only include if it's not a group member and not a light group #}
+            {% if not is_group_member and not is_light_group %}
+              {% set filtered = filtered + [entity_id] %}
             {% endif %}
           {% endfor %}
-          {{ filtered_lights }}
+          {{ filtered }}
     
     - repeat:
         for_each: "{{ filtered_light_entities }}"
@@ -797,17 +843,33 @@ load_scene:
                       message: "Turning OFF {{ entity_id }}"
                       level: info
     
-    # Process only covers that are in the scene data, filtering out group entities
+    # Process only covers that are in the scene data, using new group filtering
     - variables:
         cover_entities_in_scene: "{{ scene_data.keys() | select('match', '^cover\\.') | list }}"
+        
+    # Filter the cover entities using the new approach
+    - variables:
         filtered_cover_entities: >-
-          {% set filtered_covers = [] %}
+          {% set filtered = [] %}
           {% for entity_id in cover_entities_in_scene %}
-            {% if not state_attr(entity_id, 'entity_id') %}
-              {% set filtered_covers = filtered_covers + [entity_id] %}
+            {% set is_group_member = false %}
+            
+            {# Check if this entity is a member of any group #}
+            {% for group_state in states.group %}
+              {% if group_state.attributes.get('entity_id') and entity_id in group_state.attributes.entity_id %}
+                {% set is_group_member = true %}
+              {% endif %}
+            {% endfor %}
+            
+            {# Check if this entity is a cover group (has entity_id attribute) #}
+            {% set is_cover_group = states[entity_id].attributes.get('entity_id') is not none %}
+            
+            {# Only include if it's not a group member and not a cover group #}
+            {% if not is_group_member and not is_cover_group %}
+              {% set filtered = filtered + [entity_id] %}
             {% endif %}
           {% endfor %}
-          {{ filtered_covers }}
+          {{ filtered }}
     
     - repeat:
         for_each: "{{ filtered_cover_entities }}"
@@ -846,3 +908,4 @@ load_scene:
       data:
         title: "Scene Loaded"
         message: "Scene '{{ scene_name }}' has been loaded"
+
