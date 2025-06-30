@@ -659,10 +659,10 @@ load_scene:
       selector:
         text:
   sequence:
-    # Get the scene data from MQTT sensor
+    # Get the scene data from MQTT text entity
     - variables:
-        mqtt_sensor_entity: "sensor.scene_{{ scene_name | replace(' ', '_') | lower }}"
-        simple_data: "{{ states(mqtt_sensor_entity) }}"
+        mqtt_text_entity: "text.scene_{{ scene_name | replace(' ', '_') | lower }}"
+        simple_data: "{{ states(mqtt_text_entity) }}"
     
     # Log the scene data
     - service: system_log.write
@@ -670,8 +670,8 @@ load_scene:
         message: >
           LOAD SCENE:
           Scene name: {{ scene_name }}
-          MQTT sensor: {{ mqtt_sensor_entity }}
-          Scene data exists: {{ states(mqtt_sensor_entity) != 'unknown' and states(mqtt_sensor_entity) != 'unavailable' }}
+          MQTT text entity: {{ mqtt_text_entity }}
+          Scene data exists: {{ states(mqtt_text_entity) != 'unknown' and states(mqtt_text_entity) != 'unavailable' }}
           Scene data length: {{ simple_data | length if simple_data is defined else 0 }} characters
           First 200 chars: {{ simple_data[:200] if simple_data is defined else 'undefined' }}
         level: info
