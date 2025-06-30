@@ -781,7 +781,7 @@ load_scene:
               entity_in_scene_data: "{{ entity_id in scene_data }}"
               entity_state: "{{ scene_data[entity_id] if entity_in_scene_data else 'missing' }}"
           
-          # Apply the cover state - skip group covers to avoid errors
+          # Apply the cover state - skip group covers and only use open/close
           - choose:
               - conditions:
                   - condition: template
@@ -793,38 +793,25 @@ load_scene:
                       level: info
               - conditions:
                   - condition: template
-                    value_template: "{{ entity_state != 'missing' and entity_state | int >= 75 }}"
+                    value_template: "{{ entity_state != 'missing' and entity_state | int >= 50 }}"
                 sequence:
                   - service: cover.open_cover
                     target:
                       entity_id: "{{ entity_id }}"
                   - service: system_log.write
                     data:
-                      message: "Opening cover {{ entity_id }}"
+                      message: "Opening cover {{ entity_id }} (was {{ entity_state }}%)"
                       level: info
               - conditions:
                   - condition: template
-                    value_template: "{{ entity_state != 'missing' and entity_state | int <= 25 }}"
+                    value_template: "{{ entity_state != 'missing' and entity_state | int < 50 }}"
                 sequence:
                   - service: cover.close_cover
                     target:
                       entity_id: "{{ entity_id }}"
                   - service: system_log.write
                     data:
-                      message: "Closing cover {{ entity_id }}"
-                      level: info
-              - conditions:
-                  - condition: template
-                    value_template: "{{ entity_state != 'missing' and entity_state | int > 25 and entity_state | int < 75 }}"
-                sequence:
-                  - service: cover.set_cover_position
-                    target:
-                      entity_id: "{{ entity_id }}"
-                    data:
-                      position: "{{ entity_state }}"
-                  - service: system_log.write
-                    data:
-                      message: "Setting cover {{ entity_id }} position to {{ entity_state }}"
+                      message: "Closing cover {{ entity_id }} (was {{ entity_state }}%)"
                       level: info
     
     # Notify user
