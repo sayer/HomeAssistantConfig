@@ -690,6 +690,13 @@ load_scene:
           - variables:
               # Split the pair by '=' to get entity_id and value
               pair_parts: "{{ repeat.item.split('=') }}"
+              # Only process if we have both entity_id and value
+              has_both_parts: "{{ pair_parts | length == 2 }}"
+          
+          # Only add to scene_data if we have valid parts
+          - condition: template
+            value_template: "{{ has_both_parts }}"
+          - variables:
               entity_id: "{{ pair_parts[0] }}"
               entity_state: "{{ pair_parts[1] | int }}"
               # Add to scene_data dictionary
@@ -701,15 +708,6 @@ load_scene:
         message: >
           PARSE SCENE DATA:
           Pairs found: {{ entity_pairs | length }}
-          Scene data parsed successfully: {{ scene_data is mapping }}
-          Scene data keys: {{ scene_data.keys() | list | count if scene_data is mapping else 0 }}
-        level: info
-    
-    # Log parsing result
-    - service: system_log.write
-      data:
-        message: >
-          PARSE SCENE DATA:
           Scene data parsed successfully: {{ scene_data is mapping }}
           Scene data keys: {{ scene_data.keys() | list | count if scene_data is mapping else 0 }}
         level: info
