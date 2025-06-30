@@ -636,8 +636,8 @@ save_scene:
     # Verify the scene was saved by checking the corresponding sensor entity
     - variables:
         sensor_entity: "sensor.scene_{{ scene_name | replace(' ', '_') | lower }}"
-        saved_data: "{{ states(sensor_entity) }}"
-        save_successful: "{{ saved_data != 'unknown' and saved_data != 'unavailable' and saved_data | length > 0 }}"
+        saved_data: "{{ state_attr(sensor_entity, 'data') }}"
+        save_successful: "{{ saved_data != none and saved_data | length > 0 }}"
     
     # Log the verification result
     - service: system_log.write
@@ -686,7 +686,7 @@ load_scene:
     # Get the scene data from MQTT sensor entity
     - variables:
         mqtt_sensor_entity: "sensor.scene_{{ scene_name | replace(' ', '_') | lower }}"
-        simple_data: "{{ states(mqtt_sensor_entity) }}"
+        simple_data: "{{ state_attr(mqtt_sensor_entity, 'data') }}"
     
     # Log the scene data
     - service: system_log.write
@@ -695,7 +695,7 @@ load_scene:
           LOAD SCENE:
           Scene name: {{ scene_name }}
           MQTT sensor entity: {{ mqtt_sensor_entity }}
-          Scene data exists: {{ states(mqtt_sensor_entity) != 'unknown' and states(mqtt_sensor_entity) != 'unavailable' }}
+          Scene data exists: {{ state_attr(mqtt_sensor_entity, 'data') != none }}
           Scene data length: {{ simple_data | length if simple_data is defined else 0 }} characters
           First 200 chars: {{ simple_data[:200] if simple_data is defined else 'undefined' }}
         level: info
