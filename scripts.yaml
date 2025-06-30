@@ -622,11 +622,11 @@ save_scene:
           First 200 chars: {{ simple_data[:200] }}
         level: info
     
-    # Set the value in the input_text entity
-    - service: input_text.set_value
+    # Set the value in the input_text entity using homeassistant.set_state
+    - service: homeassistant.set_state
       data:
         entity_id: "{{ scene_entity_id }}"
-        value: "{{ simple_data }}"
+        state: "{{ simple_data }}"
     
     # Log the scene data
     - service: system_log.write
