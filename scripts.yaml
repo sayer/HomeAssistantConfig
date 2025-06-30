@@ -633,10 +633,10 @@ save_scene:
     - delay:
         seconds: 2
     
-    # Verify the scene was saved by checking the corresponding text entity
+    # Verify the scene was saved by checking the corresponding sensor entity
     - variables:
-        text_entity: "text.scene_{{ scene_name | replace(' ', '_') | lower }}"
-        saved_data: "{{ states(text_entity) }}"
+        sensor_entity: "sensor.scene_{{ scene_name | replace(' ', '_') | lower }}"
+        saved_data: "{{ states(sensor_entity) }}"
         save_successful: "{{ saved_data != 'unknown' and saved_data != 'unavailable' and saved_data | length > 0 }}"
     
     # Log the verification result
@@ -645,7 +645,7 @@ save_scene:
         message: >
           SAVE SCENE VERIFICATION:
           Scene name: {{ scene_name }}
-          Text entity: {{ text_entity }}
+          Sensor entity: {{ sensor_entity }}
           Save successful: {{ save_successful }}
           Saved data length: {{ saved_data | length if saved_data is defined else 0 }} characters
           Original data length: {{ simple_data | length }} characters
@@ -683,10 +683,10 @@ load_scene:
       selector:
         text:
   sequence:
-    # Get the scene data from MQTT text entity
+    # Get the scene data from MQTT sensor entity
     - variables:
-        mqtt_text_entity: "text.scene_{{ scene_name | replace(' ', '_') | lower }}"
-        simple_data: "{{ states(mqtt_text_entity) }}"
+        mqtt_sensor_entity: "sensor.scene_{{ scene_name | replace(' ', '_') | lower }}"
+        simple_data: "{{ states(mqtt_sensor_entity) }}"
     
     # Log the scene data
     - service: system_log.write
@@ -694,8 +694,8 @@ load_scene:
         message: >
           LOAD SCENE:
           Scene name: {{ scene_name }}
-          MQTT text entity: {{ mqtt_text_entity }}
-          Scene data exists: {{ states(mqtt_text_entity) != 'unknown' and states(mqtt_text_entity) != 'unavailable' }}
+          MQTT sensor entity: {{ mqtt_sensor_entity }}
+          Scene data exists: {{ states(mqtt_sensor_entity) != 'unknown' and states(mqtt_sensor_entity) != 'unavailable' }}
           Scene data length: {{ simple_data | length if simple_data is defined else 0 }} characters
           First 200 chars: {{ simple_data[:200] if simple_data is defined else 'undefined' }}
         level: info
