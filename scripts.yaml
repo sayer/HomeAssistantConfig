@@ -737,20 +737,19 @@ load_scene:
           Scene data keys: {{ scene_data.keys() | list | count if scene_data is mapping else 0 }}
         level: info
     
-    # Process all lights in the scene data
+    # Process only lights that are in the scene data
     - repeat:
-        for_each: "{{ states.light | map(attribute='entity_id') | list }}"
+        for_each: "{{ scene_data.keys() | select('match', '^light\\.') | list }}"
         sequence:
           - variables:
               entity_id: "{{ repeat.item }}"
-              entity_in_scene_data: "{{ entity_id in scene_data }}"
-              entity_state: "{{ scene_data[entity_id] if entity_in_scene_data else 'missing' }}"
+              entity_state: "{{ scene_data[entity_id] }}"
           
           # Apply the light state
           - choose:
               - conditions:
                   - condition: template
-                    value_template: "{{ entity_state != 'missing' and entity_state | int > 0 }}"
+                    value_template: "{{ entity_state | int > 0 }}"
                 sequence:
                   - service: light.turn_on
                     target:
@@ -763,7 +762,7 @@ load_scene:
                       level: info
               - conditions:
                   - condition: template
-                    value_template: "{{ entity_state != 'missing' and entity_state | int == 0 }}"
+                    value_template: "{{ entity_state | int == 0 }}"
                 sequence:
                   - service: light.turn_off
                     target:
@@ -773,14 +772,13 @@ load_scene:
                       message: "Turning OFF {{ entity_id }}"
                       level: info
     
-    # Process all covers in the scene data
+    # Process only covers that are in the scene data
     - repeat:
-        for_each: "{{ states.cover | map(attribute='entity_id') | list }}"
+        for_each: "{{ scene_data.keys() | select('match', '^cover\\.') | list }}"
         sequence:
           - variables:
               entity_id: "{{ repeat.item }}"
-              entity_in_scene_data: "{{ entity_id in scene_data }}"
-              entity_state: "{{ scene_data[entity_id] if entity_in_scene_data else 'missing' }}"
+              entity_state: "{{ scene_data[entity_id] }}"
           
           # Apply the cover state - skip group covers and only use open/close
           - choose:
@@ -794,7 +792,7 @@ load_scene:
                       level: info
               - conditions:
                   - condition: template
-                    value_template: "{{ entity_state != 'missing' and entity_state | int >= 50 }}"
+                    value_template: "{{ entity_state | int >= 50 }}"
                 sequence:
                   - service: cover.open_cover
                     target:
@@ -805,7 +803,7 @@ load_scene:
                       level: info
               - conditions:
                   - condition: template
-                    value_template: "{{ entity_state != 'missing' and entity_state | int < 50 }}"
+                    value_template: "{{ entity_state | int < 50 }}"
                 sequence:
                   - service: cover.close_cover
                     target:
