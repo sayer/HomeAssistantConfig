@@ -573,10 +573,28 @@ save_scene:
       selector:
         text:
   sequence:
-    # First, collect all light states
+    # First, collect all light states, filtering out group entities
     - variables:
-        light_entities: "{{ states.light | map(attribute='entity_id') | list }}"
-        cover_entities: "{{ states.cover | map(attribute='entity_id') | list }}"
+        all_light_entities: "{{ states.light | map(attribute='entity_id') | list }}"
+        # Filter out group entities by checking if they have an 'entity_id' attribute (which contains member entities)
+        light_entities: >-
+          {% set filtered_lights = [] %}
+          {% for entity in all_light_entities %}
+            {% if state_attr(entity, 'entity_id') is none %}
+              {% set filtered_lights = filtered_lights + [entity] %}
+            {% endif %}
+          {% endfor %}
+          {{ filtered_lights }}
+        all_cover_entities: "{{ states.cover | map(attribute='entity_id') | list }}"
+        # Filter out group cover entities the same way
+        cover_entities: >-
+          {% set filtered_covers = [] %}
+          {% for entity in all_cover_entities %}
+            {% if state_attr(entity, 'entity_id') is none %}
+              {% set filtered_covers = filtered_covers + [entity] %}
+            {% endif %}
+          {% endfor %}
+          {{ filtered_covers }}
         scene_data: {}
     
     # Process all lights
@@ -737,9 +755,21 @@ load_scene:
           Scene data keys: {{ scene_data.keys() | list | count if scene_data is mapping else 0 }}
         level: info
     
-    # Process only lights that are in the scene data
+    # Process only lights that are in the scene data, filtering out group entities
+    - variables:
+        light_entities_in_scene: "{{ scene_data.keys() | select('match', '^light\\.') | list }}"
+        # Filter out group entities by checking if they have an 'entity_id' attribute
+        filtered_light_entities: >-
+          {% set filtered_lights = [] %}
+          {% for entity in light_entities_in_scene %}
+            {% if state_attr(entity, 'entity_id') is none %}
+              {% set filtered_lights = filtered_lights + [entity] %}
+            {% endif %}
+          {% endfor %}
+          {{ filtered_lights }}
+    
     - repeat:
-        for_each: "{{ scene_data.keys() | select('match', '^light\\.') | list }}"
+        for_each: "{{ filtered_light_entities }}"
         sequence:
           - variables:
               entity_id: "{{ repeat.item }}"
@@ -772,24 +802,28 @@ load_scene:
                       message: "Turning OFF {{ entity_id }}"
                       level: info
     
-    # Process only covers that are in the scene data
+    # Process only covers that are in the scene data, filtering out group entities
+    - variables:
+        cover_entities_in_scene: "{{ scene_data.keys() | select('match', '^cover\\.') | list }}"
+        # Filter out group entities by checking if they have an 'entity_id' attribute
+        filtered_cover_entities: >-
+          {% set filtered_covers = [] %}
+          {% for entity in cover_entities_in_scene %}
+            {% if state_attr(entity, 'entity_id') is none %}
+              {% set filtered_covers = filtered_covers + [entity] %}
+            {% endif %}
+          {% endfor %}
+          {{ filtered_covers }}
+    
     - repeat:
-        for_each: "{{ scene_data.keys() | select('match', '^cover\\.') | list }}"
+        for_each: "{{ filtered_cover_entities }}"
         sequence:
           - variables:
               entity_id: "{{ repeat.item }}"
               entity_state: "{{ scene_data[entity_id] }}"
           
-          # Apply the cover state - skip group covers and only use open/close
+          # Apply the cover state
           - choose:
-              - conditions:
-                  - condition: template
-                    value_template: "{{ entity_id.endswith('_2') or entity_id.endswith('_3') }}"
-                sequence:
-                  - service: system_log.write
-                    data:
-                      message: "Skipping group cover {{ entity_id }}"
-                      level: info
               - conditions:
                   - condition: template
                     value_template: "{{ entity_state | int >= 50 }}"
