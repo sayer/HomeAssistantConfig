@@ -576,11 +576,12 @@ save_scene:
     # First, collect all light states, filtering out group entities
     - variables:
         all_light_entities: "{{ states.light | map(attribute='entity_id') | list }}"
-        # Filter out group entities by checking if they have an 'entity_id' attribute (which contains member entities)
+        # Filter out group entities by checking if they have an 'entity_id' attribute that contains a list of member entities
         light_entities: >-
           {% set filtered_lights = [] %}
           {% for entity in all_light_entities %}
-            {% if state_attr(entity, 'entity_id') is none %}
+            {% set entity_id_attr = state_attr(entity, 'entity_id') %}
+            {% if entity_id_attr is none or entity_id_attr is not iterable or entity_id_attr is string %}
               {% set filtered_lights = filtered_lights + [entity] %}
             {% endif %}
           {% endfor %}
@@ -590,7 +591,8 @@ save_scene:
         cover_entities: >-
           {% set filtered_covers = [] %}
           {% for entity in all_cover_entities %}
-            {% if state_attr(entity, 'entity_id') is none %}
+            {% set entity_id_attr = state_attr(entity, 'entity_id') %}
+            {% if entity_id_attr is none or entity_id_attr is not iterable or entity_id_attr is string %}
               {% set filtered_covers = filtered_covers + [entity] %}
             {% endif %}
           {% endfor %}
@@ -758,11 +760,12 @@ load_scene:
     # Process only lights that are in the scene data, filtering out group entities
     - variables:
         light_entities_in_scene: "{{ scene_data.keys() | select('match', '^light\\.') | list }}"
-        # Filter out group entities by checking if they have an 'entity_id' attribute
+        # Filter out group entities by checking if they have an 'entity_id' attribute that contains a list
         filtered_light_entities: >-
           {% set filtered_lights = [] %}
           {% for entity in light_entities_in_scene %}
-            {% if state_attr(entity, 'entity_id') is none %}
+            {% set entity_id_attr = state_attr(entity, 'entity_id') %}
+            {% if entity_id_attr is none or entity_id_attr is not iterable or entity_id_attr is string %}
               {% set filtered_lights = filtered_lights + [entity] %}
             {% endif %}
           {% endfor %}
@@ -805,11 +808,12 @@ load_scene:
     # Process only covers that are in the scene data, filtering out group entities
     - variables:
         cover_entities_in_scene: "{{ scene_data.keys() | select('match', '^cover\\.') | list }}"
-        # Filter out group entities by checking if they have an 'entity_id' attribute
+        # Filter out group entities by checking if they have an 'entity_id' attribute that contains a list
         filtered_cover_entities: >-
           {% set filtered_covers = [] %}
           {% for entity in cover_entities_in_scene %}
-            {% if state_attr(entity, 'entity_id') is none %}
+            {% set entity_id_attr = state_attr(entity, 'entity_id') %}
+            {% if entity_id_attr is none or entity_id_attr is not iterable or entity_id_attr is string %}
               {% set filtered_covers = filtered_covers + [entity] %}
             {% endif %}
           {% endfor %}
