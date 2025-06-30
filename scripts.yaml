@@ -603,30 +603,31 @@ save_scene:
           - variables:
               scene_data: "{{ dict(scene_data, **{repeat.item: entity_state}) }}"
     
-    # Store the scene data in an input_text entity using a simple format
+    # Store the scene data using MQTT
     - variables:
-        scene_entity_id: "input_text.scene_{{ scene_name | replace(' ', '_') | lower }}"
+        mqtt_topic: "homeassistant/scenes/{{ scene_name | replace(' ', '_') | lower }}"
         # Create a simple string format: entity_id=value|entity_id=value|...
         simple_data: >-
           {% for entity_id, state in scene_data.items() %}{{ entity_id }}={{ state }}{% if not loop.last %}|{% endif %}{% endfor %}
     
-    # Log the entity we're trying to use
+    # Log the data we're storing
     - service: system_log.write
       data:
         message: >
-          SAVE SCENE - Target entity:
-          Entity ID: {{ scene_entity_id }}
-          Entity exists: {{ states(scene_entity_id) != 'unavailable' }}
+          SAVE SCENE - MQTT:
+          Scene name: {{ scene_name }}
+          MQTT topic: {{ mqtt_topic }}
           Data length: {{ scene_data | length }} entities
           String length: {{ simple_data | length }} characters
           First 200 chars: {{ simple_data[:200] }}
         level: info
     
-    # Set the value in the input_text entity using homeassistant.set_state
-    - service: homeassistant.set_state
+    # Publish scene data to MQTT with retain flag
+    - service: mqtt.publish
       data:
-        entity_id: "{{ scene_entity_id }}"
-        state: "{{ simple_data }}"
+        topic: "{{ mqtt_topic }}"
+        payload: "{{ simple_data }}"
+        retain: true
     
     # Log the scene data
     - service: system_log.write
@@ -658,10 +659,10 @@ load_scene:
       selector:
         text:
   sequence:
-    # Get the scene data from the input_text entity
+    # Get the scene data from MQTT sensor
     - variables:
-        scene_entity_id: "input_text.scene_{{ scene_name | replace(' ', '_') | lower }}"
-        simple_data: "{{ states(scene_entity_id) }}"
+        mqtt_sensor_entity: "sensor.scene_{{ scene_name | replace(' ', '_') | lower }}"
+        simple_data: "{{ states(mqtt_sensor_entity) }}"
     
     # Log the scene data
     - service: system_log.write
@@ -669,8 +670,8 @@ load_scene:
         message: >
           LOAD SCENE:
           Scene name: {{ scene_name }}
-          Scene entity: {{ scene_entity_id }}
-          Scene data exists: {{ states(scene_entity_id) != 'unknown' and states(scene_entity_id) != 'unavailable' }}
+          MQTT sensor: {{ mqtt_sensor_entity }}
+          Scene data exists: {{ states(mqtt_sensor_entity) != 'unknown' and states(mqtt_sensor_entity) != 'unavailable' }}
           Scene data length: {{ simple_data | length if simple_data is defined else 0 }} characters
           First 200 chars: {{ simple_data[:200] if simple_data is defined else 'undefined' }}
         level: info
