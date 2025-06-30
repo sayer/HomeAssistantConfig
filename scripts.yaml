@@ -637,7 +637,7 @@ save_scene:
     - variables:
         sensor_entity: "sensor.scene_{{ scene_name | replace(' ', '_') | lower }}"
         saved_data: "{{ state_attr(sensor_entity, 'data') }}"
-        save_successful: "{{ saved_data != none and saved_data | length > 0 }}"
+        save_successful: "{{ saved_data != none and saved_data is defined and saved_data | length > 0 }}"
     
     # Log the verification result
     - service: system_log.write
@@ -647,7 +647,7 @@ save_scene:
           Scene name: {{ scene_name }}
           Sensor entity: {{ sensor_entity }}
           Save successful: {{ save_successful }}
-          Saved data length: {{ saved_data | length if saved_data is defined else 0 }} characters
+          Saved data length: {{ saved_data | length if saved_data is defined and saved_data != none else 0 }} characters
           Original data length: {{ simple_data | length }} characters
           Data matches: {{ saved_data == simple_data if save_successful else false }}
         level: info
@@ -696,8 +696,8 @@ load_scene:
           Scene name: {{ scene_name }}
           MQTT sensor entity: {{ mqtt_sensor_entity }}
           Scene data exists: {{ state_attr(mqtt_sensor_entity, 'data') != none }}
-          Scene data length: {{ simple_data | length if simple_data is defined else 0 }} characters
-          First 200 chars: {{ simple_data[:200] if simple_data is defined else 'undefined' }}
+          Scene data length: {{ simple_data | length if simple_data is defined and simple_data != none else 0 }} characters
+          First 200 chars: {{ simple_data[:200] if simple_data is defined and simple_data != none else 'undefined' }}
         level: info
     
     # Parse the simple data format into a dictionary
@@ -705,7 +705,7 @@ load_scene:
         # Initialize an empty dictionary
         scene_data: {}
         # Split the string by '|' to get entity_id=value pairs
-        entity_pairs: "{{ simple_data.split('|') if simple_data is defined and simple_data != '' else [] }}"
+        entity_pairs: "{{ simple_data.split('|') if simple_data is defined and simple_data != none and simple_data != '' else [] }}"
     
     # Process each entity pair and add to scene_data
     - repeat:
