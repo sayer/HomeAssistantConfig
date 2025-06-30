@@ -580,11 +580,9 @@ save_scene:
         light_entities: >-
           {% set filtered_lights = [] %}
           {% for entity_state in all_light_states %}
-            {% if entity_state.attributes is defined %}
-              {% set entity_id_attr = entity_state.attributes.entity_id %}
-              {% if entity_id_attr is none or entity_id_attr is not iterable or entity_id_attr is string %}
-                {% set filtered_lights = filtered_lights + [entity_state.entity_id] %}
-              {% endif %}
+            {% set entity_id_attr = entity_state.attributes.get('entity_id') if entity_state.attributes else none %}
+            {% if entity_id_attr is none %}
+              {% set filtered_lights = filtered_lights + [entity_state.entity_id] %}
             {% endif %}
           {% endfor %}
           {{ filtered_lights }}
@@ -593,11 +591,9 @@ save_scene:
         cover_entities: >-
           {% set filtered_covers = [] %}
           {% for entity_state in all_cover_states %}
-            {% if entity_state.attributes is defined %}
-              {% set entity_id_attr = entity_state.attributes.entity_id %}
-              {% if entity_id_attr is none or entity_id_attr is not iterable or entity_id_attr is string %}
-                {% set filtered_covers = filtered_covers + [entity_state.entity_id] %}
-              {% endif %}
+            {% set entity_id_attr = entity_state.attributes.get('entity_id') if entity_state.attributes else none %}
+            {% if entity_id_attr is none %}
+              {% set filtered_covers = filtered_covers + [entity_state.entity_id] %}
             {% endif %}
           {% endfor %}
           {{ filtered_covers }}
@@ -769,7 +765,7 @@ load_scene:
           {% set filtered_lights = [] %}
           {% for entity_id in light_entities_in_scene %}
             {% set entity_id_attr = state_attr(entity_id, 'entity_id') %}
-            {% if entity_id_attr is none or (entity_id_attr is not iterable) or (entity_id_attr is string) %}
+            {% if entity_id_attr is none %}
               {% set filtered_lights = filtered_lights + [entity_id] %}
             {% endif %}
           {% endfor %}
@@ -817,7 +813,7 @@ load_scene:
           {% set filtered_covers = [] %}
           {% for entity_id in cover_entities_in_scene %}
             {% set entity_id_attr = state_attr(entity_id, 'entity_id') %}
-            {% if entity_id_attr is none or (entity_id_attr is not iterable) or (entity_id_attr is string) %}
+            {% if entity_id_attr is none %}
               {% set filtered_covers = filtered_covers + [entity_id] %}
             {% endif %}
           {% endfor %}
