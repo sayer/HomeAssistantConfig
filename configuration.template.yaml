@@ -1583,17 +1583,17 @@ mqtt:
       state_topic: "homeassistant/scenes/scene_1"
       value_template: "stored"
       json_attributes_topic: "homeassistant/scenes/scene_1"
-      json_attributes_template: "{{ {'data': value} }}"
+      json_attributes_template: "{{ {'data': value | string} | to_json }}"
     - name: "Scene Scene 2"
       state_topic: "homeassistant/scenes/scene_2"
       value_template: "stored"
       json_attributes_topic: "homeassistant/scenes/scene_2"
-      json_attributes_template: "{{ {'data': value} }}"
+      json_attributes_template: "{{ {'data': value | string} | to_json }}"
     - name: "Scene Scene 3"
       state_topic: "homeassistant/scenes/scene_3"
       value_template: "stored"
       json_attributes_topic: "homeassistant/scenes/scene_3"
-      json_attributes_template: "{{ {'data': value} }}"
+      json_attributes_template: "{{ {'data': value | string} | to_json }}"
 
 
     # Battery Voltage Sensor
