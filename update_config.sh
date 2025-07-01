@@ -441,8 +441,101 @@ create_shade_groups_yaml() {
         done
     fi
     
+    # Create ds_so_day_shades group (Driver Side - Street Side Day Shades)
+    # This group includes DS_LIVING_DAY (always exists) and optionally DS_WINDOW1_DAY, DS_WINDOW2_DAY
+    ds_so_day_shades=()
+    
+    # DS_LIVING_DAY always exists
+    if [ -n "$DS_LIVING_DAY_CODE" ]; then
+        ds_so_day_shades+=("cover.ds_living_day")
+    fi
+    
+    # Add DS_WINDOW1_DAY if it exists for this model year
+    if [ -n "$DS_WINDOW1_DAY_CODE" ]; then
+        ds_so_day_shades+=("cover.ds_window1_day")
+    fi
+    
+    # Add DS_WINDOW2_DAY if it exists for this model year
+    if [ -n "$DS_WINDOW2_DAY_CODE" ]; then
+        ds_so_day_shades+=("cover.ds_window2_day")
+    fi
+    
+    # Create the group if we have any shades
+    if [ ${#ds_so_day_shades[@]} -gt 0 ]; then
+        echo "      ds_so_day_shades:" >> "$GROUPS_FILE"
+        echo "        friendly_name: \"Driver Side Day Shades\"" >> "$GROUPS_FILE"
+        echo "        unique_id: \"ds_so_day_shades\"" >> "$GROUPS_FILE"
+        echo "        value_template: >" >> "$GROUPS_FILE"
+        echo "          {% set cover_entities = [" >> "$GROUPS_FILE"
+        
+        # Add each available DS day shade entity
+        for i in "${!ds_so_day_shades[@]}"; do
+            if [ $i -lt $((${#ds_so_day_shades[@]} - 1)) ]; then
+                echo "            '${ds_so_day_shades[$i]}'," >> "$GROUPS_FILE"
+            else
+                echo "            '${ds_so_day_shades[$i]}'" >> "$GROUPS_FILE"
+            fi
+        done
+        
+        # Add the template logic
+        echo "          ] %}" >> "$GROUPS_FILE"
+        echo "          {% set is_opening = false %}" >> "$GROUPS_FILE"
+        echo "          {% set is_closing = false %}" >> "$GROUPS_FILE"
+        echo "          {% set open_count = 0 %}" >> "$GROUPS_FILE"
+        echo "          {% set closed_count = 0 %}" >> "$GROUPS_FILE"
+        echo "          {% set status_list = namespace(values=[]) %}" >> "$GROUPS_FILE"
+        echo "          " >> "$GROUPS_FILE"
+        echo "          {% for entity_id in cover_entities %}" >> "$GROUPS_FILE"
+        echo "            {% set cover_state = states(entity_id) %}" >> "$GROUPS_FILE"
+        echo "            {% if cover_state == 'opening' %}" >> "$GROUPS_FILE"
+        echo "              {% set is_opening = true %}" >> "$GROUPS_FILE"
+        echo "            {% elif cover_state == 'closing' %}" >> "$GROUPS_FILE"
+        echo "              {% set is_closing = true %}" >> "$GROUPS_FILE"
+        echo "            {% elif cover_state == 'open' %}" >> "$GROUPS_FILE"
+        echo "              {% set open_count = open_count + 1 %}" >> "$GROUPS_FILE"
+        echo "            {% elif cover_state == 'closed' %}" >> "$GROUPS_FILE"
+        echo "              {% set closed_count = closed_count + 1 %}" >> "$GROUPS_FILE"
+        echo "            {% endif %}" >> "$GROUPS_FILE"
+        echo "            {% set status_list.values = status_list.values + [entity_id ~ '=' ~ cover_state] %}" >> "$GROUPS_FILE"
+        echo "          {% endfor %}" >> "$GROUPS_FILE"
+        echo "          " >> "$GROUPS_FILE"
+        echo "          {% if is_opening %}" >> "$GROUPS_FILE"
+        echo "            opening" >> "$GROUPS_FILE"
+        echo "          {% elif is_closing %}" >> "$GROUPS_FILE"
+        echo "            closing" >> "$GROUPS_FILE"
+        echo "          {% elif open_count == cover_entities | length %}" >> "$GROUPS_FILE"
+        echo "            open" >> "$GROUPS_FILE"
+        echo "          {% elif closed_count == cover_entities | length %}" >> "$GROUPS_FILE"
+        echo "            closed" >> "$GROUPS_FILE"
+        echo "          {% else %}" >> "$GROUPS_FILE"
+        echo "            unknown: {{ status_list.values | join(', ') }}" >> "$GROUPS_FILE"
+        echo "          {% endif %}" >> "$GROUPS_FILE"
+        
+        # Add open_cover service
+        echo "        open_cover:" >> "$GROUPS_FILE"
+        echo "          service: cover.open_cover" >> "$GROUPS_FILE"
+        echo "          target:" >> "$GROUPS_FILE"
+        echo "            entity_id:" >> "$GROUPS_FILE"
+        
+        # Add each available DS day shade entity to service call
+        for shade in "${ds_so_day_shades[@]}"; do
+            echo "              - $shade" >> "$GROUPS_FILE"
+        done
+        
+        # Add close_cover service
+        echo "        close_cover:" >> "$GROUPS_FILE"
+        echo "          service: cover.close_cover" >> "$GROUPS_FILE"
+        echo "          target:" >> "$GROUPS_FILE"
+        echo "            entity_id:" >> "$GROUPS_FILE"
+        
+        # Add each available DS day shade entity to service call
+        for shade in "${ds_so_day_shades[@]}"; do
+            echo "              - $shade" >> "$GROUPS_FILE"
+        done
+    fi
+    
     # Report what we created
-    echo "Created shade group configurations with ${#day_shades[@]} day shades and ${#night_shades[@]} night shades."
+    echo "Created shade group configurations with ${#day_shades[@]} day shades, ${#night_shades[@]} night shades, and ${#ds_so_day_shades[@]} DS day shades."
 }
 
 # Create the YAML entries one line at a time instead of using a single string
@@ -745,11 +838,11 @@ fi
 
 echo "Inserting shade group YAML entries..."
 if grep -q "%%ALL_SHADE_GROUPS%%" "$CONFIG_FILE"; then
-    # Check if all_night_shades_2 exists in the config file
-    if grep -q "all_night_shades_2:" "$CONFIG_FILE"; then
-        echo "Preserving custom all_night_shades_2 template..."
-        # Extract the all_night_shades_2 template
-        ALL_NIGHT_SHADES_2_TEMPLATE=$(awk '/all_night_shades_2:/,/close_cover:/ {print}' "$CONFIG_FILE" | awk '/close_cover:/,/}/ {print}')
+    # Check if all_night_shades exists in the config file
+    if grep -q "all_night_shades:" "$CONFIG_FILE"; then
+        echo "Preserving custom all_night_shades template..."
+        # Extract the all_night_shades_template
+        ALL_NIGHT_SHADES_TEMPLATE=$(awk '/all_night_shades:/,/close_cover:/ {print}' "$CONFIG_FILE" | awk '/close_cover:/,/}/ {print}')
         
         # Use awk for safer multi-line replacement
         awk -v groupsfile="$SHADE_GROUPS_FILE" '
@@ -760,6 +853,40 @@ if grep -q "%%ALL_SHADE_GROUPS%%" "$CONFIG_FILE"; then
         { print }
         ' "$CONFIG_FILE" > "$TEMP_FILE"
         mv "$TEMP_FILE" "$CONFIG_FILE"
+        
+        # Re-insert the preserved all_night_shades template if it exists
+        if [ -n "$ALL_NIGHT_SHADES_TEMPLATE" ]; then
+            echo "Re-inserting preserved all_night_shades template..."
+            # Find the template covers section and append the preserved template
+            awk -v template="$ALL_NIGHT_SHADES_TEMPLATE" '
+            /^  template:/ && in_template == 0 {
+                in_template = 1
+                print
+                next
+            }
+            /^    covers:/ && in_template == 1 {
+                in_covers = 1
+                print
+                next
+            }
+            in_covers == 1 && /^[^ ]/ {
+                # We are leaving the covers section, insert the template here
+                print template
+                in_template = 0
+                in_covers = 0
+                print
+                next
+            }
+            { print }
+            END {
+                # If we reached the end and still in covers section, append template
+                if (in_covers == 1) {
+                    print template
+                }
+            }
+            ' "$CONFIG_FILE" > "$TEMP_FILE"
+            mv "$TEMP_FILE" "$CONFIG_FILE"
+        fi
         
         echo "Added shade group entries to configuration"
     else
