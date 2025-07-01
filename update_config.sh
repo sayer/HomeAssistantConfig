@@ -447,17 +447,17 @@ create_shade_groups_yaml() {
     
     # DS_LIVING_DAY always exists
     if [ -n "$DS_LIVING_DAY_CODE" ]; then
-        ds_so_day_shades+=("cover.ds_living_day")
+        ds_so_day_shades+=("cover.$UID_DS_LIVING_DAY")
     fi
     
     # Add DS_WINDOW1_DAY if it exists for this model year
     if [ -n "$DS_WINDOW1_DAY_CODE" ]; then
-        ds_so_day_shades+=("cover.ds_window1_day")
+        ds_so_day_shades+=("cover.$UID_DS_WINDOW1_DAY")
     fi
     
     # Add DS_WINDOW2_DAY if it exists for this model year
     if [ -n "$DS_WINDOW2_DAY_CODE" ]; then
-        ds_so_day_shades+=("cover.ds_window2_day")
+        ds_so_day_shades+=("cover.$UID_DS_WINDOW2_DAY")
     fi
     
     # Create the group if we have any shades
