@@ -460,6 +460,12 @@ create_shade_groups_yaml() {
         ds_so_day_shades+=("cover.ds_window2_day")
     fi
     
+    # Debug: Print what we found
+    echo "DS_LIVING_DAY_CODE: $DS_LIVING_DAY_CODE"
+    echo "DS_WINDOW1_DAY_CODE: $DS_WINDOW1_DAY_CODE"
+    echo "DS_WINDOW2_DAY_CODE: $DS_WINDOW2_DAY_CODE"
+    echo "ds_so_day_shades array: ${ds_so_day_shades[@]}"
+    
     # Create the group if we have any shades
     if [ ${#ds_so_day_shades[@]} -gt 0 ]; then
         echo "      ds_so_day_shades:" >> "$GROUPS_FILE"
