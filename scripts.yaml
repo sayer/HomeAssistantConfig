@@ -573,27 +573,83 @@ save_scene:
       selector:
         text:
   sequence:
-    # Get all group names first
+    # Get all group names first with extensive logging
     - variables:
+        all_groups_debug: >-
+          {% set groups_info = [] %}
+          {% for group_state in states.group %}
+            {% set groups_info = groups_info + [group_state.entity_id + ' (' + group_state.name + ')'] %}
+          {% endfor %}
+          {{ groups_info }}
         all_group_names: >-
           {% set group_names = [] %}
           {% for group_state in states.group %}
             {% set group_names = group_names + [group_state.name] %}
           {% endfor %}
           {{ group_names }}
-        
-        # Filter light entities - exclude if entity name is in the group name list
+    
+    # Log all groups found
+    - service: system_log.write
+      data:
+        message: >
+          SAVE SCENE DEBUG - All Groups Found:
+          Total groups: {{ all_group_names | length }}
+          Group names: {{ all_group_names }}
+          Groups with IDs: {{ all_groups_debug }}
+        level: info
+    
+    # Filter light entities with detailed logging
+    - variables:
+        light_entities_debug: >-
+          {% set lights_info = [] %}
+          {% for entity_state in states.light %}
+            {% set lights_info = lights_info + [entity_state.entity_id + ' (' + entity_state.name + ')'] %}
+          {% endfor %}
+          {{ lights_info }}
         light_entities: >-
           {% set filtered = [] %}
+          {% set excluded = [] %}
           {% for entity_state in states.light %}
             {% set entity_name = entity_state.name %}
             {% if entity_name not in all_group_names %}
               {% set filtered = filtered + [entity_state.entity_id] %}
+            {% else %}
+              {% set excluded = excluded + [entity_state.entity_id + ' (name: ' + entity_name + ')'] %}
             {% endif %}
           {% endfor %}
           {{ filtered }}
-        
-        # Filter cover entities - exclude if entity name is in the group name list
+        light_entities_excluded: >-
+          {% set excluded = [] %}
+          {% for entity_state in states.light %}
+            {% set entity_name = entity_state.name %}
+            {% if entity_name in all_group_names %}
+              {% set excluded = excluded + [entity_state.entity_id + ' (name: ' + entity_name + ')'] %}
+            {% endif %}
+          {% endfor %}
+          {{ excluded }}
+    
+    # Log light filtering results
+    - service: system_log.write
+      data:
+        message: >
+          SAVE SCENE DEBUG - Light Filtering:
+          Total light entities: {{ light_entities_debug | length }}
+          Filtered (included) lights: {{ light_entities | length }}
+          Excluded lights: {{ light_entities_excluded | length }}
+          
+          First 10 all lights: {{ light_entities_debug[:10] }}
+          First 10 included lights: {{ light_entities[:10] }}
+          Excluded lights: {{ light_entities_excluded }}
+        level: info
+    
+    # Filter cover entities with detailed logging
+    - variables:
+        cover_entities_debug: >-
+          {% set covers_info = [] %}
+          {% for entity_state in states.cover %}
+            {% set covers_info = covers_info + [entity_state.entity_id + ' (' + entity_state.name + ')'] %}
+          {% endfor %}
+          {{ covers_info }}
         cover_entities: >-
           {% set filtered = [] %}
           {% for entity_state in states.cover %}
@@ -603,7 +659,30 @@ save_scene:
             {% endif %}
           {% endfor %}
           {{ filtered }}
+        cover_entities_excluded: >-
+          {% set excluded = [] %}
+          {% for entity_state in states.cover %}
+            {% set entity_name = entity_state.name %}
+            {% if entity_name in all_group_names %}
+              {% set excluded = excluded + [entity_state.entity_id + ' (name: ' + entity_name + ')'] %}
+            {% endif %}
+          {% endfor %}
+          {{ excluded }}
         scene_data: {}
+    
+    # Log cover filtering results
+    - service: system_log.write
+      data:
+        message: >
+          SAVE SCENE DEBUG - Cover Filtering:
+          Total cover entities: {{ cover_entities_debug | length }}
+          Filtered (included) covers: {{ cover_entities | length }}
+          Excluded covers: {{ cover_entities_excluded | length }}
+          
+          First 10 all covers: {{ cover_entities_debug[:10] }}
+          First 10 included covers: {{ cover_entities[:10] }}
+          Excluded covers: {{ cover_entities_excluded }}
+        level: info
     
     # Process all lights
     - repeat:
@@ -636,16 +715,22 @@ save_scene:
         simple_data: >-
           {% for entity_id, state in scene_data.items() %}{{ entity_id }}={{ state }}{% if not loop.last %}|{% endif %}{% endfor %}
     
-    # Log the data we're storing
+    # Log the data we're storing with detailed breakdown
     - service: system_log.write
       data:
         message: >
-          SAVE SCENE - MQTT:
+          SAVE SCENE - MQTT DATA:
           Scene name: {{ scene_name }}
           MQTT topic: {{ mqtt_topic }}
-          Data length: {{ scene_data | length }} entities
+          Total entities in scene_data: {{ scene_data | length }}
+          Light entities in scene_data: {{ scene_data.keys() | select('match', '^light\\.') | list | count }}
+          Cover entities in scene_data: {{ scene_data.keys() | select('match', '^cover\\.') | list | count }}
+          
+          Light entities saved: {{ scene_data.keys() | select('match', '^light\\.') | list }}
+          Cover entities saved: {{ scene_data.keys() | select('match', '^cover\\.') | list }}
+          
           String length: {{ simple_data | length }} characters
-          First 200 chars: {{ simple_data[:200] }}
+          First 500 chars: {{ simple_data[:500] }}
         level: info
     
     # Publish scene data to MQTT with retain flag
