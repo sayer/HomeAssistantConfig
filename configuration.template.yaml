@@ -2747,9 +2747,9 @@ cover:
 
   - platform: template
     covers:
-      all_night_shades_2:
-        friendly_name: "All Night Shades 2"
-        unique_id: "all_night_shades_2"
+      all_night_shades:
+        friendly_name: "All Night Shades"
+        unique_id: "all_night_shades"
         value_template: >
           {% set cover_entities = [
             'cover.windshield_night',
@@ -2839,6 +2839,99 @@ cover:
               - cover.bedroom_dresser_night
               - cover.bedroom_front_night
               - cover.bedroom_rear_night
+
+      all_day_shades:
+        friendly_name: "All Day Shades"
+        unique_id: "all_day_shades"
+        value_template: >
+          {% set cover_entities = [
+            'cover.windshield_day',
+            'cover.driver_day',
+            'cover.passenger_day',
+            'cover.entry_door_day',
+            'cover.mid_bath_day',
+            'cover.dinette_day',
+            'cover.rear_bath_day',
+            'cover.top_bunk_day',
+            'cover.bottom_bunk_day',
+            'cover.ds_living_day',
+            'cover.bedroom_dresser_day',
+            'cover.bedroom_front_day',
+            'cover.bedroom_rear_day'
+          ] %}
+          {% set is_opening = false %}
+          {% set is_closing = false %}
+          {% set open_count = 0 %}
+          {% set closed_count = 0 %}
+          {% set unknown_count = 0 %}
+          {% set valid_count = 0 %}
+          
+          {% for entity_id in cover_entities %}
+            {% set cover_state = states(entity_id) %}
+            {% if cover_state == 'opening' %}
+              {% set is_opening = true %}
+              {% set valid_count = valid_count + 1 %}
+            {% elif cover_state == 'closing' %}
+              {% set is_closing = true %}
+              {% set valid_count = valid_count + 1 %}
+            {% elif cover_state == 'open' %}
+              {% set open_count = open_count + 1 %}
+              {% set valid_count = valid_count + 1 %}
+            {% elif cover_state == 'closed' %}
+              {% set closed_count = closed_count + 1 %}
+              {% set valid_count = valid_count + 1 %}
+            {% elif cover_state == 'unknown' or cover_state == 'unavailable' %}
+              {% set unknown_count = unknown_count + 1 %}
+            {% endif %}
+          {% endfor %}
+          
+          {% if is_opening %}
+            opening
+          {% elif is_closing %}
+            closing
+          {% elif valid_count > 0 and open_count == valid_count %}
+            open
+          {% elif valid_count > 0 and closed_count == valid_count %}
+            closed
+          {% elif valid_count > 0 and open_count > 0 %}
+            open
+          {% else %}
+            closed
+          {% endif %}
+        open_cover:
+          service: cover.open_cover
+          target:
+            entity_id:
+              - cover.windshield_day
+              - cover.driver_day
+              - cover.passenger_day
+              - cover.entry_door_day
+              - cover.mid_bath_day
+              - cover.dinette_day
+              - cover.rear_bath_day
+              - cover.top_bunk_day
+              - cover.bottom_bunk_day
+              - cover.ds_living_day
+              - cover.bedroom_dresser_day
+              - cover.bedroom_front_day
+              - cover.bedroom_rear_day
+        close_cover:
+          service: cover.close_cover
+          target:
+            entity_id:
+              - cover.windshield_day
+              - cover.driver_day
+              - cover.passenger_day
+              - cover.entry_door_day
+              - cover.mid_bath_day
+              - cover.dinette_day
+              - cover.rear_bath_day
+              - cover.top_bunk_day
+              - cover.bottom_bunk_day
+              - cover.ds_living_day
+              - cover.bedroom_dresser_day
+              - cover.bedroom_front_day
+              - cover.bedroom_rear_day
 
       cockpit_day_shades:
         friendly_name: "Cockpit Day Shades"
