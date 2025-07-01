@@ -516,7 +516,7 @@ create_shade_groups_yaml() {
         echo "          {% elif valid_count > 0 and open_count > 0 %}" >> "$GROUPS_FILE"
         echo "            open" >> "$GROUPS_FILE"
         echo "          {% else %}" >> "$GROUPS_FILE"
-        echo "            closed" >> "$GROUPS_FILE"
+        echo "            closed (debug: valid={{ valid_count }}, open={{ open_count }}, closed={{ closed_count }}, unknown={{ unknown_count }})" >> "$GROUPS_FILE"
         echo "          {% endif %}" >> "$GROUPS_FILE"
         
         # Add open_cover service
