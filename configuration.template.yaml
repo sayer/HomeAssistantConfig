@@ -2603,7 +2603,7 @@ mqtt:
         {% endif %}
       command_topic: "RVC/ROOF_FAN_COMMAND_1/%%VENT_FAN_1%%/set"
       payload_on: >-
-        {"instance": %%VENT_FAN_1%%, "System Status": 1, "Fan Mode": 3, "Speed Mode": 3, "Fan Speed Setting": 140, "Wind Direction Switch": 3, "Dome Position [Deprecated]": 0, "Light": 3}
+        {"instance": %%VENT_FAN_1%%, "System Status": 1, "Fan Mode": 3, "Speed Mode": 3, "Fan Speed Setting": 140, "Wind Direction Switch": 3, "Dome Position [Deprecated]": 15, "Light": 3}
       payload_off: >-
         {"instance": %%VENT_FAN_1%%, "System Status": 0, "Fan Mode": 3, "Speed Mode": 3, "Fan Speed Setting": 0, "Wind Direction Switch": 3, "Dome Position [Deprecated]": 0, "Light": 3}
       optimistic: false
@@ -2620,7 +2620,7 @@ mqtt:
         {% endif %}
       command_topic: "RVC/ROOF_FAN_COMMAND_1/%%VENT_FAN_2%%/set"
       payload_on: >-
-        {"instance": %%VENT_FAN_2%%, "System Status": 1, "Fan Mode": 3, "Speed Mode": 3, "Fan Speed Setting": 140, "Wind Direction Switch": 3, "Dome Position [Deprecated]": 0, "Light": 3}
+        {"instance": %%VENT_FAN_2%%, "System Status": 1, "Fan Mode": 3, "Speed Mode": 3, "Fan Speed Setting": 140, "Wind Direction Switch": 3, "Dome Position [Deprecated]": 15, "Light": 3}
       payload_off: >-
         {"instance": %%VENT_FAN_2%%, "System Status": 0, "Fan Mode": 3, "Speed Mode": 3, "Fan Speed Setting": 0, "Wind Direction Switch": 3, "Dome Position [Deprecated]": 0, "Light": 3}
       optimistic: false
