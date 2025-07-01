@@ -67,7 +67,7 @@ NAME_MID_BATH_NIGHT="Mid Bath Night"; UID_MID_BATH_NIGHT="mid_bath_night"
 NAME_DINETTE_NIGHT="Dinette Night"; UID_DINETTE_NIGHT="dinette_night"
 NAME_REAR_BATH_NIGHT="Rear Bath Night"; UID_REAR_BATH_NIGHT="rear_bath_night"
 NAME_TOP_BUNK_NIGHT="Top Bunk Night"; UID_TOP_BUNK_NIGHT="top_bunk_night"
-NAME_DS_LIVING_DAY="D/S Living Room Day"; UID_DS_LIVING_DAY="ds_living_day"
+NAME_DS_LIVING_DAY="D/S Living Room Day"; UID_DS_LIVING_DAY="d_s_living_room_day"
 NAME_BEDROOM_DRESSER_DAY="Bedroom Dresser Day"; UID_BEDROOM_DRESSER_DAY="bedroom_dreser_day"
 NAME_BOTTOM_BUNK_NIGHT="Bottom Bunk Night"; UID_BOTTOM_BUNK_NIGHT="bottom_bunk_night"
 NAME_DS_LIVING_NIGHT="D/S Living Room Night"; UID_DS_LIVING_NIGHT="ds_living_night"
@@ -459,12 +459,6 @@ create_shade_groups_yaml() {
     if [ -n "$DS_WINDOW2_DAY_CODE" ]; then
         ds_so_day_shades+=("cover.ds_window2_day")
     fi
-    
-    # Debug: Print what we found
-    echo "DS_LIVING_DAY_CODE: $DS_LIVING_DAY_CODE"
-    echo "DS_WINDOW1_DAY_CODE: $DS_WINDOW1_DAY_CODE"
-    echo "DS_WINDOW2_DAY_CODE: $DS_WINDOW2_DAY_CODE"
-    echo "ds_so_day_shades array: ${ds_so_day_shades[@]}"
     
     # Create the group if we have any shades
     if [ ${#ds_so_day_shades[@]} -gt 0 ]; then
