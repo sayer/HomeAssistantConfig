@@ -255,7 +255,6 @@ create_shade_groups_yaml() {
         echo "          {% set is_closing = false %}" >> "$GROUPS_FILE"
         echo "          {% set open_count = 0 %}" >> "$GROUPS_FILE"
         echo "          {% set closed_count = 0 %}" >> "$GROUPS_FILE"
-        echo "          {% set status_list = namespace(values=[]) %}" >> "$GROUPS_FILE"
         echo "          " >> "$GROUPS_FILE"
         echo "          {% for entity_id in cover_entities %}" >> "$GROUPS_FILE"
         echo "            {% set cover_state = states(entity_id) %}" >> "$GROUPS_FILE"
@@ -268,7 +267,6 @@ create_shade_groups_yaml() {
         echo "            {% elif cover_state == 'closed' %}" >> "$GROUPS_FILE"
         echo "              {% set closed_count = closed_count + 1 %}" >> "$GROUPS_FILE"
         echo "            {% endif %}" >> "$GROUPS_FILE"
-        echo "            {% set status_list.values = status_list.values + [entity_id ~ '=' ~ cover_state] %}" >> "$GROUPS_FILE"
         echo "          {% endfor %}" >> "$GROUPS_FILE"
         echo "          " >> "$GROUPS_FILE"
         echo "          {% if is_opening %}" >> "$GROUPS_FILE"
@@ -279,8 +277,12 @@ create_shade_groups_yaml() {
         echo "            open" >> "$GROUPS_FILE"
         echo "          {% elif closed_count == cover_entities | length %}" >> "$GROUPS_FILE"
         echo "            closed" >> "$GROUPS_FILE"
+        echo "          {% elif open_count > 0 and closed_count == 0 %}" >> "$GROUPS_FILE"
+        echo "            open" >> "$GROUPS_FILE"
+        echo "          {% elif closed_count > 0 and open_count == 0 %}" >> "$GROUPS_FILE"
+        echo "            closed" >> "$GROUPS_FILE"
         echo "          {% else %}" >> "$GROUPS_FILE"
-        echo "            unknown: {{ status_list.values | join(', ') }}" >> "$GROUPS_FILE"
+        echo "            closed" >> "$GROUPS_FILE"
         echo "          {% endif %}" >> "$GROUPS_FILE"
         
         # Add open_cover service
@@ -390,7 +392,6 @@ create_shade_groups_yaml() {
         echo "          {% set is_closing = false %}" >> "$GROUPS_FILE"
         echo "          {% set open_count = 0 %}" >> "$GROUPS_FILE"
         echo "          {% set closed_count = 0 %}" >> "$GROUPS_FILE"
-        echo "          {% set status_list = namespace(values=[]) %}" >> "$GROUPS_FILE"
         echo "          " >> "$GROUPS_FILE"
         echo "          {% for entity_id in cover_entities %}" >> "$GROUPS_FILE"
         echo "            {% set cover_state = states(entity_id) %}" >> "$GROUPS_FILE"
@@ -403,7 +404,6 @@ create_shade_groups_yaml() {
         echo "            {% elif cover_state == 'closed' %}" >> "$GROUPS_FILE"
         echo "              {% set closed_count = closed_count + 1 %}" >> "$GROUPS_FILE"
         echo "            {% endif %}" >> "$GROUPS_FILE"
-        echo "            {% set status_list.values = status_list.values + [entity_id ~ '=' ~ cover_state] %}" >> "$GROUPS_FILE"
         echo "          {% endfor %}" >> "$GROUPS_FILE"
         echo "          " >> "$GROUPS_FILE"
         echo "          {% if is_opening %}" >> "$GROUPS_FILE"
@@ -414,8 +414,12 @@ create_shade_groups_yaml() {
         echo "            open" >> "$GROUPS_FILE"
         echo "          {% elif closed_count == cover_entities | length %}" >> "$GROUPS_FILE"
         echo "            closed" >> "$GROUPS_FILE"
+        echo "          {% elif open_count > 0 and closed_count == 0 %}" >> "$GROUPS_FILE"
+        echo "            open" >> "$GROUPS_FILE"
+        echo "          {% elif closed_count > 0 and open_count == 0 %}" >> "$GROUPS_FILE"
+        echo "            closed" >> "$GROUPS_FILE"
         echo "          {% else %}" >> "$GROUPS_FILE"
-        echo "            unknown: {{ status_list.values | join(', ') }}" >> "$GROUPS_FILE"
+        echo "            closed" >> "$GROUPS_FILE"
         echo "          {% endif %}" >> "$GROUPS_FILE"
         
         # Add open_cover service
@@ -445,18 +449,21 @@ create_shade_groups_yaml() {
     # This group includes DS_LIVING_DAY (always exists) and optionally DS_WINDOW1_DAY, DS_WINDOW2_DAY
     ds_so_day_shades=()
     
-    # DS_LIVING_DAY always exists
-    if [ -n "$DS_LIVING_DAY_CODE" ]; then
+    # DS_LIVING_DAY always exists - check using the same pattern as other shades
+    ds_living_day_code=$(eval echo \$${PREFIX}_DS_LIVING_DAY)
+    if [ -n "$ds_living_day_code" ]; then
         ds_so_day_shades+=("cover.$UID_DS_LIVING_DAY")
     fi
     
     # Add DS_WINDOW1_DAY if it exists for this model year
-    if [ -n "$DS_WINDOW1_DAY_CODE" ]; then
+    ds_window1_day_code=$(eval echo \$${PREFIX}_DS_WINDOW1_DAY)
+    if [ -n "$ds_window1_day_code" ]; then
         ds_so_day_shades+=("cover.$UID_DS_WINDOW1_DAY")
     fi
     
     # Add DS_WINDOW2_DAY if it exists for this model year
-    if [ -n "$DS_WINDOW2_DAY_CODE" ]; then
+    ds_window2_day_code=$(eval echo \$${PREFIX}_DS_WINDOW2_DAY)
+    if [ -n "$ds_window2_day_code" ]; then
         ds_so_day_shades+=("cover.$UID_DS_WINDOW2_DAY")
     fi
     
@@ -483,7 +490,6 @@ create_shade_groups_yaml() {
         echo "          {% set is_closing = false %}" >> "$GROUPS_FILE"
         echo "          {% set open_count = 0 %}" >> "$GROUPS_FILE"
         echo "          {% set closed_count = 0 %}" >> "$GROUPS_FILE"
-        echo "          {% set status_list = namespace(values=[]) %}" >> "$GROUPS_FILE"
         echo "          " >> "$GROUPS_FILE"
         echo "          {% for entity_id in cover_entities %}" >> "$GROUPS_FILE"
         echo "            {% set cover_state = states(entity_id) %}" >> "$GROUPS_FILE"
@@ -496,7 +502,6 @@ create_shade_groups_yaml() {
         echo "            {% elif cover_state == 'closed' %}" >> "$GROUPS_FILE"
         echo "              {% set closed_count = closed_count + 1 %}" >> "$GROUPS_FILE"
         echo "            {% endif %}" >> "$GROUPS_FILE"
-        echo "            {% set status_list.values = status_list.values + [entity_id ~ '=' ~ cover_state] %}" >> "$GROUPS_FILE"
         echo "          {% endfor %}" >> "$GROUPS_FILE"
         echo "          " >> "$GROUPS_FILE"
         echo "          {% if is_opening %}" >> "$GROUPS_FILE"
@@ -507,8 +512,12 @@ create_shade_groups_yaml() {
         echo "            open" >> "$GROUPS_FILE"
         echo "          {% elif closed_count == cover_entities | length %}" >> "$GROUPS_FILE"
         echo "            closed" >> "$GROUPS_FILE"
+        echo "          {% elif open_count > 0 and closed_count == 0 %}" >> "$GROUPS_FILE"
+        echo "            open" >> "$GROUPS_FILE"
+        echo "          {% elif closed_count > 0 and open_count == 0 %}" >> "$GROUPS_FILE"
+        echo "            closed" >> "$GROUPS_FILE"
         echo "          {% else %}" >> "$GROUPS_FILE"
-        echo "            unknown: {{ status_list.values | join(', ') }}" >> "$GROUPS_FILE"
+        echo "            closed" >> "$GROUPS_FILE"
         echo "          {% endif %}" >> "$GROUPS_FILE"
         
         # Add open_cover service
@@ -536,6 +545,16 @@ create_shade_groups_yaml() {
     
     # Report what we created
     echo "Created shade group configurations with ${#day_shades[@]} day shades, ${#night_shades[@]} night shades, and ${#ds_so_day_shades[@]} DS day shades."
+    
+    # Debug output for DS day shades
+    if [ ${#ds_so_day_shades[@]} -gt 0 ]; then
+        echo "DS day shades included:"
+        for shade in "${ds_so_day_shades[@]}"; do
+            echo "  - $shade"
+        done
+    else
+        echo "No DS day shades found for this model year"
+    fi
 }
 
 # Create the YAML entries one line at a time instead of using a single string
