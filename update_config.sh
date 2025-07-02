@@ -228,7 +228,7 @@ create_shade_groups_yaml() {
         fi
     done
     
-    # Start with the platform header
+    # Start the groups file - generate platform section for template insertion
     echo "  - platform: template" > "$GROUPS_FILE"
     echo "    covers:" >> "$GROUPS_FILE"
     
