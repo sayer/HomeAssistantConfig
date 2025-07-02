@@ -465,6 +465,7 @@ create_shade_groups_yaml() {
         echo "      ds_so_day_shades:" >> "$GROUPS_FILE"
         echo "        friendly_name: \"Driver Side Day Shades\"" >> "$GROUPS_FILE"
         echo "        unique_id: \"ds_so_day_shades\"" >> "$GROUPS_FILE"
+        echo "        availability_template: \"{{ states('cover.d_s_living_room_day') not in ['unknown', 'unavailable'] }}\"" >> "$GROUPS_FILE"
         echo "        value_template: >" >> "$GROUPS_FILE"
         echo "          {% set cover_entities = [" >> "$GROUPS_FILE"
         
