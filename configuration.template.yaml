@@ -2143,13 +2143,13 @@ mqtt:
       unique_id: "THERMOSTAT_AMBIENT_STATUS"
       unit_of_measurement: "F"
       state_class: measurement
-      value_template: "{{ value_json['ambient temp F'] }}"
+      value_template: "{{ (value_json['ambient temp F'] | float) | round(0) }}"
     - name: "Inside Temperature"
       state_topic: "RVC/THERMOSTAT_AMBIENT_STATUS/%%INDOOR_TEMP%%"
       unique_id: "THERMOSTAT_INDOOR_TEMP"
       unit_of_measurement: "F"
       state_class: measurement
-      value_template: "{{ value_json['ambient temp F'] }}"
+      value_template: "{{ (value_json['ambient temp F'] | float) | round(0) }}"
     - name: "Parking Brake"
       state_topic: "RVC/CHASSIS_MOBILITY_STATUS"
       unique_id: "ParkingBrake"
