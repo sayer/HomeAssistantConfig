@@ -1333,6 +1333,16 @@ mqtt:
       state_off: "off"
       unique_id: "AC3"
 
+    - name: "AC 4"
+      state_topic: "RVC/THERMOSTAT_STATUS_1/167"
+      value_template: "{{ value_json['operating mode definition'] }}"
+      command_topic: "RVC/THERMOSTAT_COMMAND_1_MODE/166/set"
+      payload_on: '{"instance": 167, "operating modes": 1, "fan mode": 0}'
+      payload_off: '{"instance": 167, "operating modes": 0, "fan mode": 0}'
+      state_on: "cool"
+      state_off: "off"
+      unique_id: "AC4"
+
     - name: "Heat 1"
       state_topic: "RVC/THERMOSTAT_STATUS_1/164"
       value_template: "{{ value_json['operating mode definition'] }}"
@@ -1362,6 +1372,16 @@ mqtt:
       state_on: "heat"
       state_off: "off"
       unique_id: "HEAT3"
+
+    - name: "Heat 4"
+      state_topic: "RVC/THERMOSTAT_STATUS_1/167"
+      value_template: "{{ value_json['operating mode definition'] }}"
+      command_topic: "RVC/THERMOSTAT_COMMAND_1_MODE/166/set"
+      payload_on: '{"instance": 167, "operating modes": 2, "fan mode": 0}'
+      payload_off: '{"instance": 167, "operating modes": 0, "fan mode": 0}'
+      state_on: "heat"
+      state_off: "off"
+      unique_id: "HEAT4"
 
     - name: "Auto Gen"
       state_topic: "RVC/AGS_CRITERION_STATUS/1"
