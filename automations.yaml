@@ -1458,3 +1458,42 @@
     data:
       year: '{{ states(''input_number.model_year'') | int }}'
   mode: single
+
+  - id: '1751576905430'
+  alias: Generator Turned On
+  description: ''
+  triggers:
+  - entity_id: switch.generator
+    to: 'on'
+    trigger: state
+  actions:
+  - target:
+      entity_id: input_datetime.generator_run_start
+    data:
+      datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
+    action: input_datetime.set_datetime
+
+- id: '1751577301702'
+  alias: Generator Turned Off
+  description: ''
+  triggers:
+  - entity_id: switch.generator
+    to: 'off'
+    trigger: state
+  conditions:
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: input_datetime.generator_run_start
+      state: unknown
+  actions:
+  - variables:
+      duration: "{% set start = as_datetime(states('input_datetime.generator_run_start'))
+        %} {% set end = now() %} {% if start %}\n  {{ (end - start).total_seconds()
+        | int }}\n{% else %}\n  0\n{% endif %}\n"
+  - target:
+      entity_id: input_number.generator_last_session_seconds
+    data:
+      value: '{{ duration }}'
+    action: input_number.set_value
+    

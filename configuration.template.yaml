@@ -2849,3 +2849,14 @@ template:
             0
           {% endif %}
         unit_of_measurement: "s"
+
+      - name: Generator Session Display
+        unique_id: generator_session_display
+        state: >
+          {% if is_state('switch.generator', 'on') %}
+            {% set secs = states('sensor.generator_current_session_time') | int %}
+            Running: {{ (secs // 60) }} min {{ (secs % 60) }} sec
+          {% else %}
+            {% set secs = states('input_number.generator_last_session_seconds') | int %}
+            Last Run: {{ (secs // 60) }} min {{ (secs % 60) }} sec
+          {% endif %}
