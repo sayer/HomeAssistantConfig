@@ -60,7 +60,6 @@ input_number:
     step: 1
     mode: box
     icon: mdi:rv-truck
-    input_number:
   generator_last_session_seconds:
     name: Last Generator Run
     min: 0
