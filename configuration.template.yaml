@@ -150,6 +150,10 @@ sensor:
         friendly_name: "Bedroom Sconce Available"
         value_template: "{{ not states('light.bedroom_sconce') in ['unavailable', 'unknown', 'none'] }}"
 
+      entry_door_day_exists:
+        friendly_name: "Entry Door Day Exists"
+        value_template: "{{ states['cover.entry_door_day'] is defined }}"
+
   - platform: rest
     name: "Outback 2"
     resource: "http://192.168.100.228/Dev_status.cgi?&Port=0"
