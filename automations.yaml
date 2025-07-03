@@ -1459,7 +1459,7 @@
       year: '{{ states(''input_number.model_year'') | int }}'
   mode: single
 
-  - id: '1751576905430'
+- id: '1751576905430'
   alias: Generator Turned On
   description: ''
   triggers:
