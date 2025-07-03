@@ -2105,14 +2105,12 @@ mqtt:
       state_topic: "RVC/THERMOSTAT_AMBIENT_STATUS/%%AMBIANT_TEMP%%"
       unique_id: "THERMOSTAT_AMBIENT_STATUS"
       unit_of_measurement: "F"
-      device_class: temperature
       state_class: measurement
       value_template: "{{ value_json['ambient temp F'] }}"
     - name: "Inside Temperature"
       state_topic: "RVC/THERMOSTAT_AMBIENT_STATUS/%%INDOOR_TEMP%%"
       unique_id: "THERMOSTAT_INDOOR_TEMP"
       unit_of_measurement: "F"
-      device_class: temperature
       state_class: measurement
       value_template: "{{ value_json['ambient temp F'] }}"
     - name: "Parking Brake"
