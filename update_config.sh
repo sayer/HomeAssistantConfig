@@ -305,6 +305,7 @@ create_shade_groups_yaml() {
     
     echo "      cockpit_day_shades:" >> "$GROUPS_FILE"
     echo "        friendly_name: \"Cockpit Day Shades\"" >> "$GROUPS_FILE"
+    echo "        unique_id: \"cockpit_day_shades\"" >> "$GROUPS_FILE"
     echo "        value_template: >" >> "$GROUPS_FILE"
     
     # Start with base covers common to all models
