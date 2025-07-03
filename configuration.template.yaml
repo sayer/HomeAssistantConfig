@@ -110,6 +110,8 @@ sensor:
             states.lock.cargo_door_lock_4.state,
             states.lock.cargo_door_lock_5.state
           ] | join(', ') }}
+
+
       outback1_voltage:
         friendly_name: "Outback 1 Battery Voltage"
         unit_of_measurement: "Vdc"
@@ -132,6 +134,10 @@ sensor:
       outback1_vac_out_l2:
         friendly_name: "Outback 1 VAC_out_L2"
         value_template: "{{ state_attr('sensor.Outback_1', 'VAC_out_L2') }}"
+
+      bedroom_sconce_available:
+        friendly_name: "Bedroom Sconce Available"
+        value_template: "{{ not states('light.bedroom_sconce') in ['unavailable', 'unknown', 'none'] }}"
 
   - platform: rest
     name: "Outback 2"
@@ -2603,6 +2609,8 @@ mqtt:
       state_topic: "RVC/WATERHEATER_STATUS/1"
       value_template: "{{ value_json['dc power failure status definition'] != 'dc power not present' }}"
       device_class: power
+
+
 
 
 ##################################################################
