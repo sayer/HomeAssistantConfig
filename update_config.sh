@@ -507,8 +507,94 @@ create_shade_groups_yaml() {
         done
     fi
     
+    # Create ds_so_night_shades group (Driver Side - Street Side Night Shades)
+    # This group includes DS_LIVING_NIGHT (always exists) and optionally DS_WINDOW1_NIGHT, DS_WINDOW2_NIGHT
+    ds_so_night_shades=()
+    
+    # DS_LIVING_NIGHT always exists - check using the same pattern as other shades
+    ds_living_night_code=$(eval echo \$${PREFIX}_DS_LIVING_NIGHT)
+    if [ -n "$ds_living_night_code" ]; then
+        ds_so_night_shades+=("cover.$UID_DS_LIVING_NIGHT")
+    fi
+    
+    # Add DS_WINDOW1_NIGHT if it exists for this model year
+    ds_window1_night_code=$(eval echo \$${PREFIX}_DS_WINDOW1_NIGHT)
+    if [ -n "$ds_window1_night_code" ]; then
+        ds_so_night_shades+=("cover.$UID_DS_WINDOW1_NIGHT")
+    fi
+    
+    # Add DS_WINDOW2_NIGHT if it exists for this model year
+    ds_window2_night_code=$(eval echo \$${PREFIX}_DS_WINDOW2_NIGHT)
+    if [ -n "$ds_window2_night_code" ]; then
+        ds_so_night_shades+=("cover.$UID_DS_WINDOW2_NIGHT")
+    fi
+    
+    # Create the group if we have any shades
+    if [ ${#ds_so_night_shades[@]} -gt 0 ]; then
+        echo "      ds_so_night_shades:" >> "$GROUPS_FILE"
+        echo "        friendly_name: \"Driver Side Night Shades\"" >> "$GROUPS_FILE"
+        echo "        unique_id: \"ds_so_night_shades\"" >> "$GROUPS_FILE"
+        echo "        value_template: >" >> "$GROUPS_FILE"
+        echo "          {% set cover_entities = [" >> "$GROUPS_FILE"
+        
+        # Add each available DS night shade entity
+        for i in "${!ds_so_night_shades[@]}"; do
+            if [ $i -lt $((${#ds_so_night_shades[@]} - 1)) ]; then
+                echo "            '${ds_so_night_shades[$i]}'," >> "$GROUPS_FILE"
+            else
+                echo "            '${ds_so_night_shades[$i]}'" >> "$GROUPS_FILE"
+            fi
+        done
+        
+        # Add the template logic (matching the existing all_night_shades pattern)
+        echo "          ] %}" >> "$GROUPS_FILE"
+        echo "          {% set states_list = cover_entities | map('states') | list %}" >> "$GROUPS_FILE"
+        echo "          {% set open_states = states_list | select('eq', 'open') | list %}" >> "$GROUPS_FILE"
+        echo "          {% set closed_states = states_list | select('eq', 'closed') | list %}" >> "$GROUPS_FILE"
+        echo "          {% set opening_states = states_list | select('eq', 'opening') | list %}" >> "$GROUPS_FILE"
+        echo "          {% set closing_states = states_list | select('eq', 'closing') | list %}" >> "$GROUPS_FILE"
+        echo "          " >> "$GROUPS_FILE"
+        echo "          {% if opening_states | length > 0 %}" >> "$GROUPS_FILE"
+        echo "            opening" >> "$GROUPS_FILE"
+        echo "          {% elif closing_states | length > 0 %}" >> "$GROUPS_FILE"
+        echo "            closing" >> "$GROUPS_FILE"
+        echo "          {% elif open_states | length == cover_entities | length %}" >> "$GROUPS_FILE"
+        echo "            open" >> "$GROUPS_FILE"
+        echo "          {% elif closed_states | length == cover_entities | length %}" >> "$GROUPS_FILE"
+        echo "            closed" >> "$GROUPS_FILE"
+        echo "          {% elif open_states | length > 0 and closed_states | length == 0 %}" >> "$GROUPS_FILE"
+        echo "            open" >> "$GROUPS_FILE"
+        echo "          {% elif closed_states | length > 0 and open_states | length == 0 %}" >> "$GROUPS_FILE"
+        echo "            closed" >> "$GROUPS_FILE"
+        echo "          {% else %}" >> "$GROUPS_FILE"
+        echo "            closed" >> "$GROUPS_FILE"
+        echo "          {% endif %}" >> "$GROUPS_FILE"
+        
+        # Add open_cover service
+        echo "        open_cover:" >> "$GROUPS_FILE"
+        echo "          service: cover.open_cover" >> "$GROUPS_FILE"
+        echo "          target:" >> "$GROUPS_FILE"
+        echo "            entity_id:" >> "$GROUPS_FILE"
+        
+        # Add each available DS night shade entity to service call
+        for shade in "${ds_so_night_shades[@]}"; do
+            echo "              - $shade" >> "$GROUPS_FILE"
+        done
+        
+        # Add close_cover service
+        echo "        close_cover:" >> "$GROUPS_FILE"
+        echo "          service: cover.close_cover" >> "$GROUPS_FILE"
+        echo "          target:" >> "$GROUPS_FILE"
+        echo "            entity_id:" >> "$GROUPS_FILE"
+        
+        # Add each available DS night shade entity to service call
+        for shade in "${ds_so_night_shades[@]}"; do
+            echo "              - $shade" >> "$GROUPS_FILE"
+        done
+    fi
+    
     # Report what we created
-    echo "Created shade group configurations with ${#day_shades[@]} day shades, ${#night_shades[@]} night shades, and ${#ds_so_day_shades[@]} DS day shades."
+    echo "Created shade group configurations with ${#day_shades[@]} day shades, ${#night_shades[@]} night shades, ${#ds_so_day_shades[@]} DS day shades, and ${#ds_so_night_shades[@]} DS night shades."
     
     # Debug output for DS day shades
     if [ ${#ds_so_day_shades[@]} -gt 0 ]; then
@@ -518,6 +604,16 @@ create_shade_groups_yaml() {
         done
     else
         echo "No DS day shades found for this model year"
+    fi
+    
+    # Debug output for DS night shades
+    if [ ${#ds_so_night_shades[@]} -gt 0 ]; then
+        echo "DS night shades included:"
+        for shade in "${ds_so_night_shades[@]}"; do
+            echo "  - $shade"
+        done
+    else
+        echo "No DS night shades found for this model year"
     fi
 }
 
