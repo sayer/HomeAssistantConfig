@@ -2164,43 +2164,73 @@
               ]
             },
             {
-              "type": "conditional",
-              "conditions": [
+              "type": "vertical-stack",
+              "cards": [
                 {
-                  "condition": "state",
-                  "entity": "cover.windshield_day",
-                  "state_not": "unavailable"
+                  "type": "markdown",
+                  "content": "## Cockpit Day Shades\n",
+                  "style": "ha-markdown {\n  padding: 0 0 8px 0;\n  font-weight: bold;\n}\n"
                 },
                 {
-                  "condition": "state",
-                  "entity": "cover.driver_day",
-                  "state_not": "unavailable"
-                },
-                {
-                  "condition": "state",
-                  "entity": "cover.entry_door_day",
-                  "state_not": "unavailable"
+                  "type": "grid",
+                  "columns": 3,
+                  "square": false,
+                  "cards": [
+                    {
+                      "type": "glance",
+                      "show_name": true,
+                      "show_icon": true,
+                      "show_state": true,
+                      "state_color": true,
+                      "columns": 1,
+                      "entities": [
+                        {
+                          "entity": "cover.windshield_day"
+                        }
+                      ],
+                      "style": "ha-card {\n  margin: 0 !important;\n  box-shadow: none !important;\n  background: transparent !important;\n}\n"
+                    },
+                    {
+                      "type": "glance",
+                      "show_name": true,
+                      "show_icon": true,
+                      "show_state": true,
+                      "state_color": true,
+                      "columns": 1,
+                      "entities": [
+                        {
+                          "entity": "cover.driver_day"
+                        }
+                      ],
+                      "style": "ha-card {\n  margin: 0 !important;\n  box-shadow: none !important;\n  background: transparent !important;\n}\n"
+                    },
+                    {
+                      "type": "conditional",
+                      "conditions": [
+                        {
+                          "condition": "state",
+                          "entity": "cover.entry_door_day",
+                          "state_not": "unavailable"
+                        }
+                      ],
+                      "card": {
+                        "type": "glance",
+                        "show_name": true,
+                        "show_icon": true,
+                        "show_state": true,
+                        "state_color": true,
+                        "columns": 1,
+                        "entities": [
+                          {
+                            "entity": "cover.entry_door_day"
+                          }
+                        ],
+                        "style": "ha-card {\n  margin: 0 !important;\n  box-shadow: none !important;\n  background: transparent !important;\n}\n"
+                      }
+                    }
+                  ]
                 }
-              ],
-              "card": {
-                "show_name": true,
-                "show_icon": true,
-                "show_state": true,
-                "type": "glance",
-                "state_color": true,
-                "entities": [
-                  {
-                    "entity": "cover.windshield_day"
-                  },
-                  {
-                    "entity": "cover.driver_day"
-                  },
-                  {
-                    "entity": "cover.entry_door_day"
-                  }
-                ],
-                "title": "Cockpit Day Shades"
-              }
+              ]
             },
             {
               "show_name": true,
