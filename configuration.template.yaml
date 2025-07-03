@@ -60,6 +60,13 @@ input_number:
     step: 1
     mode: box
     icon: mdi:rv-truck
+    input_number:
+  generator_last_session_seconds:
+    name: Last Generator Run
+    min: 0
+    max: 86400
+    step: 1
+    unit_of_measurement: "s"
 
 input_boolean:
   is_optimistic:
@@ -71,6 +78,11 @@ input_text:
   owner_name:
     name: Owner Name
 
+input_datetime:
+  generator_run_start:
+    name: Generator Run Start
+    has_date: true
+    has_time: true
 
 sensor:
   - platform: rest
@@ -2820,3 +2832,21 @@ fan:
             entity_id:
               - switch.rear_bath_fan_switch
               - switch.roof_fan_2_control
+
+template:
+  - sensor:
+      - name: Generator Current Session Time
+        unique_id: generator_current_session
+        state: >
+          {% if is_state('switch.generator', 'on') %}
+            {% set start = as_datetime(states('input_datetime.generator_run_start')) %}
+            {% set now = now() %}
+            {% if start %}
+              {{ (now - start).total_seconds() | int }}
+            {% else %}
+              0
+            {% endif %}
+          {% else %}
+            0
+          {% endif %}
+        unit_of_measurement: "s"
