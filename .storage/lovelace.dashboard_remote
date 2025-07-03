@@ -242,42 +242,8 @@
                   "title": "Battereis"
                 },
                 {
-                  "square": false,
-                  "columns": 4,
-                  "type": "grid",
-                  "cards": [
-                    {
-                      "type": "gauge",
-                      "entity": "sensor.outback1_voltage",
-                      "min": 0,
-                      "max": 15,
-                      "needle": true,
-                      "name": "House Battery",
-                      "unit": "V"
-                    },
-                    {
-                      "type": "gauge",
-                      "entity": "sensor.outback1_ac_mode",
-                      "min": 0,
-                      "max": 15,
-                      "needle": true
-                    },
-                    {
-                      "type": "gauge",
-                      "entity": "sensor.outback1_inverter_mode",
-                      "min": 0,
-                      "max": 15,
-                      "needle": true
-                    },
-                    {
-                      "type": "gauge",
-                      "entity": "sensor.outback2_voltage",
-                      "min": 0,
-                      "max": 15,
-                      "needle": true
-                    }
-                  ],
-                  "visibility": [
+                  "type": "conditional",
+                  "conditions": [
                     {
                       "condition": "state",
                       "entity": "sensor.outback1_voltage",
@@ -289,7 +255,44 @@
                       "state_not": "unknown"
                     }
                   ],
-                  "title": "Outback Interters"
+                  "card": {
+                    "type": "grid",
+                    "title": "Outback Inverters",
+                    "square": false,
+                    "columns": 4,
+                    "cards": [
+                      {
+                        "type": "gauge",
+                        "entity": "sensor.outback1_voltage",
+                        "min": 0,
+                        "max": 15,
+                        "needle": true,
+                        "name": "House Battery",
+                        "unit": "V"
+                      },
+                      {
+                        "type": "gauge",
+                        "entity": "sensor.outback1_ac_mode",
+                        "min": 0,
+                        "max": 15,
+                        "needle": true
+                      },
+                      {
+                        "type": "gauge",
+                        "entity": "sensor.outback1_inverter_mode",
+                        "min": 0,
+                        "max": 15,
+                        "needle": true
+                      },
+                      {
+                        "type": "gauge",
+                        "entity": "sensor.outback2_voltage",
+                        "min": 0,
+                        "max": 15,
+                        "needle": true
+                      }
+                    ]
+                  }
                 },
                 {
                   "square": false,
@@ -386,9 +389,26 @@
                   ]
                 },
                 {
-                  "type": "weather-forecast",
-                  "entity": "weather.foretravel",
-                  "forecast_type": "daily"
+                  "type": "conditional",
+                  "conditions": [
+                    {
+                      "condition": "state",
+                      "entity": "weather.foretravel",
+                      "state_not": "unavailable"
+                    },
+                    {
+                      "condition": "state",
+                      "entity": "weather.foretravel",
+                      "state_not": "unknown"
+                    }
+                  ],
+                  "card": {
+                    "type": "weather-forecast",
+                    "entity": "weather.foretravel",
+                    "forecast_type": "daily",
+                    "show_current": true,
+                    "show_forecast": false
+                  }
                 }
               ]
             },
@@ -396,31 +416,67 @@
               "type": "grid",
               "cards": [
                 {
-                  "show_name": true,
-                  "show_icon": true,
-                  "show_state": true,
-                  "type": "glance",
-                  "entities": [
+                  "type": "conditional",
+                  "conditions": [
                     {
-                      "entity": "sensor.parking_brake"
-                    },
-                    {
-                      "entity": "sensor.transmision_gear",
-                      "name": "Gear"
-                    },
-                    {
-                      "entity": "sensor.vehicle_speed",
-                      "name": "Speed"
-                    },
-                    {
-                      "entity": "input_boolean.busparked",
-                      "name": "Parked"
-                    },
-                    {
-                      "entity": "input_boolean.camping"
+                      "condition": "or",
+                      "conditions": [
+                        {
+                          "condition": "state",
+                          "entity": "sensor.parking_brake",
+                          "state_not": "unavailable"
+                        },
+                        {
+                          "condition": "state",
+                          "entity": "sensor.transmision_gear",
+                          "state_not": "unavailable"
+                        },
+                        {
+                          "condition": "state",
+                          "entity": "sensor.vehicle_speed",
+                          "state_not": "unavailable"
+                        },
+                        {
+                          "condition": "state",
+                          "entity": "input_boolean.busparked",
+                          "state_not": "unavailable"
+                        },
+                        {
+                          "condition": "state",
+                          "entity": "input_boolean.camping",
+                          "state_not": "unavailable"
+                        }
+                      ]
                     }
                   ],
-                  "state_color": true
+                  "card": {
+                    "type": "glance",
+                    "title": "Vehicle Info",
+                    "show_name": true,
+                    "show_icon": true,
+                    "show_state": true,
+                    "state_color": true,
+                    "entities": [
+                      {
+                        "entity": "sensor.parking_brake"
+                      },
+                      {
+                        "entity": "sensor.transmision_gear",
+                        "name": "Gear"
+                      },
+                      {
+                        "entity": "sensor.vehicle_speed",
+                        "name": "Speed"
+                      },
+                      {
+                        "entity": "input_boolean.busparked",
+                        "name": "Parked"
+                      },
+                      {
+                        "entity": "input_boolean.camping"
+                      }
+                    ]
+                  }
                 },
                 {
                   "show_name": true,
@@ -750,9 +806,26 @@
                   "columns": 2
                 },
                 {
-                  "type": "weather-forecast",
-                  "entity": "weather.foretravel",
-                  "forecast_type": "daily"
+                  "type": "conditional",
+                  "conditions": [
+                    {
+                      "condition": "state",
+                      "entity": "weather.foretravel",
+                      "state_not": "unavailable"
+                    },
+                    {
+                      "condition": "state",
+                      "entity": "weather.foretravel",
+                      "state_not": "unknown"
+                    }
+                  ],
+                  "card": {
+                    "type": "weather-forecast",
+                    "entity": "weather.foretravel",
+                    "forecast_type": "daily",
+                    "show_current": true,
+                    "show_forecast": false
+                  }
                 }
               ]
             },
@@ -827,24 +900,54 @@
                   "heading_style": "subtitle"
                 },
                 {
-                  "type": "gauge",
-                  "entity": "sensor.vehicle_rpm",
-                  "needle": true,
-                  "severity": {
-                    "green": 0,
-                    "yellow": 2000,
-                    "red": 2450
-                  },
-                  "max": 2500
+                  "type": "conditional",
+                  "conditions": [
+                    {
+                      "condition": "state",
+                      "entity": "sensor.vehicle_rpm",
+                      "state_not": "unavailable"
+                    },
+                    {
+                      "condition": "state",
+                      "entity": "sensor.vehicle_rpm",
+                      "state_not": "unknown"
+                    }
+                  ],
+                  "card": {
+                    "type": "gauge",
+                    "entity": "sensor.vehicle_rpm",
+                    "needle": true,
+                    "max": 2500,
+                    "severity": {
+                      "green": 0,
+                      "yellow": 2000,
+                      "red": 2450
+                    }
+                  }
                 },
                 {
-                  "type": "gauge",
-                  "entity": "sensor.vehicle_speed",
-                  "needle": true,
-                  "severity": {
-                    "green": 0,
-                    "yellow": 65,
-                    "red": 75
+                  "type": "conditional",
+                  "conditions": [
+                    {
+                      "condition": "state",
+                      "entity": "sensor.vehicle_speed",
+                      "state_not": "unavailable"
+                    },
+                    {
+                      "condition": "state",
+                      "entity": "sensor.vehicle_speed",
+                      "state_not": "unknown"
+                    }
+                  ],
+                  "card": {
+                    "type": "gauge",
+                    "entity": "sensor.vehicle_speed",
+                    "needle": true,
+                    "severity": {
+                      "green": 0,
+                      "yellow": 65,
+                      "red": 75
+                    }
                   }
                 }
               ],
@@ -966,25 +1069,56 @@
                   "icon": "mdi:fan"
                 },
                 {
-                  "show_name": true,
-                  "show_icon": true,
-                  "show_state": true,
-                  "type": "glance",
-                  "entities": [
+                  "type": "conditional",
+                  "conditions": [
                     {
-                      "entity": "sensor.min_temperature"
-                    },
-                    {
-                      "entity": "sensor.max_temperature"
-                    },
-                    {
-                      "entity": "sensor.thermostat_ambient_status"
-                    },
-                    {
-                      "entity": "sensor.inside_temperature"
+                      "condition": "or",
+                      "conditions": [
+                        {
+                          "condition": "state",
+                          "entity": "sensor.min_temperature",
+                          "state_not": "unavailable"
+                        },
+                        {
+                          "condition": "state",
+                          "entity": "sensor.max_temperature",
+                          "state_not": "unavailable"
+                        },
+                        {
+                          "condition": "state",
+                          "entity": "sensor.thermostat_ambient_status",
+                          "state_not": "unavailable"
+                        },
+                        {
+                          "condition": "state",
+                          "entity": "sensor.inside_temperature",
+                          "state_not": "unavailable"
+                        }
+                      ]
                     }
                   ],
-                  "state_color": true
+                  "card": {
+                    "type": "glance",
+                    "title": "Temperature Overview",
+                    "show_name": true,
+                    "show_icon": true,
+                    "show_state": true,
+                    "state_color": true,
+                    "entities": [
+                      {
+                        "entity": "sensor.min_temperature"
+                      },
+                      {
+                        "entity": "sensor.max_temperature"
+                      },
+                      {
+                        "entity": "sensor.thermostat_ambient_status"
+                      },
+                      {
+                        "entity": "sensor.inside_temperature"
+                      }
+                    ]
+                  }
                 },
                 {
                   "square": false,
@@ -1067,29 +1201,64 @@
                   "state_color": true
                 },
                 {
-                  "show_name": true,
-                  "show_icon": true,
-                  "show_state": true,
-                  "type": "glance",
-                  "entities": [
+                  "type": "conditional",
+                  "conditions": [
                     {
-                      "entity": "switch.heat"
-                    },
-                    {
-                      "entity": "switch.heat_1"
-                    },
-                    {
-                      "entity": "switch.heat_2"
-                    },
-                    {
-                      "entity": "switch.heat_3"
-                    },
-                    {
-                      "entity": "switch.heat_4"
+                      "condition": "or",
+                      "conditions": [
+                        {
+                          "condition": "state",
+                          "entity": "switch.heat",
+                          "state_not": "unavailable"
+                        },
+                        {
+                          "condition": "state",
+                          "entity": "switch.heat_1",
+                          "state_not": "unavailable"
+                        },
+                        {
+                          "condition": "state",
+                          "entity": "switch.heat_2",
+                          "state_not": "unavailable"
+                        },
+                        {
+                          "condition": "state",
+                          "entity": "switch.heat_3",
+                          "state_not": "unavailable"
+                        },
+                        {
+                          "condition": "state",
+                          "entity": "switch.heat_4",
+                          "state_not": "unavailable"
+                        }
+                      ]
                     }
                   ],
-                  "title": "Heat Pumps",
-                  "state_color": true
+                  "card": {
+                    "type": "glance",
+                    "title": "Heat Pumps",
+                    "show_name": true,
+                    "show_icon": true,
+                    "show_state": true,
+                    "state_color": true,
+                    "entities": [
+                      {
+                        "entity": "switch.heat"
+                      },
+                      {
+                        "entity": "switch.heat_1"
+                      },
+                      {
+                        "entity": "switch.heat_2"
+                      },
+                      {
+                        "entity": "switch.heat_3"
+                      },
+                      {
+                        "entity": "switch.heat_4"
+                      }
+                    ]
+                  }
                 },
                 {
                   "type": "entities",
@@ -1126,29 +1295,64 @@
                   "icon": "mdi:air-conditioner"
                 },
                 {
-                  "show_name": true,
-                  "show_icon": true,
-                  "show_state": true,
-                  "type": "glance",
-                  "entities": [
+                  "type": "conditional",
+                  "conditions": [
                     {
-                      "entity": "switch.air_conditioning"
-                    },
-                    {
-                      "entity": "switch.front_ac"
-                    },
-                    {
-                      "entity": "switch.ac_2"
-                    },
-                    {
-                      "entity": "switch.ac_3"
-                    },
-                    {
-                      "entity": "switch.ac_4"
+                      "condition": "or",
+                      "conditions": [
+                        {
+                          "condition": "state",
+                          "entity": "switch.air_conditioning",
+                          "state_not": "unavailable"
+                        },
+                        {
+                          "condition": "state",
+                          "entity": "switch.front_ac",
+                          "state_not": "unavailable"
+                        },
+                        {
+                          "condition": "state",
+                          "entity": "switch.ac_2",
+                          "state_not": "unavailable"
+                        },
+                        {
+                          "condition": "state",
+                          "entity": "switch.ac_3",
+                          "state_not": "unavailable"
+                        },
+                        {
+                          "condition": "state",
+                          "entity": "switch.ac_4",
+                          "state_not": "unavailable"
+                        }
+                      ]
                     }
                   ],
-                  "state_color": true,
-                  "title": "Air Conditioning"
+                  "card": {
+                    "type": "glance",
+                    "title": "Air Conditioning",
+                    "show_name": true,
+                    "show_icon": true,
+                    "show_state": true,
+                    "state_color": true,
+                    "entities": [
+                      {
+                        "entity": "switch.air_conditioning"
+                      },
+                      {
+                        "entity": "switch.front_ac"
+                      },
+                      {
+                        "entity": "switch.ac_2"
+                      },
+                      {
+                        "entity": "switch.ac_3"
+                      },
+                      {
+                        "entity": "switch.ac_4"
+                      }
+                    ]
+                  }
                 }
               ]
             },
@@ -1161,9 +1365,26 @@
                   "heading": "Local Weather"
                 },
                 {
-                  "type": "weather-forecast",
-                  "entity": "weather.foretravel",
-                  "forecast_type": "daily"
+                  "type": "conditional",
+                  "conditions": [
+                    {
+                      "condition": "state",
+                      "entity": "weather.foretravel",
+                      "state_not": "unavailable"
+                    },
+                    {
+                      "condition": "state",
+                      "entity": "weather.foretravel",
+                      "state_not": "unknown"
+                    }
+                  ],
+                  "card": {
+                    "type": "weather-forecast",
+                    "entity": "weather.foretravel",
+                    "forecast_type": "daily",
+                    "show_current": true,
+                    "show_forecast": false
+                  }
                 },
                 {
                   "type": "picture",
@@ -1431,24 +1652,6 @@
               "columns": 2
             },
             {
-              "show_name": true,
-              "show_icon": true,
-              "show_state": true,
-              "type": "glance",
-              "entities": [
-                {
-                  "entity": "cover.windshield_day"
-                },
-                {
-                  "entity": "cover.driver_day"
-                },
-                {
-                  "entity": "cover.entry_door_day"
-                }
-              ],
-              "state_color": true
-            },
-            {
               "type": "custom:mushroom-chips-card",
               "chips": [
                 {
@@ -1500,6 +1703,45 @@
                   }
                 }
               ]
+            },
+            {
+              "type": "conditional",
+              "conditions": [
+                {
+                  "condition": "state",
+                  "entity": "cover.windshield_day",
+                  "state_not": "unavailable"
+                },
+                {
+                  "condition": "state",
+                  "entity": "cover.driver_day",
+                  "state_not": "unavailable"
+                },
+                {
+                  "condition": "state",
+                  "entity": "cover.entry_door_day",
+                  "state_not": "unavailable"
+                }
+              ],
+              "card": {
+                "show_name": true,
+                "show_icon": true,
+                "show_state": true,
+                "type": "glance",
+                "state_color": true,
+                "entities": [
+                  {
+                    "entity": "cover.windshield_day"
+                  },
+                  {
+                    "entity": "cover.driver_day"
+                  },
+                  {
+                    "entity": "cover.entry_door_day"
+                  }
+                ],
+                "title": "Cockpit Day Shades"
+              }
             },
             {
               "show_name": true,
@@ -1582,16 +1824,12 @@
               "type": "glance",
               "entities": [
                 {
-                  "entity": "cover.bedroom_dresser_night",
-                  "name": "Dresser Night"
+                  "entity": "cover.d_s_living_room_night",
+                  "name": "D/S Slide Night"
                 },
                 {
-                  "entity": "cover.bedroom_front_night",
-                  "name": "Bed Front Night"
-                },
-                {
-                  "entity": "cover.bedroom_rear_night",
-                  "name": "Bed Rear Night"
+                  "entity": "cover.dinette_night",
+                  "name": "P/S Slide Night"
                 }
               ],
               "state_color": true
@@ -1603,12 +1841,16 @@
               "type": "glance",
               "entities": [
                 {
-                  "entity": "cover.d_s_living_room_night",
-                  "name": "D/S Slide Night"
+                  "entity": "cover.bedroom_dresser_night",
+                  "name": "Dresser Night"
                 },
                 {
-                  "entity": "cover.dinette_night",
-                  "name": "P/S Slide Night"
+                  "entity": "cover.bedroom_front_night",
+                  "name": "Bed Front Night"
+                },
+                {
+                  "entity": "cover.bedroom_rear_night",
+                  "name": "Bed Rear Night"
                 }
               ],
               "state_color": true
