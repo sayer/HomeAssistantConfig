@@ -242,57 +242,69 @@
                   "title": "Battereis"
                 },
                 {
-                  "type": "conditional",
-                  "conditions": [
+                  "type": "vertical-stack",
+                  "cards": [
                     {
-                      "condition": "state",
-                      "entity": "sensor.outback1_voltage",
-                      "state_not": "unavailable"
+                      "type": "custom:auto-entities",
+                      "card": {
+                        "type": "grid",
+                        "title": "Outback Inverters",
+                        "square": false,
+                        "columns": 4
+                      },
+                      "filter": {
+                        "include": [
+                          {
+                            "entity_id": [
+                              "sensor.outback1_voltage",
+                              "sensor.outback1_ac_mode",
+                              "sensor.outback1_inverter_mode",
+                              "sensor.outback2_voltage"
+                            ]
+                          }
+                        ],
+                        "exclude": [
+                          {
+                            "state": "unavailable"
+                          },
+                          {
+                            "state": "unknown"
+                          }
+                        ]
+                      },
+                      "card_param": "cards",
+                      "card_type": "gauge"
                     },
                     {
-                      "condition": "state",
-                      "entity": "sensor.outback1_voltage",
-                      "state_not": "unknown"
-                    }
-                  ],
-                  "card": {
-                    "type": "grid",
-                    "title": "Outback Inverters",
-                    "square": false,
-                    "columns": 4,
-                    "cards": [
-                      {
-                        "type": "gauge",
-                        "entity": "sensor.outback1_voltage",
-                        "min": 0,
-                        "max": 15,
-                        "needle": true,
-                        "name": "House Battery",
-                        "unit": "V"
-                      },
-                      {
-                        "type": "gauge",
-                        "entity": "sensor.outback1_ac_mode",
-                        "min": 0,
-                        "max": 15,
-                        "needle": true
-                      },
-                      {
-                        "type": "gauge",
-                        "entity": "sensor.outback1_inverter_mode",
-                        "min": 0,
-                        "max": 15,
-                        "needle": true
-                      },
-                      {
-                        "type": "gauge",
-                        "entity": "sensor.outback2_voltage",
-                        "min": 0,
-                        "max": 15,
-                        "needle": true
+                      "type": "conditional",
+                      "conditions": [
+                        {
+                          "condition": "state",
+                          "entity": "sensor.outback1_voltage",
+                          "state": "unavailable"
+                        },
+                        {
+                          "condition": "state",
+                          "entity": "sensor.outback1_ac_mode",
+                          "state": "unavailable"
+                        },
+                        {
+                          "condition": "state",
+                          "entity": "sensor.outback1_inverter_mode",
+                          "state": "unavailable"
+                        },
+                        {
+                          "condition": "state",
+                          "entity": "sensor.outback2_voltage",
+                          "state": "unavailable"
+                        }
+                      ],
+                      "card": {
+                        "type": "markdown",
+                        "content": "**No Outback inverter data available.**\n"
                       }
-                    ]
-                  }
+                    }
+                  ]
                 },
                 {
                   "square": false,
@@ -416,67 +428,65 @@
               "type": "grid",
               "cards": [
                 {
-                  "type": "conditional",
-                  "conditions": [
+                  "type": "vertical-stack",
+                  "cards": [
                     {
-                      "condition": "or",
+                      "type": "conditional",
                       "conditions": [
                         {
-                          "condition": "state",
-                          "entity": "sensor.parking_brake",
-                          "state_not": "unavailable"
-                        },
+                          "condition": "or",
+                          "conditions": [
+                            {
+                              "condition": "state",
+                              "entity": "sensor.parking_brake",
+                              "state_not": "unavailable"
+                            },
+                            {
+                              "condition": "state",
+                              "entity": "sensor.transmision_gear",
+                              "state_not": "unavailable"
+                            },
+                            {
+                              "condition": "state",
+                              "entity": "sensor.vehicle_speed",
+                              "state_not": "unavailable"
+                            }
+                          ]
+                        }
+                      ],
+                      "card": {
+                        "type": "glance",
+                        "title": "Vehicle Sensors",
+                        "show_name": true,
+                        "show_icon": true,
+                        "show_state": true,
+                        "state_color": true,
+                        "entities": [
+                          "sensor.parking_brake",
+                          "sensor.transmision_gear",
+                          "sensor.vehicle_speed"
+                        ]
+                      }
+                    },
+                    {
+                      "type": "glance",
+                      "title": "Vehicle State",
+                      "show_name": true,
+                      "show_icon": true,
+                      "show_state": true,
+                      "state_color": true,
+                      "entities": [
                         {
-                          "condition": "state",
-                          "entity": "sensor.transmision_gear",
-                          "state_not": "unavailable"
-                        },
-                        {
-                          "condition": "state",
-                          "entity": "sensor.vehicle_speed",
-                          "state_not": "unavailable"
-                        },
-                        {
-                          "condition": "state",
                           "entity": "input_boolean.busparked",
-                          "state_not": "unavailable"
+                          "name": "Parked"
                         },
                         {
-                          "condition": "state",
                           "entity": "input_boolean.camping",
-                          "state_not": "unavailable"
+                          "name": "Camping"
                         }
                       ]
                     }
-                  ],
-                  "card": {
-                    "type": "glance",
-                    "title": "Vehicle Info",
-                    "show_name": true,
-                    "show_icon": true,
-                    "show_state": true,
-                    "state_color": true,
-                    "entities": [
-                      {
-                        "entity": "sensor.parking_brake"
-                      },
-                      {
-                        "entity": "sensor.transmision_gear",
-                        "name": "Gear"
-                      },
-                      {
-                        "entity": "sensor.vehicle_speed",
-                        "name": "Speed"
-                      },
-                      {
-                        "entity": "input_boolean.busparked",
-                        "name": "Parked"
-                      },
-                      {
-                        "entity": "input_boolean.camping"
-                      }
-                    ]
-                  }
+                  ]
                 },
                 {
                   "show_name": true,
@@ -833,28 +843,53 @@
               "type": "grid",
               "cards": [
                 {
-                  "show_name": true,
-                  "show_icon": true,
-                  "show_state": true,
-                  "type": "glance",
-                  "entities": [
-                    {
-                      "entity": "sensor.parking_brake"
-                    },
-                    {
-                      "entity": "sensor.transmision_gear",
-                      "name": "Gear"
-                    },
-                    {
-                      "entity": "input_boolean.busparked",
-                      "name": "Parked"
-                    },
-                    {
-                      "entity": "input_boolean.camping"
+                  "type": "custom:auto-entities",
+                  "card": {
+                    "type": "glance",
+                    "title": "Vehicle Status",
+                    "show_name": true,
+                    "show_icon": true,
+                    "show_state": true,
+                    "state_color": true,
+                    "columns": 2,
+                    "card_mod": {
+                      "style": ".card-header {\n  font-size: 14px;\n}\n"
                     }
-                  ],
-                  "state_color": true,
-                  "columns": 2
+                  },
+                  "filter": {
+                    "include": [
+                      {
+                        "entity_id": "sensor.parking_brake"
+                      },
+                      {
+                        "entity_id": "sensor.transmision_gear",
+                        "options": {
+                          "name": "Gear"
+                        }
+                      },
+                      {
+                        "entity_id": "input_boolean.busparked",
+                        "options": {
+                          "name": "Parked"
+                        }
+                      },
+                      {
+                        "entity_id": "input_boolean.camping"
+                      }
+                    ],
+                    "exclude": [
+                      {
+                        "state": "unavailable"
+                      },
+                      {
+                        "state": "unknown"
+                      },
+                      {
+                        "state": "undefined"
+                      }
+                    ]
+                  },
+                  "show_empty": false
                 },
                 {
                   "type": "heading",
@@ -997,31 +1032,433 @@
                   "heading": "Tanks"
                 },
                 {
-                  "show_name": true,
-                  "show_icon": true,
-                  "show_state": true,
-                  "type": "glance",
-                  "entities": [
+                  "type": "vertical-stack",
+                  "cards": [
                     {
-                      "entity": "sensor.fresh_water"
+                      "type": "markdown",
+                      "content": "## <span style=\"color: white; background-color: #222222; padding: 6px 12px; border-radius: 6px;\">Tanks</span>\n",
+                      "style": "ha-markdown {\n  padding: 0 0 12px 0;\n}\n"
                     },
                     {
-                      "entity": "sensor.black_tank"
+                      "type": "grid",
+                      "columns": 2,
+                      "square": false,
+                      "cards": [
+                        {
+                          "type": "custom:button-card",
+                          "entity": "sensor.fresh_water",
+                          "name": "Fresh Water",
+                          "show_state": true,
+                          "show_icon": true,
+                          "layout": "icon_name_state",
+                          "state_display": "[[[ return Math.round(entity.state) + '%'; ]]]\n",
+                          "styles": {
+                            "card": [
+                              {
+                                "border-radius": "12px"
+                              },
+                              {
+                                "padding": "12px"
+                              },
+                              {
+                                "background-color": "var(--card-background-color)"
+                              },
+                              {
+                                "box-shadow": "none"
+                              },
+                              {
+                                "margin-bottom": "8px"
+                              }
+                            ],
+                            "name": [
+                              {
+                                "font-size": "14px"
+                              },
+                              {
+                                "font-weight": "bold"
+                              }
+                            ],
+                            "state": [
+                              {
+                                "font-size": "12px"
+                              }
+                            ],
+                            "icon": [
+                              {
+                                "color": "var(--primary-text-color)"
+                              }
+                            ]
+                          },
+                          "state": [
+                            {
+                              "operator": "<",
+                              "value": 25,
+                              "styles": {
+                                "card": [
+                                  {
+                                    "background-color": "red"
+                                  },
+                                  {
+                                    "color": "white"
+                                  }
+                                ]
+                              },
+                              "icon": "mdi:water-alert"
+                            },
+                            {
+                              "operator": ">=",
+                              "value": 25,
+                              "icon": "mdi:water"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "custom:button-card",
+                          "entity": "sensor.black_tank",
+                          "name": "Black Tank",
+                          "show_state": true,
+                          "show_icon": true,
+                          "layout": "icon_name_state",
+                          "state_display": "[[[ return Math.round(entity.state) + '%'; ]]]\n",
+                          "styles": {
+                            "card": [
+                              {
+                                "border-radius": "12px"
+                              },
+                              {
+                                "padding": "12px"
+                              },
+                              {
+                                "background-color": "var(--card-background-color)"
+                              },
+                              {
+                                "box-shadow": "none"
+                              },
+                              {
+                                "margin-bottom": "8px"
+                              }
+                            ],
+                            "name": [
+                              {
+                                "font-size": "14px"
+                              },
+                              {
+                                "font-weight": "bold"
+                              }
+                            ],
+                            "state": [
+                              {
+                                "font-size": "12px"
+                              }
+                            ],
+                            "icon": [
+                              {
+                                "color": "var(--primary-text-color)"
+                              }
+                            ]
+                          },
+                          "state": [
+                            {
+                              "operator": ">",
+                              "value": 75,
+                              "styles": {
+                                "card": [
+                                  {
+                                    "background-color": "red"
+                                  },
+                                  {
+                                    "color": "white"
+                                  }
+                                ]
+                              },
+                              "icon": "mdi:alert-circle"
+                            },
+                            {
+                              "operator": "<=",
+                              "value": 75,
+                              "icon": "mdi:delete-empty"
+                            }
+                          ]
+                        }
+                      ]
                     },
                     {
-                      "entity": "switch.water_autofill"
+                      "type": "markdown",
+                      "content": "## <span style=\"color: white; background-color: #222222; padding: 6px 12px; border-radius: 6px;\">Controls</span>\n",
+                      "style": "ha-markdown {\n  padding: 0 0 12px 0;\n}\n"
                     },
                     {
-                      "entity": "switch.gray_water_bypass"
-                    },
-                    {
-                      "entity": "switch.black_waste_dump"
-                    },
-                    {
-                      "entity": "switch.water_pump"
+                      "type": "grid",
+                      "columns": 2,
+                      "square": false,
+                      "cards": [
+                        {
+                          "type": "custom:button-card",
+                          "entity": "switch.water_autofill",
+                          "name": "Autofill",
+                          "show_state": true,
+                          "show_icon": true,
+                          "layout": "icon_name_state",
+                          "styles": {
+                            "card": [
+                              {
+                                "border-radius": "12px"
+                              },
+                              {
+                                "padding": "12px"
+                              },
+                              {
+                                "background-color": "var(--card-background-color)"
+                              },
+                              {
+                                "box-shadow": "none"
+                              }
+                            ],
+                            "name": [
+                              {
+                                "font-size": "14px"
+                              },
+                              {
+                                "font-weight": "bold"
+                              }
+                            ],
+                            "state": [
+                              {
+                                "font-size": "12px"
+                              }
+                            ],
+                            "icon": [
+                              {
+                                "color": "var(--primary-text-color)"
+                              }
+                            ]
+                          },
+                          "state": [
+                            {
+                              "value": "on",
+                              "icon": "mdi:water-pump",
+                              "styles": {
+                                "icon": [
+                                  {
+                                    "color": "var(--accent-color)"
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "value": "off",
+                              "icon": "mdi:water-pump-off",
+                              "styles": {
+                                "icon": [
+                                  {
+                                    "color": "gray"
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "custom:button-card",
+                          "entity": "switch.gray_water_bypass",
+                          "name": "Gray Bypass",
+                          "show_state": true,
+                          "show_icon": true,
+                          "layout": "icon_name_state",
+                          "styles": {
+                            "card": [
+                              {
+                                "border-radius": "12px"
+                              },
+                              {
+                                "padding": "12px"
+                              },
+                              {
+                                "background-color": "var(--card-background-color)"
+                              },
+                              {
+                                "box-shadow": "none"
+                              }
+                            ],
+                            "name": [
+                              {
+                                "font-size": "14px"
+                              },
+                              {
+                                "font-weight": "bold"
+                              }
+                            ],
+                            "state": [
+                              {
+                                "font-size": "12px"
+                              }
+                            ],
+                            "icon": [
+                              {
+                                "color": "var(--primary-text-color)"
+                              }
+                            ]
+                          },
+                          "state": [
+                            {
+                              "value": "on",
+                              "icon": "mdi:pipe",
+                              "styles": {
+                                "icon": [
+                                  {
+                                    "color": "var(--accent-color)"
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "value": "off",
+                              "icon": "mdi:pipe-disconnected",
+                              "styles": {
+                                "icon": [
+                                  {
+                                    "color": "gray"
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "custom:button-card",
+                          "entity": "switch.black_waste_dump",
+                          "name": "Black Dump",
+                          "show_state": true,
+                          "show_icon": true,
+                          "layout": "icon_name_state",
+                          "styles": {
+                            "card": [
+                              {
+                                "border-radius": "12px"
+                              },
+                              {
+                                "padding": "12px"
+                              },
+                              {
+                                "background-color": "var(--card-background-color)"
+                              },
+                              {
+                                "box-shadow": "none"
+                              }
+                            ],
+                            "name": [
+                              {
+                                "font-size": "14px"
+                              },
+                              {
+                                "font-weight": "bold"
+                              }
+                            ],
+                            "state": [
+                              {
+                                "font-size": "12px"
+                              }
+                            ],
+                            "icon": [
+                              {
+                                "color": "var(--primary-text-color)"
+                              }
+                            ]
+                          },
+                          "state": [
+                            {
+                              "value": "on",
+                              "icon": "mdi:trash-can",
+                              "styles": {
+                                "icon": [
+                                  {
+                                    "color": "var(--accent-color)"
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "value": "off",
+                              "icon": "mdi:trash-can-outline",
+                              "styles": {
+                                "icon": [
+                                  {
+                                    "color": "gray"
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "custom:button-card",
+                          "entity": "switch.water_pump",
+                          "name": "Water Pump",
+                          "show_state": true,
+                          "show_icon": true,
+                          "layout": "icon_name_state",
+                          "styles": {
+                            "card": [
+                              {
+                                "border-radius": "12px"
+                              },
+                              {
+                                "padding": "12px"
+                              },
+                              {
+                                "background-color": "var(--card-background-color)"
+                              },
+                              {
+                                "box-shadow": "none"
+                              }
+                            ],
+                            "name": [
+                              {
+                                "font-size": "14px"
+                              },
+                              {
+                                "font-weight": "bold"
+                              }
+                            ],
+                            "state": [
+                              {
+                                "font-size": "12px"
+                              }
+                            ],
+                            "icon": [
+                              {
+                                "color": "var(--primary-text-color)"
+                              }
+                            ]
+                          },
+                          "state": [
+                            {
+                              "value": "on",
+                              "icon": "mdi:water-pump",
+                              "styles": {
+                                "icon": [
+                                  {
+                                    "color": "var(--accent-color)"
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "value": "off",
+                              "icon": "mdi:water-pump-off",
+                              "styles": {
+                                "icon": [
+                                  {
+                                    "color": "gray"
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      ]
                     }
-                  ],
-                  "columns": 2
+                  ]
                 }
               ]
             },
@@ -1201,64 +1638,75 @@
                   "state_color": true
                 },
                 {
-                  "type": "conditional",
-                  "conditions": [
+                  "type": "vertical-stack",
+                  "cards": [
                     {
-                      "condition": "or",
+                      "type": "custom:auto-entities",
+                      "card": {
+                        "type": "glance",
+                        "title": "Heat Pumps",
+                        "show_name": true,
+                        "show_icon": true,
+                        "show_state": true,
+                        "state_color": true
+                      },
+                      "filter": {
+                        "include": [
+                          {
+                            "entity_id": [
+                              "switch.heat",
+                              "switch.heat_1",
+                              "switch.heat_2",
+                              "switch.heat_3",
+                              "switch.heat_4"
+                            ]
+                          }
+                        ],
+                        "exclude": [
+                          {
+                            "state": "unavailable"
+                          },
+                          {
+                            "state": "unknown"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "type": "conditional",
                       "conditions": [
                         {
                           "condition": "state",
                           "entity": "switch.heat",
-                          "state_not": "unavailable"
+                          "state": "unavailable"
                         },
                         {
                           "condition": "state",
                           "entity": "switch.heat_1",
-                          "state_not": "unavailable"
+                          "state": "unavailable"
                         },
                         {
                           "condition": "state",
                           "entity": "switch.heat_2",
-                          "state_not": "unavailable"
+                          "state": "unavailable"
                         },
                         {
                           "condition": "state",
                           "entity": "switch.heat_3",
-                          "state_not": "unavailable"
+                          "state": "unavailable"
                         },
                         {
                           "condition": "state",
                           "entity": "switch.heat_4",
-                          "state_not": "unavailable"
+                          "state": "unavailable"
                         }
-                      ]
-                    }
-                  ],
-                  "card": {
-                    "type": "glance",
-                    "title": "Heat Pumps",
-                    "show_name": true,
-                    "show_icon": true,
-                    "show_state": true,
-                    "state_color": true,
-                    "entities": [
-                      {
-                        "entity": "switch.heat"
-                      },
-                      {
-                        "entity": "switch.heat_1"
-                      },
-                      {
-                        "entity": "switch.heat_2"
-                      },
-                      {
-                        "entity": "switch.heat_3"
-                      },
-                      {
-                        "entity": "switch.heat_4"
+                      ],
+                      "card": {
+                        "type": "markdown",
+                        "content": "**Please turn on Heat with thermostat.**\n"
                       }
-                    ]
-                  }
+                    }
+                  ]
                 },
                 {
                   "type": "entities",
@@ -1295,64 +1743,78 @@
                   "icon": "mdi:air-conditioner"
                 },
                 {
-                  "type": "conditional",
-                  "conditions": [
+                  "type": "vertical-stack",
+                  "cards": [
                     {
-                      "condition": "or",
+                      "type": "custom:auto-entities",
+                      "card": {
+                        "type": "glance",
+                        "title": "Air Conditioning",
+                        "show_name": true,
+                        "show_icon": true,
+                        "show_state": true,
+                        "state_color": true
+                      },
+                      "filter": {
+                        "include": [
+                          {
+                            "options": {},
+                            "entity_id": [
+                              "switch.air_conditioning",
+                              "switch.front_ac",
+                              "switch.ac_2",
+                              "switch.ac_3",
+                              "switch.ac_4"
+                            ]
+                          }
+                        ],
+                        "exclude": [
+                          {
+                            "options": {},
+                            "state": "unavailable"
+                          },
+                          {
+                            "options": {},
+                            "state": "unknown"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "type": "conditional",
                       "conditions": [
                         {
                           "condition": "state",
                           "entity": "switch.air_conditioning",
-                          "state_not": "unavailable"
+                          "state": "unavailable"
                         },
                         {
                           "condition": "state",
                           "entity": "switch.front_ac",
-                          "state_not": "unavailable"
+                          "state": "unavailable"
                         },
                         {
                           "condition": "state",
                           "entity": "switch.ac_2",
-                          "state_not": "unavailable"
+                          "state": "unavailable"
                         },
                         {
                           "condition": "state",
                           "entity": "switch.ac_3",
-                          "state_not": "unavailable"
+                          "state": "unavailable"
                         },
                         {
                           "condition": "state",
                           "entity": "switch.ac_4",
-                          "state_not": "unavailable"
+                          "state": "unavailable"
                         }
-                      ]
-                    }
-                  ],
-                  "card": {
-                    "type": "glance",
-                    "title": "Air Conditioning",
-                    "show_name": true,
-                    "show_icon": true,
-                    "show_state": true,
-                    "state_color": true,
-                    "entities": [
-                      {
-                        "entity": "switch.air_conditioning"
-                      },
-                      {
-                        "entity": "switch.front_ac"
-                      },
-                      {
-                        "entity": "switch.ac_2"
-                      },
-                      {
-                        "entity": "switch.ac_3"
-                      },
-                      {
-                        "entity": "switch.ac_4"
+                      ],
+                      "card": {
+                        "type": "markdown",
+                        "content": "**Please turn on Cool mode with the thermostat.**\n"
                       }
-                    ]
-                  }
+                    }
+                  ]
                 }
               ]
             },
@@ -1536,10 +1998,13 @@
               "columns": 2
             },
             {
+              "type": "glance",
+              "title": "Bedroom",
               "show_name": true,
               "show_icon": true,
               "show_state": false,
-              "type": "glance",
+              "state_color": true,
+              "columns": 2,
               "entities": [
                 {
                   "entity": "light.bedroom_lights"
@@ -1560,9 +2025,6 @@
                   "entity": "light.bedroom_dresser_accent"
                 },
                 {
-                  "entity": "light.bedroom_dresser_accent"
-                },
-                {
                   "entity": "light.dimmer_3_21"
                 },
                 {
@@ -1571,10 +2033,7 @@
                 {
                   "entity": "light.bedroom_sconce"
                 }
-              ],
-              "title": "Bedroom",
-              "state_color": true,
-              "columns": 2
+              ]
             },
             {
               "show_name": true,
@@ -1705,43 +2164,73 @@
               ]
             },
             {
-              "type": "conditional",
-              "conditions": [
+              "type": "vertical-stack",
+              "cards": [
                 {
-                  "condition": "state",
-                  "entity": "cover.windshield_day",
-                  "state_not": "unavailable"
+                  "type": "markdown",
+                  "content": "## Cockpit Day Shades\n",
+                  "style": "ha-markdown {\n  padding: 0 0 8px 0;\n  font-weight: bold;\n}\n"
                 },
                 {
-                  "condition": "state",
-                  "entity": "cover.driver_day",
-                  "state_not": "unavailable"
-                },
-                {
-                  "condition": "state",
-                  "entity": "cover.entry_door_day",
-                  "state_not": "unavailable"
+                  "type": "grid",
+                  "columns": 3,
+                  "square": false,
+                  "cards": [
+                    {
+                      "type": "glance",
+                      "show_name": true,
+                      "show_icon": true,
+                      "show_state": true,
+                      "state_color": true,
+                      "columns": 1,
+                      "entities": [
+                        {
+                          "entity": "cover.windshield_day"
+                        }
+                      ],
+                      "style": "ha-card {\n  margin: 0 !important;\n  box-shadow: none !important;\n  background: transparent !important;\n}\n"
+                    },
+                    {
+                      "type": "glance",
+                      "show_name": true,
+                      "show_icon": true,
+                      "show_state": true,
+                      "state_color": true,
+                      "columns": 1,
+                      "entities": [
+                        {
+                          "entity": "cover.driver_day"
+                        }
+                      ],
+                      "style": "ha-card {\n  margin: 0 !important;\n  box-shadow: none !important;\n  background: transparent !important;\n}\n"
+                    },
+                    {
+                      "type": "conditional",
+                      "conditions": [
+                        {
+                          "condition": "state",
+                          "entity": "cover.entry_door_day",
+                          "state_not": "unavailable"
+                        }
+                      ],
+                      "card": {
+                        "type": "glance",
+                        "show_name": true,
+                        "show_icon": true,
+                        "show_state": true,
+                        "state_color": true,
+                        "columns": 1,
+                        "entities": [
+                          {
+                            "entity": "cover.entry_door_day"
+                          }
+                        ],
+                        "style": "ha-card {\n  margin: 0 !important;\n  box-shadow: none !important;\n  background: transparent !important;\n}\n"
+                      }
+                    }
+                  ]
                 }
-              ],
-              "card": {
-                "show_name": true,
-                "show_icon": true,
-                "show_state": true,
-                "type": "glance",
-                "state_color": true,
-                "entities": [
-                  {
-                    "entity": "cover.windshield_day"
-                  },
-                  {
-                    "entity": "cover.driver_day"
-                  },
-                  {
-                    "entity": "cover.entry_door_day"
-                  }
-                ],
-                "title": "Cockpit Day Shades"
-              }
+              ]
             },
             {
               "show_name": true,
@@ -1768,7 +2257,7 @@
               "type": "glance",
               "entities": [
                 {
-                  "entity": "cover.d_s_living_room_day",
+                  "entity": "cover.ds_so_day_shades",
                   "name": "D/S Slide Day"
                 },
                 {
@@ -1824,7 +2313,7 @@
               "type": "glance",
               "entities": [
                 {
-                  "entity": "cover.d_s_living_room_night",
+                  "entity": "cover.ds_so_night_shades",
                   "name": "D/S Slide Night"
                 },
                 {
@@ -2101,15 +2590,36 @@
                   "heading": "Generator"
                 },
                 {
-                  "square": true,
                   "type": "grid",
+                  "square": true,
+                  "columns": 2,
                   "cards": [
                     {
-                      "type": "gauge",
-                      "entity": "sensor.generator_2",
-                      "name": "Generator RPM",
-                      "max": 2000,
-                      "needle": true
+                      "type": "conditional",
+                      "conditions": [
+                        {
+                          "condition": "state",
+                          "entity": "sensor.generator_2",
+                          "state_not": "0"
+                        },
+                        {
+                          "condition": "state",
+                          "entity": "sensor.generator_2",
+                          "state_not": "unavailable"
+                        },
+                        {
+                          "condition": "state",
+                          "entity": "sensor.generator_2",
+                          "state_not": "unknown"
+                        }
+                      ],
+                      "card": {
+                        "type": "gauge",
+                        "entity": "sensor.generator_2",
+                        "name": "Generator RPM",
+                        "max": 2000,
+                        "needle": true
+                      }
                     },
                     {
                       "type": "custom:mushroom-entity-card",
@@ -2122,6 +2632,17 @@
                       "icon": "mdi:turbine"
                     },
                     {
+                      "type": "custom:mushroom-template-card",
+                      "entity": "switch.generator",
+                      "primary": "{{ 'Stop Generator' if is_state('switch.generator', 'on') else 'Start Generator' }}\n",
+                      "icon": "{{ 'mdi:stop-circle' if is_state('switch.generator', 'on') else 'mdi:play-circle' }}\n",
+                      "icon_color": "{{ 'red' if is_state('switch.generator', 'on') else 'green' }}\n",
+                      "tap_action": {
+                        "action": "toggle"
+                      },
+                      "fill_container": true
+                    },
+                    {
                       "type": "custom:mushroom-entity-card",
                       "entity": "sensor.generator_hours",
                       "name": "Total Hours",
@@ -2130,12 +2651,12 @@
                     },
                     {
                       "type": "custom:mushroom-entity-card",
-                      "entity": "sensor.generator_current_run_time",
+                      "entity": "sensor.generator_session_display",
+                      "name": "Session Time",
                       "fill_container": true,
                       "icon": "mdi:av-timer"
                     }
-                  ],
-                  "columns": 2
+                  ]
                 },
                 {
                   "show_name": true,
@@ -2636,9 +3157,6 @@
                   "entity": "switch.generator"
                 },
                 {
-                  "entity": "binary_sensor.samjin_multi"
-                },
-                {
                   "entity": "sensor.generator_hours"
                 },
                 {
@@ -2661,6 +3179,45 @@
                 },
                 {
                   "entity": "climate.kitchen"
+                },
+                {
+                  "entity": "sensor.chassis_battery"
+                },
+                {
+                  "entity": "sensor.dc_house_voltage"
+                },
+                {
+                  "entity": "sensor.smartbmv_battery"
+                },
+                {
+                  "entity": "sensor.ac_source"
+                },
+                {
+                  "entity": "sensor.generator_oil_level_shutdown_alert"
+                },
+                {
+                  "entity": "sensor.generator_temperature_shutdown_alert"
+                },
+                {
+                  "entity": "sensor.generator_oil_pressure_shutdown_alert"
+                },
+                {
+                  "entity": "sensor.outback1_error"
+                },
+                {
+                  "entity": "sensor.outback1_warning"
+                },
+                {
+                  "entity": "sensor.outback2_error"
+                },
+                {
+                  "entity": "sensor.outback2_warning"
+                },
+                {
+                  "entity": "sensor.thermostat_ambient_status"
+                },
+                {
+                  "entity": "sensor.current_isp"
                 }
               ]
             },
