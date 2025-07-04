@@ -366,7 +366,7 @@ mqtt:
     fan_mode_state_topic: "RVC/THERMOSTAT_STATUS_1/164"
     fan_mode_state_template: "{{ 'on' if value_json['fan mode'] == 1 else 'auto' }}"
     temperature_command_topic: "RVC/THERMOSTAT_COMMAND_1/164/set"
-    temperature_command_template: '{"instance":164, "setpoint temp heat":{{ ((target_temperature - 32) * 5/9) | int }}, "setpoint temp cool":{{ ((target_temperature - 32) * 5/9) | int }}}'
+    temperature_command_template: '{"instance":164, "setpoint temp heat":{{ ((temperature - 32) * 5/9) | int }}, "setpoint temp cool":{{ ((temperature - 32) * 5/9) | int }}}'
 
     unique_id: "hvac_front_thermostat"
     precision: 1.0
@@ -409,7 +409,7 @@ mqtt:
     fan_mode_state_topic: "RVC/THERMOSTAT_STATUS_1/165"
     fan_mode_state_template: "{{ 'on' if value_json['fan mode'] == 1 else 'auto' }}"
     temperature_command_topic: "RVC/THERMOSTAT_COMMAND_1/165/set"
-    temperature_command_template: '{"instance":165, "setpoint temp heat":{{ ((target_temperature - 32) * 5/9) | int }}, "setpoint temp cool":{{ ((target_temperature - 32) * 5/9) | int }}}'
+    temperature_command_template: '{"instance":165, "setpoint temp heat":{{ ((temperature - 32) * 5/9) | int }}, "setpoint temp cool":{{ ((temperature - 32) * 5/9) | int }}}'
 
     unique_id: "hvac_mid_thermostat"
     precision: 1.0
@@ -451,7 +451,7 @@ mqtt:
     fan_mode_state_topic: "RVC/THERMOSTAT_STATUS_1/166"
     fan_mode_state_template: "{{ 'on' if value_json['fan mode'] == 1 else 'auto' }}"
     temperature_command_topic: "RVC/THERMOSTAT_COMMAND_1/166/set"
-    temperature_command_template: '{"instance":166, "setpoint temp heat":{{ ((target_temperature - 32) * 5/9) | int }}, "setpoint temp cool":{{ ((target_temperature - 32) * 5/9) | int }}}'
+    temperature_command_template: '{"instance":166, "setpoint temp heat":{{ ((temperature - 32) * 5/9) | int }}, "setpoint temp cool":{{ ((temperature - 32) * 5/9) | int }}}'
 
     unique_id: "hvac_bedroom_thermostat"
     precision: 1.0
