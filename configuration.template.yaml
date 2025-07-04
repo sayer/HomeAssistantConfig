@@ -366,18 +366,7 @@ mqtt:
     fan_mode_state_topic: "RVC/THERMOSTAT_STATUS_1/164"
     fan_mode_state_template: "{{ 'on' if value_json['fan mode'] == 1 else 'auto' }}"
     temperature_command_topic: "RVC/THERMOSTAT_COMMAND_1/164/set"
-    temperature_command_template: >-
-      {
-        "instance": 164,
-        "operating mode": {% set mode = state_attr('climate.hvac_front_thermostat', 'hvac_mode') %}
-          {% if mode == 'off' %}0{% elif mode == 'cool' %}1{% elif mode == 'heat' %}2{% elif mode == 'auto' %}3{% elif mode == 'fan_only' %}4{% else %}0{% endif %},
-        "fan mode": {% set fan = state_attr('climate.hvac_front_thermostat', 'fan_mode') %}
-          {% if fan == 'on' %}1{% else %}0{% endif %},
-        "schedule mode": 0,
-        "fan speed": 0,
-        "setpoint temp heat": {{ ((value - 32) * 5/9) | int }},
-        "setpoint temp cool": {{ ((value - 32) * 5/9) | int }}
-      }
+    temperature_command_template: '{"instance":164, "operating mode":{{ 0 if state_attr("climate.hvac_front_thermostat", "hvac_mode") == "off" else 1 if state_attr("climate.hvac_front_thermostat", "hvac_mode") == "cool" else 2 if state_attr("climate.hvac_front_thermostat", "hvac_mode") == "heat" else 3 if state_attr("climate.hvac_front_thermostat", "hvac_mode") == "auto" else 4 if state_attr("climate.hvac_front_thermostat", "hvac_mode") == "fan_only" else 0 }}, "fan mode":{{ 1 if state_attr("climate.hvac_front_thermostat", "fan_mode") == "on" else 0 }}, "schedule mode":0, "fan speed":0, "setpoint temp heat":{{ ((value - 32) * 5/9) | int }}, "setpoint temp cool":{{ ((value - 32) * 5/9) | int }}}'
 
     unique_id: "hvac_front_thermostat"
     precision: 1.0
@@ -420,18 +409,7 @@ mqtt:
     fan_mode_state_topic: "RVC/THERMOSTAT_STATUS_1/165"
     fan_mode_state_template: "{{ 'on' if value_json['fan mode'] == 1 else 'auto' }}"
     temperature_command_topic: "RVC/THERMOSTAT_COMMAND_1/165/set"
-    temperature_command_template: >-
-      {
-        "instance": 165,
-        "operating mode": {% set mode = state_attr('climate.hvac_mid_thermostat', 'hvac_mode') %}
-          {% if mode == 'off' %}0{% elif mode == 'cool' %}1{% elif mode == 'heat' %}2{% elif mode == 'auto' %}3{% elif mode == 'fan_only' %}4{% else %}0{% endif %},
-        "fan mode": {% set fan = state_attr('climate.hvac_mid_thermostat', 'fan_mode') %}
-          {% if fan == 'on' %}1{% else %}0{% endif %},
-        "schedule mode": 0,
-        "fan speed": 0,
-        "setpoint temp heat": {{ ((value - 32) * 5/9) | int }},
-        "setpoint temp cool": {{ ((value - 32) * 5/9) | int }}
-      }
+    temperature_command_template: '{"instance":165, "operating mode":{{ 0 if state_attr("climate.hvac_mid_thermostat", "hvac_mode") == "off" else 1 if state_attr("climate.hvac_mid_thermostat", "hvac_mode") == "cool" else 2 if state_attr("climate.hvac_mid_thermostat", "hvac_mode") == "heat" else 3 if state_attr("climate.hvac_mid_thermostat", "hvac_mode") == "auto" else 4 if state_attr("climate.hvac_mid_thermostat", "hvac_mode") == "fan_only" else 0 }}, "fan mode":{{ 1 if state_attr("climate.hvac_mid_thermostat", "fan_mode") == "on" else 0 }}, "schedule mode":0, "fan speed":0, "setpoint temp heat":{{ ((value - 32) * 5/9) | int }}, "setpoint temp cool":{{ ((value - 32) * 5/9) | int }}}'
 
     unique_id: "hvac_mid_thermostat"
     precision: 1.0
@@ -473,18 +451,7 @@ mqtt:
     fan_mode_state_topic: "RVC/THERMOSTAT_STATUS_1/166"
     fan_mode_state_template: "{{ 'on' if value_json['fan mode'] == 1 else 'auto' }}"
     temperature_command_topic: "RVC/THERMOSTAT_COMMAND_1/166/set"
-    temperature_command_template: >-
-      {
-        "instance": 166,
-        "operating mode": {% set mode = state_attr('climate.hvac_bedroom_thermostat', 'hvac_mode') %}
-          {% if mode == 'off' %}0{% elif mode == 'cool' %}1{% elif mode == 'heat' %}2{% elif mode == 'auto' %}3{% elif mode == 'fan_only' %}4{% else %}0{% endif %},
-        "fan mode": {% set fan = state_attr('climate.hvac_bedroom_thermostat', 'fan_mode') %}
-          {% if fan == 'on' %}1{% else %}0{% endif %},
-        "schedule mode": 0,
-        "fan speed": 0,
-        "setpoint temp heat": {{ ((value - 32) * 5/9) | int }},
-        "setpoint temp cool": {{ ((value - 32) * 5/9) | int }}
-      }
+    temperature_command_template: '{"instance":166, "operating mode":{{ 0 if state_attr("climate.hvac_bedroom_thermostat", "hvac_mode") == "off" else 1 if state_attr("climate.hvac_bedroom_thermostat", "hvac_mode") == "cool" else 2 if state_attr("climate.hvac_bedroom_thermostat", "hvac_mode") == "heat" else 3 if state_attr("climate.hvac_bedroom_thermostat", "hvac_mode") == "auto" else 4 if state_attr("climate.hvac_bedroom_thermostat", "hvac_mode") == "fan_only" else 0 }}, "fan mode":{{ 1 if state_attr("climate.hvac_bedroom_thermostat", "fan_mode") == "on" else 0 }}, "schedule mode":0, "fan speed":0, "setpoint temp heat":{{ ((value - 32) * 5/9) | int }}, "setpoint temp cool":{{ ((value - 32) * 5/9) | int }}}'
 
     unique_id: "hvac_bedroom_thermostat"
     precision: 1.0
