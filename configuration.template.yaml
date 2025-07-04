@@ -365,30 +365,8 @@ mqtt:
     current_temperature_template: "{{ value_json['ambient temp F'] }}"
     fan_mode_state_topic: "RVC/THERMOSTAT_STATUS_1/164"
     fan_mode_state_template: "{{ 'on' if value_json['fan mode'] == 1 else 'auto' }}"
-    mode_command_topic: "RVC/THERMOSTAT_COMMAND_1/164/set"
-    mode_command_template: >-
-      {"instance":164,
-       "operating mode":{{
-         0 if hvac_mode=='off' else
-         1 if hvac_mode=='cool' else
-         2 if hvac_mode=='heat' else
-         3 if hvac_mode=='auto' else
-         4 if hvac_mode=='fan_only' else 5
-       }},
-       "fan mode":{{ 0 if fan_mode=='auto' else 1 }}}
     temperature_command_topic: "RVC/THERMOSTAT_COMMAND_1/164/set"
     temperature_command_template: '{"instance":164, "setpoint temp heat":{{ temperature }}, "setpoint temp cool":{{ temperature }}}'
-    fan_mode_command_topic: "RVC/THERMOSTAT_COMMAND_1/164/set"
-    fan_mode_command_template: >-
-      {"instance":164,
-       "operating mode":{{
-         0 if hvac_mode=='off' else
-         1 if hvac_mode=='cool' else
-         2 if hvac_mode=='heat' else
-         3 if hvac_mode=='auto' else
-         4 if hvac_mode=='fan_only' else 5
-       }},
-       "fan mode":{{ 0 if fan_mode=='auto' else 1 }}}
 
     unique_id: "hvac_front_thermostat"
     precision: 1.0
@@ -430,30 +408,8 @@ mqtt:
     current_temperature_template: "{{ value_json['ambient temp F'] }}"
     fan_mode_state_topic: "RVC/THERMOSTAT_STATUS_1/165"
     fan_mode_state_template: "{{ 'on' if value_json['fan mode'] == 1 else 'auto' }}"
-    mode_command_topic: "RVC/THERMOSTAT_COMMAND_1/165/set"
-    mode_command_template: >-
-      {"instance":165,
-       "operating mode":{{
-         0 if hvac_mode=='off' else
-         1 if hvac_mode=='cool' else
-         2 if hvac_mode=='heat' else
-         3 if hvac_mode=='auto' else
-         4 if hvac_mode=='fan_only' else 5
-       }},
-       "fan mode":{{ 0 if fan_mode=='auto' else 1 }}}
     temperature_command_topic: "RVC/THERMOSTAT_COMMAND_1/165/set"
     temperature_command_template: '{"instance":165, "setpoint temp heat":{{ temperature }}, "setpoint temp cool":{{ temperature }}}'
-    fan_mode_command_topic: "RVC/THERMOSTAT_COMMAND_1/165/set"
-    fan_mode_command_template: >-
-      {"instance":165,
-       "operating mode":{{
-         0 if hvac_mode=='off' else
-         1 if hvac_mode=='cool' else
-         2 if hvac_mode=='heat' else
-         3 if hvac_mode=='auto' else
-         4 if hvac_mode=='fan_only' else 5
-       }},
-       "fan mode":{{ 0 if fan_mode=='auto' else 1 }}}
 
     unique_id: "hvac_mid_thermostat"
     precision: 1.0
@@ -494,30 +450,8 @@ mqtt:
     current_temperature_template: "{{ value_json['ambient temp F'] }}"
     fan_mode_state_topic: "RVC/THERMOSTAT_STATUS_1/166"
     fan_mode_state_template: "{{ 'on' if value_json['fan mode'] == 1 else 'auto' }}"
-    mode_command_topic: "RVC/THERMOSTAT_COMMAND_1/166/set"
-    mode_command_template: >-
-      {"instance":166,
-       "operating mode":{{
-         0 if hvac_mode=='off' else
-         1 if hvac_mode=='cool' else
-         2 if hvac_mode=='heat' else
-         3 if hvac_mode=='auto' else
-         4 if hvac_mode=='fan_only' else 5
-       }},
-       "fan mode":{{ 0 if fan_mode=='auto' else 1 }}}
     temperature_command_topic: "RVC/THERMOSTAT_COMMAND_1/166/set"
     temperature_command_template: '{"instance":166, "setpoint temp heat":{{ temperature }}, "setpoint temp cool":{{ temperature }}}'
-    fan_mode_command_topic: "RVC/THERMOSTAT_COMMAND_1/166/set"
-    fan_mode_command_template: >-
-      {"instance":166,
-       "operating mode":{{
-         0 if hvac_mode=='off' else
-         1 if hvac_mode=='cool' else
-         2 if hvac_mode=='heat' else
-         3 if hvac_mode=='auto' else
-         4 if hvac_mode=='fan_only' else 5
-       }},
-       "fan mode":{{ 0 if fan_mode=='auto' else 1 }}}
 
     unique_id: "hvac_bedroom_thermostat"
     precision: 1.0
