@@ -2209,8 +2209,8 @@
                       "conditions": [
                         {
                           "condition": "state",
-                          "entity": "cover.entry_door_day",
-                          "state_not": "unavailable"
+                          "entity": "binary_sensor.has_entry_door_shade",
+                          "state": "on"
                         }
                       ],
                       "card": {
