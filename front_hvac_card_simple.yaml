@@ -1,0 +1,78 @@
+type: vertical-stack
+title: Front HVAC Zone
+cards:
+  # Main thermostat control
+  - type: thermostat
+    entity: climate.front_thermostat
+    name: Front Zone
+
+  # Status information
+  - type: entities
+    title: Status
+    show_header_toggle: false
+    entities:
+      - entity: sensor.ambient_temperature
+        name: Current Temperature
+        icon: mdi:thermometer
+      - entity: climate.front_thermostat
+        name: Target Temperature
+        icon: mdi:target
+      - entity: climate.front_thermostat
+        name: Mode
+        icon: mdi:air-conditioner
+        attribute: hvac_mode
+
+  # Quick preset buttons
+  - type: horizontal-stack
+    title: Quick Presets
+    cards:
+      - type: entities
+        entities:
+          - entity: climate.front_thermostat
+            name: Cool 72°F
+            icon: mdi:snowflake
+            tap_action:
+              action: call-service
+              service: climate.set_temperature
+              service_data:
+                entity_id: climate.front_thermostat
+                temperature: 72
+                hvac_mode: cool
+        show_header_toggle: false
+      - type: entities
+        entities:
+          - entity: climate.front_thermostat
+            name: Heat 70°F
+            icon: mdi:fire
+            tap_action:
+              action: call-service
+              service: climate.set_temperature
+              service_data:
+                entity_id: climate.front_thermostat
+                temperature: 70
+                hvac_mode: heat
+        show_header_toggle: false
+      - type: entities
+        entities:
+          - entity: climate.front_thermostat
+            name: Auto Mode
+            icon: mdi:thermostat-auto
+            tap_action:
+              action: call-service
+              service: climate.set_hvac_mode
+              service_data:
+                entity_id: climate.front_thermostat
+                hvac_mode: auto
+        show_header_toggle: false
+      - type: entities
+        entities:
+          - entity: climate.front_thermostat
+            name: Turn Off
+            icon: mdi:power-off
+            tap_action:
+              action: call-service
+              service: climate.set_hvac_mode
+              service_data:
+                entity_id: climate.front_thermostat
+                hvac_mode: off
+        show_header_toggle: false 

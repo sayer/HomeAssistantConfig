@@ -1,0 +1,102 @@
+type: vertical-stack
+title: Front HVAC Zone
+cards:
+  # Main thermostat control using built-in card
+  - type: thermostat
+    entity: climate.front_thermostat
+    name: Front Zone
+    step_size: 1
+    layout: vertical
+    hide:
+      temperature: false
+      state: false
+      mode: false
+      fan: false
+
+  # Quick preset buttons
+  - type: horizontal-stack
+    cards:
+      - type: custom:button-card
+        name: 68°F
+        icon: mdi:thermometer-low
+        tap_action:
+          action: call-service
+          service: climate.set_temperature
+          service_data:
+            entity_id: climate.front_thermostat
+            temperature: 68
+        style: |
+          ha-card {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            transition: all 0.3s ease;
+          }
+          ha-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(76, 175, 80, 0.3);
+          }
+
+      - type: custom:button-card
+        name: 72°F
+        icon: mdi:thermometer
+        tap_action:
+          action: call-service
+          service: climate.set_temperature
+          service_data:
+            entity_id: climate.front_thermostat
+            temperature: 72
+        style: |
+          ha-card {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            transition: all 0.3s ease;
+          }
+          ha-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(33, 150, 243, 0.3);
+          }
+
+      - type: custom:button-card
+        name: 76°F
+        icon: mdi:thermometer-high
+        tap_action:
+          action: call-service
+          service: climate.set_temperature
+          service_data:
+            entity_id: climate.front_thermostat
+            temperature: 76
+        style: |
+          ha-card {
+            background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            transition: all 0.3s ease;
+          }
+          ha-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(255, 152, 0, 0.3);
+          }
+
+  # Status information
+  - type: entities
+    title: Status
+    show_header_toggle: false
+    entities:
+      - entity: sensor.ambient_temperature
+        name: Current Temperature
+        icon: mdi:thermometer
+      - entity: climate.front_thermostat
+        name: Target Temperature
+        icon: mdi:target
+      - entity: climate.front_thermostat
+        name: Mode
+        icon: mdi:air-conditioner
+        attribute: hvac_mode 
