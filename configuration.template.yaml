@@ -466,6 +466,8 @@ mqtt:
     initial: 72
     optimistic: true
 
+# William also has 7 - 9 in addition to the above 
+
   light:
     # Using the template format you provided
     - name: "Docking Lights"
