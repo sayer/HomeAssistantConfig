@@ -378,9 +378,17 @@ mqtt:
        "fan mode":{{ 0 if fan_mode=='auto' else 1 }}}
     temperature_command_topic: "RVC/THERMOSTAT_COMMAND_1/164/set"
     temperature_command_template: >-
-      {"instance":164,
-       "setpoint temp heat":{{ temperature | int }},
-       "setpoint temp cool":{{ temperature | int }}}
+      {% if target_temperature is defined %}
+        {"instance":164,
+         "setpoint temp heat":{{ target_temperature | int }},
+         "setpoint temp cool":{{ target_temperature | int }}}
+      {% elif temperature is defined %}
+        {"instance":164,
+         "setpoint temp heat":{{ temperature | int }},
+         "setpoint temp cool":{{ temperature | int }}}
+      {% else %}
+        {"instance":164}
+      {% endif %}
     fan_mode_command_topic: "RVC/THERMOSTAT_COMMAND_1/164/set"
     fan_mode_command_template: >-
       {"instance":164,
@@ -398,7 +406,7 @@ mqtt:
     min_temp: 50
     max_temp: 90
     initial: 72
-    optimistic: true
+    optimistic: false
 
   
   - name: "Mid Thermostat"
@@ -446,9 +454,17 @@ mqtt:
        "fan mode":{{ 0 if fan_mode=='auto' else 1 }}}
     temperature_command_topic: "RVC/THERMOSTAT_COMMAND_1/165/set"
     temperature_command_template: >-
-      {"instance":165,
-       "setpoint temp heat":{{ temperature | int }},
-       "setpoint temp cool":{{ temperature | int }}}
+      {% if target_temperature is defined %}
+        {"instance":165,
+         "setpoint temp heat":{{ target_temperature | int }},
+         "setpoint temp cool":{{ target_temperature | int }}}
+      {% elif temperature is defined %}
+        {"instance":165,
+         "setpoint temp heat":{{ temperature | int }},
+         "setpoint temp cool":{{ temperature | int }}}
+      {% else %}
+        {"instance":165}
+      {% endif %}
     fan_mode_command_topic: "RVC/THERMOSTAT_COMMAND_1/165/set"
     fan_mode_command_template: >-
       {"instance":165,
@@ -466,7 +482,7 @@ mqtt:
     min_temp: 50
     max_temp: 90
     initial: 72
-    optimistic: true
+    optimistic: false
 
   - name: "Bedroom Thermostat"
     temperature_unit: "F"
@@ -513,9 +529,17 @@ mqtt:
        "fan mode":{{ 0 if fan_mode=='auto' else 1 }}}
     temperature_command_topic: "RVC/THERMOSTAT_COMMAND_1/166/set"
     temperature_command_template: >-
-      {"instance":166,
-       "setpoint temp heat":{{ temperature | int }},
-       "setpoint temp cool":{{ temperature | int }}}
+      {% if target_temperature is defined %}
+        {"instance":166,
+         "setpoint temp heat":{{ target_temperature | int }},
+         "setpoint temp cool":{{ target_temperature | int }}}
+      {% elif temperature is defined %}
+        {"instance":166,
+         "setpoint temp heat":{{ temperature | int }},
+         "setpoint temp cool":{{ temperature | int }}}
+      {% else %}
+        {"instance":166}
+      {% endif %}
     fan_mode_command_topic: "RVC/THERMOSTAT_COMMAND_1/166/set"
     fan_mode_command_template: >-
       {"instance":166,
@@ -533,7 +557,7 @@ mqtt:
     min_temp: 50
     max_temp: 90
     initial: 72
-    optimistic: true
+    optimistic: false
 
   light:
     # Using the template format you provided
