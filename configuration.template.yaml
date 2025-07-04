@@ -378,16 +378,9 @@ mqtt:
        "fan mode":{{ 0 if fan_mode=='auto' else 1 }}}
     temperature_command_topic: "RVC/THERMOSTAT_COMMAND_1/164/set"
     temperature_command_template: >-
-      {% if temperature is defined %}
-        {"instance":164,
-         {% if hvac_mode in ['heat','off','fan_only'] %}
-           "setpoint temp heat":{{ temperature | int }}
-         {% else %}
-           "setpoint temp cool":{{ temperature | int }}
-         {% endif %}}
-      {% else %}
-        {"instance":164}
-      {% endif %}
+      {"instance":164,
+       "setpoint temp heat":{{ temperature | int }},
+       "setpoint temp cool":{{ temperature | int }}}
     fan_mode_command_topic: "RVC/THERMOSTAT_COMMAND_1/164/set"
     fan_mode_command_template: >-
       {"instance":164,
@@ -453,16 +446,9 @@ mqtt:
        "fan mode":{{ 0 if fan_mode=='auto' else 1 }}}
     temperature_command_topic: "RVC/THERMOSTAT_COMMAND_1/165/set"
     temperature_command_template: >-
-      {% if temperature is defined %}
-        {"instance":165,
-         {% if hvac_mode in ['heat','off','fan_only'] %}
-           "setpoint temp heat":{{ temperature | int }}
-         {% else %}
-           "setpoint temp cool":{{ temperature | int }}
-         {% endif %}}
-      {% else %}
-        {"instance":165}
-      {% endif %}
+      {"instance":165,
+       "setpoint temp heat":{{ temperature | int }},
+       "setpoint temp cool":{{ temperature | int }}}
     fan_mode_command_topic: "RVC/THERMOSTAT_COMMAND_1/165/set"
     fan_mode_command_template: >-
       {"instance":165,
@@ -527,16 +513,9 @@ mqtt:
        "fan mode":{{ 0 if fan_mode=='auto' else 1 }}}
     temperature_command_topic: "RVC/THERMOSTAT_COMMAND_1/166/set"
     temperature_command_template: >-
-      {% if temperature is defined %}
-        {"instance":166,
-         {% if hvac_mode in ['heat','off','fan_only'] %}
-           "setpoint temp heat":{{ temperature | int }}
-         {% else %}
-           "setpoint temp cool":{{ temperature | int }}
-         {% endif %}}
-      {% else %}
-        {"instance":166}
-      {% endif %}
+      {"instance":166,
+       "setpoint temp heat":{{ temperature | int }},
+       "setpoint temp cool":{{ temperature | int }}}
     fan_mode_command_topic: "RVC/THERMOSTAT_COMMAND_1/166/set"
     fan_mode_command_template: >-
       {"instance":166,
