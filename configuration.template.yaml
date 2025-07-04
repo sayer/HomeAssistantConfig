@@ -150,11 +150,7 @@ sensor:
         friendly_name: "Bedroom Sconce Available"
         value_template: "{{ not states('light.bedroom_sconce') in ['unavailable', 'unknown', 'none'] }}"
 
-    binary_sensor:
-      entry_door_day_exists:
-        friendly_name: "Entry Door Day Exists"
-        value_template: >
-          {{ states('cover.entry_door_day') not in ['unavailable', 'unknown', ''] }}
+
 
   - platform: rest
     name: "Outback 2"
@@ -2866,3 +2862,11 @@ template:
             {% set secs = states('input_number.generator_last_session_seconds') | int %}
             Last Run: {{ (secs // 60) }} min {{ (secs % 60) }} sec
           {% endif %}
+
+
+  - binary_sensor:
+      - name: "Has Entry Door Shade"
+        unique_id: has_entry_door_shade
+        state: >
+          {{ states('cover.entry_door_day') not in ['unknown', 'unavailable', ''] }}
+        device_class: connectivity  # Optional, use if you want a toggle-style icon
