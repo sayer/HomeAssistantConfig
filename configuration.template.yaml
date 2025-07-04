@@ -153,8 +153,7 @@ sensor:
       entry_door_day_exists:
         friendly_name: "Entry Door Day Exists"
         value_template: >
-          {% set entity = 'cover.entry_door_day' %}
-          {{ entity in states and states(entity) != 'unavailable' }}
+          {{ states('cover.entry_door_day') not in ['unavailable', 'unknown', ''] }}
 
   - platform: rest
     name: "Outback 2"
