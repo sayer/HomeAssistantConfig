@@ -728,6 +728,11 @@ configure_2023_plus() {
     INDOOR_TEMP="2"
     LIGHT_COMMAND_ON="0"
     LIGHT_COMMAND_OFF="3"
+    # Thermostat instances
+    THERMOSTAT1="164"
+    THERMOSTAT2="165"
+    THERMOSTAT3="166"
+    THERMOSTAT4="167"
     # Set shade codes
     set_shade_tokens "CODE_2023"
 }
@@ -748,6 +753,11 @@ configure_2020_to_2022() {
     INDOOR_TEMP="250"
     LIGHT_COMMAND_ON="0"
     LIGHT_COMMAND_OFF="3"
+    # Thermostat instances
+    THERMOSTAT1="164"
+    THERMOSTAT2="165"
+    THERMOSTAT3="166"
+    THERMOSTAT4="167"
     # Set shade codes
     set_shade_tokens "CODE_2020"
 }
@@ -768,6 +778,11 @@ configure_2017_to_2019() {
     INDOOR_TEMP="250"
     LIGHT_COMMAND_ON="0"
     LIGHT_COMMAND_OFF="3"
+    # Thermostat instances
+    THERMOSTAT1="1"
+    THERMOSTAT2="2"
+    THERMOSTAT3="3"
+    THERMOSTAT4="4"
     # Set shade codes
     set_shade_tokens "CODE_2017"
 }
@@ -788,6 +803,11 @@ configure_pre_2016() {
     INDOOR_TEMP="250"
     LIGHT_COMMAND_ON="0" # Toggle
     LIGHT_COMMAND_OFF="3" # Toggle
+    # Thermostat instances
+    THERMOSTAT1="1"
+    THERMOSTAT2="2"
+    THERMOSTAT3="3"
+    THERMOSTAT4="4"
     # Set shade codes
     set_shade_tokens "CODE_PRE2016"
 }
@@ -886,6 +906,19 @@ cat "$CONFIG_FILE" | sed "s/%%LIGHT_COMMAND_ON%%/$LIGHT_COMMAND_ON/g" > "$TEMP_F
 mv "$TEMP_FILE" "$CONFIG_FILE"
 
 cat "$CONFIG_FILE" | sed "s/%%LIGHT_COMMAND_OFF%%/$LIGHT_COMMAND_OFF/g" > "$TEMP_FILE"
+mv "$TEMP_FILE" "$CONFIG_FILE"
+
+# Replace thermostat tokens
+cat "$CONFIG_FILE" | sed "s/%%THERMOSTAT1%%/$THERMOSTAT1/g" > "$TEMP_FILE"
+mv "$TEMP_FILE" "$CONFIG_FILE"
+
+cat "$CONFIG_FILE" | sed "s/%%THERMOSTAT2%%/$THERMOSTAT2/g" > "$TEMP_FILE"
+mv "$TEMP_FILE" "$CONFIG_FILE"
+
+cat "$CONFIG_FILE" | sed "s/%%THERMOSTAT3%%/$THERMOSTAT3/g" > "$TEMP_FILE"
+mv "$TEMP_FILE" "$CONFIG_FILE"
+
+cat "$CONFIG_FILE" | sed "s/%%THERMOSTAT4%%/$THERMOSTAT4/g" > "$TEMP_FILE"
 mv "$TEMP_FILE" "$CONFIG_FILE"
 
 # Replace shade tokens
@@ -1004,6 +1037,12 @@ echo "  %%AMBIANT_TEMP%% -> $AMBIANT_TEMP"
 echo "  %%INDOOR_TEMP%% -> $INDOOR_TEMP"
 echo "  %%LIGHT_COMMAND_ON%% -> $LIGHT_COMMAND_ON"
 echo "  %%LIGHT_COMMAND_OFF%% -> $LIGHT_COMMAND_OFF"
+echo ""
+echo "Thermostat instances:"
+echo "  %%THERMOSTAT1%% -> $THERMOSTAT1"
+echo "  %%THERMOSTAT2%% -> $THERMOSTAT2"
+echo "  %%THERMOSTAT3%% -> $THERMOSTAT3"
+echo "  %%THERMOSTAT4%% -> $THERMOSTAT4"
 echo ""
 echo "Window shade entries for model year $MODEL_YEAR:"
 echo ""
