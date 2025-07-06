@@ -2873,6 +2873,7 @@ template:
           {{ states('cover.entry_door_day') not in ['unknown', 'unavailable', ''] }}
         device_class: connectivity  # Optional, use if you want a toggle-style icon
 
+  - sensor:
       - name: "Master Cool Target"
         unique_id: "master_cool_target"
         unit_of_measurement: "°F"
