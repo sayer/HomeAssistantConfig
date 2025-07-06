@@ -1505,5 +1505,52 @@
       data:
         hvac_mode: "{{ states('input_select.master_thermostat_mode') }}"
 
+# Master Thermostat Climate Entity Control
+- alias: "Master Thermostat - Set Temperature on All Thermostats"
+  description: "When master thermostat temperature changes, set all real thermostats"
+  trigger:
+    - platform: state
+      entity_id: climate.master_thermostat
+      attribute: temperature
+  action:
+    - service: script.master_thermostat_set_temperature
+      data:
+        temperature: "{{ state_attr('climate.master_thermostat', 'temperature') }}"
+
+- alias: "Master Thermostat - Set HVAC Mode on All Thermostats"
+  description: "When master thermostat mode changes, set all real thermostats"
+  trigger:
+    - platform: state
+      entity_id: climate.master_thermostat
+      attribute: hvac_mode
+  action:
+    - service: script.master_thermostat_set_mode
+      data:
+        hvac_mode: "{{ state_attr('climate.master_thermostat', 'hvac_mode') }}"
+
+- alias: "Master Thermostat - Turn On Heater When Active"
+  description: "Turn on the dummy heater when master thermostat is active"
+  trigger:
+    - platform: state
+      entity_id: climate.master_thermostat
+      attribute: hvac_mode
+      to: "cool"
+  action:
+    - service: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.master_thermostat_heater
+
+- alias: "Master Thermostat - Turn Off Heater When Inactive"
+  description: "Turn off the dummy heater when master thermostat is off"
+  trigger:
+    - platform: state
+      entity_id: climate.master_thermostat
+      attribute: hvac_mode
+      to: "off"
+  action:
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.master_thermostat_heater
+
 
     

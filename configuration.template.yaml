@@ -2938,6 +2938,26 @@ input_select:
     initial: "off"
     icon: mdi:thermostat
 
+# Master Thermostat - Real Climate Entity
+climate:
+  - platform: generic_thermostat
+    name: "Master Thermostat"
+    unique_id: "master_thermostat"
+    heater: input_boolean.master_thermostat_heater
+    target_sensor: sensor.master_cool_target
+    min_temp: 50
+    max_temp: 90
+    ac_mode: true
+    target_temp: 72
+    cold_tolerance: 0.3
+    hot_tolerance: 0.3
+    min_cycle_duration:
+      minutes: 5
+    keep_alive:
+      minutes: 3
+    initial_hvac_mode: "off"
+    precision: 1.0
+
 
 
 
