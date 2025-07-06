@@ -2907,13 +2907,113 @@ template:
 
 # Master Thermostat - Built-in Group
 group:
-  master_thermostat:
-    name: "Master Thermostat"
+  master_thermostat_group:
+    name: "Master Thermostat Group"
     entities:
       - climate.livingroom_thermostat
       - climate.kitchen_thermostat
       - climate.bedroom_thermostat
       - climate.bathroom_thermostat
+
+# Master Thermostat - Template Climate Entity
+climate:
+  - platform: template
+    thermostats:
+      master_thermostat:
+        friendly_name: "Master Thermostat"
+        unique_id: "master_thermostat"
+        temperature_unit: "F"
+        min_temp: 50
+        max_temp: 90
+        precision: 1.0
+        target_temperature_step: 1.0
+        
+        # Current temperature - average of all available thermostats
+        current_temperature_template: >
+          {% set thermostats = [
+            'climate.livingroom_thermostat',
+            'climate.kitchen_thermostat',
+            'climate.bedroom_thermostat',
+            'climate.bathroom_thermostat'
+          ] %}
+          {% set valid_temps = [] %}
+          {% for entity_id in thermostats %}
+            {% set temp = state_attr(entity_id, 'current_temperature') %}
+            {% if temp is not none and temp | float > 0 %}
+              {% set _ = valid_temps.append(temp | float) %}
+            {% endif %}
+          {% endfor %}
+          {% if valid_temps | length > 0 %}
+            {{ (valid_temps | sum) / valid_temps | length | round(1) }}
+          {% else %}
+            72
+          {% endif %}
+        
+        # Target temperature - highest cool target from available thermostats
+        target_temperature_template: >
+          {% set thermostats = [
+            'climate.livingroom_thermostat',
+            'climate.kitchen_thermostat',
+            'climate.bedroom_thermostat',
+            'climate.bathroom_thermostat'
+          ] %}
+          {% set valid_targets = [] %}
+          {% for entity_id in thermostats %}
+            {% set target = state_attr(entity_id, 'temperature') %}
+            {% if target is not none and target | float > 0 %}
+              {% set _ = valid_targets.append(target | float) %}
+            {% endif %}
+          {% endfor %}
+          {% if valid_targets | length > 0 %}
+            {{ valid_targets | max }}
+          {% else %}
+            72
+          {% endif %}
+        
+        # HVAC mode - aggregate mode from all thermostats
+        hvac_mode_template: >
+          {% set thermostats = [
+            'climate.livingroom_thermostat',
+            'climate.kitchen_thermostat',
+            'climate.bedroom_thermostat',
+            'climate.bathroom_thermostat'
+          ] %}
+          {% set modes = [] %}
+          {% for entity_id in thermostats %}
+            {% if states(entity_id) not in ['unavailable', 'unknown', 'none'] %}
+              {% set mode = state_attr(entity_id, 'hvac_mode') %}
+              {% if mode and mode != 'off' %}
+                {% set _ = modes.append(mode) %}
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+          {% if modes | length > 0 %}
+            {% if 'cool' in modes %}cool
+            {% elif 'heat' in modes %}heat
+            {% elif 'auto' in modes %}auto
+            {% else %}off{% endif %}
+          {% else %}
+            off
+          {% endif %}
+        
+        # Available HVAC modes
+        hvac_modes:
+          - "off"
+          - "heat"
+          - "cool"
+          - "auto"
+        
+        # Set target temperature for all available thermostats
+        set_temperature:
+          service: script.master_thermostat_set_temperature
+          data:
+            temperature: "{{ temperature }}"
+        
+        # Set HVAC mode for all available thermostats
+        set_hvac_mode:
+          service: script.master_thermostat_set_mode
+          data:
+            hvac_mode: "{{ hvac_mode }}"
 
 
 
