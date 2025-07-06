@@ -2875,6 +2875,7 @@ template:
 group:
   master_thermostat:
     name: "Master Thermostat"
+    unique_id: "hvac_master_thermostat_group"
     entities:
       - climate.livingroom_thermostat
       - climate.kitchen_thermostat

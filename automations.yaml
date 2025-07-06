@@ -198,6 +198,67 @@
   - platform: numeric_state
     entity_id: sensor.chassis_battery
     below: 11.9
+
+# Master Thermostat Control Automations
+- id: 'master_thermostat_temperature_change'
+  alias: 'Master Thermostat - Temperature Change'
+  description: 'Set all thermostats to the same temperature when master thermostat temperature changes'
+  trigger:
+    - platform: state
+      entity_id: group.master_thermostat
+      attribute: temperature
+  condition: []
+  action:
+    - service: climate.set_temperature
+      target:
+        entity_id:
+          - climate.livingroom_thermostat
+          - climate.kitchen_thermostat
+          - climate.bedroom_thermostat
+          - climate.bathroom_thermostat
+      data:
+        temperature: "{{ state_attr('group.master_thermostat', 'temperature') }}"
+  mode: single
+
+- id: 'master_thermostat_mode_change'
+  alias: 'Master Thermostat - Mode Change'
+  description: 'Set all thermostats to the same mode when master thermostat mode changes'
+  trigger:
+    - platform: state
+      entity_id: group.master_thermostat
+      attribute: hvac_mode
+  condition: []
+  action:
+    - service: climate.set_hvac_mode
+      target:
+        entity_id:
+          - climate.livingroom_thermostat
+          - climate.kitchen_thermostat
+          - climate.bedroom_thermostat
+          - climate.bathroom_thermostat
+      data:
+        hvac_mode: "{{ state_attr('group.master_thermostat', 'hvac_mode') }}"
+  mode: single
+
+- id: 'master_thermostat_fan_mode_change'
+  alias: 'Master Thermostat - Fan Mode Change'
+  description: 'Set all thermostats to the same fan mode when master thermostat fan mode changes'
+  trigger:
+    - platform: state
+      entity_id: group.master_thermostat
+      attribute: fan_mode
+  condition: []
+  action:
+    - service: climate.set_fan_mode
+      target:
+        entity_id:
+          - climate.livingroom_thermostat
+          - climate.kitchen_thermostat
+          - climate.bedroom_thermostat
+          - climate.bathroom_thermostat
+      data:
+        fan_mode: "{{ state_attr('group.master_thermostat', 'fan_mode') }}"
+  mode: single
   condition: []
   action:
   - service: homeassistant.turn_on
