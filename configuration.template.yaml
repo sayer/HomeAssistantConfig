@@ -2905,17 +2905,15 @@ template:
           {% endfor %}
           false
 
-# Master Thermostat - Climate Group Integration
-climate:
-  - platform: climate_group
+# Master Thermostat - Built-in Group
+group:
+  master_thermostat:
     name: "Master Thermostat"
-    unique_id: "master_thermostat"
     entities:
       - climate.livingroom_thermostat
       - climate.kitchen_thermostat
       - climate.bedroom_thermostat
       - climate.bathroom_thermostat
-    temperature_unit: F
 
 
 
