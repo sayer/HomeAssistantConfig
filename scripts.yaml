@@ -1018,3 +1018,79 @@ master_thermostat_off:
       data:
         hvac_mode: off
 
+master_thermostat_set_temperature:
+  alias: "Master Thermostat - Set Temperature"
+  description: "Set temperature for all thermostats based on current mode"
+  fields:
+    temperature:
+      description: "Target temperature in Fahrenheit"
+      example: 72
+      selector:
+        number:
+          min: 50
+          max: 90
+          step: 1
+          unit_of_measurement: "°F"
+  sequence:
+    - service: climate.set_temperature
+      target:
+        entity_id: >
+          {% set thermostats = [
+            'climate.livingroom_thermostat',
+            'climate.kitchen_thermostat',
+            'climate.bedroom_thermostat',
+            'climate.bathroom_thermostat'
+          ] %}
+          {% set available_thermostats = [] %}
+          {% for entity_id in thermostats %}
+            {% if states(entity_id) not in ['unavailable', 'unknown', 'none'] %}
+              {% set _ = available_thermostats.append(entity_id) %}
+            {% endif %}
+          {% endfor %}
+          {{ available_thermostats }}
+      data:
+        temperature: "{{ temperature }}"
+
+master_thermostat_set_mode:
+  alias: "Master Thermostat - Set HVAC Mode"
+  description: "Set HVAC mode for all thermostats"
+  fields:
+    hvac_mode:
+      description: "HVAC mode to set"
+      example: "cool"
+      selector:
+        select:
+          options:
+            - "off"
+            - "heat"
+            - "cool"
+            - "auto"
+  sequence:
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: "{{ hvac_mode == 'off' }}"
+          sequence:
+            - service: script.master_thermostat_off
+        - conditions:
+            - condition: template
+              value_template: "{{ hvac_mode == 'heat' }}"
+          sequence:
+            - service: script.master_thermostat_set_heat
+              data:
+                temperature: "{{ state_attr('climate.master_thermostat', 'temperature') | default(72) }}"
+        - conditions:
+            - condition: template
+              value_template: "{{ hvac_mode == 'cool' }}"
+          sequence:
+            - service: script.master_thermostat_set_cool
+              data:
+                temperature: "{{ state_attr('climate.master_thermostat', 'temperature') | default(72) }}"
+        - conditions:
+            - condition: template
+              value_template: "{{ hvac_mode == 'auto' }}"
+          sequence:
+            - service: script.master_thermostat_set_auto
+              data:
+                temperature: "{{ state_attr('climate.master_thermostat', 'temperature') | default(72) }}"
+

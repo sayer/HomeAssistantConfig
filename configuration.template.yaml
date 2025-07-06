@@ -2905,24 +2905,19 @@ template:
           {% endfor %}
           false
 
-# Master Thermostat - Generic Thermostat Integration
+# Master Thermostat - Climate Group Integration
 climate:
-  - platform: generic_thermostat
+  - platform: climate_group
     name: "Master Thermostat"
     unique_id: "master_thermostat"
-    heater: script.master_thermostat_set_cool
-    target_sensor: sensor.master_cool_target
+    entities:
+      - climate.livingroom_thermostat
+      - climate.kitchen_thermostat
+      - climate.bedroom_thermostat
+      - climate.bathroom_thermostat
+    temperature_unit: F
     min_temp: 50
     max_temp: 90
-    ac_mode: true
-    target_temp: 72
-    cold_tolerance: 0.3
-    hot_tolerance: 0.3
-    min_cycle_duration:
-      minutes: 5
-    keep_alive:
-      minutes: 3
-    initial_hvac_mode: "off"
     precision: 1.0
 
 
