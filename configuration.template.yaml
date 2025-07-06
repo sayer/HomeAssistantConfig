@@ -66,6 +66,14 @@ input_number:
     max: 86400
     step: 1
     unit_of_measurement: "s"
+  master_thermostat_temp:
+    name: "Master Thermostat Temperature"
+    min: 50
+    max: 90
+    step: 1
+    mode: box
+    unit_of_measurement: "°F"
+    icon: mdi:thermostat
 
 input_boolean:
   is_optimistic:
@@ -2918,17 +2926,6 @@ group:
       - climate.kitchen_thermostat
       - climate.bedroom_thermostat
       - climate.bathroom_thermostat
-
-# Master Thermostat - Input Number for Control
-input_number:
-  master_thermostat_temp:
-    name: "Master Thermostat Temperature"
-    min: 50
-    max: 90
-    step: 1
-    mode: box
-    unit_of_measurement: "°F"
-    icon: mdi:thermostat
 
 input_select:
   master_thermostat_mode:
