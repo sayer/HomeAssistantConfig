@@ -2916,9 +2916,6 @@ climate:
       - climate.bedroom_thermostat
       - climate.bathroom_thermostat
     temperature_unit: F
-    min_temp: 50
-    max_temp: 90
-    precision: 1.0
 
 
 
