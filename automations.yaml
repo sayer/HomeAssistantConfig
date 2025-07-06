@@ -259,19 +259,6 @@
       data:
         fan_mode: "{{ state_attr('group.master_thermostat', 'fan_mode') }}"
   mode: single
-  condition: []
-  action:
-  - service: homeassistant.turn_on
-    data: {}
-    target:
-      entity_id:
-      - switch.auto_gen
-      - switch.auto_gen_5
-  - service: script.notify_home
-    data:
-      title: Foretravel
-      message: Chassis batteries low
-  mode: single
 - id: '1679597270218'
   alias: House Batteries Low
   description: ''
