@@ -515,24 +515,6 @@ mqtt:
 
 # William also has 7 - 9 in addition to the above
 
-  - platform: generic_thermostat
-    name: "Master Thermostat"
-    unique_id: "master_thermostat"
-    heater: input_boolean.master_thermostat_heater
-    target_sensor: sensor.master_cool_target
-    min_temp: 50
-    max_temp: 90
-    ac_mode: true
-    target_temp: 72
-    cold_tolerance: 0.3
-    hot_tolerance: 0.3
-    min_cycle_duration:
-      minutes: 5
-    keep_alive:
-      minutes: 3
-    initial_hvac_mode: "off"
-    precision: 1.0 
-
   light:
     # Using the template format you provided
     - name: "Docking Lights"
@@ -2936,6 +2918,28 @@ group:
       - climate.kitchen_thermostat
       - climate.bedroom_thermostat
       - climate.bathroom_thermostat
+
+# Master Thermostat - Input Number for Control
+input_number:
+  master_thermostat_temp:
+    name: "Master Thermostat Temperature"
+    min: 50
+    max: 90
+    step: 1
+    mode: box
+    unit_of_measurement: "°F"
+    icon: mdi:thermostat
+
+input_select:
+  master_thermostat_mode:
+    name: "Master Thermostat Mode"
+    options:
+      - "off"
+      - "heat"
+      - "cool"
+      - "auto"
+    initial: "off"
+    icon: mdi:thermostat
 
 
 
