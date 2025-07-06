@@ -892,3 +892,129 @@ load_scene:
         title: "Scene Loaded"
         message: "Scene '{{ scene_name }}' has been loaded"
 
+# Master Thermostat Control Scripts
+master_thermostat_set_cool:
+  alias: "Master Thermostat - Set Cool Temperature"
+  description: "Set all thermostats to cool mode with specified temperature"
+  fields:
+    temperature:
+      description: "Target temperature in Fahrenheit"
+      example: 72
+      selector:
+        number:
+          min: 60
+          max: 90
+          step: 1
+          unit_of_measurement: "°F"
+  sequence:
+    - service: climate.set_temperature
+      target:
+        entity_id: >
+          {% set thermostats = [
+            'climate.livingroom_thermostat',
+            'climate.kitchen_thermostat',
+            'climate.bedroom_thermostat',
+            'climate.bathroom_thermostat'
+          ] %}
+          {% set available_thermostats = [] %}
+          {% for entity_id in thermostats %}
+            {% if states(entity_id) not in ['unavailable', 'unknown', 'none'] %}
+              {% set _ = available_thermostats.append(entity_id) %}
+            {% endif %}
+          {% endfor %}
+          {{ available_thermostats }}
+      data:
+        temperature: "{{ temperature }}"
+        hvac_mode: cool
+
+master_thermostat_set_heat:
+  alias: "Master Thermostat - Set Heat Temperature"
+  description: "Set all thermostats to heat mode with specified temperature"
+  fields:
+    temperature:
+      description: "Target temperature in Fahrenheit"
+      example: 68
+      selector:
+        number:
+          min: 50
+          max: 85
+          step: 1
+          unit_of_measurement: "°F"
+  sequence:
+    - service: climate.set_temperature
+      target:
+        entity_id: >
+          {% set thermostats = [
+            'climate.livingroom_thermostat',
+            'climate.kitchen_thermostat',
+            'climate.bedroom_thermostat',
+            'climate.bathroom_thermostat'
+          ] %}
+          {% set available_thermostats = [] %}
+          {% for entity_id in thermostats %}
+            {% if states(entity_id) not in ['unavailable', 'unknown', 'none'] %}
+              {% set _ = available_thermostats.append(entity_id) %}
+            {% endif %}
+          {% endfor %}
+          {{ available_thermostats }}
+      data:
+        temperature: "{{ temperature }}"
+        hvac_mode: heat
+
+master_thermostat_set_auto:
+  alias: "Master Thermostat - Set Auto Mode"
+  description: "Set all thermostats to auto mode with specified temperature"
+  fields:
+    temperature:
+      description: "Target temperature in Fahrenheit"
+      example: 70
+      selector:
+        number:
+          min: 60
+          max: 85
+          step: 1
+          unit_of_measurement: "°F"
+  sequence:
+    - service: climate.set_temperature
+      target:
+        entity_id: >
+          {% set thermostats = [
+            'climate.livingroom_thermostat',
+            'climate.kitchen_thermostat',
+            'climate.bedroom_thermostat',
+            'climate.bathroom_thermostat'
+          ] %}
+          {% set available_thermostats = [] %}
+          {% for entity_id in thermostats %}
+            {% if states(entity_id) not in ['unavailable', 'unknown', 'none'] %}
+              {% set _ = available_thermostats.append(entity_id) %}
+            {% endif %}
+          {% endfor %}
+          {{ available_thermostats }}
+      data:
+        temperature: "{{ temperature }}"
+        hvac_mode: auto
+
+master_thermostat_off:
+  alias: "Master Thermostat - Turn Off"
+  description: "Turn off all thermostats"
+  sequence:
+    - service: climate.set_hvac_mode
+      target:
+        entity_id: >
+          {% set thermostats = [
+            'climate.livingroom_thermostat',
+            'climate.kitchen_thermostat',
+            'climate.bedroom_thermostat',
+            'climate.bathroom_thermostat'
+          ] %}
+          {% set available_thermostats = [] %}
+          {% for entity_id in thermostats %}
+            {% if states(entity_id) not in ['unavailable', 'unknown', 'none'] %}
+              {% set _ = available_thermostats.append(entity_id) %}
+            {% endif %}
+          {% endfor %}
+          {{ available_thermostats }}
+      data:
+        hvac_mode: off
+

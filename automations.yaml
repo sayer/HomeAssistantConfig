@@ -253,10 +253,6 @@
   - condition: state
     entity_id: input_boolean.busparked
     state: 'on'
-    for:
-      hours: 0
-      minutes: 5
-      seconds: 0
   - condition: state
     entity_id: input_boolean.camping
     state: 'on'
@@ -1485,4 +1481,6 @@
     data:
       value: '{{ duration }}'
     action: input_number.set_value
+
+
     
