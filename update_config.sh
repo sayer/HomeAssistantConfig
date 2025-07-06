@@ -733,6 +733,11 @@ configure_2023_plus() {
     THERMOSTAT2="165"
     THERMOSTAT3="166"
     THERMOSTAT4="167"
+    # Thermostat ambient instances (same for all model years)
+    THERMOSTAT1_AMBIENT="249"
+    THERMOSTAT2_AMBIENT="249"
+    THERMOSTAT3_AMBIENT="250"
+    THERMOSTAT4_AMBIENT="250"
     # Set shade codes
     set_shade_tokens "CODE_2023"
 }
@@ -758,6 +763,11 @@ configure_2020_to_2022() {
     THERMOSTAT2="165"
     THERMOSTAT3="166"
     THERMOSTAT4="167"
+    # Thermostat ambient instances (same for all model years)
+    THERMOSTAT1_AMBIENT="249"
+    THERMOSTAT2_AMBIENT="249"
+    THERMOSTAT3_AMBIENT="250"
+    THERMOSTAT4_AMBIENT="250"
     # Set shade codes
     set_shade_tokens "CODE_2020"
 }
@@ -783,6 +793,11 @@ configure_2017_to_2019() {
     THERMOSTAT2="2"
     THERMOSTAT3="3"
     THERMOSTAT4="4"
+    # Thermostat ambient instances (same for all model years)
+    THERMOSTAT1_AMBIENT="249"
+    THERMOSTAT2_AMBIENT="249"
+    THERMOSTAT3_AMBIENT="250"
+    THERMOSTAT4_AMBIENT="250"
     # Set shade codes
     set_shade_tokens "CODE_2017"
 }
@@ -808,6 +823,11 @@ configure_pre_2016() {
     THERMOSTAT2="2"
     THERMOSTAT3="3"
     THERMOSTAT4="4"
+    # Thermostat ambient instances (same for all model years)
+    THERMOSTAT1_AMBIENT="249"
+    THERMOSTAT2_AMBIENT="249"
+    THERMOSTAT3_AMBIENT="250"
+    THERMOSTAT4_AMBIENT="250"
     # Set shade codes
     set_shade_tokens "CODE_PRE2016"
 }
@@ -919,6 +939,19 @@ cat "$CONFIG_FILE" | sed "s/%%THERMOSTAT3%%/$THERMOSTAT3/g" > "$TEMP_FILE"
 mv "$TEMP_FILE" "$CONFIG_FILE"
 
 cat "$CONFIG_FILE" | sed "s/%%THERMOSTAT4%%/$THERMOSTAT4/g" > "$TEMP_FILE"
+mv "$TEMP_FILE" "$CONFIG_FILE"
+
+# Replace thermostat ambient tokens
+cat "$CONFIG_FILE" | sed "s/%%THERMOSTAT1_AMBIENT%%/$THERMOSTAT1_AMBIENT/g" > "$TEMP_FILE"
+mv "$TEMP_FILE" "$CONFIG_FILE"
+
+cat "$CONFIG_FILE" | sed "s/%%THERMOSTAT2_AMBIENT%%/$THERMOSTAT2_AMBIENT/g" > "$TEMP_FILE"
+mv "$TEMP_FILE" "$CONFIG_FILE"
+
+cat "$CONFIG_FILE" | sed "s/%%THERMOSTAT3_AMBIENT%%/$THERMOSTAT3_AMBIENT/g" > "$TEMP_FILE"
+mv "$TEMP_FILE" "$CONFIG_FILE"
+
+cat "$CONFIG_FILE" | sed "s/%%THERMOSTAT4_AMBIENT%%/$THERMOSTAT4_AMBIENT/g" > "$TEMP_FILE"
 mv "$TEMP_FILE" "$CONFIG_FILE"
 
 # Replace shade tokens
@@ -1043,6 +1076,12 @@ echo "  %%THERMOSTAT1%% -> $THERMOSTAT1"
 echo "  %%THERMOSTAT2%% -> $THERMOSTAT2"
 echo "  %%THERMOSTAT3%% -> $THERMOSTAT3"
 echo "  %%THERMOSTAT4%% -> $THERMOSTAT4"
+echo ""
+echo "Thermostat ambient instances:"
+echo "  %%THERMOSTAT1_AMBIENT%% -> $THERMOSTAT1_AMBIENT"
+echo "  %%THERMOSTAT2_AMBIENT%% -> $THERMOSTAT2_AMBIENT"
+echo "  %%THERMOSTAT3_AMBIENT%% -> $THERMOSTAT3_AMBIENT"
+echo "  %%THERMOSTAT4_AMBIENT%% -> $THERMOSTAT4_AMBIENT"
 echo ""
 echo "Window shade entries for model year $MODEL_YEAR:"
 echo ""

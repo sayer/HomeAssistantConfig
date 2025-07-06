@@ -333,7 +333,7 @@ mqtt:
 
   climate:
   
-  - name: "Front Thermostat"
+  - name: "Livingroom Thermostat"
     temperature_unit: "F"
     modes:
       - "off"
@@ -361,7 +361,7 @@ mqtt:
           72
         {% endif %}
       {% endif %}
-    current_temperature_topic: "RVC/THERMOSTAT_AMBIENT_STATUS/2"
+    current_temperature_topic: "RVC/THERMOSTAT_AMBIENT_STATUS/%%THERMOSTAT1_AMBIENT%%"
     current_temperature_template: "{{ value_json['ambient temp F'] }}"
     fan_mode_state_topic: "RVC/THERMOSTAT_STATUS_1/%%THERMOSTAT1%%"
     fan_mode_state_template: "{{ 'on' if value_json['fan mode'] == 1 else 'auto' }}"
@@ -370,7 +370,7 @@ mqtt:
     mode_command_topic: "RVC/THERMOSTAT_COMMAND_1/%%THERMOSTAT1%%/set"
     mode_command_template: '{"instance":%%THERMOSTAT1%%, "operating mode":{{ 0 if value == "off" else 1 if value == "cool" else 2 if value == "heat" else 3 if value == "auto" else 4 if value == "fan_only" else 0 }}, "fan mode":0, "schedule mode":0, "fan speed":0}'
 
-    unique_id: "hvac_front_thermostat"
+    unique_id: "hvac_livingroom_thermostat"
     precision: 1.0
     min_temp: 50
     max_temp: 90
@@ -378,7 +378,7 @@ mqtt:
     optimistic: true
 
   
-  - name: "Mid Thermostat"
+  - name: "Kitchen Thermostat"
     temperature_unit: "F"
     modes:
       - "off"
@@ -406,7 +406,7 @@ mqtt:
           72
         {% endif %}
       {% endif %}
-    current_temperature_topic: "RVC/THERMOSTAT_AMBIENT_STATUS/2"
+    current_temperature_topic: "RVC/THERMOSTAT_AMBIENT_STATUS/%%THERMOSTAT2_AMBIENT%%"
     current_temperature_template: "{{ value_json['ambient temp F'] }}"
     fan_mode_state_topic: "RVC/THERMOSTAT_STATUS_1/%%THERMOSTAT2%%"
     fan_mode_state_template: "{{ 'on' if value_json['fan mode'] == 1 else 'auto' }}"
@@ -415,7 +415,7 @@ mqtt:
     mode_command_topic: "RVC/THERMOSTAT_COMMAND_1/%%THERMOSTAT2%%/set"
     mode_command_template: '{"instance":%%THERMOSTAT2%%, "operating mode":{{ 0 if value == "off" else 1 if value == "cool" else 2 if value == "heat" else 3 if value == "auto" else 4 if value == "fan_only" else 0 }}, "fan mode":0, "schedule mode":0, "fan speed":0}'
 
-    unique_id: "hvac_mid_thermostat"
+    unique_id: "hvac_kitchen_thermostat"
     precision: 1.0
     min_temp: 50
     max_temp: 90
@@ -450,7 +450,7 @@ mqtt:
           72
         {% endif %}
       {% endif %}
-    current_temperature_topic: "RVC/THERMOSTAT_AMBIENT_STATUS/2"
+    current_temperature_topic: "RVC/THERMOSTAT_AMBIENT_STATUS/%%THERMOSTAT3_AMBIENT%%"
     current_temperature_template: "{{ value_json['ambient temp F'] }}"
     fan_mode_state_topic: "RVC/THERMOSTAT_STATUS_1/%%THERMOSTAT3%%"
     fan_mode_state_template: "{{ 'on' if value_json['fan mode'] == 1 else 'auto' }}"
@@ -460,6 +460,50 @@ mqtt:
     mode_command_template: '{"instance":%%THERMOSTAT3%%, "operating mode":{{ 0 if value == "off" else 1 if value == "cool" else 2 if value == "heat" else 3 if value == "auto" else 4 if value == "fan_only" else 0 }}, "fan mode":0, "schedule mode":0, "fan speed":0}'
 
     unique_id: "hvac_bedroom_thermostat"
+    precision: 1.0
+    min_temp: 50
+    max_temp: 90
+    initial: 72
+    optimistic: true
+
+  - name: "Bathroom Thermostat"
+    temperature_unit: "F"
+    modes:
+      - "off"
+      - "cool"
+      - "heat"
+      - "auto"
+      - "fan_only"
+    fan_modes:
+      - "auto"
+      - "on"
+    mode_state_topic: "RVC/THERMOSTAT_STATUS_1/%%THERMOSTAT4%%"
+    mode_state_template: "{{ value_json['operating mode definition'] }}"
+    temperature_state_topic: "RVC/THERMOSTAT_STATUS_1/%%THERMOSTAT4%%"
+    temperature_state_template: >-
+      {% if value_json['operating mode definition'] == 'cool' or value_json['operating mode definition'] == 'auto' %}
+        {% if value_json['setpoint temp cool F'] is defined and value_json['setpoint temp cool F'] != "n/a" %}
+          {{ value_json['setpoint temp cool F'] }}
+        {% else %}
+          72
+        {% endif %}
+      {% else %}
+        {% if value_json['setpoint temp heat F'] is defined and value_json['setpoint temp heat F'] != "n/a" %}
+          {{ value_json['setpoint temp heat F'] }}
+        {% else %}
+          72
+        {% endif %}
+      {% endif %}
+    current_temperature_topic: "RVC/THERMOSTAT_AMBIENT_STATUS/%%THERMOSTAT4_AMBIENT%%"
+    current_temperature_template: "{{ value_json['ambient temp F'] }}"
+    fan_mode_state_topic: "RVC/THERMOSTAT_STATUS_1/%%THERMOSTAT4%%"
+    fan_mode_state_template: "{{ 'on' if value_json['fan mode'] == 1 else 'auto' }}"
+    temperature_command_topic: "RVC/THERMOSTAT_COMMAND_1/%%THERMOSTAT4%%/set"
+    temperature_command_template: '{"instance":%%THERMOSTAT4%%, "operating mode":1, "fan mode":0, "schedule mode":0, "fan speed":0, "setpoint temp heat":{{ ((value - 32) * 5/9) | int }}, "setpoint temp cool":{{ ((value - 32) * 5/9) | int }}}'
+    mode_command_topic: "RVC/THERMOSTAT_COMMAND_1/%%THERMOSTAT4%%/set"
+    mode_command_template: '{"instance":%%THERMOSTAT4%%, "operating mode":{{ 0 if value == "off" else 1 if value == "cool" else 2 if value == "heat" else 3 if value == "auto" else 4 if value == "fan_only" else 0 }}, "fan mode":0, "schedule mode":0, "fan speed":0}'
+
+    unique_id: "hvac_bathroom_thermostat"
     precision: 1.0
     min_temp: 50
     max_temp: 90
