@@ -357,7 +357,7 @@
                   "cards": [
                     {
                       "type": "custom:mushroom-climate-card",
-                      "entity": "climate.front_thermostat",
+                      "entity": "climate.livingroom_thermostat",
                       "show_temperature_control": true,
                       "collapsible_controls": false,
                       "fill_container": false,
@@ -365,7 +365,7 @@
                     },
                     {
                       "type": "custom:mushroom-climate-card",
-                      "entity": "climate.mid_thermostat",
+                      "entity": "climate.kitchen_thermostat",
                       "show_temperature_control": true,
                       "collapsible_controls": true,
                       "name": "Mid Zone"
@@ -373,6 +373,13 @@
                     {
                       "type": "custom:mushroom-climate-card",
                       "entity": "climate.bedroom_thermostat",
+                      "show_temperature_control": true,
+                      "collapsible_controls": true,
+                      "name": "Bedroom Zone"
+                    },
+                    {
+                      "type": "custom:mushroom-climate-card",
+                      "entity": "climate.bathroom_thermostat",
                       "show_temperature_control": true,
                       "collapsible_controls": true,
                       "name": "Bedroom Zone"
@@ -1579,27 +1586,41 @@
                   "type": "grid",
                   "cards": [
                     {
-                      "type": "custom:mushroom-climate-card",
-                      "entity": "climate.front_thermostat",
-                      "name": "Front Zone",
-                      "show_temperature_control": true,
-                      "collapsible_controls": false,
-                      "fill_container": true,
-                      "hvac_modes": []
+                      "type": "thermostat",
+                      "entity": "climate.livingroom_thermostat",
+                      "features": [
+                        {
+                          "type": "climate-hvac-modes"
+                        }
+                      ]
                     },
                     {
-                      "type": "custom:mushroom-climate-card",
-                      "entity": "climate.mid_thermostat",
-                      "show_temperature_control": true,
-                      "collapsible_controls": true,
-                      "name": "Mid Zone"
+                      "type": "thermostat",
+                      "entity": "climate.kitchen_thermostat",
+                      "features": [
+                        {
+                          "type": "climate-hvac-modes"
+                        }
+                      ]
                     },
                     {
-                      "type": "custom:mushroom-climate-card",
+                      "type": "thermostat",
                       "entity": "climate.bedroom_thermostat",
-                      "show_temperature_control": true,
-                      "collapsible_controls": true,
-                      "name": "Bedroom Zone"
+                      "features": [
+                        {
+                          "type": "climate-hvac-modes"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "thermostat",
+                      "entity": "climate.bathroom_thermostat",
+                      "show_current_as_primary": false,
+                      "features": [
+                        {
+                          "type": "climate-hvac-modes"
+                        }
+                      ]
                     }
                   ],
                   "columns": 2
