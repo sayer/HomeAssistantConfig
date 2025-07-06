@@ -2910,8 +2910,7 @@ climate:
   - platform: generic_thermostat
     name: "Master Thermostat"
     unique_id: "master_thermostat"
-    heater: script.master_thermostat_set_heat
-    cooler: script.master_thermostat_set_cool
+    heater: script.master_thermostat_set_cool
     target_sensor: sensor.master_cool_target
     min_temp: 50
     max_temp: 90
