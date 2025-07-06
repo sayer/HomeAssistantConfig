@@ -272,6 +272,86 @@ master_thermostat_set_fan_mode:
           - climate.bathroom_thermostat
       data:
         fan_mode: "{{ fan_mode }}"
+
+master_thermostat_set_cool_temperature:
+  alias: "Master Thermostat - Set Cool Temperature"
+  description: "Set cool temperature on all thermostats using highest current setting"
+  sequence:
+    - service: climate.set_temperature
+      target:
+        entity_id:
+          - climate.livingroom_thermostat
+          - climate.kitchen_thermostat
+          - climate.bedroom_thermostat
+          - climate.bathroom_thermostat
+      data:
+        temperature: "{{ states('sensor.master_thermostat_cool_setting') | float }}"
+        hvac_mode: "cool"
+
+master_thermostat_set_heat_temperature:
+  alias: "Master Thermostat - Set Heat Temperature"
+  description: "Set heat temperature on all thermostats using lowest current setting"
+  sequence:
+    - service: climate.set_temperature
+      target:
+        entity_id:
+          - climate.livingroom_thermostat
+          - climate.kitchen_thermostat
+          - climate.bedroom_thermostat
+          - climate.bathroom_thermostat
+      data:
+        temperature: "{{ states('sensor.master_thermostat_heat_setting') | float }}"
+        hvac_mode: "heat"
+
+master_thermostat_adjust_cool:
+  alias: "Master Thermostat - Adjust Cool Temperature"
+  description: "Adjust cool temperature on all thermostats"
+  fields:
+    adjustment:
+      description: "Temperature adjustment (+/- degrees)"
+      example: 1
+      selector:
+        number:
+          min: -10
+          max: 10
+          step: 1
+          unit_of_measurement: "°F"
+  sequence:
+    - service: climate.set_temperature
+      target:
+        entity_id:
+          - climate.livingroom_thermostat
+          - climate.kitchen_thermostat
+          - climate.bedroom_thermostat
+          - climate.bathroom_thermostat
+      data:
+        temperature: "{{ (states('sensor.master_thermostat_cool_setting') | float) + adjustment }}"
+        hvac_mode: "cool"
+
+master_thermostat_adjust_heat:
+  alias: "Master Thermostat - Adjust Heat Temperature"
+  description: "Adjust heat temperature on all thermostats"
+  fields:
+    adjustment:
+      description: "Temperature adjustment (+/- degrees)"
+      example: 1
+      selector:
+        number:
+          min: -10
+          max: 10
+          step: 1
+          unit_of_measurement: "°F"
+  sequence:
+    - service: climate.set_temperature
+      target:
+        entity_id:
+          - climate.livingroom_thermostat
+          - climate.kitchen_thermostat
+          - climate.bedroom_thermostat
+          - climate.bathroom_thermostat
+      data:
+        temperature: "{{ (states('sensor.master_thermostat_heat_setting') | float) + adjustment }}"
+        hvac_mode: "heat"
       minutes: 5
       seconds: 0
   - service: light.turn_on

@@ -2870,5 +2870,28 @@ template:
           {{ states('cover.entry_door_day') not in ['unknown', 'unavailable', ''] }}
         device_class: connectivity  # Optional, use if you want a toggle-style icon
 
+      # Master Thermostat Aggregated Values
+      - name: "Master Thermostat Cool Setting"
+        unique_id: master_thermostat_cool_setting
+        state: >
+          {% set livingroom_cool = state_attr('climate.livingroom_thermostat', 'temperature') | float(72) %}
+          {% set kitchen_cool = state_attr('climate.kitchen_thermostat', 'temperature') | float(72) %}
+          {% set bedroom_cool = state_attr('climate.bedroom_thermostat', 'temperature') | float(72) %}
+          {% set bathroom_cool = state_attr('climate.bathroom_thermostat', 'temperature') | float(72) %}
+          {{ [livingroom_cool, kitchen_cool, bedroom_cool, bathroom_cool] | max }}
+        unit_of_measurement: "°F"
+        device_class: temperature
+
+      - name: "Master Thermostat Heat Setting"
+        unique_id: master_thermostat_heat_setting
+        state: >
+          {% set livingroom_heat = state_attr('climate.livingroom_thermostat', 'temperature') | float(72) %}
+          {% set kitchen_heat = state_attr('climate.kitchen_thermostat', 'temperature') | float(72) %}
+          {% set bedroom_heat = state_attr('climate.bedroom_thermostat', 'temperature') | float(72) %}
+          {% set bathroom_heat = state_attr('climate.bathroom_thermostat', 'temperature') | float(72) %}
+          {{ [livingroom_heat, kitchen_heat, bedroom_heat, bathroom_heat] | min }}
+        unit_of_measurement: "°F"
+        device_class: temperature
+
 
 
