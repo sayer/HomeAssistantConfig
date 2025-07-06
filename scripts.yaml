@@ -198,6 +198,80 @@ tv_time:
     state: 'on'
     for:
       hours: 0
+
+# Master Thermostat Control Scripts
+master_thermostat_set_temperature:
+  alias: "Master Thermostat - Set Temperature"
+  description: "Set temperature on all thermostats"
+  fields:
+    temperature:
+      description: "Temperature to set (Fahrenheit)"
+      example: 72
+      selector:
+        number:
+          min: 50
+          max: 90
+          step: 1
+          unit_of_measurement: "°F"
+  sequence:
+    - service: climate.set_temperature
+      target:
+        entity_id:
+          - climate.livingroom_thermostat
+          - climate.kitchen_thermostat
+          - climate.bedroom_thermostat
+          - climate.bathroom_thermostat
+      data:
+        temperature: "{{ temperature }}"
+
+master_thermostat_set_mode:
+  alias: "Master Thermostat - Set Mode"
+  description: "Set HVAC mode on all thermostats"
+  fields:
+    hvac_mode:
+      description: "HVAC mode to set"
+      example: "cool"
+      selector:
+        select:
+          options:
+            - "off"
+            - "cool"
+            - "heat"
+            - "auto"
+            - "fan_only"
+  sequence:
+    - service: climate.set_hvac_mode
+      target:
+        entity_id:
+          - climate.livingroom_thermostat
+          - climate.kitchen_thermostat
+          - climate.bedroom_thermostat
+          - climate.bathroom_thermostat
+      data:
+        hvac_mode: "{{ hvac_mode }}"
+
+master_thermostat_set_fan_mode:
+  alias: "Master Thermostat - Set Fan Mode"
+  description: "Set fan mode on all thermostats"
+  fields:
+    fan_mode:
+      description: "Fan mode to set"
+      example: "auto"
+      selector:
+        select:
+          options:
+            - "auto"
+            - "on"
+  sequence:
+    - service: climate.set_fan_mode
+      target:
+        entity_id:
+          - climate.livingroom_thermostat
+          - climate.kitchen_thermostat
+          - climate.bedroom_thermostat
+          - climate.bathroom_thermostat
+      data:
+        fan_mode: "{{ fan_mode }}"
       minutes: 5
       seconds: 0
   - service: light.turn_on
