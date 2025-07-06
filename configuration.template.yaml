@@ -333,6 +333,112 @@ mqtt:
 
   climate:
   
+  - name: "Master Thermostat"
+    temperature_unit: "F"
+    modes:
+      - "off"
+      - "cool"
+      - "heat"
+      - "auto"
+      - "fan_only"
+    fan_modes:
+      - "auto"
+      - "on"
+    target_temperature_step: 1.0
+    min_temp: 50
+    max_temp: 90
+    initial: 72
+    precision: 1.0
+    
+    # Template-based state tracking
+    value_template: >-
+      {% set livingroom_mode = states('climate.livingroom_thermostat') %}
+      {% set kitchen_mode = states('climate.kitchen_thermostat') %}
+      {% set bedroom_mode = states('climate.bedroom_thermostat') %}
+      {% set bathroom_mode = states('climate.bathroom_thermostat') %}
+      
+      {% set modes = [livingroom_mode, kitchen_mode, bedroom_mode, bathroom_mode] | select('in', ['cool', 'heat', 'auto', 'fan_only']) | list %}
+      {% if modes | length > 0 %}
+        {{ modes[0] }}
+      {% else %}
+        off
+      {% endif %}
+    
+    current_temperature_template: >-
+      {% set livingroom_temp = states('climate.livingroom_thermostat') | float(0) %}
+      {% set kitchen_temp = states('climate.kitchen_thermostat') | float(0) %}
+      {% set bedroom_temp = states('climate.bedroom_thermostat') | float(0) %}
+      {% set bathroom_temp = states('climate.bathroom_thermostat') | float(0) %}
+      
+      {% set temps = [livingroom_temp, kitchen_temp, bedroom_temp, bathroom_temp] | select('>', 0) | list %}
+      {% if temps | length > 0 %}
+        {{ (temps | sum) / (temps | length) | round(1) }}
+      {% else %}
+        72
+      {% endif %}
+    
+    temperature_template: >-
+      {% set livingroom_setpoint = state_attr('climate.livingroom_thermostat', 'temperature') | float(0) %}
+      {% set kitchen_setpoint = state_attr('climate.kitchen_thermostat', 'temperature') | float(0) %}
+      {% set bedroom_setpoint = state_attr('climate.bedroom_thermostat', 'temperature') | float(0) %}
+      {% set bathroom_setpoint = state_attr('climate.bathroom_thermostat', 'temperature') | float(0) %}
+      
+      {% set setpoints = [livingroom_setpoint, kitchen_setpoint, bedroom_setpoint, bathroom_setpoint] | select('>', 0) | list %}
+      {% if setpoints | length > 0 %}
+        {{ (setpoints | sum) / (setpoints | length) | round(1) }}
+      {% else %}
+        72
+      {% endif %}
+    
+    fan_mode_template: >-
+      {% set livingroom_fan = state_attr('climate.livingroom_thermostat', 'fan_mode') %}
+      {% set kitchen_fan = state_attr('climate.kitchen_thermostat', 'fan_mode') %}
+      {% set bedroom_fan = state_attr('climate.bedroom_thermostat', 'fan_mode') %}
+      {% set bathroom_fan = state_attr('climate.bathroom_thermostat', 'fan_mode') %}
+      
+      {% if 'on' in [livingroom_fan, kitchen_fan, bedroom_fan, bathroom_fan] %}
+        on
+      {% else %}
+        auto
+      {% endif %}
+    
+    # Service calls to control all thermostats
+    set_temperature:
+      service: climate.set_temperature
+      data_template:
+        target:
+          entity_id:
+            - climate.livingroom_thermostat
+            - climate.kitchen_thermostat
+            - climate.bedroom_thermostat
+            - climate.bathroom_thermostat
+        temperature: "{{ temperature }}"
+    
+    set_hvac_mode:
+      service: climate.set_hvac_mode
+      data_template:
+        target:
+          entity_id:
+            - climate.livingroom_thermostat
+            - climate.kitchen_thermostat
+            - climate.bedroom_thermostat
+            - climate.bathroom_thermostat
+        hvac_mode: "{{ hvac_mode }}"
+    
+    set_fan_mode:
+      service: climate.set_fan_mode
+      data_template:
+        target:
+          entity_id:
+            - climate.livingroom_thermostat
+            - climate.kitchen_thermostat
+            - climate.bedroom_thermostat
+            - climate.bathroom_thermostat
+        fan_mode: "{{ fan_mode }}"
+    
+    unique_id: "hvac_master_thermostat"
+    optimistic: false
+
   - name: "Livingroom Thermostat"
     temperature_unit: "F"
     modes:
