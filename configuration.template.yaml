@@ -2918,16 +2918,34 @@ template:
           {% endfor %}
           {{ available_count.value > 0 }}
 
-  # Master Thermostat Climate Entity
-  - climate:
-      - name: "Master Thermostat"
+
+# Master Thermostat - Built-in Group
+group:
+  master_thermostat_group:
+    name: "Master Thermostat Group"
+    entities:
+      - climate.livingroom_thermostat
+      - climate.kitchen_thermostat
+      - climate.bedroom_thermostat
+      - climate.bathroom_thermostat
+
+# Master Thermostat Climate Entity
+climate:
+  - platform: template
+    climates:
+      master_thermostat:
+        friendly_name: "Master Thermostat"
         unique_id: "master_thermostat"
-        temperature_unit: "F"
+        modes:
+          - "off"
+          - "heat" 
+          - "cool"
+          - "auto"
+          - "fan_only"
         min_temp: 50
         max_temp: 90
-        precision: 1.0
         
-        # Get the current temperature from the average of all thermostats
+        # Get current temperature from average
         current_temperature_template: >
           {% set temps = [] %}
           {% set thermostats = ['climate.livingroom_thermostat', 'climate.kitchen_thermostat', 
@@ -2946,7 +2964,7 @@ template:
             72
           {% endif %}
         
-        # Get the target temperature from the average of all active thermostats
+        # Get target temperature from average
         temperature_template: >
           {% set temps = [] %}
           {% set thermostats = ['climate.livingroom_thermostat', 'climate.kitchen_thermostat', 
@@ -2965,7 +2983,7 @@ template:
             72
           {% endif %}
         
-        # Get the HVAC mode from the majority of thermostats
+        # Get HVAC mode from majority
         hvac_mode_template: >
           {% set modes = {} %}
           {% set thermostats = ['climate.livingroom_thermostat', 'climate.kitchen_thermostat', 
@@ -2986,7 +3004,7 @@ template:
             off
           {% endif %}
         
-        # Actions for controlling all thermostats
+        # Actions to control all thermostats
         set_hvac_mode:
           - service: climate.set_hvac_mode
             target:
@@ -3009,13 +3027,3 @@ template:
             data:
               temperature: "{{ temperature }}"
               hvac_mode: "{{ hvac_mode | default(states('climate.master_thermostat')) }}"
-
-# Master Thermostat - Built-in Group
-group:
-  master_thermostat_group:
-    name: "Master Thermostat Group"
-    entities:
-      - climate.livingroom_thermostat
-      - climate.kitchen_thermostat
-      - climate.bedroom_thermostat
-      - climate.bathroom_thermostat
