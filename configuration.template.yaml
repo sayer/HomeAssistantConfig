@@ -513,7 +513,25 @@ mqtt:
     initial: 72
     optimistic: true
 
-# William also has 7 - 9 in addition to the above 
+# William also has 7 - 9 in addition to the above
+
+  - platform: generic_thermostat
+    name: "Master Thermostat"
+    unique_id: "master_thermostat"
+    heater: input_boolean.master_thermostat_heater
+    target_sensor: sensor.master_cool_target
+    min_temp: 50
+    max_temp: 90
+    ac_mode: true
+    target_temp: 72
+    cold_tolerance: 0.3
+    hot_tolerance: 0.3
+    min_cycle_duration:
+      minutes: 5
+    keep_alive:
+      minutes: 3
+    initial_hvac_mode: "off"
+    precision: 1.0 
 
   light:
     # Using the template format you provided
@@ -2879,14 +2897,14 @@ template:
         unit_of_measurement: "°F"
         state: >
           {% set thermostats = [
-            ('climate.livingroom_thermostat', states('climate.livingroom_thermostat')),
-            ('climate.kitchen_thermostat', states('climate.kitchen_thermostat')),
-            ('climate.bedroom_thermostat', states('climate.bedroom_thermostat')),
-            ('climate.bathroom_thermostat', states('climate.bathroom_thermostat'))
+            ('climate.livingroom_thermostat', state_attr('climate.livingroom_thermostat', 'temperature')),
+            ('climate.kitchen_thermostat', state_attr('climate.kitchen_thermostat', 'temperature')),
+            ('climate.bedroom_thermostat', state_attr('climate.bedroom_thermostat', 'temperature')),
+            ('climate.bathroom_thermostat', state_attr('climate.bathroom_thermostat', 'temperature'))
           ] %}
           {% set valid_targets = [] %}
           {% for entity_id, temp in thermostats %}
-            {% if temp not in ['unavailable', 'unknown', 'none'] and temp | float > 0 %}
+            {% if temp is not none and temp not in ['unavailable', 'unknown', 'none'] and temp | float > 0 %}
               {% set _ = valid_targets.append(temp | float) %}
             {% endif %}
           {% endfor %}
@@ -2918,26 +2936,6 @@ group:
       - climate.kitchen_thermostat
       - climate.bedroom_thermostat
       - climate.bathroom_thermostat
-
-# Master Thermostat - Generic Thermostat with Dummy Switch
-climate:
-  - platform: generic_thermostat
-    name: "Master Thermostat"
-    unique_id: "master_thermostat"
-    heater: input_boolean.master_thermostat_heater
-    target_sensor: sensor.master_cool_target
-    min_temp: 50
-    max_temp: 90
-    ac_mode: true
-    target_temp: 72
-    cold_tolerance: 0.3
-    hot_tolerance: 0.3
-    min_cycle_duration:
-      minutes: 5
-    keep_alive:
-      minutes: 3
-    initial_hvac_mode: "off"
-    precision: 1.0
 
 
 
