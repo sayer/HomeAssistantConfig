@@ -66,6 +66,7 @@ input_number:
     max: 86400
     step: 1
     unit_of_measurement: "s"
+    initial: 0
   master_thermostat_temp:
     name: "Master Thermostat Temperature"
     min: 50
@@ -111,6 +112,7 @@ input_datetime:
     name: Generator Run Start
     has_date: true
     has_time: true
+    initial: "2024-01-01 00:00:00"
 
 sensor:
   - platform: rest

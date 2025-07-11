@@ -2683,10 +2683,7 @@
                       "entity": "input_number.generator_shutdown_delay",
                       "name": "Shutdown Delay (min)",
                       "icon": "mdi:timer-outline",
-                      "fill_container": true,
-                      "min": 1,
-                      "max": 480,
-                      "step": 1
+                      "fill_container": true
                     },
                     {
                       "type": "custom:mushroom-template-card",
@@ -2722,10 +2719,7 @@
                       "entity": "input_number.generator_start_delay",
                       "name": "Start Delay (min)",
                       "icon": "mdi:timer-outline",
-                      "fill_container": true,
-                      "min": 1,
-                      "max": 480,
-                      "step": 1
+                      "fill_container": true
                     },
                     {
                       "type": "custom:mushroom-template-card",
