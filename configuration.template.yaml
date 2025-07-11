@@ -2886,8 +2886,14 @@ template:
         unique_id: generator_session_display
         state: >
           {% if is_state('switch.generator', 'on') %}
-            {% set secs = states('sensor.generator_current_session_time') | int %}
-            Running: {{ (secs // 60) }} min {{ (secs % 60) }} sec
+            {% set start = as_datetime(states('input_datetime.generator_run_start')) %}
+            {% set now = now() %}
+            {% if start %}
+              {% set secs = (now - start).total_seconds() | int %}
+              Running: {{ (secs // 60) }} min {{ (secs % 60) }} sec
+            {% else %}
+              Running: 0 min 0 sec
+            {% endif %}
           {% else %}
             {% set secs = states('input_number.generator_last_session_seconds') | int %}
             Last Run: {{ (secs // 60) }} min {{ (secs % 60) }} sec
