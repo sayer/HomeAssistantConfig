@@ -352,40 +352,13 @@
                   "title": "Smart BVM"
                 },
                 {
-                  "square": false,
-                  "type": "grid",
-                  "cards": [
+                  "type": "thermostat",
+                  "entity": "climate.master_thermostat",
+                  "features": [
                     {
-                      "type": "custom:mushroom-climate-card",
-                      "entity": "climate.livingroom_thermostat",
-                      "show_temperature_control": true,
-                      "collapsible_controls": false,
-                      "fill_container": false,
-                      "name": "Front Zone"
-                    },
-                    {
-                      "type": "custom:mushroom-climate-card",
-                      "entity": "climate.kitchen_thermostat",
-                      "show_temperature_control": true,
-                      "collapsible_controls": true,
-                      "name": "Mid Zone"
-                    },
-                    {
-                      "type": "custom:mushroom-climate-card",
-                      "entity": "climate.bedroom_thermostat",
-                      "show_temperature_control": true,
-                      "collapsible_controls": true,
-                      "name": "Bedroom Zone"
-                    },
-                    {
-                      "type": "custom:mushroom-climate-card",
-                      "entity": "climate.bathroom_thermostat",
-                      "show_temperature_control": true,
-                      "collapsible_controls": true,
-                      "name": "Bedroom Zone"
+                      "type": "climate-hvac-modes"
                     }
-                  ],
-                  "columns": 2
+                  ]
                 },
                 {
                   "square": false,
