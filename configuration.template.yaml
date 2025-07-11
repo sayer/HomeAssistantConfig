@@ -74,6 +74,24 @@ input_number:
     mode: box
     unit_of_measurement: "°F"
     icon: mdi:thermostat
+  generator_shutdown_delay:
+    name: "Generator Shutdown Delay"
+    min: 1
+    max: 480
+    step: 1
+    mode: box
+    unit_of_measurement: "minutes"
+    icon: mdi:timer-outline
+    initial: 30
+  generator_start_delay:
+    name: "Generator Start Delay"
+    min: 1
+    max: 480
+    step: 1
+    mode: box
+    unit_of_measurement: "minutes"
+    icon: mdi:timer-outline
+    initial: 5
 
 input_boolean:
   is_optimistic:
@@ -2886,20 +2904,15 @@ template:
         unique_id: "master_cool_target"
         unit_of_measurement: "°F"
         state: >
-          {% set thermostats = [
-            ('climate.livingroom_thermostat', state_attr('climate.livingroom_thermostat', 'temperature')),
-            ('climate.kitchen_thermostat', state_attr('climate.kitchen_thermostat', 'temperature')),
-            ('climate.bedroom_thermostat', state_attr('climate.bedroom_thermostat', 'temperature')),
-            ('climate.bathroom_thermostat', state_attr('climate.bathroom_thermostat', 'temperature'))
-          ] %}
-          {% set valid_targets = [] %}
-          {% for entity_id, temp in thermostats %}
-            {% if temp is not none and temp not in ['unavailable', 'unknown', 'none'] and temp | float > 0 %}
-              {% set _ = valid_targets.append(temp | float) %}
-            {% endif %}
-          {% endfor %}
-          {% if valid_targets | length > 0 %}
-            {{ valid_targets | max }}
+          {% set temps = [
+            state_attr('climate.livingroom_thermostat', 'temperature'),
+            state_attr('climate.kitchen_thermostat', 'temperature'),
+            state_attr('climate.bedroom_thermostat', 'temperature'),
+            state_attr('climate.bathroom_thermostat', 'temperature')
+          ] | select('defined') | select('!=', None) | select('!=', 'unavailable') | select('!=', 'unknown') | list %}
+          {% set valid_temps = temps | select('>', 0) | list %}
+          {% if valid_temps | length > 0 %}
+            {{ valid_temps | max }}
           {% else %}
             72
           {% endif %}

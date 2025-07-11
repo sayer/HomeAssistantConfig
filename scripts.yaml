@@ -28,6 +28,138 @@ unlock_all_cargo_doors:
           - lock.cargo_door_lock_4
           - lock.cargo_door_lock_5
 
+# Generator Shutdown with Verification Script
+generator_shutdown_with_verification:
+  alias: "Generator Shutdown with Verification"
+  description: "Turn off generator after specified minutes, verify shutdown, retry if needed, and notify on failure"
+  fields:
+    delay_minutes:
+      description: "Number of minutes to wait before shutting down generator"
+      example: 30
+      required: true
+      selector:
+        number:
+          min: 1
+          max: 480
+          step: 1
+          unit_of_measurement: "minutes"
+    notification_service:
+      description: "Notification service to use for alerts"
+      example: "notify.mobile_app"
+      required: false
+      default: "notify.mobile_app"
+      selector:
+        text:
+  sequence:
+    # Wait for the specified delay
+    - delay:
+        minutes: "{{ delay_minutes }}"
+    
+    # Turn off generator
+    - service: switch.turn_off
+      target:
+        entity_id: switch.generator
+      data:
+        message: "Generator shutdown initiated after {{ delay_minutes }} minutes"
+    
+    # Wait 30 seconds for generator to shut down
+    - delay:
+        seconds: 30
+    
+    # Check if generator is off, retry up to 3 times
+    - repeat:
+        count: 3
+        sequence:
+          # Check if generator is still running
+          - condition: template
+            value_template: "{{ is_state('switch.generator', 'on') }}"
+          # If still running, turn off again
+          - service: switch.turn_off
+            target:
+              entity_id: switch.generator
+            data:
+              message: "Generator shutdown retry {{ repeat.index }}"
+          # Wait 30 seconds before next check
+          - delay:
+              seconds: 30
+    
+    # Final verification - if still running, send notification
+    - condition: template
+      value_template: "{{ is_state('switch.generator', 'on') }}"
+    - service: "{{ notification_service }}"
+      data:
+        title: "Generator Shutdown Failed"
+        message: "Unable to stop generator after {{ delay_minutes }} minutes and 3 retry attempts. Manual intervention required."
+        data:
+          priority: "high"
+          channel: "alerts"
+
+# Generator Start with Verification Script
+generator_start_with_verification:
+  alias: "Generator Start with Verification"
+  description: "Turn on generator after specified minutes, verify startup, retry if needed, and notify on failure"
+  fields:
+    delay_minutes:
+      description: "Number of minutes to wait before starting generator"
+      example: 5
+      required: true
+      selector:
+        number:
+          min: 1
+          max: 480
+          step: 1
+          unit_of_measurement: "minutes"
+    notification_service:
+      description: "Notification service to use for alerts"
+      example: "notify.mobile_app"
+      required: false
+      default: "notify.mobile_app"
+      selector:
+        text:
+  sequence:
+    # Wait for the specified delay
+    - delay:
+        minutes: "{{ delay_minutes }}"
+    
+    # Turn on generator
+    - service: switch.turn_on
+      target:
+        entity_id: switch.generator
+      data:
+        message: "Generator startup initiated after {{ delay_minutes }} minutes"
+    
+    # Wait 30 seconds for generator to start
+    - delay:
+        seconds: 30
+    
+    # Check if generator is on, retry up to 3 times
+    - repeat:
+        count: 3
+        sequence:
+          # Check if generator is still off
+          - condition: template
+            value_template: "{{ is_state('switch.generator', 'off') }}"
+          # If still off, turn on again
+          - service: switch.turn_on
+            target:
+              entity_id: switch.generator
+            data:
+              message: "Generator startup retry {{ repeat.index }}"
+          # Wait 60 seconds before next check
+          - delay:
+              seconds: 60
+    
+    # Final verification - if still off, send notification
+    - condition: template
+      value_template: "{{ is_state('switch.generator', 'off') }}"
+    - service: "{{ notification_service }}"
+      data:
+        title: "Generator Startup Failed"
+        message: "Unable to start generator after {{ delay_minutes }} minutes and 3 retry attempts. Manual intervention required."
+        data:
+          priority: "high"
+          channel: "alerts"
+
 # Master Thermostat Scripts
 master_thermostat_set_temperature:
   alias: "Master Thermostat - Set Temperature"

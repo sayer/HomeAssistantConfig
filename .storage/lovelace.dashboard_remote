@@ -2699,6 +2699,84 @@
                     }
                   ],
                   "state_color": true
+                },
+                {
+                  "type": "grid",
+                  "square": true,
+                  "columns": 2,
+                  "cards": [
+                    {
+                      "type": "custom:mushroom-number-card",
+                      "entity": "input_number.generator_shutdown_delay",
+                      "name": "Shutdown Delay (min)",
+                      "icon": "mdi:timer-outline",
+                      "fill_container": true,
+                      "min": 1,
+                      "max": 480,
+                      "step": 1
+                    },
+                    {
+                      "type": "custom:mushroom-template-card",
+                      "entity": "switch.generator",
+                      "primary": "Shutdown Generator",
+                      "icon": "mdi:power-off",
+                      "icon_color": "orange",
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "script.generator_shutdown_with_verification",
+                        "service_data": {
+                          "delay_minutes": "{{ states('input_number.generator_shutdown_delay') | int }}"
+                        }
+                      },
+                      "fill_container": true,
+                      "conditions": [
+                        {
+                          "condition": "state",
+                          "entity": "switch.generator",
+                          "state": "on"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "grid",
+                  "square": true,
+                  "columns": 2,
+                  "cards": [
+                    {
+                      "type": "custom:mushroom-number-card",
+                      "entity": "input_number.generator_start_delay",
+                      "name": "Start Delay (min)",
+                      "icon": "mdi:timer-outline",
+                      "fill_container": true,
+                      "min": 1,
+                      "max": 480,
+                      "step": 1
+                    },
+                    {
+                      "type": "custom:mushroom-template-card",
+                      "entity": "switch.generator",
+                      "primary": "Start Generator",
+                      "icon": "mdi:power-on",
+                      "icon_color": "green",
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "script.generator_start_with_verification",
+                        "service_data": {
+                          "delay_minutes": "{{ states('input_number.generator_start_delay') | int }}"
+                        }
+                      },
+                      "fill_container": true,
+                      "conditions": [
+                        {
+                          "condition": "state",
+                          "entity": "switch.generator",
+                          "state": "off"
+                        }
+                      ]
+                    }
+                  ]
                 }
               ]
             }
