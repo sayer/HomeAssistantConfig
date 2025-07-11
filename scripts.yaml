@@ -198,17 +198,6 @@ tv_time:
     state: 'on'
     for:
       hours: 0
-
-
-
-tv_time:
-  alias: TV Time
-  sequence:
-  - condition: state
-    entity_id: input_boolean.busparked
-    state: 'on'
-    for:
-      hours: 0
       minutes: 5
       seconds: 0
   - service: light.turn_on
@@ -241,7 +230,7 @@ tv_time:
   mode: single
   icon: mdi:television
 
-  drive_time:
+drive_time:
   alias: Drive Time
   sequence:
   - service: cover.open_cover

@@ -198,7 +198,13 @@
   - platform: numeric_state
     entity_id: sensor.chassis_battery
     below: 11.9
-
+  condition: []
+  action:
+  - service: script.notify_home
+    data:
+      title: Foretravel
+      message: Chassis battery is low
+  mode: single
 
 - id: '1679597270218'
   alias: House Batteries Low
@@ -1495,15 +1501,15 @@
       data:
         temperature: "{{ states('input_number.master_thermostat_temp') | int }}"
 
-- alias: "Master Thermostat - Mode Changed"
-  description: "When master thermostat mode changes, set all thermostats"
-  trigger:
-    - platform: state
-      entity_id: input_select.master_thermostat_mode
-  action:
-    - service: script.master_thermostat_set_mode
-      data:
-        hvac_mode: "{{ states('input_select.master_thermostat_mode') }}"
+# - alias: "Master Thermostat - Mode Changed"
+#   description: "When master thermostat mode changes, set all thermostats"
+#   trigger:
+#     - platform: state
+#       entity_id: input_select.master_thermostat_mode
+#   action:
+#     - service: script.master_thermostat_set_mode
+#       data:
+#         hvac_mode: "{{ states('input_select.master_thermostat_mode') }}"
 
 # Master Thermostat Climate Entity Control
 - alias: "Master Thermostat - Set Temperature on All Thermostats"
