@@ -895,10 +895,12 @@
   - platform: state
     entity_id:
     - light.all_lights
+    enabled: false
   - platform: state
     entity_id:
     - binary_sensor.samjin_multi
     to: 'on'
+    enabled: false
   condition: []
   action:
   - service: light.turn_on
@@ -906,7 +908,6 @@
     target:
       entity_id: light.entry_light_2
   mode: single
-  enabled: false
 - id: '1686707309457'
   alias: Apple TV Play - TV Time
   description: ''
@@ -1211,6 +1212,7 @@
     - sensor.generator_oil_pressure_shutdown_alert
     from:
     to: Alert
+    enabled: false
   condition: []
   action:
   - service: script.notify_home
@@ -1222,7 +1224,6 @@
       title: Foretravel
       message: Generator Alert!
   mode: single
-  enabled: false
 - id: '1718857604955'
   alias: Inverter Errors
   description: ''
@@ -1234,6 +1235,7 @@
     - sensor.outback2_error
     - sensor.outback2_warning
     to:
+    enabled: false
   condition:
   - condition: template
     value_template: "{{ not is_state('sensor.outback1_error', 'unknown')\n   and not
@@ -1253,7 +1255,6 @@
       title: Foretravel
       message: Inverters reporting errors
   mode: single
-  enabled: false
 - id: '1719616309591'
   alias: ISP Changed
   description: ''
