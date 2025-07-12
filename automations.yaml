@@ -1614,4 +1614,4 @@
         entity_id: input_datetime.generator_run_start
       data:
         # Set to 5 minutes ago to ensure we show some runtime
-        datetime: "{{ (now() - timedelta(minutes=5)).strftime('%Y-%m-%d %H:%M:%S') }}"
+        datetime: "{{ now().timestamp() - 300 | timestamp_custom('%Y-%m-%d %H:%M:%S') }}"

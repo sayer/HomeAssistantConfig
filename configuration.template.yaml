@@ -2912,7 +2912,7 @@ template:
   - sensor:
       - name: Generator Current Session Time
         unique_id: generator_current_session
-        state: >
+        state: >-
           {% if is_state('switch.generator', 'on') %}
             {% set start_str = states('input_datetime.generator_run_start') %}
             {% if start_str != 'unknown' and start_str != 'unavailable' and start_str != '' %}
@@ -2920,10 +2920,8 @@ template:
               {% set now = now() %}
               {{ (now - start).total_seconds() | int }}
             {% elif states.switch.generator.last_changed != None %}
-              {# Fallback to switch.generator last_changed #}
               {{ (now() - states.switch.generator.last_changed).total_seconds() | int }}
             {% else %}
-              {# Last resort - use a default value that will show some time #}
               300
             {% endif %}
           {% else %}
@@ -2938,19 +2936,21 @@ template:
 
       - name: Generator Session Display
         unique_id: generator_session_display
-        state: >
+        state: >-
           {% if is_state('switch.generator', 'on') %}
             {% set secs = states('sensor.generator_current_session_time') | int(0) %}
-            {% set hours = secs // 3600 %}
-            {% set minutes = (secs % 3600) // 60 %}
-            Running: {{ hours }} hr {{ minutes }} min
+            {% set mins = secs // 60 %}
+            {% set hours = mins // 60 %}
+            {% set mins = mins % 60 %}
+            Running: {{ hours }} hr {{ mins }} min
           {% else %}
             {% set secs_str = states('input_number.generator_last_session_seconds') %}
             {% if secs_str != 'unknown' and secs_str != 'unavailable' and secs_str != '' %}
               {% set secs = secs_str | int %}
-              {% set hours = secs // 3600 %}
-              {% set minutes = (secs % 3600) // 60 %}
-              Last Run: {{ hours }} hr {{ minutes }} min
+              {% set mins = secs // 60 %}
+              {% set hours = mins // 60 %}
+              {% set mins = mins % 60 %}
+              Last Run: {{ hours }} hr {{ mins }} min
             {% else %}
               Last Run: 0 hr 0 min
             {% endif %}
