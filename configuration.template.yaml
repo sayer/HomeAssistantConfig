@@ -2916,18 +2916,30 @@ template:
           {% if is_state('switch.generator', 'on') %}
             {% set start_str = states('input_datetime.generator_run_start') %}
             {% if start_str != 'unknown' and start_str != 'unavailable' and start_str != '' %}
-              {% set start = as_datetime(start_str) %}
-              {% set now = now() %}
-              {{ (now - start).total_seconds() | int }}
-            {% elif states.switch.generator.last_changed != None %}
-              {{ (now() - states.switch.generator.last_changed).total_seconds() | int }}
+              {% try %}
+                {% set start = as_datetime(start_str) %}
+                {% set now = now() %}
+                {{ (now - start).total_seconds() | int }}
+              {% except %}
+                60
+              {% endtry %}
+            {% elif states.switch.generator.last_changed is defined and states.switch.generator.last_changed is not none %}
+              {% try %}
+                {{ (now() - states.switch.generator.last_changed).total_seconds() | int }}
+              {% except %}
+                60
+              {% endtry %}
             {% else %}
-              300
+              60
             {% endif %}
           {% else %}
             {% set secs_str = states('input_number.generator_last_session_seconds') %}
             {% if secs_str != 'unknown' and secs_str != 'unavailable' and secs_str != '' %}
-              {{ secs_str | int }}
+              {% try %}
+                {{ secs_str | int }}
+              {% except %}
+                0
+              {% endtry %}
             {% else %}
               0
             {% endif %}
@@ -2948,14 +2960,20 @@ template:
               {% set hours = mins // 60 %}
               {% set mins = mins % 60 %}
               Running: {{ hours }} hr {{ mins }} min
+            {% elif states.switch.generator.last_changed is defined and states.switch.generator.last_changed is not none %}
+              {% try %}
+                {% set secs = states.switch.generator.last_changed.timestamp() | int(0) %}
+                {% set now = now().timestamp() | int %}
+                {% set diff = now - secs %}
+                {% set mins = diff // 60 %}
+                {% set hours = mins // 60 %}
+                {% set mins = mins % 60 %}
+                Running: {{ hours }} hr {{ mins }} min
+              {% except %}
+                Running: 0 hr 1 min
+              {% endtry %}
             {% else %}
-              {% set secs = states.switch.generator.last_changed.timestamp() | int(0) %}
-              {% set now = now().timestamp() | int %}
-              {% set diff = now - secs %}
-              {% set mins = diff // 60 %}
-              {% set hours = mins // 60 %}
-              {% set mins = mins % 60 %}
-              Running: {{ hours }} hr {{ mins }} min
+              Running: 0 hr 1 min
             {% endif %}
           {% else %}
             {% set secs_str = states('input_number.generator_last_session_seconds') %}
@@ -2969,6 +2987,8 @@ template:
               Last Run: 0 hr 0 min
             {% endif %}
           {% endif %}
+        availability: >-
+          {{ true }}
 
 
   - binary_sensor:
