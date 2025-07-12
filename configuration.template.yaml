@@ -306,16 +306,21 @@ sensor:
         value_template: >-
           {% if is_state('switch.generator', 'on') %}
             {% if states('input_datetime.generator_run_start') not in ['unknown', 'unavailable', ''] %}
-              {% try %}
-                {% set start = as_datetime(states('input_datetime.generator_run_start')) %}
-                {% set now = now() %}
-                {% set duration_seconds = (now - start).total_seconds() | int %}
-                {% set hours = duration_seconds // 3600 %}
-                {% set minutes = (duration_seconds % 3600) // 60 %}
-                {{ hours }} hours and {{ minutes }} minutes
-              {% except %}
+              {% set start_str = states('input_datetime.generator_run_start') %}
+              {% if start_str %}
+                {% set start = as_datetime(start_str) %}
+                {% if start %}
+                  {% set now = now() %}
+                  {% set duration_seconds = (now - start).total_seconds() | int %}
+                  {% set hours = duration_seconds // 3600 %}
+                  {% set minutes = (duration_seconds % 3600) // 60 %}
+                  {{ hours }} hours and {{ minutes }} minutes
+                {% else %}
+                  0 hours and 1 minutes
+                {% endif %}
+              {% else %}
                 0 hours and 1 minutes
-              {% endtry %}
+              {% endif %}
             {% else %}
               0 hours and 1 minutes
             {% endif %}
@@ -2958,29 +2963,35 @@ template:
         state: >-
           {% if is_state('switch.generator', 'on') %}
             {% if states('input_datetime.generator_run_start') not in ['unknown', 'unavailable', ''] %}
-              {% try %}
-                {% set start = as_datetime(states('input_datetime.generator_run_start')) %}
-                {% set now = now() %}
-                {% set duration_seconds = (now - start).total_seconds() | int %}
-                {% set hours = duration_seconds // 3600 %}
-                {% set minutes = (duration_seconds % 3600) // 60 %}
-                Running: {{ hours }} hr {{ minutes }} min
-              {% except %}
+              {% set start_str = states('input_datetime.generator_run_start') %}
+              {% if start_str %}
+                {% set start = as_datetime(start_str) %}
+                {% if start %}
+                  {% set now = now() %}
+                  {% set duration_seconds = (now - start).total_seconds() | int %}
+                  {% set hours = duration_seconds // 3600 %}
+                  {% set minutes = (duration_seconds % 3600) // 60 %}
+                  Running: {{ hours }} hr {{ minutes }} min
+                {% else %}
+                  Running: 0 hr 1 min
+                {% endif %}
+              {% else %}
                 Running: 0 hr 1 min
-              {% endtry %}
+              {% endif %}
             {% else %}
               Running: 0 hr 1 min
             {% endif %}
           {% else %}
             {% if states('input_number.generator_last_session_seconds') not in ['unknown', 'unavailable', ''] %}
-              {% try %}
-                {% set duration_seconds = states('input_number.generator_last_session_seconds') | int %}
+              {% set duration_str = states('input_number.generator_last_session_seconds') %}
+              {% if duration_str %}
+                {% set duration_seconds = duration_str | int(0) %}
                 {% set hours = duration_seconds // 3600 %}
                 {% set minutes = (duration_seconds % 3600) // 60 %}
                 Last Run: {{ hours }} hr {{ minutes }} min
-              {% except %}
+              {% else %}
                 Last Run: 0 hr 0 min
-              {% endtry %}
+              {% endif %}
             {% else %}
               Last Run: 0 hr 0 min
             {% endif %}
