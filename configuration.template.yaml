@@ -24,7 +24,6 @@ shell_command: !include shell_commands.yaml
 
 
 homeassistant:
-  time_zone: America/New_York
   customize:
     zone.foretravel:
       radius: 20
