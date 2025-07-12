@@ -2933,16 +2933,30 @@ template:
             {% endif %}
           {% endif %}
         unit_of_measurement: "s"
+        availability: >-
+          {{ true }}
 
       - name: Generator Session Display
         unique_id: generator_session_display
         state: >-
           {% if is_state('switch.generator', 'on') %}
-            {% set secs = states('sensor.generator_current_session_time') | int(0) %}
-            {% set mins = secs // 60 %}
-            {% set hours = mins // 60 %}
-            {% set mins = mins % 60 %}
-            Running: {{ hours }} hr {{ mins }} min
+            {% if states('input_datetime.generator_run_start') != 'unknown' and states('input_datetime.generator_run_start') != 'unavailable' and states('input_datetime.generator_run_start') != '' %}
+              {% set start = as_datetime(states('input_datetime.generator_run_start')) %}
+              {% set now = now() %}
+              {% set secs = (now - start).total_seconds() | int %}
+              {% set mins = secs // 60 %}
+              {% set hours = mins // 60 %}
+              {% set mins = mins % 60 %}
+              Running: {{ hours }} hr {{ mins }} min
+            {% else %}
+              {% set secs = states.switch.generator.last_changed.timestamp() | int(0) %}
+              {% set now = now().timestamp() | int %}
+              {% set diff = now - secs %}
+              {% set mins = diff // 60 %}
+              {% set hours = mins // 60 %}
+              {% set mins = mins % 60 %}
+              Running: {{ hours }} hr {{ mins }} min
+            {% endif %}
           {% else %}
             {% set secs_str = states('input_number.generator_last_session_seconds') %}
             {% if secs_str != 'unknown' and secs_str != 'unavailable' and secs_str != '' %}
