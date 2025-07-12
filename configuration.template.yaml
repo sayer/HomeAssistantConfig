@@ -2920,20 +2920,20 @@ template:
               {% set now = now() %}
               {{ (now - start).total_seconds() | int }}
             {% else %}
-              {% set gen_status = states('sensor.generator') %}
-              {% if gen_status != 'unknown' and gen_status != 'unavailable' and gen_status == 'running' %}
-                {% set gen_entity = states.sensor.generator %}
-                {% if gen_entity.last_changed != None %}
-                  {{ (now() - gen_entity.last_changed).total_seconds() | int }}
-                {% else %}
-                  1
-                {% endif %}
+              {% set gen_entity = states.switch.generator %}
+              {% if gen_entity.last_changed != None %}
+                {{ (now() - gen_entity.last_changed).total_seconds() | int }}
               {% else %}
-                2
+                60
               {% endif %}
             {% endif %}
           {% else %}
-            0
+            {% set secs_str = states('input_number.generator_last_session_seconds') %}
+            {% if secs_str != 'unknown' and secs_str != 'unavailable' and secs_str != '' %}
+              {{ secs_str | int }}
+            {% else %}
+              0
+            {% endif %}
           {% endif %}
         unit_of_measurement: "s"
 
@@ -2941,33 +2941,19 @@ template:
         unique_id: generator_session_display
         state: >
           {% if is_state('switch.generator', 'on') %}
-            {% set start_str = states('input_datetime.generator_run_start') %}
-            {% if start_str != 'unknown' and start_str != 'unavailable' and start_str != '' %}
-              {% set start = as_datetime(start_str) %}
-              {% set now = now() %}
-              {% set secs = (now - start).total_seconds() | int %}
-              Running: {{ (secs // 60) }} min {{ (secs % 60) }} sec
-            {% else %}
-              {% set gen_status = states('sensor.generator') %}
-              {% if gen_status != 'unknown' and gen_status != 'unavailable' and gen_status == 'running' %}
-                {% set gen_entity = states.sensor.generator %}
-                {% if gen_entity.last_changed != None %}
-                  {% set secs = (now() - gen_entity.last_changed).total_seconds() | int %}
-                  Running: {{ (secs // 60) }} min {{ (secs % 60) }} sec
-                {% else %}
-                  Running: Unknown Duration
-                {% endif %}
-              {% else %}
-                Running: Unknown Duration
-              {% endif %}
-            {% endif %}
+            {% set secs = states('sensor.generator_current_session_time') | int(0) %}
+            {% set hours = secs // 3600 %}
+            {% set minutes = (secs % 3600) // 60 %}
+            Running: {{ hours }} hr {{ minutes }} min
           {% else %}
             {% set secs_str = states('input_number.generator_last_session_seconds') %}
             {% if secs_str != 'unknown' and secs_str != 'unavailable' and secs_str != '' %}
               {% set secs = secs_str | int %}
-              Last Run: {{ (secs // 60) }} min {{ (secs % 60) }} sec
+              {% set hours = secs // 3600 %}
+              {% set minutes = (secs % 3600) // 60 %}
+              Last Run: {{ hours }} hr {{ minutes }} min
             {% else %}
-              Last Run: 0 min 0 sec
+              Last Run: 0 hr 0 min
             {% endif %}
           {% endif %}
 
