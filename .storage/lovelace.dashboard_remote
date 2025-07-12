@@ -3241,10 +3241,10 @@
                   "entity": "input_boolean.busparked"
                 },
                 {
-                  "entity": "climate.living_room"
+                  "entity": "climate.hvac_livingroom_thermostat"
                 },
                 {
-                  "entity": "climate.kitchen"
+                  "entity": "climate.hvac_bedroom_thermostat"
                 },
                 {
                   "entity": "sensor.chassis_battery"
