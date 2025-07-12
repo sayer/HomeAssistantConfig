@@ -1593,7 +1593,7 @@
       event: start
   action:
     - delay:
-        seconds: 30
+        seconds: 60
     - condition: and
       conditions:
         - condition: state
@@ -1613,4 +1613,5 @@
       target:
         entity_id: input_datetime.generator_run_start
       data:
-        datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+        # Set to 5 minutes ago to ensure we show some runtime
+        datetime: "{{ (now() - timedelta(minutes=5)).strftime('%Y-%m-%d %H:%M:%S') }}"

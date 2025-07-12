@@ -2919,13 +2919,12 @@ template:
               {% set start = as_datetime(start_str) %}
               {% set now = now() %}
               {{ (now - start).total_seconds() | int }}
+            {% elif states.switch.generator.last_changed != None %}
+              {# Fallback to switch.generator last_changed #}
+              {{ (now() - states.switch.generator.last_changed).total_seconds() | int }}
             {% else %}
-              {% set gen_entity = states.switch.generator %}
-              {% if gen_entity.last_changed != None %}
-                {{ (now() - gen_entity.last_changed).total_seconds() | int }}
-              {% else %}
-                60
-              {% endif %}
+              {# Last resort - use a default value that will show some time #}
+              300
             {% endif %}
           {% else %}
             {% set secs_str = states('input_number.generator_last_session_seconds') %}
