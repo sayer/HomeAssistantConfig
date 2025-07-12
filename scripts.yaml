@@ -677,7 +677,7 @@ generator_shutdown_with_verification:
   sequence:
     # Wait for the specified delay
     - delay:
-        minutes: {{ delay_minutes }}
+        minutes: {{ delay_minutes | default(30) }}
     
     # Turn off generator
     - service: switch.turn_off
@@ -740,7 +740,7 @@ generator_start_with_verification:
   sequence:
     # Wait for the specified delay
     - delay:
-        minutes: {{ delay_minutes }}
+        minutes: {{ delay_minutes | default(30) }}
     
     # Turn on generator
     - service: switch.turn_on

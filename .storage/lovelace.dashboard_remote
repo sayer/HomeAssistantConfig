@@ -2696,7 +2696,7 @@
                         "action": "call-service",
                         "service": "script.generator_shutdown_with_verification",
                         "service_data": {
-                          "delay_minutes": "{{ states('input_number.generator_shutdown_delay') | int }}"
+                          "delay_minutes": {{ states('input_number.generator_shutdown_delay') | int }}
                         }
                       },
                       "fill_container": true,
@@ -2732,7 +2732,7 @@
                         "action": "call-service",
                         "service": "script.generator_start_with_verification",
                         "service_data": {
-                          "delay_minutes": "{{ states('input_number.generator_start_delay') | int }}"
+                          "delay_minutes": {{ states('input_number.generator_start_delay') | int }}
                         }
                       },
                       "fill_container": true,
