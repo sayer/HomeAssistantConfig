@@ -1483,11 +1483,27 @@
       duration: "{% set start = as_datetime(states('input_datetime.generator_run_start'))
         %} {% set end = now() %} {% if start %}\n  {{ (end - start).total_seconds()
         | int }}\n{% else %}\n  0\n{% endif %}\n"
+  - variables:
+      duration_hours: "{{ (duration | int // 3600) }}"
+      duration_minutes: "{{ ((duration | int % 3600) // 60) }}"
   - target:
       entity_id: input_number.generator_last_session_seconds
     data:
       value: '{{ duration }}'
     action: input_number.set_value
+  - service: input_datetime.set_datetime
+    target:
+      entity_id: input_datetime.generator_run_start
+    data:
+      datetime: ""
+  - service: persistent_notification.create
+    data:
+      title: "Generator Stopped"
+      message: "Generator stopped after running for {{ duration_hours }} hours and {{ duration_minutes }} minutes"
+  - service: script.notify_home
+    data:
+      title: "Foretravel"
+      message: "Generator stopped after running for {{ duration_hours }} hours and {{ duration_minutes }} minutes"
 
 
 
@@ -1568,3 +1584,33 @@
     - service: script.change_timezone
       data:
         timezone: "{{ states('input_select.timezone') }}"
+
+- id: 'generator_running_at_startup'
+  alias: Set Generator Start Time at Startup
+  description: 'Sets the generator start time if the generator is already running when Home Assistant starts and no start time is set'
+  trigger:
+    - platform: homeassistant
+      event: start
+  action:
+    - delay:
+        seconds: 30
+    - condition: and
+      conditions:
+        - condition: state
+          entity_id: switch.generator
+          state: 'on'
+        - condition: or
+          conditions:
+            - condition: state
+              entity_id: input_datetime.generator_run_start
+              state: 'unknown'
+            - condition: state
+              entity_id: input_datetime.generator_run_start
+              state: 'unavailable'
+            - condition: template
+              value_template: "{{ states('input_datetime.generator_run_start') == '' }}"
+    - service: input_datetime.set_datetime
+      target:
+        entity_id: input_datetime.generator_run_start
+      data:
+        datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"

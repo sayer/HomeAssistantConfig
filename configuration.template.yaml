@@ -2920,7 +2920,17 @@ template:
               {% set now = now() %}
               {{ (now - start).total_seconds() | int }}
             {% else %}
-              0
+              {% set gen_status = states('sensor.generator') %}
+              {% if gen_status != 'unknown' and gen_status != 'unavailable' and gen_status == 'running' %}
+                {% set gen_entity = states.sensor.generator %}
+                {% if gen_entity.last_changed != None %}
+                  {{ (now() - gen_entity.last_changed).total_seconds() | int }}
+                {% else %}
+                  1
+                {% endif %}
+              {% else %}
+                2
+              {% endif %}
             {% endif %}
           {% else %}
             0
@@ -2938,7 +2948,18 @@ template:
               {% set secs = (now - start).total_seconds() | int %}
               Running: {{ (secs // 60) }} min {{ (secs % 60) }} sec
             {% else %}
-              Running: 0 min 0 sec
+              {% set gen_status = states('sensor.generator') %}
+              {% if gen_status != 'unknown' and gen_status != 'unavailable' and gen_status == 'running' %}
+                {% set gen_entity = states.sensor.generator %}
+                {% if gen_entity.last_changed != None %}
+                  {% set secs = (now() - gen_entity.last_changed).total_seconds() | int %}
+                  Running: {{ (secs // 60) }} min {{ (secs % 60) }} sec
+                {% else %}
+                  Running: Unknown Duration
+                {% endif %}
+              {% else %}
+                Running: Unknown Duration
+              {% endif %}
             {% endif %}
           {% else %}
             {% set secs_str = states('input_number.generator_last_session_seconds') %}
