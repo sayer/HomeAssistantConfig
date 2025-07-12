@@ -48,6 +48,45 @@ change_timezone:
   mode: single
   icon: mdi:clock-time-four
 
+auto_detect_timezone:
+  alias: Auto-Detect Timezone from Location
+  description: "Automatically detect and set timezone based on current GPS location"
+  sequence:
+    - condition: template
+      value_template: >
+        {{ states('sensor.gps_127_0_0_1_latitude') not in ['unknown', 'unavailable', 'none'] and
+           states('sensor.gps_127_0_0_1_longitude') not in ['unknown', 'unavailable', 'none'] }}
+    - service: persistent_notification.create
+      data:
+        title: "Detecting Timezone"
+        message: "Detecting timezone for current location..."
+    - delay:
+        seconds: 3
+    - service: homeassistant.update_entity
+      target:
+        entity_id: sensor.location_timezone
+    - delay:
+        seconds: 2
+    - condition: template
+      value_template: >
+        {{ states('sensor.location_timezone') not in ['unknown', 'unavailable', 'none'] and
+           states('sensor.location_timezone') != states('input_select.timezone') }}
+    - service: input_select.select_option
+      target:
+        entity_id: input_select.timezone
+      data:
+        option: "{{ states('sensor.location_timezone') }}"
+    - service: persistent_notification.create
+      data:
+        title: "Timezone Auto-Detected"
+        message: "Detected timezone: {{ states('sensor.location_timezone') }}. Setting system timezone..."
+    - service: script.notify_home
+      data:
+        title: "Timezone Auto-Detected"
+        message: "Detected timezone: {{ states('sensor.location_timezone') }}"
+  mode: single
+  icon: mdi:map-marker-clock
+
 store_bus:
   alias: Store Bus
   sequence:

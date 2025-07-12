@@ -152,6 +152,20 @@ sensor:
     value_template: "{{ value_json.isp }}"
 
   - platform: rest
+    name: "Current Timezone"
+    scan_interval: 3600
+    resource: "http://ip-api.com/json/?fields=timezone"
+    value_template: "{{ value_json.timezone }}"
+    icon: mdi:clock-time-four
+
+  - platform: rest
+    name: "Location Timezone"
+    scan_interval: 300
+    resource: "http://ip-api.com/json/?fields=timezone&lat={{ states('sensor.gps_127_0_0_1_latitude') | float | round(4) }}&lon={{ states('sensor.gps_127_0_0_1_longitude') | float | round(4) }}"
+    value_template: "{{ value_json.timezone }}"
+    icon: mdi:map-marker-clock
+
+  - platform: rest
     name: "Outback 1"
     resource: "http://192.168.100.231/Dev_status.cgi?&Port=0"
     headers:

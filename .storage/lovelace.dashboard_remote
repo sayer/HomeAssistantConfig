@@ -3232,6 +3232,99 @@
                       }
                     }
                   ]
+                },
+                {
+                  "type": "grid",
+                  "columns": 2,
+                  "square": false,
+                  "cards": [
+                    {
+                      "type": "custom:button-card",
+                      "entity": "script.auto_detect_timezone",
+                      "name": "Auto-Detect Timezone",
+                      "show_state": false,
+                      "show_icon": true,
+                      "layout": "icon_name",
+                      "styles": {
+                        "card": [
+                          {
+                            "border-radius": "12px"
+                          },
+                          {
+                            "padding": "12px"
+                          },
+                          {
+                            "background-color": "var(--accent-color)"
+                          },
+                          {
+                            "color": "white"
+                          }
+                        ],
+                        "name": [
+                          {
+                            "font-size": "14px"
+                          },
+                          {
+                            "font-weight": "bold"
+                          },
+                          {
+                            "color": "white"
+                          }
+                        ],
+                        "icon": [
+                          {
+                            "color": "white"
+                          }
+                        ]
+                      },
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "script.auto_detect_timezone"
+                      }
+                    },
+                    {
+                      "type": "custom:button-card",
+                      "entity": "sensor.location_timezone",
+                      "name": "Location Timezone",
+                      "show_state": true,
+                      "show_icon": true,
+                      "layout": "icon_name_state",
+                      "styles": {
+                        "card": [
+                          {
+                            "border-radius": "12px"
+                          },
+                          {
+                            "padding": "12px"
+                          },
+                          {
+                            "background-color": "var(--card-background-color)"
+                          },
+                          {
+                            "box-shadow": "none"
+                          }
+                        ],
+                        "name": [
+                          {
+                            "font-size": "14px"
+                          },
+                          {
+                            "font-weight": "bold"
+                          }
+                        ],
+                        "state": [
+                          {
+                            "font-size": "12px"
+                          }
+                        ],
+                        "icon": [
+                          {
+                            "color": "var(--primary-text-color)"
+                          }
+                        ]
+                      }
+                    }
+                  ]
                 }
               ]
             },
