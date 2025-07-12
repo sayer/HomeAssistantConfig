@@ -1559,5 +1559,12 @@
       target:
         entity_id: input_boolean.master_thermostat_heater
 
-
-    
+- alias: "Timezone Change"
+  description: "Change system timezone when input_select changes"
+  trigger:
+    - platform: state
+      entity_id: input_select.timezone
+  action:
+    - service: script.change_timezone
+      data:
+        timezone: "{{ states('input_select.timezone') }}"

@@ -21,7 +21,10 @@ script: !include scripts.yaml
 scene: !include scenes.yaml
 shell_command: !include shell_commands.yaml
 
+
+
 homeassistant:
+  time_zone: America/New_York
   customize:
     zone.foretravel:
       radius: 20
@@ -106,6 +109,33 @@ input_boolean:
 input_text:
   owner_name:
     name: Owner Name
+
+input_select:
+  timezone:
+    name: "System Timezone"
+    icon: mdi:clock-time-four
+    options:
+      - "America/New_York"
+      - "America/Chicago"
+      - "America/Denver"
+      - "America/Los_Angeles"
+      - "America/Anchorage"
+      - "Pacific/Honolulu"
+      - "America/Phoenix"
+      - "America/Indiana/Indianapolis"
+      - "America/Detroit"
+      - "America/Kentucky/Louisville"
+      - "America/Boise"
+      - "America/Regina"
+      - "America/Winnipeg"
+      - "America/Toronto"
+      - "America/Vancouver"
+      - "America/Edmonton"
+      - "America/Calgary"
+      - "America/Montreal"
+      - "America/Halifax"
+      - "America/St_Johns"
+    initial: "America/New_York"
 
 input_datetime:
   generator_run_start:

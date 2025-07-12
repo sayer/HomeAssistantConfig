@@ -691,7 +691,8 @@
                       "entity": "input_number.coach_number"
                     }
                   ]
-                }
+                },
+
               ]
             }
           ],
@@ -3131,11 +3132,110 @@
           "background": "center / cover no-repeat url(\"/local/Background.png\")",
           "cards": [
             {
-              "type": "entity",
-              "entity": "sensor.current_isp",
-              "name": "ISP",
-              "icon": "mdi:web"
+              "type": "vertical-stack",
+              "cards": [
+                {
+                  "type": "markdown",
+                  "content": "## <span style=\"color: white; background-color: #222222; padding: 6px 12px; border-radius: 6px;\">System Configuration</span>",
+                  "style": "ha-markdown {\n  padding: 0 0 12px 0;\n}\n"
+                },
+                {
+                  "type": "grid",
+                  "columns": 2,
+                  "square": false,
+                  "cards": [
+                    {
+                      "type": "custom:button-card",
+                      "entity": "input_select.timezone",
+                      "name": "System Timezone",
+                      "show_state": true,
+                      "show_icon": true,
+                      "layout": "icon_name_state",
+                      "styles": {
+                        "card": [
+                          {
+                            "border-radius": "12px"
+                          },
+                          {
+                            "padding": "12px"
+                          },
+                          {
+                            "background-color": "var(--card-background-color)"
+                          },
+                          {
+                            "box-shadow": "none"
+                          }
+                        ],
+                        "name": [
+                          {
+                            "font-size": "14px"
+                          },
+                          {
+                            "font-weight": "bold"
+                          }
+                        ],
+                        "state": [
+                          {
+                            "font-size": "12px"
+                          }
+                        ],
+                        "icon": [
+                          {
+                            "color": "var(--primary-text-color)"
+                          }
+                        ]
+                      },
+                      "tap_action": {
+                        "action": "more-info"
+                      }
+                    },
+                    {
+                      "type": "custom:button-card",
+                      "entity": "sensor.current_isp",
+                      "name": "Current ISP",
+                      "show_state": true,
+                      "show_icon": true,
+                      "layout": "icon_name_state",
+                      "styles": {
+                        "card": [
+                          {
+                            "border-radius": "12px"
+                          },
+                          {
+                            "padding": "12px"
+                          },
+                          {
+                            "background-color": "var(--card-background-color)"
+                          },
+                          {
+                            "box-shadow": "none"
+                          }
+                        ],
+                        "name": [
+                          {
+                            "font-size": "14px"
+                          },
+                          {
+                            "font-weight": "bold"
+                          }
+                        ],
+                        "state": [
+                          {
+                            "font-size": "12px"
+                          }
+                        ],
+                        "icon": [
+                          {
+                            "color": "var(--primary-text-color)"
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ]
             },
+
             {
               "type": "entities",
               "entities": [
@@ -3241,10 +3341,10 @@
                   "entity": "input_boolean.busparked"
                 },
                 {
-                  "entity": "climate.hvac_livingroom_thermostat"
+                  "entity": "hvac_livingroom_thermostat"
                 },
                 {
-                  "entity": "climate.hvac_bedroom_thermostat"
+                  "entity": "hvac_bedroom_thermostat"
                 },
                 {
                   "entity": "sensor.chassis_battery"
@@ -3305,6 +3405,10 @@
                 },
                 {
                   "entity": "input_text.owner_name"
+                },
+                {
+                  "entity": "input_select.timezone",
+                  "name": "System Timezone"
                 }
               ]
             }

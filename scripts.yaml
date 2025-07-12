@@ -1,3 +1,53 @@
+change_timezone:
+  alias: Change System Timezone
+  description: "Change Home Assistant timezone via configuration file"
+  fields:
+    timezone:
+      description: "New timezone to set"
+      example: "America/New_York"
+      selector:
+        select:
+          options:
+            - "America/New_York"
+            - "America/Chicago"
+            - "America/Denver"
+            - "America/Los_Angeles"
+            - "America/Anchorage"
+            - "Pacific/Honolulu"
+            - "America/Phoenix"
+            - "America/Indiana/Indianapolis"
+            - "America/Detroit"
+            - "America/Kentucky/Louisville"
+            - "America/Boise"
+            - "America/Regina"
+            - "America/Winnipeg"
+            - "America/Toronto"
+            - "America/Vancouver"
+            - "America/Edmonton"
+            - "America/Calgary"
+            - "America/Montreal"
+            - "America/Halifax"
+            - "America/St_Johns"
+  sequence:
+    - service: shell_command.change_timezone
+      data:
+        timezone: "{{ timezone }}"
+    - delay:
+        seconds: 2
+    - service: persistent_notification.create
+      data:
+        title: "Timezone Changed"
+        message: "System timezone has been changed to {{ timezone }}. Home Assistant will restart in 10 seconds to apply changes."
+    - service: script.notify_home
+      data:
+        title: "Timezone Changed"
+        message: "System timezone changed to {{ timezone }}. Restarting Home Assistant..."
+    - delay:
+        seconds: 10
+    - service: homeassistant.restart
+  mode: single
+  icon: mdi:clock-time-four
+
 store_bus:
   alias: Store Bus
   sequence:

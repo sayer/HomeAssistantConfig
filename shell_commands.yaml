@@ -1,2 +1,3 @@
 # shell_commands.yaml
 write_coach_year: ./update_coach_year.sh {{ year }}
+change_timezone: sed -i '' 's|time_zone: .*|time_zone: {{ timezone }}|' configuration.yaml
