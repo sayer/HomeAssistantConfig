@@ -2914,18 +2914,11 @@ template:
         unique_id: generator_current_session
         state: >-
           {% if is_state('switch.generator', 'on') %}
-            {% set start_str = states('input_datetime.generator_run_start') %}
-            {% if start_str != 'unknown' and start_str != 'unavailable' and start_str != '' %}
+            {% if states('input_datetime.generator_run_start') not in ['unknown', 'unavailable', ''] %}
               {% try %}
-                {% set start = as_datetime(start_str) %}
+                {% set start = as_datetime(states('input_datetime.generator_run_start')) %}
                 {% set now = now() %}
                 {{ (now - start).total_seconds() | int }}
-              {% except %}
-                60
-              {% endtry %}
-            {% elif states.switch.generator.last_changed is defined and states.switch.generator.last_changed is not none %}
-              {% try %}
-                {{ (now() - states.switch.generator.last_changed).total_seconds() | int }}
               {% except %}
                 60
               {% endtry %}
@@ -2933,10 +2926,9 @@ template:
               60
             {% endif %}
           {% else %}
-            {% set secs_str = states('input_number.generator_last_session_seconds') %}
-            {% if secs_str != 'unknown' and secs_str != 'unavailable' and secs_str != '' %}
+            {% if states('input_number.generator_last_session_seconds') not in ['unknown', 'unavailable', ''] %}
               {% try %}
-                {{ secs_str | int }}
+                {{ states('input_number.generator_last_session_seconds') | int }}
               {% except %}
                 0
               {% endtry %}
@@ -2948,27 +2940,18 @@ template:
         availability: >-
           {{ true }}
 
-      - name: Generator Session Display
+      - name: "Generator Session Display"
         unique_id: generator_session_display
         state: >-
           {% if is_state('switch.generator', 'on') %}
-            {% if states('input_datetime.generator_run_start') != 'unknown' and states('input_datetime.generator_run_start') != 'unavailable' and states('input_datetime.generator_run_start') != '' %}
-              {% set start = as_datetime(states('input_datetime.generator_run_start')) %}
-              {% set now = now() %}
-              {% set secs = (now - start).total_seconds() | int %}
-              {% set mins = secs // 60 %}
-              {% set hours = mins // 60 %}
-              {% set mins = mins % 60 %}
-              Running: {{ hours }} hr {{ mins }} min
-            {% elif states.switch.generator.last_changed is defined and states.switch.generator.last_changed is not none %}
+            {% if states('input_datetime.generator_run_start') not in ['unknown', 'unavailable', ''] %}
               {% try %}
-                {% set secs = states.switch.generator.last_changed.timestamp() | int(0) %}
-                {% set now = now().timestamp() | int %}
-                {% set diff = now - secs %}
-                {% set mins = diff // 60 %}
-                {% set hours = mins // 60 %}
-                {% set mins = mins % 60 %}
-                Running: {{ hours }} hr {{ mins }} min
+                {% set start = as_datetime(states('input_datetime.generator_run_start')) %}
+                {% set now = now() %}
+                {% set duration_seconds = (now - start).total_seconds() | int %}
+                {% set hours = duration_seconds // 3600 %}
+                {% set minutes = (duration_seconds % 3600) // 60 %}
+                Running: {{ hours }} hr {{ minutes }} min
               {% except %}
                 Running: 0 hr 1 min
               {% endtry %}
@@ -2976,13 +2959,15 @@ template:
               Running: 0 hr 1 min
             {% endif %}
           {% else %}
-            {% set secs_str = states('input_number.generator_last_session_seconds') %}
-            {% if secs_str != 'unknown' and secs_str != 'unavailable' and secs_str != '' %}
-              {% set secs = secs_str | int %}
-              {% set mins = secs // 60 %}
-              {% set hours = mins // 60 %}
-              {% set mins = mins % 60 %}
-              Last Run: {{ hours }} hr {{ mins }} min
+            {% if states('input_number.generator_last_session_seconds') not in ['unknown', 'unavailable', ''] %}
+              {% try %}
+                {% set duration_seconds = states('input_number.generator_last_session_seconds') | int %}
+                {% set hours = duration_seconds // 3600 %}
+                {% set minutes = (duration_seconds % 3600) // 60 %}
+                Last Run: {{ hours }} hr {{ minutes }} min
+              {% except %}
+                Last Run: 0 hr 0 min
+              {% endtry %}
             {% else %}
               Last Run: 0 hr 0 min
             {% endif %}
