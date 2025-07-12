@@ -2934,23 +2934,30 @@ template:
         state: >-
           {% if is_state('switch.generator', 'on') %}
             {% if states('input_datetime.generator_run_start') not in ['unknown', 'unavailable', ''] %}
-              {% try %}
-                {% set start = as_datetime(states('input_datetime.generator_run_start')) %}
-                {% set now = now() %}
-                {{ (now - start).total_seconds() | int }}
-              {% except %}
+              {% set start_str = states('input_datetime.generator_run_start') %}
+              {% if start_str %}
+                {% set start = as_datetime(start_str) %}
+                {% if start %}
+                  {% set now_naive = now().replace(tzinfo=None) %}
+                  {% set start_naive = start.replace(tzinfo=None) %}
+                  {{ (now_naive - start_naive).total_seconds() | int }}
+                {% else %}
+                  60
+                {% endif %}
+              {% else %}
                 60
-              {% endtry %}
+              {% endif %}
             {% else %}
               60
             {% endif %}
           {% else %}
             {% if states('input_number.generator_last_session_seconds') not in ['unknown', 'unavailable', ''] %}
-              {% try %}
-                {{ states('input_number.generator_last_session_seconds') | int }}
-              {% except %}
+              {% set duration_str = states('input_number.generator_last_session_seconds') %}
+              {% if duration_str %}
+                {{ duration_str | int(0) }}
+              {% else %}
                 0
-              {% endtry %}
+              {% endif %}
             {% else %}
               0
             {% endif %}
