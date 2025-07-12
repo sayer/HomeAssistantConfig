@@ -304,10 +304,23 @@ sensor:
       generator_current_run_time:
         friendly_name: "Run time"
         value_template: >-
-          {% if (states('switch.generator') != 'on') or (states.switch.generatorstatus.last_changed == 'unknown') or (states.switch.generatorstatus.last_changed == 'unavailable') %}
-          n/a
+          {% if is_state('switch.generator', 'on') %}
+            {% if states('input_datetime.generator_run_start') not in ['unknown', 'unavailable', ''] %}
+              {% try %}
+                {% set start = as_datetime(states('input_datetime.generator_run_start')) %}
+                {% set now = now() %}
+                {% set duration_seconds = (now - start).total_seconds() | int %}
+                {% set hours = duration_seconds // 3600 %}
+                {% set minutes = (duration_seconds % 3600) // 60 %}
+                {{ hours }} hours and {{ minutes }} minutes
+              {% except %}
+                0 hours and 1 minutes
+              {% endtry %}
+            {% else %}
+              0 hours and 1 minutes
+            {% endif %}
           {% else %}
-          {{ relative_time(states.switch.generatorstatus.last_changed) | timestamp_custom('%-H hours and %-M minutes', false) }}
+            n/a
           {% endif %}
 
 
