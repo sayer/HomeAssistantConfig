@@ -2914,9 +2914,10 @@ template:
         unique_id: generator_current_session
         state: >
           {% if is_state('switch.generator', 'on') %}
-            {% set start = as_datetime(states('input_datetime.generator_run_start')) %}
-            {% set now = now() %}
-            {% if start %}
+            {% set start_str = states('input_datetime.generator_run_start') %}
+            {% if start_str != 'unknown' and start_str != 'unavailable' and start_str != '' %}
+              {% set start = as_datetime(start_str) %}
+              {% set now = now() %}
               {{ (now - start).total_seconds() | int }}
             {% else %}
               0
@@ -2930,17 +2931,23 @@ template:
         unique_id: generator_session_display
         state: >
           {% if is_state('switch.generator', 'on') %}
-            {% set start = as_datetime(states('input_datetime.generator_run_start')) %}
-            {% set now = now() %}
-            {% if start %}
+            {% set start_str = states('input_datetime.generator_run_start') %}
+            {% if start_str != 'unknown' and start_str != 'unavailable' and start_str != '' %}
+              {% set start = as_datetime(start_str) %}
+              {% set now = now() %}
               {% set secs = (now - start).total_seconds() | int %}
               Running: {{ (secs // 60) }} min {{ (secs % 60) }} sec
             {% else %}
               Running: 0 min 0 sec
             {% endif %}
           {% else %}
-            {% set secs = states('input_number.generator_last_session_seconds') | int %}
-            Last Run: {{ (secs // 60) }} min {{ (secs % 60) }} sec
+            {% set secs_str = states('input_number.generator_last_session_seconds') %}
+            {% if secs_str != 'unknown' and secs_str != 'unavailable' and secs_str != '' %}
+              {% set secs = secs_str | int %}
+              Last Run: {{ (secs // 60) }} min {{ (secs % 60) }} sec
+            {% else %}
+              Last Run: 0 min 0 sec
+            {% endif %}
           {% endif %}
 
 
