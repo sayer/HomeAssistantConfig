@@ -310,8 +310,9 @@ sensor:
               {% if start_str %}
                 {% set start = as_datetime(start_str) %}
                 {% if start %}
-                  {% set now = now() %}
-                  {% set duration_seconds = (now - start).total_seconds() | int %}
+                  {% set now_naive = now().replace(tzinfo=None) %}
+                  {% set start_naive = start.replace(tzinfo=None) %}
+                  {% set duration_seconds = (now_naive - start_naive).total_seconds() | int %}
                   {% set hours = duration_seconds // 3600 %}
                   {% set minutes = (duration_seconds % 3600) // 60 %}
                   {{ hours }} hours and {{ minutes }} minutes
@@ -2967,8 +2968,9 @@ template:
               {% if start_str %}
                 {% set start = as_datetime(start_str) %}
                 {% if start %}
-                  {% set now = now() %}
-                  {% set duration_seconds = (now - start).total_seconds() | int %}
+                  {% set now_naive = now().replace(tzinfo=None) %}
+                  {% set start_naive = start.replace(tzinfo=None) %}
+                  {% set duration_seconds = (now_naive - start_naive).total_seconds() | int %}
                   {% set hours = duration_seconds // 3600 %}
                   {% set minutes = (duration_seconds % 3600) // 60 %}
                   Running: {{ hours }} hr {{ minutes }} min
