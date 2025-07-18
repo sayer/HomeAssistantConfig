@@ -295,10 +295,8 @@ create_shade_groups_yaml() {
             echo "              - $shade" >> "$GROUPS_FILE"
         done
         
-        # Add supported features to always show both open/close buttons
-        echo "        supported_features:" >> "$GROUPS_FILE"
-        echo "          - open" >> "$GROUPS_FILE"
-        echo "          - close" >> "$GROUPS_FILE"
+        # Add device class to ensure both open/close are always available
+        echo "        device_class: shade" >> "$GROUPS_FILE"
         
         # Add spacing for next group
         echo "" >> "$GROUPS_FILE"
@@ -425,6 +423,9 @@ create_shade_groups_yaml() {
         for shade in "${night_shades[@]}"; do
             echo "              - $shade" >> "$GROUPS_FILE"
         done
+        
+        # Add device class to ensure both open/close are always available
+        echo "        device_class: shade" >> "$GROUPS_FILE"
     fi
     
     # Create ds_so_day_shades group (Driver Side - Street Side Day Shades)
