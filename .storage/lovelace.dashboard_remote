@@ -503,30 +503,40 @@
                   "type": "grid",
                   "cards": [
                     {
-                      "type": "custom:mushroom-cover-card",
-                      "entity": "cover.all_night_shades",
-                      "fill_container": false,
-                      "show_buttons_control": true,
-                      "name": "All Night"
+                      "type": "entities",
+                      "entities": [
+                        {
+                          "entity": "cover.all_night_shades",
+                          "name": "All Night Shades"
+                        }
+                      ]
                     },
                     {
-                      "type": "custom:mushroom-cover-card",
-                      "entity": "cover.all_day_shades",
-                      "name": "All Day",
-                      "show_buttons_control": true
+                      "type": "entities",
+                      "entities": [
+                        {
+                          "entity": "cover.all_day_shades",
+                          "name": "All Day Shades"
+                        }
+                      ]
                     },
                     {
-                      "type": "custom:mushroom-cover-card",
-                      "entity": "cover.cockpit_night_shades",
-                      "name": "Cockpit Night",
-                      "show_position_control": false,
-                      "show_buttons_control": true
+                      "type": "entities",
+                      "entities": [
+                        {
+                          "entity": "cover.cockpit_night_shades",
+                          "name": "Cockpit Night Shades"
+                        }
+                      ]
                     },
                     {
-                      "type": "custom:mushroom-cover-card",
-                      "entity": "cover.cockpit_day_shades",
-                      "show_buttons_control": true,
-                      "name": "Cockpit Day"
+                      "type": "entities",
+                      "entities": [
+                        {
+                          "entity": "cover.cockpit_day_shades",
+                          "name": "Cockpit Day Shades"
+                        }
+                      ]
                     }
                   ],
                   "columns": 2
@@ -777,19 +787,24 @@
                   "type": "grid",
                   "cards": [
                     {
-                      "type": "custom:mushroom-cover-card",
-                      "entity": "cover.cockpit_night_shades",
-                      "name": "Cockpit Night",
-                      "show_position_control": false,
-                      "show_buttons_control": true,
+                      "type": "entities",
+                      "entities": [
+                        {
+                          "entity": "cover.cockpit_night_shades",
+                          "name": "Cockpit Night Shades"
+                        }
+                      ],
                       "fill_container": true,
                       "layout": "vertical"
                     },
                     {
-                      "type": "custom:mushroom-cover-card",
-                      "entity": "cover.cockpit_day_shades",
-                      "show_buttons_control": true,
-                      "name": "Cockpit Day",
+                      "type": "entities",
+                      "entities": [
+                        {
+                          "entity": "cover.cockpit_day_shades",
+                          "name": "Cockpit Day Shades"
+                        }
+                      ],
                       "layout": "vertical",
                       "fill_container": true
                     }
