@@ -273,7 +273,7 @@ create_shade_groups_yaml() {
         echo "            closed" >> "$GROUPS_FILE"
         echo "          {% endif %}" >> "$GROUPS_FILE"
         
-        # Add open_cover service
+        # Add open_cover service - always available
         echo "        open_cover:" >> "$GROUPS_FILE"
         echo "          service: cover.open_cover" >> "$GROUPS_FILE"
         echo "          target:" >> "$GROUPS_FILE"
@@ -284,7 +284,7 @@ create_shade_groups_yaml() {
             echo "              - $shade" >> "$GROUPS_FILE"
         done
         
-        # Add close_cover service
+        # Add close_cover service - always available
         echo "        close_cover:" >> "$GROUPS_FILE"
         echo "          service: cover.close_cover" >> "$GROUPS_FILE"
         echo "          target:" >> "$GROUPS_FILE"
@@ -294,6 +294,11 @@ create_shade_groups_yaml() {
         for shade in "${day_shades[@]}"; do
             echo "              - $shade" >> "$GROUPS_FILE"
         done
+        
+        # Add supported features to always show both open/close buttons
+        echo "        supported_features:" >> "$GROUPS_FILE"
+        echo "          - open" >> "$GROUPS_FILE"
+        echo "          - close" >> "$GROUPS_FILE"
         
         # Add spacing for next group
         echo "" >> "$GROUPS_FILE"
