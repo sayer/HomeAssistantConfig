@@ -512,11 +512,20 @@
                       ]
                     },
                     {
-                      "type": "entities",
-                      "entities": [
+                      "type": "custom:cover-card",
+                      "entity": "cover.all_day_shades",
+                      "show_buttons": true,
+                      "show_position": false,
+                      "show_animation": true,
+                      "animate_icons": true,
+                      "buttons": [
                         {
-                          "entity": "cover.all_day_shades",
-                          "name": "All Day Shades"
+                          "name": "Open",
+                          "service": "cover.open_cover"
+                        },
+                        {
+                          "name": "Close",
+                          "service": "cover.close_cover"
                         }
                       ]
                     },
