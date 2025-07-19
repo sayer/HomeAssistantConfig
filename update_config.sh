@@ -238,7 +238,6 @@ create_shade_groups_yaml() {
         echo "        friendly_name: \"All Day Shades\"" >> "$GROUPS_FILE"
         echo "        unique_id: \"all_day_shades\"" >> "$GROUPS_FILE"
         echo "        device_class: shade" >> "$GROUPS_FILE"
-        echo "        availability: \"{{ true }}\"" >> "$GROUPS_FILE"
         echo "        position_template: >" >> "$GROUPS_FILE"
         echo "          {% set covers = [" >> "$GROUPS_FILE"
         
@@ -369,7 +368,6 @@ create_shade_groups_yaml() {
         echo "        friendly_name: \"All Night Shades\"" >> "$GROUPS_FILE"
         echo "        unique_id: \"all_night_shades\"" >> "$GROUPS_FILE"
         echo "        device_class: shade" >> "$GROUPS_FILE"
-        echo "        availability: \"{{ true }}\"" >> "$GROUPS_FILE"
         echo "        position_template: >" >> "$GROUPS_FILE"
         echo "          {% set covers = [" >> "$GROUPS_FILE"
         
@@ -460,7 +458,6 @@ create_shade_groups_yaml() {
         echo "        friendly_name: \"Driver Side Day Shades\"" >> "$GROUPS_FILE"
         echo "        unique_id: \"ds_so_day_shades\"" >> "$GROUPS_FILE"
         echo "        device_class: shade" >> "$GROUPS_FILE"
-        echo "        availability: \"{{ true }}\"" >> "$GROUPS_FILE"
         echo "        position_template: >" >> "$GROUPS_FILE"
         echo "          {% set covers = [" >> "$GROUPS_FILE"
         
@@ -548,7 +545,6 @@ create_shade_groups_yaml() {
         echo "        friendly_name: \"Driver Side Night Shades\"" >> "$GROUPS_FILE"
         echo "        unique_id: \"ds_so_night_shades\"" >> "$GROUPS_FILE"
         echo "        device_class: shade" >> "$GROUPS_FILE"
-        echo "        availability: \"{{ true }}\"" >> "$GROUPS_FILE"
         echo "        position_template: >" >> "$GROUPS_FILE"
         echo "          {% set covers = [" >> "$GROUPS_FILE"
         

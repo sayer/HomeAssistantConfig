@@ -512,10 +512,9 @@
                       ]
                     },
                     {
-                      "type": "custom:mushroom-cover-card",
+                      "type": "cover",
                       "entity": "cover.all_day_shades",
-                      "name": "All Day",
-                      "show_buttons_control": true
+                      "name": "All Day Shades"
                     },
                     {
                       "type": "entities",
