@@ -237,8 +237,10 @@ create_shade_groups_yaml() {
         echo "      all_day_shades:" >> "$GROUPS_FILE"
         echo "        friendly_name: \"All Day Shades\"" >> "$GROUPS_FILE"
         echo "        unique_id: \"all_day_shades\"" >> "$GROUPS_FILE"
-        echo "        value_template: >" >> "$GROUPS_FILE"
-        echo "          {% set cover_entities = [" >> "$GROUPS_FILE"
+        echo "        device_class: shade" >> "$GROUPS_FILE"
+        echo "        availability: \"{{ true }}\"" >> "$GROUPS_FILE"
+        echo "        position_template: >" >> "$GROUPS_FILE"
+        echo "          {% set covers = [" >> "$GROUPS_FILE"
         
         # Add each available day shade entity
         for i in "${!day_shades[@]}"; do
@@ -366,8 +368,10 @@ create_shade_groups_yaml() {
         echo "      all_night_shades:" >> "$GROUPS_FILE"
         echo "        friendly_name: \"All Night Shades\"" >> "$GROUPS_FILE"
         echo "        unique_id: \"all_night_shades\"" >> "$GROUPS_FILE"
-        echo "        value_template: >" >> "$GROUPS_FILE"
-        echo "          {% set cover_entities = [" >> "$GROUPS_FILE"
+        echo "        device_class: shade" >> "$GROUPS_FILE"
+        echo "        availability: \"{{ true }}\"" >> "$GROUPS_FILE"
+        echo "        position_template: >" >> "$GROUPS_FILE"
+        echo "          {% set covers = [" >> "$GROUPS_FILE"
         
         # Add each available night shade entity
         for i in "${!night_shades[@]}"; do
@@ -455,8 +459,10 @@ create_shade_groups_yaml() {
         echo "      ds_so_day_shades:" >> "$GROUPS_FILE"
         echo "        friendly_name: \"Driver Side Day Shades\"" >> "$GROUPS_FILE"
         echo "        unique_id: \"ds_so_day_shades\"" >> "$GROUPS_FILE"
-        echo "        value_template: >" >> "$GROUPS_FILE"
-        echo "          {% set cover_entities = [" >> "$GROUPS_FILE"
+        echo "        device_class: shade" >> "$GROUPS_FILE"
+        echo "        availability: \"{{ true }}\"" >> "$GROUPS_FILE"
+        echo "        position_template: >" >> "$GROUPS_FILE"
+        echo "          {% set covers = [" >> "$GROUPS_FILE"
         
         # Add each available DS day shade entity
         for i in "${!ds_so_day_shades[@]}"; do
@@ -541,8 +547,10 @@ create_shade_groups_yaml() {
         echo "      ds_so_night_shades:" >> "$GROUPS_FILE"
         echo "        friendly_name: \"Driver Side Night Shades\"" >> "$GROUPS_FILE"
         echo "        unique_id: \"ds_so_night_shades\"" >> "$GROUPS_FILE"
-        echo "        value_template: >" >> "$GROUPS_FILE"
-        echo "          {% set cover_entities = [" >> "$GROUPS_FILE"
+        echo "        device_class: shade" >> "$GROUPS_FILE"
+        echo "        availability: \"{{ true }}\"" >> "$GROUPS_FILE"
+        echo "        position_template: >" >> "$GROUPS_FILE"
+        echo "          {% set covers = [" >> "$GROUPS_FILE"
         
         # Add each available DS night shade entity
         for i in "${!ds_so_night_shades[@]}"; do

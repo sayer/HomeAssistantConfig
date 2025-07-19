@@ -512,22 +512,10 @@
                       ]
                     },
                     {
-                      "type": "custom:cover-card",
+                      "type": "custom:mushroom-cover-card",
                       "entity": "cover.all_day_shades",
-                      "show_buttons": true,
-                      "show_position": false,
-                      "show_animation": true,
-                      "animate_icons": true,
-                      "buttons": [
-                        {
-                          "name": "Open",
-                          "service": "cover.open_cover"
-                        },
-                        {
-                          "name": "Close",
-                          "service": "cover.close_cover"
-                        }
-                      ]
+                      "name": "All Day",
+                      "show_buttons_control": true
                     },
                     {
                       "type": "entities",
