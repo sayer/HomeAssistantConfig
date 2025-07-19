@@ -456,10 +456,6 @@ notify_iphone:
   - data:
       message: '{{message}}'
       title: '{{title}} — {{ states(''input_number.coach_number'') | int }}'
-    action: notify.notify
-  - data:
-      message: '{{message}}'
-      title: '{{title}} — {{ states(''input_number.coach_number'') | int }}'
     action: notify.mobile_app_iphone_15_pro_max
   mode: single
   fields:
