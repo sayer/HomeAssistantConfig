@@ -503,13 +503,9 @@
                   "type": "grid",
                   "cards": [
                     {
-                      "type": "entities",
-                      "entities": [
-                        {
-                          "entity": "cover.all_night_shades",
-                          "name": "All Night Shades"
-                        }
-                      ]
+                      "type": "cover",
+                      "entity": "cover.all_night_shades",
+                      "name": "All Night Shades"
                     },
                     {
                       "type": "cover",
@@ -517,22 +513,14 @@
                       "name": "All Day Shades"
                     },
                     {
-                      "type": "entities",
-                      "entities": [
-                        {
-                          "entity": "cover.cockpit_night_shades",
-                          "name": "Cockpit Night Shades"
-                        }
-                      ]
+                      "type": "cover",
+                      "entity": "cover.cockpit_night_shades",
+                      "name": "Cockpit Night Shades"
                     },
                     {
-                      "type": "entities",
-                      "entities": [
-                        {
-                          "entity": "cover.cockpit_day_shades",
-                          "name": "Cockpit Day Shades"
-                        }
-                      ]
+                      "type": "cover",
+                      "entity": "cover.cockpit_day_shades",
+                      "name": "Cockpit Day Shades"
                     }
                   ],
                   "columns": 2
@@ -783,24 +771,16 @@
                   "type": "grid",
                   "cards": [
                     {
-                      "type": "entities",
-                      "entities": [
-                        {
-                          "entity": "cover.cockpit_night_shades",
-                          "name": "Cockpit Night Shades"
-                        }
-                      ],
+                      "type": "cover",
+                      "entity": "cover.cockpit_night_shades",
+                      "name": "Cockpit Night Shades",
                       "fill_container": true,
                       "layout": "vertical"
                     },
                     {
-                      "type": "entities",
-                      "entities": [
-                        {
-                          "entity": "cover.cockpit_day_shades",
-                          "name": "Cockpit Day Shades"
-                        }
-                      ],
+                      "type": "cover",
+                      "entity": "cover.cockpit_day_shades",
+                      "name": "Cockpit Day Shades",
                       "layout": "vertical",
                       "fill_container": true
                     }
