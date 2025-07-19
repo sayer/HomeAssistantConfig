@@ -259,12 +259,8 @@ create_shade_groups_yaml() {
         echo "            100" >> "$GROUPS_FILE"
         echo "          {% elif closed == covers | count %}" >> "$GROUPS_FILE"
         echo "            0" >> "$GROUPS_FILE"
-        echo "          {% elif open_states | length > 0 and closed_states | length == 0 %}" >> "$GROUPS_FILE"
-        echo "            open" >> "$GROUPS_FILE"
-        echo "          {% elif closed_states | length > 0 and open_states | length == 0 %}" >> "$GROUPS_FILE"
-        echo "            closed" >> "$GROUPS_FILE"
         echo "          {% else %}" >> "$GROUPS_FILE"
-        echo "            closed" >> "$GROUPS_FILE"
+        echo "            50" >> "$GROUPS_FILE"
         echo "          {% endif %}" >> "$GROUPS_FILE"
         
         # Add open_cover service - always available
@@ -385,12 +381,8 @@ create_shade_groups_yaml() {
         echo "            100" >> "$GROUPS_FILE"
         echo "          {% elif closed == covers | count %}" >> "$GROUPS_FILE"
         echo "            0" >> "$GROUPS_FILE"
-        echo "          {% elif open_states | length > 0 and closed_states | length == 0 %}" >> "$GROUPS_FILE"
-        echo "            open" >> "$GROUPS_FILE"
-        echo "          {% elif closed_states | length > 0 and open_states | length == 0 %}" >> "$GROUPS_FILE"
-        echo "            closed" >> "$GROUPS_FILE"
         echo "          {% else %}" >> "$GROUPS_FILE"
-        echo "            closed" >> "$GROUPS_FILE"
+        echo "            50" >> "$GROUPS_FILE"
         echo "          {% endif %}" >> "$GROUPS_FILE"
         
         # Add open_cover service
@@ -468,12 +460,8 @@ create_shade_groups_yaml() {
         echo "            100" >> "$GROUPS_FILE"
         echo "          {% elif closed == covers | count %}" >> "$GROUPS_FILE"
         echo "            0" >> "$GROUPS_FILE"
-        echo "          {% elif open_states | length > 0 and closed_states | length == 0 %}" >> "$GROUPS_FILE"
-        echo "            open" >> "$GROUPS_FILE"
-        echo "          {% elif closed_states | length > 0 and open_states | length == 0 %}" >> "$GROUPS_FILE"
-        echo "            closed" >> "$GROUPS_FILE"
         echo "          {% else %}" >> "$GROUPS_FILE"
-        echo "            closed" >> "$GROUPS_FILE"
+        echo "            50" >> "$GROUPS_FILE"
         echo "          {% endif %}" >> "$GROUPS_FILE"
         
         # Add open_cover service
@@ -548,12 +536,8 @@ create_shade_groups_yaml() {
         echo "            100" >> "$GROUPS_FILE"
         echo "          {% elif closed == covers | count %}" >> "$GROUPS_FILE"
         echo "            0" >> "$GROUPS_FILE"
-        echo "          {% elif open_states | length > 0 and closed_states | length == 0 %}" >> "$GROUPS_FILE"
-        echo "            open" >> "$GROUPS_FILE"
-        echo "          {% elif closed_states | length > 0 and open_states | length == 0 %}" >> "$GROUPS_FILE"
-        echo "            closed" >> "$GROUPS_FILE"
         echo "          {% else %}" >> "$GROUPS_FILE"
-        echo "            closed" >> "$GROUPS_FILE"
+        echo "            50" >> "$GROUPS_FILE"
         echo "          {% endif %}" >> "$GROUPS_FILE"
         
         # Add open_cover service
