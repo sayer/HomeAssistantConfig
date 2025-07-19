@@ -252,20 +252,13 @@ create_shade_groups_yaml() {
         
         # Add the template logic
         echo "          ] %}" >> "$GROUPS_FILE"
-        echo "          {% set states_list = cover_entities | map('states') | list %}" >> "$GROUPS_FILE"
-        echo "          {% set open_states = states_list | select('eq', 'open') | list %}" >> "$GROUPS_FILE"
-        echo "          {% set closed_states = states_list | select('eq', 'closed') | list %}" >> "$GROUPS_FILE"
-        echo "          {% set opening_states = states_list | select('eq', 'opening') | list %}" >> "$GROUPS_FILE"
-        echo "          {% set closing_states = states_list | select('eq', 'closing') | list %}" >> "$GROUPS_FILE"
+        echo "          {% set open = covers | selectattr('state', 'equalto', 'open') | list | count %}" >> "$GROUPS_FILE"
+        echo "          {% set closed = covers | selectattr('state', 'equalto', 'closed') | list | count %}" >> "$GROUPS_FILE"
         echo "          " >> "$GROUPS_FILE"
-        echo "          {% if opening_states | length > 0 %}" >> "$GROUPS_FILE"
-        echo "            opening" >> "$GROUPS_FILE"
-        echo "          {% elif closing_states | length > 0 %}" >> "$GROUPS_FILE"
-        echo "            closing" >> "$GROUPS_FILE"
-        echo "          {% elif open_states | length == cover_entities | length %}" >> "$GROUPS_FILE"
-        echo "            open" >> "$GROUPS_FILE"
-        echo "          {% elif closed_states | length == cover_entities | length %}" >> "$GROUPS_FILE"
-        echo "            closed" >> "$GROUPS_FILE"
+        echo "          {% if open == covers | count %}" >> "$GROUPS_FILE"
+        echo "            100" >> "$GROUPS_FILE"
+        echo "          {% elif closed == covers | count %}" >> "$GROUPS_FILE"
+        echo "            0" >> "$GROUPS_FILE"
         echo "          {% elif open_states | length > 0 and closed_states | length == 0 %}" >> "$GROUPS_FILE"
         echo "            open" >> "$GROUPS_FILE"
         echo "          {% elif closed_states | length > 0 and open_states | length == 0 %}" >> "$GROUPS_FILE"
@@ -310,7 +303,8 @@ create_shade_groups_yaml() {
     echo "      cockpit_day_shades:" >> "$GROUPS_FILE"
     echo "        friendly_name: \"Cockpit Day Shades\"" >> "$GROUPS_FILE"
     echo "        unique_id: \"cockpit_day_shades\"" >> "$GROUPS_FILE"
-    echo "        value_template: >" >> "$GROUPS_FILE"
+    echo "        device_class: shade" >> "$GROUPS_FILE"
+    echo "        position_template: >" >> "$GROUPS_FILE"
     
     # Start with base covers common to all models
     echo "          {% set covers = [" >> "$GROUPS_FILE"
@@ -324,12 +318,14 @@ create_shade_groups_yaml() {
     fi
     
     echo "          ] %}" >> "$GROUPS_FILE"
-    echo "          {% if covers | selectattr('state', 'eq', 'open') | list | length == covers | length %}" >> "$GROUPS_FILE"
-    echo "            open" >> "$GROUPS_FILE"
-    echo "          {% elif covers | selectattr('state', 'eq', 'closed') | list | length == covers | length %}" >> "$GROUPS_FILE"
-    echo "            closed" >> "$GROUPS_FILE"
+    echo "          {% set open = covers | selectattr('state', 'equalto', 'open') | list | count %}" >> "$GROUPS_FILE"
+    echo "          {% set closed = covers | selectattr('state', 'equalto', 'closed') | list | count %}" >> "$GROUPS_FILE"
+    echo "          {% if open == covers | count %}" >> "$GROUPS_FILE"
+    echo "            100" >> "$GROUPS_FILE"
+    echo "          {% elif closed == covers | count %}" >> "$GROUPS_FILE"
+    echo "            0" >> "$GROUPS_FILE"
     echo "          {% else %}" >> "$GROUPS_FILE"
-    echo "            opening" >> "$GROUPS_FILE"
+    echo "            50" >> "$GROUPS_FILE"
     echo "          {% endif %}" >> "$GROUPS_FILE"
     
     # Add open_cover service
@@ -382,20 +378,13 @@ create_shade_groups_yaml() {
         
         # Add the template logic
         echo "          ] %}" >> "$GROUPS_FILE"
-        echo "          {% set states_list = cover_entities | map('states') | list %}" >> "$GROUPS_FILE"
-        echo "          {% set open_states = states_list | select('eq', 'open') | list %}" >> "$GROUPS_FILE"
-        echo "          {% set closed_states = states_list | select('eq', 'closed') | list %}" >> "$GROUPS_FILE"
-        echo "          {% set opening_states = states_list | select('eq', 'opening') | list %}" >> "$GROUPS_FILE"
-        echo "          {% set closing_states = states_list | select('eq', 'closing') | list %}" >> "$GROUPS_FILE"
+        echo "          {% set open = covers | selectattr('state', 'equalto', 'open') | list | count %}" >> "$GROUPS_FILE"
+        echo "          {% set closed = covers | selectattr('state', 'equalto', 'closed') | list | count %}" >> "$GROUPS_FILE"
         echo "          " >> "$GROUPS_FILE"
-        echo "          {% if opening_states | length > 0 %}" >> "$GROUPS_FILE"
-        echo "            opening" >> "$GROUPS_FILE"
-        echo "          {% elif closing_states | length > 0 %}" >> "$GROUPS_FILE"
-        echo "            closing" >> "$GROUPS_FILE"
-        echo "          {% elif open_states | length == cover_entities | length %}" >> "$GROUPS_FILE"
-        echo "            open" >> "$GROUPS_FILE"
-        echo "          {% elif closed_states | length == cover_entities | length %}" >> "$GROUPS_FILE"
-        echo "            closed" >> "$GROUPS_FILE"
+        echo "          {% if open == covers | count %}" >> "$GROUPS_FILE"
+        echo "            100" >> "$GROUPS_FILE"
+        echo "          {% elif closed == covers | count %}" >> "$GROUPS_FILE"
+        echo "            0" >> "$GROUPS_FILE"
         echo "          {% elif open_states | length > 0 and closed_states | length == 0 %}" >> "$GROUPS_FILE"
         echo "            open" >> "$GROUPS_FILE"
         echo "          {% elif closed_states | length > 0 and open_states | length == 0 %}" >> "$GROUPS_FILE"
@@ -464,28 +453,21 @@ create_shade_groups_yaml() {
         # Add each available DS day shade entity
         for i in "${!ds_so_day_shades[@]}"; do
             if [ $i -lt $((${#ds_so_day_shades[@]} - 1)) ]; then
-                echo "            '${ds_so_day_shades[$i]}'," >> "$GROUPS_FILE"
+                echo "            states.${ds_so_day_shades[$i]//./_}," >> "$GROUPS_FILE"
             else
-                echo "            '${ds_so_day_shades[$i]}'" >> "$GROUPS_FILE"
+                echo "            states.${ds_so_day_shades[$i]//./_}" >> "$GROUPS_FILE"
             fi
         done
         
         # Add the template logic (matching the existing all_night_shades pattern)
         echo "          ] %}" >> "$GROUPS_FILE"
-        echo "          {% set states_list = cover_entities | map('states') | list %}" >> "$GROUPS_FILE"
-        echo "          {% set open_states = states_list | select('eq', 'open') | list %}" >> "$GROUPS_FILE"
-        echo "          {% set closed_states = states_list | select('eq', 'closed') | list %}" >> "$GROUPS_FILE"
-        echo "          {% set opening_states = states_list | select('eq', 'opening') | list %}" >> "$GROUPS_FILE"
-        echo "          {% set closing_states = states_list | select('eq', 'closing') | list %}" >> "$GROUPS_FILE"
+        echo "          {% set open = covers | selectattr('state', 'equalto', 'open') | list | count %}" >> "$GROUPS_FILE"
+        echo "          {% set closed = covers | selectattr('state', 'equalto', 'closed') | list | count %}" >> "$GROUPS_FILE"
         echo "          " >> "$GROUPS_FILE"
-        echo "          {% if opening_states | length > 0 %}" >> "$GROUPS_FILE"
-        echo "            opening" >> "$GROUPS_FILE"
-        echo "          {% elif closing_states | length > 0 %}" >> "$GROUPS_FILE"
-        echo "            closing" >> "$GROUPS_FILE"
-        echo "          {% elif open_states | length == cover_entities | length %}" >> "$GROUPS_FILE"
-        echo "            open" >> "$GROUPS_FILE"
-        echo "          {% elif closed_states | length == cover_entities | length %}" >> "$GROUPS_FILE"
-        echo "            closed" >> "$GROUPS_FILE"
+        echo "          {% if open == covers | count %}" >> "$GROUPS_FILE"
+        echo "            100" >> "$GROUPS_FILE"
+        echo "          {% elif closed == covers | count %}" >> "$GROUPS_FILE"
+        echo "            0" >> "$GROUPS_FILE"
         echo "          {% elif open_states | length > 0 and closed_states | length == 0 %}" >> "$GROUPS_FILE"
         echo "            open" >> "$GROUPS_FILE"
         echo "          {% elif closed_states | length > 0 and open_states | length == 0 %}" >> "$GROUPS_FILE"
@@ -551,28 +533,21 @@ create_shade_groups_yaml() {
         # Add each available DS night shade entity
         for i in "${!ds_so_night_shades[@]}"; do
             if [ $i -lt $((${#ds_so_night_shades[@]} - 1)) ]; then
-                echo "            '${ds_so_night_shades[$i]}'," >> "$GROUPS_FILE"
+                echo "            states.${ds_so_night_shades[$i]//./_}," >> "$GROUPS_FILE"
             else
-                echo "            '${ds_so_night_shades[$i]}'" >> "$GROUPS_FILE"
+                echo "            states.${ds_so_night_shades[$i]//./_}" >> "$GROUPS_FILE"
             fi
         done
         
         # Add the template logic (matching the existing all_night_shades pattern)
         echo "          ] %}" >> "$GROUPS_FILE"
-        echo "          {% set states_list = cover_entities | map('states') | list %}" >> "$GROUPS_FILE"
-        echo "          {% set open_states = states_list | select('eq', 'open') | list %}" >> "$GROUPS_FILE"
-        echo "          {% set closed_states = states_list | select('eq', 'closed') | list %}" >> "$GROUPS_FILE"
-        echo "          {% set opening_states = states_list | select('eq', 'opening') | list %}" >> "$GROUPS_FILE"
-        echo "          {% set closing_states = states_list | select('eq', 'closing') | list %}" >> "$GROUPS_FILE"
+        echo "          {% set open = covers | selectattr('state', 'equalto', 'open') | list | count %}" >> "$GROUPS_FILE"
+        echo "          {% set closed = covers | selectattr('state', 'equalto', 'closed') | list | count %}" >> "$GROUPS_FILE"
         echo "          " >> "$GROUPS_FILE"
-        echo "          {% if opening_states | length > 0 %}" >> "$GROUPS_FILE"
-        echo "            opening" >> "$GROUPS_FILE"
-        echo "          {% elif closing_states | length > 0 %}" >> "$GROUPS_FILE"
-        echo "            closing" >> "$GROUPS_FILE"
-        echo "          {% elif open_states | length == cover_entities | length %}" >> "$GROUPS_FILE"
-        echo "            open" >> "$GROUPS_FILE"
-        echo "          {% elif closed_states | length == cover_entities | length %}" >> "$GROUPS_FILE"
-        echo "            closed" >> "$GROUPS_FILE"
+        echo "          {% if open == covers | count %}" >> "$GROUPS_FILE"
+        echo "            100" >> "$GROUPS_FILE"
+        echo "          {% elif closed == covers | count %}" >> "$GROUPS_FILE"
+        echo "            0" >> "$GROUPS_FILE"
         echo "          {% elif open_states | length > 0 and closed_states | length == 0 %}" >> "$GROUPS_FILE"
         echo "            open" >> "$GROUPS_FILE"
         echo "          {% elif closed_states | length > 0 and open_states | length == 0 %}" >> "$GROUPS_FILE"
