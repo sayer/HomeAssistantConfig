@@ -453,9 +453,9 @@ create_shade_groups_yaml() {
         # Add each available DS day shade entity
         for i in "${!ds_so_day_shades[@]}"; do
             if [ $i -lt $((${#ds_so_day_shades[@]} - 1)) ]; then
-                echo "            states.${ds_so_day_shades[$i]//./_}," >> "$GROUPS_FILE"
+                echo "            states.cover.${ds_so_day_shades[$i]#cover.}," >> "$GROUPS_FILE"
             else
-                echo "            states.${ds_so_day_shades[$i]//./_}" >> "$GROUPS_FILE"
+                echo "            states.cover.${ds_so_day_shades[$i]#cover.}" >> "$GROUPS_FILE"
             fi
         done
         
@@ -533,9 +533,9 @@ create_shade_groups_yaml() {
         # Add each available DS night shade entity
         for i in "${!ds_so_night_shades[@]}"; do
             if [ $i -lt $((${#ds_so_night_shades[@]} - 1)) ]; then
-                echo "            states.${ds_so_night_shades[$i]//./_}," >> "$GROUPS_FILE"
+                echo "            states.cover.${ds_so_night_shades[$i]#cover.}," >> "$GROUPS_FILE"
             else
-                echo "            states.${ds_so_night_shades[$i]//./_}" >> "$GROUPS_FILE"
+                echo "            states.cover.${ds_so_night_shades[$i]#cover.}" >> "$GROUPS_FILE"
             fi
         done
         
