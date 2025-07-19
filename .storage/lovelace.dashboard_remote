@@ -499,33 +499,6 @@
                   "heading": "Shades"
                 },
                 {
-                  "square": false,
-                  "type": "grid",
-                  "cards": [
-                    {
-                      "type": "cover",
-                      "entity": "cover.all_night_shades",
-                      "name": "All Night Shades"
-                    },
-                    {
-                      "type": "cover",
-                      "entity": "cover.all_day_shades",
-                      "name": "All Day Shades"
-                    },
-                    {
-                      "type": "cover",
-                      "entity": "cover.cockpit_night_shades",
-                      "name": "Cockpit Night Shades"
-                    },
-                    {
-                      "type": "cover",
-                      "entity": "cover.cockpit_day_shades",
-                      "name": "Cockpit Day Shades"
-                    }
-                  ],
-                  "columns": 2
-                },
-                {
                   "square": true,
                   "type": "grid",
                   "cards": [
