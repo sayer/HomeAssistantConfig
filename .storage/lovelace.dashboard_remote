@@ -494,9 +494,30 @@
                   "state_color": true
                 },
                 {
-                  "type": "heading",
-                  "heading_style": "title",
-                  "heading": "Shades"
+                  "show_name": true,
+                  "show_icon": true,
+                  "show_state": true,
+                  "type": "glance",
+                  "entities": [
+                    {
+                      "entity": "cover.all_day_shades",
+                      "name": "All Day"
+                    },
+                    {
+                      "entity": "cover.all_night_shades",
+                      "name": "All Night"
+                    },
+                    {
+                      "entity": "cover.cockpit_day_shades",
+                      "name": "Cockpit Day"
+                    },
+                    {
+                      "entity": "cover.cockpit_night_shades",
+                      "name": "Cockpit Night"
+                    }
+                  ],
+                  "state_color": true,
+                  "title": "Shades"
                 },
                 {
                   "square": true,
@@ -659,7 +680,6 @@
                     }
                   ]
                 }
- 
               ]
             }
           ],
@@ -744,18 +764,16 @@
                   "type": "grid",
                   "cards": [
                     {
-                      "type": "cover",
+                      "type": "custom:mushroom-cover-card",
                       "entity": "cover.cockpit_night_shades",
-                      "name": "Cockpit Night Shades",
-                      "fill_container": true,
-                      "layout": "vertical"
+                      "show_position_control": false,
+                      "show_buttons_control": true
                     },
                     {
-                      "type": "cover",
+                      "type": "custom:mushroom-cover-card",
                       "entity": "cover.cockpit_day_shades",
-                      "name": "Cockpit Day Shades",
-                      "layout": "vertical",
-                      "fill_container": true
+                      "show_buttons_control": true,
+                      "show_position_control": false
                     }
                   ],
                   "columns": 2
@@ -992,7 +1010,7 @@
                         {
                           "type": "custom:button-card",
                           "entity": "sensor.fresh_water",
-                          "name": "Fresh Water",
+                          "name": "Fresh",
                           "show_state": true,
                           "show_icon": true,
                           "layout": "icon_name_state",
@@ -1060,7 +1078,7 @@
                         {
                           "type": "custom:button-card",
                           "entity": "sensor.black_tank",
-                          "name": "Black Tank",
+                          "name": "Black",
                           "show_state": true,
                           "show_icon": true,
                           "layout": "icon_name_state",
@@ -1597,77 +1615,6 @@
                   "state_color": true
                 },
                 {
-                  "type": "vertical-stack",
-                  "cards": [
-                    {
-                      "type": "custom:auto-entities",
-                      "card": {
-                        "type": "glance",
-                        "title": "Heat Pumps",
-                        "show_name": true,
-                        "show_icon": true,
-                        "show_state": true,
-                        "state_color": true
-                      },
-                      "filter": {
-                        "include": [
-                          {
-                            "entity_id": [
-                              "switch.heat",
-                              "switch.heat_1",
-                              "switch.heat_2",
-                              "switch.heat_3",
-                              "switch.heat_4"
-                            ]
-                          }
-                        ],
-                        "exclude": [
-                          {
-                            "state": "unavailable"
-                          },
-                          {
-                            "state": "unknown"
-                          }
-                        ]
-                      }
-                    },
-                    {
-                      "type": "conditional",
-                      "conditions": [
-                        {
-                          "condition": "state",
-                          "entity": "switch.heat",
-                          "state": "unavailable"
-                        },
-                        {
-                          "condition": "state",
-                          "entity": "switch.heat_1",
-                          "state": "unavailable"
-                        },
-                        {
-                          "condition": "state",
-                          "entity": "switch.heat_2",
-                          "state": "unavailable"
-                        },
-                        {
-                          "condition": "state",
-                          "entity": "switch.heat_3",
-                          "state": "unavailable"
-                        },
-                        {
-                          "condition": "state",
-                          "entity": "switch.heat_4",
-                          "state": "unavailable"
-                        }
-                      ],
-                      "card": {
-                        "type": "markdown",
-                        "content": "**Please turn on Heat with thermostat.**\n"
-                      }
-                    }
-                  ]
-                },
-                {
                   "type": "entities",
                   "entities": [
                     {
@@ -1687,91 +1634,6 @@
                     },
                     {
                       "entity": "switch.aqua_hot_burner"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "type": "grid",
-              "cards": [
-                {
-                  "type": "heading",
-                  "heading_style": "subtitle",
-                  "heading": "Air Conditioning",
-                  "icon": "mdi:air-conditioner"
-                },
-                {
-                  "type": "vertical-stack",
-                  "cards": [
-                    {
-                      "type": "custom:auto-entities",
-                      "card": {
-                        "type": "glance",
-                        "title": "Air Conditioning",
-                        "show_name": true,
-                        "show_icon": true,
-                        "show_state": true,
-                        "state_color": true
-                      },
-                      "filter": {
-                        "include": [
-                          {
-                            "options": {},
-                            "entity_id": [
-                              "switch.air_conditioning",
-                              "switch.front_ac",
-                              "switch.ac_2",
-                              "switch.ac_3",
-                              "switch.ac_4"
-                            ]
-                          }
-                        ],
-                        "exclude": [
-                          {
-                            "options": {},
-                            "state": "unavailable"
-                          },
-                          {
-                            "options": {},
-                            "state": "unknown"
-                          }
-                        ]
-                      }
-                    },
-                    {
-                      "type": "conditional",
-                      "conditions": [
-                        {
-                          "condition": "state",
-                          "entity": "switch.air_conditioning",
-                          "state": "unavailable"
-                        },
-                        {
-                          "condition": "state",
-                          "entity": "switch.front_ac",
-                          "state": "unavailable"
-                        },
-                        {
-                          "condition": "state",
-                          "entity": "switch.ac_2",
-                          "state": "unavailable"
-                        },
-                        {
-                          "condition": "state",
-                          "entity": "switch.ac_3",
-                          "state": "unavailable"
-                        },
-                        {
-                          "condition": "state",
-                          "entity": "switch.ac_4",
-                          "state": "unavailable"
-                        }
-                      ],
-                      "card": {
-                        "type": "markdown",
-                        "content": "**Please turn on Cool mode with the thermostat.**\n"
-                      }
                     }
                   ]
                 }
@@ -2070,59 +1932,6 @@
               "columns": 2
             },
             {
-              "type": "custom:mushroom-chips-card",
-              "chips": [
-                {
-                  "type": "entity",
-                  "entity": "script.good_morning",
-                  "name": "Morning",
-                  "content_info": "name",
-                  "icon": "mdi:sun-clock",
-                  "tap_action": {
-                    "action": "call-service",
-                    "service": "script.good_morning",
-                    "target": {}
-                  }
-                },
-                {
-                  "type": "entity",
-                  "entity": "script.evening",
-                  "tap_action": {
-                    "action": "call-service",
-                    "service": "script.evening",
-                    "target": {}
-                  },
-                  "icon": "mdi:clock-time-seven",
-                  "name": "Evening",
-                  "content_info": "name"
-                },
-                {
-                  "type": "entity",
-                  "entity": "script.good_night",
-                  "name": "Night",
-                  "content_info": "name",
-                  "tap_action": {
-                    "action": "call-service",
-                    "service": "script.good_night",
-                    "target": {}
-                  },
-                  "icon": "mdi:lightbulb-night"
-                },
-                {
-                  "type": "entity",
-                  "entity": "person.stephen_ayers",
-                  "name": "TV",
-                  "content_info": "name",
-                  "icon": "mdi:television",
-                  "tap_action": {
-                    "action": "call-service",
-                    "service": "script.tv_time",
-                    "target": {}
-                  }
-                }
-              ]
-            },
-            {
               "type": "vertical-stack",
               "cards": [
                 {
@@ -2186,8 +1995,75 @@
                         ],
                         "style": "ha-card {\n  margin: 0 !important;\n  box-shadow: none !important;\n  background: transparent !important;\n}\n"
                       }
+                    },
+                    {
+                      "type": "glance",
+                      "show_name": true,
+                      "show_icon": true,
+                      "show_state": true,
+                      "state_color": true,
+                      "columns": 1,
+                      "entities": [
+                        {
+                          "entity": "cover.passenger_day"
+                        }
+                      ],
+                      "style": "ha-card {\n  margin: 0 !important;\n  box-shadow: none !important;\n  background: transparent !important;\n}\n"
                     }
                   ]
+                }
+              ]
+            },
+            {
+              "type": "custom:mushroom-chips-card",
+              "chips": [
+                {
+                  "type": "entity",
+                  "entity": "script.good_morning",
+                  "name": "Morning",
+                  "content_info": "name",
+                  "icon": "mdi:sun-clock",
+                  "tap_action": {
+                    "action": "call-service",
+                    "service": "script.good_morning",
+                    "target": {}
+                  }
+                },
+                {
+                  "type": "entity",
+                  "entity": "script.evening",
+                  "tap_action": {
+                    "action": "call-service",
+                    "service": "script.evening",
+                    "target": {}
+                  },
+                  "icon": "mdi:clock-time-seven",
+                  "name": "Evening",
+                  "content_info": "name"
+                },
+                {
+                  "type": "entity",
+                  "entity": "script.good_night",
+                  "name": "Night",
+                  "content_info": "name",
+                  "tap_action": {
+                    "action": "call-service",
+                    "service": "script.good_night",
+                    "target": {}
+                  },
+                  "icon": "mdi:lightbulb-night"
+                },
+                {
+                  "type": "entity",
+                  "entity": "person.stephen_ayers",
+                  "name": "TV",
+                  "content_info": "name",
+                  "icon": "mdi:television",
+                  "tap_action": {
+                    "action": "call-service",
+                    "service": "script.tv_time",
+                    "target": {}
+                  }
                 }
               ]
             },
@@ -3104,55 +2980,10 @@
                   "style": "ha-markdown {\n  padding: 0 0 12px 0;\n}\n"
                 },
                 {
-                  "type": "grid",
-                  "columns": 2,
                   "square": false,
+                  "type": "grid",
+                  "columns": 1,
                   "cards": [
-                    {
-                      "type": "custom:button-card",
-                      "entity": "input_select.timezone",
-                      "name": "System Timezone",
-                      "show_state": true,
-                      "show_icon": true,
-                      "layout": "icon_name_state",
-                      "styles": {
-                        "card": [
-                          {
-                            "border-radius": "12px"
-                          },
-                          {
-                            "padding": "12px"
-                          },
-                          {
-                            "background-color": "var(--card-background-color)"
-                          },
-                          {
-                            "box-shadow": "none"
-                          }
-                        ],
-                        "name": [
-                          {
-                            "font-size": "14px"
-                          },
-                          {
-                            "font-weight": "bold"
-                          }
-                        ],
-                        "state": [
-                          {
-                            "font-size": "12px"
-                          }
-                        ],
-                        "icon": [
-                          {
-                            "color": "var(--primary-text-color)"
-                          }
-                        ]
-                      },
-                      "tap_action": {
-                        "action": "more-info"
-                      }
-                    },
                     {
                       "type": "custom:button-card",
                       "entity": "sensor.current_isp",
@@ -3196,103 +3027,9 @@
                       }
                     }
                   ]
-                },
-                {
-                  "type": "grid",
-                  "columns": 2,
-                  "square": false,
-                  "cards": [
-                    {
-                      "type": "custom:button-card",
-                      "entity": "script.auto_detect_timezone",
-                      "name": "Auto-Detect Timezone",
-                      "show_state": false,
-                      "show_icon": true,
-                      "layout": "icon_name",
-                      "styles": {
-                        "card": [
-                          {
-                            "border-radius": "12px"
-                          },
-                          {
-                            "padding": "12px"
-                          },
-                          {
-                            "background-color": "var(--accent-color)"
-                          },
-                          {
-                            "color": "white"
-                          }
-                        ],
-                        "name": [
-                          {
-                            "font-size": "14px"
-                          },
-                          {
-                            "font-weight": "bold"
-                          },
-                          {
-                            "color": "white"
-                          }
-                        ],
-                        "icon": [
-                          {
-                            "color": "white"
-                          }
-                        ]
-                      },
-                      "tap_action": {
-                        "action": "call-service",
-                        "service": "script.auto_detect_timezone"
-                      }
-                    },
-                    {
-                      "type": "custom:button-card",
-                      "entity": "sensor.location_timezone",
-                      "name": "Location Timezone",
-                      "show_state": true,
-                      "show_icon": true,
-                      "layout": "icon_name_state",
-                      "styles": {
-                        "card": [
-                          {
-                            "border-radius": "12px"
-                          },
-                          {
-                            "padding": "12px"
-                          },
-                          {
-                            "background-color": "var(--card-background-color)"
-                          },
-                          {
-                            "box-shadow": "none"
-                          }
-                        ],
-                        "name": [
-                          {
-                            "font-size": "14px"
-                          },
-                          {
-                            "font-weight": "bold"
-                          }
-                        ],
-                        "state": [
-                          {
-                            "font-size": "12px"
-                          }
-                        ],
-                        "icon": [
-                          {
-                            "color": "var(--primary-text-color)"
-                          }
-                        ]
-                      }
-                    }
-                  ]
                 }
               ]
             },
-
             {
               "type": "entities",
               "entities": [
@@ -3398,12 +3135,6 @@
                   "entity": "input_boolean.busparked"
                 },
                 {
-                  "entity": "hvac_livingroom_thermostat"
-                },
-                {
-                  "entity": "hvac_bedroom_thermostat"
-                },
-                {
                   "entity": "sensor.chassis_battery"
                 },
                 {
@@ -3462,10 +3193,6 @@
                 },
                 {
                   "entity": "input_text.owner_name"
-                },
-                {
-                  "entity": "input_select.timezone",
-                  "name": "System Timezone"
                 }
               ]
             }
