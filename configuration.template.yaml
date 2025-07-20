@@ -141,7 +141,6 @@ input_datetime:
     name: Generator Run Start
     has_date: true
     has_time: true
-    initial: "2024-01-01 00:00:00"
 
 sensor:
   - platform: rest
