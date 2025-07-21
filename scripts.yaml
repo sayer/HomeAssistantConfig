@@ -955,9 +955,13 @@ load_scene:
       selector:
         text:
   sequence:
+    # Capture the scene name parameter first
+    - variables:
+        scene_name_param: "{{ scene_name }}"
+    
     # Get the scene data from MQTT sensor entity
     - variables:
-        scene_name_clean: "{{ scene_name | replace(' ', '_') | lower }}"
+        scene_name_clean: "{{ scene_name_param | replace(' ', '_') | lower }}"
         mqtt_sensor_entity: "sensor.scene_{{ scene_name_clean }}"
         json_data: "{{ state_attr('sensor.scene_' + scene_name_clean, 'data') }}"
         simple_data: "{{ json_data.data if json_data is mapping and 'data' in json_data else json_data }}"
@@ -967,7 +971,7 @@ load_scene:
       data:
         message: >
           LOAD SCENE:
-          Scene name: {{ scene_name }}
+          Scene name: {{ scene_name_param }}
           MQTT sensor entity: {{ mqtt_sensor_entity }}
           Scene data exists: {{ state_attr(mqtt_sensor_entity, 'data') != none }}
           Scene data length: {{ simple_data | length if simple_data is defined and simple_data != none else 0 }} characters
@@ -1090,7 +1094,7 @@ load_scene:
     - service: notify.notify
       data:
         title: "Scene Loaded"
-        message: "Scene '{{ scene_name }}' has been loaded"
+        message: "Scene '{{ scene_name_param }}' has been loaded"
 
 # Master Thermostat Control Scripts
 master_thermostat_set_cool:
