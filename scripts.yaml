@@ -957,8 +957,9 @@ load_scene:
   sequence:
     # Get the scene data from MQTT sensor entity
     - variables:
-        mqtt_sensor_entity: "sensor.scene_{{ scene_name | replace(' ', '_') | lower }}"
-        json_data: "{{ state_attr(mqtt_sensor_entity, 'data') }}"
+        scene_name_clean: "{{ scene_name | replace(' ', '_') | lower }}"
+        mqtt_sensor_entity: "sensor.scene_{{ scene_name_clean }}"
+        json_data: "{{ state_attr('sensor.scene_' + scene_name_clean, 'data') }}"
         simple_data: "{{ json_data.data if json_data is mapping and 'data' in json_data else json_data }}"
     
     # Log the scene data
