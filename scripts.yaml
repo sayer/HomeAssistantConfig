@@ -947,6 +947,9 @@ load_scene:
   description: "Loads a previously saved scene and applies it to all lights and shades"
   icon: mdi:palette
   mode: single
+  variables:
+    scene_clean: "{{ scene_name | replace(' ', '_') | lower }}"
+    sensor_entity: "sensor.scene_{{ scene_clean }}"
   fields:
     scene_name:
       name: Scene Name
@@ -955,16 +958,14 @@ load_scene:
       selector:
         text:
   sequence:
-    # Hardcoded test - remove all scene_name references temporarily
+    # Log scene load attempt
     - service: system_log.write
       data:
-        message: "Testing load scene with hardcoded values"
+        message: "Loading scene: {{ scene_name }}"
         level: info
     
     - variables:
-        test_scene: "evening_scene"  # Hardcoded for testing
-        sensor_entity: "sensor.scene_evening_scene"
-        scene_data_raw: "{{ state_attr('sensor.scene_evening_scene', 'data') }}"
+        scene_data_raw: "{{ state_attr(sensor_entity, 'data') }}"
         scene_data_simple: "{{ scene_data_raw.data if scene_data_raw is mapping and 'data' in scene_data_raw else scene_data_raw }}"
     
     # Log the scene data
@@ -972,7 +973,7 @@ load_scene:
       data:
         message: >
           LOAD SCENE:
-          Scene name: {{ test_scene }}
+          Scene name: {{ scene_name }}
           MQTT sensor entity: {{ sensor_entity }}
           Scene data exists: {{ scene_data_raw != none }}
           Scene data length: {{ scene_data_simple | length if scene_data_simple is defined and scene_data_simple != none else 0 }} characters
@@ -1095,7 +1096,7 @@ load_scene:
     - service: notify.notify
       data:
         title: "Scene Loaded"
-        message: "Scene '{{ test_scene }}' has been loaded"
+        message: "Scene '{{ scene_name }}' has been loaded"
 
 # Master Thermostat Control Scripts
 master_thermostat_set_cool:
