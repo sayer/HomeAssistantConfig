@@ -955,16 +955,13 @@ load_scene:
       selector:
         text:
   sequence:
-    # Capture the scene name parameter first
-    - variables:
-        scene_name_param: "{{ scene_name }}"
-    
     # Get the scene data from MQTT sensor entity
     - variables:
-        scene_name_clean: "{{ scene_name_param | replace(' ', '_') | lower }}"
+        scene_name_clean: "{{ scene_name | replace(' ', '_') | lower }}"
         mqtt_sensor_entity: "sensor.scene_{{ scene_name_clean }}"
-        json_data: "{{ state_attr('sensor.scene_' + scene_name_clean, 'data') }}"
+        json_data: "{{ state_attr(mqtt_sensor_entity, 'data') }}"
         simple_data: "{{ json_data.data if json_data is mapping and 'data' in json_data else json_data }}"
+        scene_name_param: "{{ scene_name }}"
     
     # Log the scene data
     - service: system_log.write
