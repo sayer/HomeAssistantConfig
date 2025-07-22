@@ -955,24 +955,38 @@ load_scene:
       selector:
         text:
   sequence:
-    # Get the scene data from MQTT sensor entity
+    # Log scene load attempt first
+    - service: system_log.write
+      data:
+        message: "Starting load for scene: {{ scene_name }}"
+        level: info
+    
+    # Get the scene data using direct template service calls
+    - service: mqtt.publish
+      data:
+        topic: "homeassistant/debug/scene_load"
+        payload: "{{ scene_name }}"
+        retain: false
+    
+    # Get scene data from MQTT sensor
     - variables:
-        scene_name_clean: "{{ scene_name | replace(' ', '_') | lower }}"
-        mqtt_sensor_entity: "sensor.scene_{{ scene_name_clean }}"
-        json_data: "{{ state_attr(mqtt_sensor_entity, 'data') }}"
-        simple_data: "{{ json_data.data if json_data is mapping and 'data' in json_data else json_data }}"
-        scene_name_param: "{{ scene_name }}"
+        scene_clean: "{{ scene_name | replace(' ', '_') | lower }}"
+    
+    - variables:
+        sensor_entity: "sensor.scene_{{ scene_clean }}"
+        scene_data_raw: "{{ state_attr('sensor.scene_' + scene_clean, 'data') }}"
+        scene_data_simple: "{{ scene_data_raw.data if scene_data_raw is mapping and 'data' in scene_data_raw else scene_data_raw }}"
     
     # Log the scene data
     - service: system_log.write
       data:
         message: >
           LOAD SCENE:
-          Scene name: {{ scene_name_param }}
-          MQTT sensor entity: {{ mqtt_sensor_entity }}
-          Scene data exists: {{ state_attr(mqtt_sensor_entity, 'data') != none }}
-          Scene data length: {{ simple_data | length if simple_data is defined and simple_data != none else 0 }} characters
-          First 200 chars: {{ simple_data[:200] if simple_data is defined and simple_data != none else 'undefined' }}
+          Scene name: {{ scene_name }}
+          MQTT sensor entity: {{ sensor_entity }}
+          Scene data exists: {{ scene_data_raw != none }}
+          Scene data length: {{ scene_data_simple | length if scene_data_simple is defined and scene_data_simple != none else 0 }} characters
+          First 200 chars: {{ scene_data_simple[:200] if scene_data_simple is defined and scene_data_simple != none else 'undefined' }}
         level: info
     
     # Parse the simple data format into a dictionary
@@ -980,7 +994,7 @@ load_scene:
         # Initialize an empty dictionary
         scene_data: {}
         # Split the string by '|' to get entity_id=value pairs
-        entity_pairs: "{{ simple_data.split('|') if simple_data is defined and simple_data != none and simple_data != '' else [] }}"
+        entity_pairs: "{{ scene_data_simple.split('|') if scene_data_simple is defined and scene_data_simple != none and scene_data_simple != '' else [] }}"
     
     # Process each entity pair and add to scene_data
     - repeat:
@@ -1091,7 +1105,7 @@ load_scene:
     - service: notify.notify
       data:
         title: "Scene Loaded"
-        message: "Scene '{{ scene_name_param }}' has been loaded"
+        message: "Scene '{{ scene_name }}' has been loaded"
 
 # Master Thermostat Control Scripts
 master_thermostat_set_cool:
