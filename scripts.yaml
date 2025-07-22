@@ -955,26 +955,16 @@ load_scene:
       selector:
         text:
   sequence:
-    # Log scene load attempt first
+    # Hardcoded test - remove all scene_name references temporarily
     - service: system_log.write
       data:
-        message: "Starting load for scene: {{ scene_name }}"
+        message: "Testing load scene with hardcoded values"
         level: info
     
-    # Get the scene data using direct template service calls
-    - service: mqtt.publish
-      data:
-        topic: "homeassistant/debug/scene_load"
-        payload: "{{ scene_name }}"
-        retain: false
-    
-    # Get scene data from MQTT sensor
     - variables:
-        scene_clean: "{{ scene_name | replace(' ', '_') | lower }}"
-    
-    - variables:
-        sensor_entity: "sensor.scene_{{ scene_clean }}"
-        scene_data_raw: "{{ state_attr('sensor.scene_' + scene_clean, 'data') }}"
+        test_scene: "evening_scene"  # Hardcoded for testing
+        sensor_entity: "sensor.scene_evening_scene"
+        scene_data_raw: "{{ state_attr('sensor.scene_evening_scene', 'data') }}"
         scene_data_simple: "{{ scene_data_raw.data if scene_data_raw is mapping and 'data' in scene_data_raw else scene_data_raw }}"
     
     # Log the scene data
@@ -982,7 +972,7 @@ load_scene:
       data:
         message: >
           LOAD SCENE:
-          Scene name: {{ scene_name }}
+          Scene name: {{ test_scene }}
           MQTT sensor entity: {{ sensor_entity }}
           Scene data exists: {{ scene_data_raw != none }}
           Scene data length: {{ scene_data_simple | length if scene_data_simple is defined and scene_data_simple != none else 0 }} characters
@@ -1105,7 +1095,7 @@ load_scene:
     - service: notify.notify
       data:
         title: "Scene Loaded"
-        message: "Scene '{{ scene_name }}' has been loaded"
+        message: "Scene '{{ test_scene }}' has been loaded"
 
 # Master Thermostat Control Scripts
 master_thermostat_set_cool:
