@@ -698,9 +698,9 @@ configure_2023_plus() {
     LIGHT_COMMAND_ON="0"
     LIGHT_COMMAND_OFF="3"
     # Thermostat instances
-    THERMOSTAT1="164"
-    THERMOSTAT2="165"
-    THERMOSTAT3="166"
+    THERMOSTAT1="7"
+    THERMOSTAT2="8"
+    THERMOSTAT3="9"
     THERMOSTAT4="167"
     # Thermostat ambient instances (same for all model years)
     THERMOSTAT1_AMBIENT="249"
