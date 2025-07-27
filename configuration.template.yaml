@@ -291,7 +291,9 @@ sensor:
         value_template: >-
           {% set rms_current = states('sensor.power_rms_current') %}
           {% set generator_status = states('sensor.generatorstatus') %}
-          {% if (rms_current == 0) or (rms_current == 'unknown') %}
+          {% if rms_current == 'unknown' and generator_status != 'running' %}
+          unknown
+          {% elif (rms_current == 0) or (rms_current == 'unknown') %}
           Inverter
           {% elif generator_status == 'running' %}
           Generator
