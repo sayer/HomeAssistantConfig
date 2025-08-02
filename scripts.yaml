@@ -829,7 +829,8 @@ save_scene:
                or attrs.position_template is defined
                or attrs.open_cover is defined and attrs.open_cover.service is defined
                or attrs.close_cover is defined and attrs.close_cover.service is defined
-               or (attrs.friendly_name is defined and ('all' in attrs.friendly_name.lower() or 'group' in attrs.friendly_name.lower())) %}
+               or (attrs.friendly_name is defined and ('all' in attrs.friendly_name.lower() or 'group' in attrs.friendly_name.lower()))
+               or 'shades' in entity.entity_id %}
               {% set groups = groups + [entity.entity_id] %}
             {% endif %}
           {% endfor %}
@@ -843,7 +844,8 @@ save_scene:
                or attrs.position_template is defined
                or attrs.open_cover is defined and attrs.open_cover.service is defined
                or attrs.close_cover is defined and attrs.close_cover.service is defined
-               or (attrs.friendly_name is defined and ('all' in attrs.friendly_name.lower() or 'group' in attrs.friendly_name.lower())) %}
+               or (attrs.friendly_name is defined and ('all' in attrs.friendly_name.lower() or 'group' in attrs.friendly_name.lower()))
+               or 'shades' in entity.entity_id %}
               {% set debug_info = debug_info + [entity.entity_id + ' (group detected)'] %}
             {% endif %}
           {% endfor %}
@@ -1097,7 +1099,8 @@ load_scene:
                  or attrs.position_template is defined
                  or attrs.open_cover is defined and attrs.open_cover.service is defined
                  or attrs.close_cover is defined and attrs.close_cover.service is defined
-                 or (attrs.friendly_name is defined and ('all' in attrs.friendly_name.lower() or 'group' in attrs.friendly_name.lower())) %}
+                 or (attrs.friendly_name is defined and ('all' in attrs.friendly_name.lower() or 'group' in attrs.friendly_name.lower()))
+                 or 'shades' in entity_id %}
                 {% set groups = groups + [entity_id] %}
               {% endif %}
             {% endif %}
