@@ -787,18 +787,18 @@ save_scene:
     # Filter light entities - exclude groups (entities with entity_id attribute)
     - variables:
         all_light_entities: >-
-          {% set all_lights = states.light | map(attribute='entity_id') | list %}
-          {{ all_lights }}
+          {{ states.light | map(attribute='entity_id') | list }}
         light_groups: >-
-          {% set groups = states.light
+          {{ states.light
              | selectattr('attributes.entity_id', 'defined')
-             | map(attribute='entity_id') | list %}
-          {{ groups }}
+             | map(attribute='entity_id') 
+             | list }}
         light_entities: >-
-          {% set real_lights = states.light
-             | selectattr('attributes.entity_id', 'undefined')
-             | map(attribute='entity_id') | list %}
-          {{ real_lights }}
+          {% set groups = light_groups %}
+          {{ states.light
+             | map(attribute='entity_id')
+             | reject('in', groups)
+             | list }}
     
     # Log light filtering results
     - service: system_log.write
@@ -821,26 +821,22 @@ save_scene:
           {{ all_covers }}
         # Detect cover groups dynamically based on attributes
         cover_groups: >-
-          {% set groups = [] %}
-          {% for entity in states.cover %}
-            {# Check if entity has 'entity_id' attribute (indicates it's a group) #}
-            {% if entity.attributes.entity_id is defined %}
-              {% set _ = groups.append(entity.entity_id) %}
-            {# Also check for position_template attribute which template groups have #}
-            {% elif entity.attributes.position_template is defined %}
-              {% set _ = groups.append(entity.entity_id) %}
-            {% endif %}
-          {% endfor %}
-          {{ groups }}
+          {{ states.cover 
+             | selectattr('attributes.entity_id', 'defined')
+             | map(attribute='entity_id') 
+             | list 
+             + states.cover 
+             | selectattr('attributes.position_template', 'defined')
+             | map(attribute='entity_id') 
+             | list 
+             | unique 
+             | list }}
         cover_entities: >-
-          {% set all_covers = states.cover | map(attribute='entity_id') | list %}
-          {% set real_covers = [] %}
-          {% for entity_id in all_covers %}
-            {% if entity_id not in cover_groups %}
-              {% set _ = real_covers.append(entity_id) %}
-            {% endif %}
-          {% endfor %}
-          {{ real_covers }}
+          {% set groups = cover_groups %}
+          {{ states.cover 
+             | map(attribute='entity_id') 
+             | reject('in', groups) 
+             | list }}
         scene_data: {}
     
     # Log cover filtering results
@@ -962,8 +958,6 @@ load_scene:
   variables:
     scene_clean: "{{ scene_name | replace(' ', '_') | lower }}"
     sensor_entity: "sensor.scene_{{ scene_clean }}"
-    # Initialize list to track which shades have been commanded
-    commanded_shades: []
   fields:
     scene_name:
       name: Scene Name
@@ -1074,29 +1068,20 @@ load_scene:
         cover_entities_in_scene: "{{ scene_data.keys() | select('match', '^cover\\.') | list }}"
         # Detect cover groups dynamically based on attributes
         shade_groups: >-
-          {% set groups = [] %}
-          {% for entity_id in cover_entities_in_scene %}
-            {% set entity = states.cover[entity_id.split('.')[1]] if states.cover[entity_id.split('.')[1]] is defined else none %}
-            {% if entity %}
-              {# Check if entity has 'entity_id' attribute (indicates it's a group) #}
-              {% if entity.attributes.entity_id is defined %}
-                {% set _ = groups.append(entity_id) %}
-              {# Also check for position_template attribute which template groups have #}
-              {% elif entity.attributes.position_template is defined %}
-                {% set _ = groups.append(entity_id) %}
-              {% endif %}
-            {% endif %}
-          {% endfor %}
-          {{ groups }}
+          {{ states.cover 
+             | selectattr('attributes.entity_id', 'defined')
+             | map(attribute='entity_id') 
+             | list 
+             + states.cover 
+             | selectattr('attributes.position_template', 'defined')
+             | map(attribute='entity_id') 
+             | list 
+             | unique 
+             | list }}
         # Only process individual shades, not groups
         filtered_cover_entities: >-
-          {% set individual_shades = [] %}
-          {% for entity in cover_entities_in_scene %}
-            {% if entity not in shade_groups %}
-              {% set _ = individual_shades.append(entity) %}
-            {% endif %}
-          {% endfor %}
-          {{ individual_shades }}
+          {% set groups = shade_groups %}
+          {{ cover_entities_in_scene | reject('in', groups) | list }}
     
     # Log filtering results
     - service: system_log.write
@@ -1114,14 +1099,6 @@ load_scene:
           - variables:
               entity_id: "{{ repeat.item }}"
               entity_state: "{{ scene_data[entity_id] }}"
-          
-          # Check if this shade has already been commanded
-          - condition: template
-            value_template: "{{ entity_id not in commanded_shades }}"
-          
-          # Add to commanded shades list
-          - variables:
-              commanded_shades: "{{ commanded_shades + [entity_id] }}"
           
           # Apply the cover state
           - choose:
