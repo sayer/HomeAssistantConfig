@@ -819,10 +819,17 @@ save_scene:
         all_cover_entities: >-
           {% set all_covers = states.cover | map(attribute='entity_id') | list %}
           {{ all_covers }}
-        # Define known shade groups
-        shade_groups: ['cover.all_day_shades', 'cover.all_night_shades', 'cover.cockpit_night_shades', 
-                       'cover.cockpit_day_shades', 'cover.living_night_shades', 'cover.ds_so_day_shades',
-                       'cover.ds_so_night_shades']
+        # Define known shade groups - include any entity with certain patterns
+        shade_groups: >-
+          {% set groups = ['cover.all_day_shades', 'cover.all_night_shades', 'cover.cockpit_night_shades', 
+                          'cover.cockpit_day_shades', 'cover.living_night_shades', 'cover.ds_so_day_shades',
+                          'cover.ds_so_night_shades'] %}
+          {% for entity in states.cover %}
+            {% if 'all_' in entity.entity_id or '_shades' in entity.entity_id %}
+              {% set _ = groups.append(entity.entity_id) %}
+            {% endif %}
+          {% endfor %}
+          {{ groups | unique | list }}
         cover_groups: >-
           {% set groups = states.cover
              | selectattr('attributes.entity_id', 'defined')
@@ -830,10 +837,11 @@ save_scene:
           {% set all_groups = groups + shade_groups %}
           {{ all_groups | unique | list }}
         cover_entities: >-
+          {% set all_covers = states.cover | map(attribute='entity_id') | list %}
           {% set real_covers = [] %}
-          {% for entity in states.cover %}
-            {% if entity.entity_id not in shade_groups and entity.attributes.get('entity_id') is not defined %}
-              {% set _ = real_covers.append(entity.entity_id) %}
+          {% for entity_id in all_covers %}
+            {% if entity_id not in shade_groups %}
+              {% set _ = real_covers.append(entity_id) %}
             {% endif %}
           {% endfor %}
           {{ real_covers }}
@@ -1068,10 +1076,17 @@ load_scene:
     # Process only covers that are in the scene data
     - variables:
         cover_entities_in_scene: "{{ scene_data.keys() | select('match', '^cover\\.') | list }}"
-        # Filter out known shade groups
-        shade_groups: ['cover.all_day_shades', 'cover.all_night_shades', 'cover.cockpit_night_shades', 
-                       'cover.cockpit_day_shades', 'cover.living_night_shades', 'cover.ds_so_day_shades',
-                       'cover.ds_so_night_shades']
+        # Filter out known shade groups - include any entity with certain patterns
+        shade_groups: >-
+          {% set groups = ['cover.all_day_shades', 'cover.all_night_shades', 'cover.cockpit_night_shades', 
+                          'cover.cockpit_day_shades', 'cover.living_night_shades', 'cover.ds_so_day_shades',
+                          'cover.ds_so_night_shades'] %}
+          {% for entity_id in cover_entities_in_scene %}
+            {% if 'all_' in entity_id or '_shades' in entity_id %}
+              {% set _ = groups.append(entity_id) %}
+            {% endif %}
+          {% endfor %}
+          {{ groups | unique | list }}
         # Only process individual shades, not groups
         filtered_cover_entities: >-
           {% set individual_shades = [] %}
