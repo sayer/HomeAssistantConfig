@@ -819,15 +819,23 @@ save_scene:
         all_cover_entities: >-
           {% set all_covers = states.cover | map(attribute='entity_id') | list %}
           {{ all_covers }}
+        # Define known shade groups
+        shade_groups: ['cover.all_day_shades', 'cover.all_night_shades', 'cover.cockpit_night_shades', 
+                       'cover.cockpit_day_shades', 'cover.living_night_shades', 'cover.ds_so_day_shades',
+                       'cover.ds_so_night_shades']
         cover_groups: >-
           {% set groups = states.cover
              | selectattr('attributes.entity_id', 'defined')
              | map(attribute='entity_id') | list %}
-          {{ groups }}
+          {% set all_groups = groups + shade_groups %}
+          {{ all_groups | unique | list }}
         cover_entities: >-
-          {% set real_covers = states.cover
-             | selectattr('attributes.entity_id', 'undefined')
-             | map(attribute='entity_id') | list %}
+          {% set real_covers = [] %}
+          {% for entity in states.cover %}
+            {% if entity.entity_id not in shade_groups and entity.attributes.get('entity_id') is not defined %}
+              {% set _ = real_covers.append(entity.entity_id) %}
+            {% endif %}
+          {% endfor %}
           {{ real_covers }}
         scene_data: {}
     
@@ -950,6 +958,8 @@ load_scene:
   variables:
     scene_clean: "{{ scene_name | replace(' ', '_') | lower }}"
     sensor_entity: "sensor.scene_{{ scene_clean }}"
+    # Initialize list to track which shades have been commanded
+    commanded_shades: []
   fields:
     scene_name:
       name: Scene Name
@@ -1058,7 +1068,29 @@ load_scene:
     # Process only covers that are in the scene data
     - variables:
         cover_entities_in_scene: "{{ scene_data.keys() | select('match', '^cover\\.') | list }}"
-        filtered_cover_entities: "{{ cover_entities_in_scene }}"
+        # Filter out known shade groups
+        shade_groups: ['cover.all_day_shades', 'cover.all_night_shades', 'cover.cockpit_night_shades', 
+                       'cover.cockpit_day_shades', 'cover.living_night_shades', 'cover.ds_so_day_shades',
+                       'cover.ds_so_night_shades']
+        # Only process individual shades, not groups
+        filtered_cover_entities: >-
+          {% set individual_shades = [] %}
+          {% for entity in cover_entities_in_scene %}
+            {% if entity not in shade_groups %}
+              {% set _ = individual_shades.append(entity) %}
+            {% endif %}
+          {% endfor %}
+          {{ individual_shades }}
+    
+    # Log filtering results
+    - service: system_log.write
+      data:
+        message: >
+          LOAD SCENE - Cover Filtering:
+          Total covers in scene: {{ cover_entities_in_scene | length }}
+          Individual shades to control: {{ filtered_cover_entities | length }}
+          Excluded groups: {{ cover_entities_in_scene | select('in', shade_groups) | list }}
+        level: info
     
     - repeat:
         for_each: "{{ filtered_cover_entities }}"
@@ -1066,6 +1098,14 @@ load_scene:
           - variables:
               entity_id: "{{ repeat.item }}"
               entity_state: "{{ scene_data[entity_id] }}"
+          
+          # Check if this shade has already been commanded
+          - condition: template
+            value_template: "{{ entity_id not in commanded_shades }}"
+          
+          # Add to commanded shades list
+          - variables:
+              commanded_shades: "{{ commanded_shades + [entity_id] }}"
           
           # Apply the cover state
           - choose:
