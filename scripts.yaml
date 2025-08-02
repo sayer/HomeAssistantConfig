@@ -819,42 +819,14 @@ save_scene:
         all_cover_entities: >-
           {% set all_covers = states.cover | map(attribute='entity_id') | list %}
           {{ all_covers }}
-        # Detect cover groups more thoroughly
-        cover_groups: >-
-          {% set groups = [] %}
-          {% for entity in states.cover %}
-            {% set attrs = entity.attributes %}
-            {# Check multiple indicators of a group #}
-            {% if attrs.entity_id is defined 
-               or attrs.position_template is defined
-               or attrs.open_cover is defined and attrs.open_cover.service is defined
-               or attrs.close_cover is defined and attrs.close_cover.service is defined
-               or (attrs.friendly_name is defined and ('all' in attrs.friendly_name.lower() or 'group' in attrs.friendly_name.lower()))
-               or 'shades' in entity.entity_id %}
-              {% set groups = groups + [entity.entity_id] %}
-            {% endif %}
-          {% endfor %}
-          {{ groups | unique | list }}
-        # Log what we're detecting as groups
-        detected_groups_debug: >-
-          {% set debug_info = [] %}
-          {% for entity in states.cover %}
-            {% set attrs = entity.attributes %}
-            {% if attrs.entity_id is defined 
-               or attrs.position_template is defined
-               or attrs.open_cover is defined and attrs.open_cover.service is defined
-               or attrs.close_cover is defined and attrs.close_cover.service is defined
-               or (attrs.friendly_name is defined and ('all' in attrs.friendly_name.lower() or 'group' in attrs.friendly_name.lower()))
-               or 'shades' in entity.entity_id %}
-              {% set debug_info = debug_info + [entity.entity_id + ' (group detected)'] %}
-            {% endif %}
-          {% endfor %}
-          {{ debug_info }}
+        # Filter out any cover that contains 'shades' or looks like a group
         cover_entities: >-
-          {% set groups = cover_groups %}
           {{ states.cover 
+             | rejectattr('entity_id', 'search', 'shades')
+             | rejectattr('entity_id', 'search', 'all_')
+             | rejectattr('attributes.entity_id', 'defined')
+             | rejectattr('attributes.position_template', 'defined')
              | map(attribute='entity_id') 
-             | reject('in', groups) 
              | list }}
         scene_data: {}
     
@@ -864,14 +836,10 @@ save_scene:
         message: >
           SAVE SCENE DEBUG - Cover Filtering:
           Total cover entities: {{ all_cover_entities | length }}
-          Cover groups (excluded): {{ cover_groups | length }}
           Real covers (included): {{ cover_entities | length }}
           
-          Detected groups: {{ detected_groups_debug }}
-          
           All covers: {{ all_cover_entities }}
-          Cover groups: {{ cover_groups }}
-          Real covers: {{ cover_entities }}
+          Real covers (no groups): {{ cover_entities }}
         level: info
     
     # Process all lights
@@ -1087,29 +1055,12 @@ load_scene:
     # Process only covers that are in the scene data
     - variables:
         cover_entities_in_scene: "{{ scene_data.keys() | select('match', '^cover\\.') | list }}"
-        # Detect cover groups more thoroughly - check saved entities against current state
-        shade_groups: >-
-          {% set groups = [] %}
-          {% for entity_id in cover_entities_in_scene %}
-            {% set entity = states.cover[entity_id.split('.')[1]] if states.cover[entity_id.split('.')[1]] is defined else none %}
-            {% if entity %}
-              {% set attrs = entity.attributes %}
-              {# Check multiple indicators of a group #}
-              {% if attrs.entity_id is defined 
-                 or attrs.position_template is defined
-                 or attrs.open_cover is defined and attrs.open_cover.service is defined
-                 or attrs.close_cover is defined and attrs.close_cover.service is defined
-                 or (attrs.friendly_name is defined and ('all' in attrs.friendly_name.lower() or 'group' in attrs.friendly_name.lower()))
-                 or 'shades' in entity_id %}
-                {% set groups = groups + [entity_id] %}
-              {% endif %}
-            {% endif %}
-          {% endfor %}
-          {{ groups | unique | list }}
-        # Only process individual shades, not groups
+        # Filter out any entity containing 'shades' or 'all_' - these are groups
         filtered_cover_entities: >-
-          {% set groups = shade_groups %}
-          {{ cover_entities_in_scene | reject('in', groups) | list }}
+          {{ cover_entities_in_scene 
+             | reject('search', 'shades')
+             | reject('search', 'all_')
+             | list }}
     
     # Log filtering results
     - service: system_log.write
@@ -1118,7 +1069,7 @@ load_scene:
           LOAD SCENE - Cover Filtering:
           Total covers in scene: {{ cover_entities_in_scene | length }}
           Individual shades to control: {{ filtered_cover_entities | length }}
-          Excluded groups: {{ cover_entities_in_scene | select('in', shade_groups) | list }}
+          Excluded groups: {{ cover_entities_in_scene | select('search', 'shades') | list + cover_entities_in_scene | select('search', 'all_') | list }}
         level: info
     
     - repeat:
