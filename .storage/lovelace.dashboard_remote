@@ -3206,6 +3206,1210 @@
               ]
             }
           ]
+        },
+        {
+          "title": "Automation",
+          "path": "automation",
+          "icon": "mdi:home-automation",
+          "background": "center / cover no-repeat url(\"/local/Background.png\")",
+          "badges": [],
+          "type": "masonry",
+          "cards": [
+            {
+              "type": "entities",
+              "title": "Scene Schedule Overview",
+              "entities": [
+                {
+                  "entity": "input_boolean.scene_slot_1_schedule_enabled",
+                  "name": "Slot 01"
+                },
+                {
+                  "entity": "input_boolean.scene_slot_2_schedule_enabled",
+                  "name": "Slot 02"
+                },
+                {
+                  "entity": "input_boolean.scene_slot_3_schedule_enabled",
+                  "name": "Slot 03"
+                },
+                {
+                  "entity": "input_boolean.scene_slot_4_schedule_enabled",
+                  "name": "Slot 04"
+                },
+                {
+                  "entity": "input_boolean.scene_slot_5_schedule_enabled",
+                  "name": "Slot 05"
+                },
+                {
+                  "entity": "input_boolean.scene_slot_6_schedule_enabled",
+                  "name": "Slot 06"
+                },
+                {
+                  "entity": "input_boolean.scene_slot_7_schedule_enabled",
+                  "name": "Slot 07"
+                },
+                {
+                  "entity": "input_boolean.scene_slot_8_schedule_enabled",
+                  "name": "Slot 08"
+                },
+                {
+                  "entity": "input_boolean.scene_slot_9_schedule_enabled",
+                  "name": "Slot 09"
+                },
+                {
+                  "entity": "input_boolean.scene_slot_10_schedule_enabled",
+                  "name": "Slot 10"
+                },
+                {
+                  "entity": "input_boolean.scene_slot_11_schedule_enabled",
+                  "name": "Slot 11"
+                },
+                {
+                  "entity": "input_boolean.scene_slot_12_schedule_enabled",
+                  "name": "Slot 12"
+                }
+              ]
+            },
+            {
+              "type": "vertical-stack",
+              "cards": [
+                {
+                  "type": "entities",
+                  "title": "Scene Slot 01",
+                  "entities": [
+                    {
+                      "entity": "input_text.scene_slot_1_name",
+                      "name": "Name"
+                    },
+                    {
+                      "entity": "input_boolean.scene_slot_1_schedule_enabled",
+                      "name": "Schedule Enabled"
+                    },
+                    {
+                      "entity": "input_select.scene_slot_1_schedule_type",
+                      "name": "Schedule Type"
+                    },
+                    {
+                      "type": "conditional",
+                      "conditions": [
+                        {
+                          "entity": "input_select.scene_slot_1_schedule_type",
+                          "state": "time"
+                        }
+                      ],
+                      "row": {
+                        "entity": "input_datetime.scene_slot_1_time",
+                        "name": "Run Time"
+                      }
+                    },
+                    {
+                      "type": "conditional",
+                      "conditions": [
+                        {
+                          "entity": "input_select.scene_slot_1_schedule_type",
+                          "state": "sunrise"
+                        }
+                      ],
+                      "row": {
+                        "entity": "input_number.scene_slot_1_offset_minutes",
+                        "name": "Offset (min)"
+                      }
+                    },
+                    {
+                      "type": "conditional",
+                      "conditions": [
+                        {
+                          "entity": "input_select.scene_slot_1_schedule_type",
+                          "state": "sunset"
+                        }
+                      ],
+                      "row": {
+                        "entity": "input_number.scene_slot_1_offset_minutes",
+                        "name": "Offset (min)"
+                      }
+                    },
+                    {
+                      "entity": "sensor.scene_slot_1",
+                      "name": "Stored Payload"
+                    }
+                  ]
+                },
+                {
+                  "type": "horizontal-stack",
+                  "cards": [
+                    {
+                      "type": "button",
+                      "name": "Save",
+                      "icon": "mdi:content-save-outline",
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "script.save_scene",
+                        "data": {
+                          "slot_number": 1
+                        }
+                      }
+                    },
+                    {
+                      "type": "button",
+                      "name": "Load",
+                      "icon": "mdi:play-circle-outline",
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "script.load_scene",
+                        "data": {
+                          "slot_number": 1
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "vertical-stack",
+              "cards": [
+                {
+                  "type": "entities",
+                  "title": "Scene Slot 02",
+                  "entities": [
+                    {
+                      "entity": "input_text.scene_slot_2_name",
+                      "name": "Name"
+                    },
+                    {
+                      "entity": "input_boolean.scene_slot_2_schedule_enabled",
+                      "name": "Schedule Enabled"
+                    },
+                    {
+                      "entity": "input_select.scene_slot_2_schedule_type",
+                      "name": "Schedule Type"
+                    },
+                    {
+                      "type": "conditional",
+                      "conditions": [
+                        {
+                          "entity": "input_select.scene_slot_2_schedule_type",
+                          "state": "time"
+                        }
+                      ],
+                      "row": {
+                        "entity": "input_datetime.scene_slot_2_time",
+                        "name": "Run Time"
+                      }
+                    },
+                    {
+                      "type": "conditional",
+                      "conditions": [
+                        {
+                          "entity": "input_select.scene_slot_2_schedule_type",
+                          "state": "sunrise"
+                        }
+                      ],
+                      "row": {
+                        "entity": "input_number.scene_slot_2_offset_minutes",
+                        "name": "Offset (min)"
+                      }
+                    },
+                    {
+                      "type": "conditional",
+                      "conditions": [
+                        {
+                          "entity": "input_select.scene_slot_2_schedule_type",
+                          "state": "sunset"
+                        }
+                      ],
+                      "row": {
+                        "entity": "input_number.scene_slot_2_offset_minutes",
+                        "name": "Offset (min)"
+                      }
+                    },
+                    {
+                      "entity": "sensor.scene_slot_2",
+                      "name": "Stored Payload"
+                    }
+                  ]
+                },
+                {
+                  "type": "horizontal-stack",
+                  "cards": [
+                    {
+                      "type": "button",
+                      "name": "Save",
+                      "icon": "mdi:content-save-outline",
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "script.save_scene",
+                        "data": {
+                          "slot_number": 2
+                        }
+                      }
+                    },
+                    {
+                      "type": "button",
+                      "name": "Load",
+                      "icon": "mdi:play-circle-outline",
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "script.load_scene",
+                        "data": {
+                          "slot_number": 2
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "vertical-stack",
+              "cards": [
+                {
+                  "type": "entities",
+                  "title": "Scene Slot 03",
+                  "entities": [
+                    {
+                      "entity": "input_text.scene_slot_3_name",
+                      "name": "Name"
+                    },
+                    {
+                      "entity": "input_boolean.scene_slot_3_schedule_enabled",
+                      "name": "Schedule Enabled"
+                    },
+                    {
+                      "entity": "input_select.scene_slot_3_schedule_type",
+                      "name": "Schedule Type"
+                    },
+                    {
+                      "type": "conditional",
+                      "conditions": [
+                        {
+                          "entity": "input_select.scene_slot_3_schedule_type",
+                          "state": "time"
+                        }
+                      ],
+                      "row": {
+                        "entity": "input_datetime.scene_slot_3_time",
+                        "name": "Run Time"
+                      }
+                    },
+                    {
+                      "type": "conditional",
+                      "conditions": [
+                        {
+                          "entity": "input_select.scene_slot_3_schedule_type",
+                          "state": "sunrise"
+                        }
+                      ],
+                      "row": {
+                        "entity": "input_number.scene_slot_3_offset_minutes",
+                        "name": "Offset (min)"
+                      }
+                    },
+                    {
+                      "type": "conditional",
+                      "conditions": [
+                        {
+                          "entity": "input_select.scene_slot_3_schedule_type",
+                          "state": "sunset"
+                        }
+                      ],
+                      "row": {
+                        "entity": "input_number.scene_slot_3_offset_minutes",
+                        "name": "Offset (min)"
+                      }
+                    },
+                    {
+                      "entity": "sensor.scene_slot_3",
+                      "name": "Stored Payload"
+                    }
+                  ]
+                },
+                {
+                  "type": "horizontal-stack",
+                  "cards": [
+                    {
+                      "type": "button",
+                      "name": "Save",
+                      "icon": "mdi:content-save-outline",
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "script.save_scene",
+                        "data": {
+                          "slot_number": 3
+                        }
+                      }
+                    },
+                    {
+                      "type": "button",
+                      "name": "Load",
+                      "icon": "mdi:play-circle-outline",
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "script.load_scene",
+                        "data": {
+                          "slot_number": 3
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "vertical-stack",
+              "cards": [
+                {
+                  "type": "entities",
+                  "title": "Scene Slot 04",
+                  "entities": [
+                    {
+                      "entity": "input_text.scene_slot_4_name",
+                      "name": "Name"
+                    },
+                    {
+                      "entity": "input_boolean.scene_slot_4_schedule_enabled",
+                      "name": "Schedule Enabled"
+                    },
+                    {
+                      "entity": "input_select.scene_slot_4_schedule_type",
+                      "name": "Schedule Type"
+                    },
+                    {
+                      "type": "conditional",
+                      "conditions": [
+                        {
+                          "entity": "input_select.scene_slot_4_schedule_type",
+                          "state": "time"
+                        }
+                      ],
+                      "row": {
+                        "entity": "input_datetime.scene_slot_4_time",
+                        "name": "Run Time"
+                      }
+                    },
+                    {
+                      "type": "conditional",
+                      "conditions": [
+                        {
+                          "entity": "input_select.scene_slot_4_schedule_type",
+                          "state": "sunrise"
+                        }
+                      ],
+                      "row": {
+                        "entity": "input_number.scene_slot_4_offset_minutes",
+                        "name": "Offset (min)"
+                      }
+                    },
+                    {
+                      "type": "conditional",
+                      "conditions": [
+                        {
+                          "entity": "input_select.scene_slot_4_schedule_type",
+                          "state": "sunset"
+                        }
+                      ],
+                      "row": {
+                        "entity": "input_number.scene_slot_4_offset_minutes",
+                        "name": "Offset (min)"
+                      }
+                    },
+                    {
+                      "entity": "sensor.scene_slot_4",
+                      "name": "Stored Payload"
+                    }
+                  ]
+                },
+                {
+                  "type": "horizontal-stack",
+                  "cards": [
+                    {
+                      "type": "button",
+                      "name": "Save",
+                      "icon": "mdi:content-save-outline",
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "script.save_scene",
+                        "data": {
+                          "slot_number": 4
+                        }
+                      }
+                    },
+                    {
+                      "type": "button",
+                      "name": "Load",
+                      "icon": "mdi:play-circle-outline",
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "script.load_scene",
+                        "data": {
+                          "slot_number": 4
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "vertical-stack",
+              "cards": [
+                {
+                  "type": "entities",
+                  "title": "Scene Slot 05",
+                  "entities": [
+                    {
+                      "entity": "input_text.scene_slot_5_name",
+                      "name": "Name"
+                    },
+                    {
+                      "entity": "input_boolean.scene_slot_5_schedule_enabled",
+                      "name": "Schedule Enabled"
+                    },
+                    {
+                      "entity": "input_select.scene_slot_5_schedule_type",
+                      "name": "Schedule Type"
+                    },
+                    {
+                      "type": "conditional",
+                      "conditions": [
+                        {
+                          "entity": "input_select.scene_slot_5_schedule_type",
+                          "state": "time"
+                        }
+                      ],
+                      "row": {
+                        "entity": "input_datetime.scene_slot_5_time",
+                        "name": "Run Time"
+                      }
+                    },
+                    {
+                      "type": "conditional",
+                      "conditions": [
+                        {
+                          "entity": "input_select.scene_slot_5_schedule_type",
+                          "state": "sunrise"
+                        }
+                      ],
+                      "row": {
+                        "entity": "input_number.scene_slot_5_offset_minutes",
+                        "name": "Offset (min)"
+                      }
+                    },
+                    {
+                      "type": "conditional",
+                      "conditions": [
+                        {
+                          "entity": "input_select.scene_slot_5_schedule_type",
+                          "state": "sunset"
+                        }
+                      ],
+                      "row": {
+                        "entity": "input_number.scene_slot_5_offset_minutes",
+                        "name": "Offset (min)"
+                      }
+                    },
+                    {
+                      "entity": "sensor.scene_slot_5",
+                      "name": "Stored Payload"
+                    }
+                  ]
+                },
+                {
+                  "type": "horizontal-stack",
+                  "cards": [
+                    {
+                      "type": "button",
+                      "name": "Save",
+                      "icon": "mdi:content-save-outline",
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "script.save_scene",
+                        "data": {
+                          "slot_number": 5
+                        }
+                      }
+                    },
+                    {
+                      "type": "button",
+                      "name": "Load",
+                      "icon": "mdi:play-circle-outline",
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "script.load_scene",
+                        "data": {
+                          "slot_number": 5
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "vertical-stack",
+              "cards": [
+                {
+                  "type": "entities",
+                  "title": "Scene Slot 06",
+                  "entities": [
+                    {
+                      "entity": "input_text.scene_slot_6_name",
+                      "name": "Name"
+                    },
+                    {
+                      "entity": "input_boolean.scene_slot_6_schedule_enabled",
+                      "name": "Schedule Enabled"
+                    },
+                    {
+                      "entity": "input_select.scene_slot_6_schedule_type",
+                      "name": "Schedule Type"
+                    },
+                    {
+                      "type": "conditional",
+                      "conditions": [
+                        {
+                          "entity": "input_select.scene_slot_6_schedule_type",
+                          "state": "time"
+                        }
+                      ],
+                      "row": {
+                        "entity": "input_datetime.scene_slot_6_time",
+                        "name": "Run Time"
+                      }
+                    },
+                    {
+                      "type": "conditional",
+                      "conditions": [
+                        {
+                          "entity": "input_select.scene_slot_6_schedule_type",
+                          "state": "sunrise"
+                        }
+                      ],
+                      "row": {
+                        "entity": "input_number.scene_slot_6_offset_minutes",
+                        "name": "Offset (min)"
+                      }
+                    },
+                    {
+                      "type": "conditional",
+                      "conditions": [
+                        {
+                          "entity": "input_select.scene_slot_6_schedule_type",
+                          "state": "sunset"
+                        }
+                      ],
+                      "row": {
+                        "entity": "input_number.scene_slot_6_offset_minutes",
+                        "name": "Offset (min)"
+                      }
+                    },
+                    {
+                      "entity": "sensor.scene_slot_6",
+                      "name": "Stored Payload"
+                    }
+                  ]
+                },
+                {
+                  "type": "horizontal-stack",
+                  "cards": [
+                    {
+                      "type": "button",
+                      "name": "Save",
+                      "icon": "mdi:content-save-outline",
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "script.save_scene",
+                        "data": {
+                          "slot_number": 6
+                        }
+                      }
+                    },
+                    {
+                      "type": "button",
+                      "name": "Load",
+                      "icon": "mdi:play-circle-outline",
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "script.load_scene",
+                        "data": {
+                          "slot_number": 6
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "vertical-stack",
+              "cards": [
+                {
+                  "type": "entities",
+                  "title": "Scene Slot 07",
+                  "entities": [
+                    {
+                      "entity": "input_text.scene_slot_7_name",
+                      "name": "Name"
+                    },
+                    {
+                      "entity": "input_boolean.scene_slot_7_schedule_enabled",
+                      "name": "Schedule Enabled"
+                    },
+                    {
+                      "entity": "input_select.scene_slot_7_schedule_type",
+                      "name": "Schedule Type"
+                    },
+                    {
+                      "type": "conditional",
+                      "conditions": [
+                        {
+                          "entity": "input_select.scene_slot_7_schedule_type",
+                          "state": "time"
+                        }
+                      ],
+                      "row": {
+                        "entity": "input_datetime.scene_slot_7_time",
+                        "name": "Run Time"
+                      }
+                    },
+                    {
+                      "type": "conditional",
+                      "conditions": [
+                        {
+                          "entity": "input_select.scene_slot_7_schedule_type",
+                          "state": "sunrise"
+                        }
+                      ],
+                      "row": {
+                        "entity": "input_number.scene_slot_7_offset_minutes",
+                        "name": "Offset (min)"
+                      }
+                    },
+                    {
+                      "type": "conditional",
+                      "conditions": [
+                        {
+                          "entity": "input_select.scene_slot_7_schedule_type",
+                          "state": "sunset"
+                        }
+                      ],
+                      "row": {
+                        "entity": "input_number.scene_slot_7_offset_minutes",
+                        "name": "Offset (min)"
+                      }
+                    },
+                    {
+                      "entity": "sensor.scene_slot_7",
+                      "name": "Stored Payload"
+                    }
+                  ]
+                },
+                {
+                  "type": "horizontal-stack",
+                  "cards": [
+                    {
+                      "type": "button",
+                      "name": "Save",
+                      "icon": "mdi:content-save-outline",
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "script.save_scene",
+                        "data": {
+                          "slot_number": 7
+                        }
+                      }
+                    },
+                    {
+                      "type": "button",
+                      "name": "Load",
+                      "icon": "mdi:play-circle-outline",
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "script.load_scene",
+                        "data": {
+                          "slot_number": 7
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "vertical-stack",
+              "cards": [
+                {
+                  "type": "entities",
+                  "title": "Scene Slot 08",
+                  "entities": [
+                    {
+                      "entity": "input_text.scene_slot_8_name",
+                      "name": "Name"
+                    },
+                    {
+                      "entity": "input_boolean.scene_slot_8_schedule_enabled",
+                      "name": "Schedule Enabled"
+                    },
+                    {
+                      "entity": "input_select.scene_slot_8_schedule_type",
+                      "name": "Schedule Type"
+                    },
+                    {
+                      "type": "conditional",
+                      "conditions": [
+                        {
+                          "entity": "input_select.scene_slot_8_schedule_type",
+                          "state": "time"
+                        }
+                      ],
+                      "row": {
+                        "entity": "input_datetime.scene_slot_8_time",
+                        "name": "Run Time"
+                      }
+                    },
+                    {
+                      "type": "conditional",
+                      "conditions": [
+                        {
+                          "entity": "input_select.scene_slot_8_schedule_type",
+                          "state": "sunrise"
+                        }
+                      ],
+                      "row": {
+                        "entity": "input_number.scene_slot_8_offset_minutes",
+                        "name": "Offset (min)"
+                      }
+                    },
+                    {
+                      "type": "conditional",
+                      "conditions": [
+                        {
+                          "entity": "input_select.scene_slot_8_schedule_type",
+                          "state": "sunset"
+                        }
+                      ],
+                      "row": {
+                        "entity": "input_number.scene_slot_8_offset_minutes",
+                        "name": "Offset (min)"
+                      }
+                    },
+                    {
+                      "entity": "sensor.scene_slot_8",
+                      "name": "Stored Payload"
+                    }
+                  ]
+                },
+                {
+                  "type": "horizontal-stack",
+                  "cards": [
+                    {
+                      "type": "button",
+                      "name": "Save",
+                      "icon": "mdi:content-save-outline",
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "script.save_scene",
+                        "data": {
+                          "slot_number": 8
+                        }
+                      }
+                    },
+                    {
+                      "type": "button",
+                      "name": "Load",
+                      "icon": "mdi:play-circle-outline",
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "script.load_scene",
+                        "data": {
+                          "slot_number": 8
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "vertical-stack",
+              "cards": [
+                {
+                  "type": "entities",
+                  "title": "Scene Slot 09",
+                  "entities": [
+                    {
+                      "entity": "input_text.scene_slot_9_name",
+                      "name": "Name"
+                    },
+                    {
+                      "entity": "input_boolean.scene_slot_9_schedule_enabled",
+                      "name": "Schedule Enabled"
+                    },
+                    {
+                      "entity": "input_select.scene_slot_9_schedule_type",
+                      "name": "Schedule Type"
+                    },
+                    {
+                      "type": "conditional",
+                      "conditions": [
+                        {
+                          "entity": "input_select.scene_slot_9_schedule_type",
+                          "state": "time"
+                        }
+                      ],
+                      "row": {
+                        "entity": "input_datetime.scene_slot_9_time",
+                        "name": "Run Time"
+                      }
+                    },
+                    {
+                      "type": "conditional",
+                      "conditions": [
+                        {
+                          "entity": "input_select.scene_slot_9_schedule_type",
+                          "state": "sunrise"
+                        }
+                      ],
+                      "row": {
+                        "entity": "input_number.scene_slot_9_offset_minutes",
+                        "name": "Offset (min)"
+                      }
+                    },
+                    {
+                      "type": "conditional",
+                      "conditions": [
+                        {
+                          "entity": "input_select.scene_slot_9_schedule_type",
+                          "state": "sunset"
+                        }
+                      ],
+                      "row": {
+                        "entity": "input_number.scene_slot_9_offset_minutes",
+                        "name": "Offset (min)"
+                      }
+                    },
+                    {
+                      "entity": "sensor.scene_slot_9",
+                      "name": "Stored Payload"
+                    }
+                  ]
+                },
+                {
+                  "type": "horizontal-stack",
+                  "cards": [
+                    {
+                      "type": "button",
+                      "name": "Save",
+                      "icon": "mdi:content-save-outline",
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "script.save_scene",
+                        "data": {
+                          "slot_number": 9
+                        }
+                      }
+                    },
+                    {
+                      "type": "button",
+                      "name": "Load",
+                      "icon": "mdi:play-circle-outline",
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "script.load_scene",
+                        "data": {
+                          "slot_number": 9
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "vertical-stack",
+              "cards": [
+                {
+                  "type": "entities",
+                  "title": "Scene Slot 10",
+                  "entities": [
+                    {
+                      "entity": "input_text.scene_slot_10_name",
+                      "name": "Name"
+                    },
+                    {
+                      "entity": "input_boolean.scene_slot_10_schedule_enabled",
+                      "name": "Schedule Enabled"
+                    },
+                    {
+                      "entity": "input_select.scene_slot_10_schedule_type",
+                      "name": "Schedule Type"
+                    },
+                    {
+                      "type": "conditional",
+                      "conditions": [
+                        {
+                          "entity": "input_select.scene_slot_10_schedule_type",
+                          "state": "time"
+                        }
+                      ],
+                      "row": {
+                        "entity": "input_datetime.scene_slot_10_time",
+                        "name": "Run Time"
+                      }
+                    },
+                    {
+                      "type": "conditional",
+                      "conditions": [
+                        {
+                          "entity": "input_select.scene_slot_10_schedule_type",
+                          "state": "sunrise"
+                        }
+                      ],
+                      "row": {
+                        "entity": "input_number.scene_slot_10_offset_minutes",
+                        "name": "Offset (min)"
+                      }
+                    },
+                    {
+                      "type": "conditional",
+                      "conditions": [
+                        {
+                          "entity": "input_select.scene_slot_10_schedule_type",
+                          "state": "sunset"
+                        }
+                      ],
+                      "row": {
+                        "entity": "input_number.scene_slot_10_offset_minutes",
+                        "name": "Offset (min)"
+                      }
+                    },
+                    {
+                      "entity": "sensor.scene_slot_10",
+                      "name": "Stored Payload"
+                    }
+                  ]
+                },
+                {
+                  "type": "horizontal-stack",
+                  "cards": [
+                    {
+                      "type": "button",
+                      "name": "Save",
+                      "icon": "mdi:content-save-outline",
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "script.save_scene",
+                        "data": {
+                          "slot_number": 10
+                        }
+                      }
+                    },
+                    {
+                      "type": "button",
+                      "name": "Load",
+                      "icon": "mdi:play-circle-outline",
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "script.load_scene",
+                        "data": {
+                          "slot_number": 10
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "vertical-stack",
+              "cards": [
+                {
+                  "type": "entities",
+                  "title": "Scene Slot 11",
+                  "entities": [
+                    {
+                      "entity": "input_text.scene_slot_11_name",
+                      "name": "Name"
+                    },
+                    {
+                      "entity": "input_boolean.scene_slot_11_schedule_enabled",
+                      "name": "Schedule Enabled"
+                    },
+                    {
+                      "entity": "input_select.scene_slot_11_schedule_type",
+                      "name": "Schedule Type"
+                    },
+                    {
+                      "type": "conditional",
+                      "conditions": [
+                        {
+                          "entity": "input_select.scene_slot_11_schedule_type",
+                          "state": "time"
+                        }
+                      ],
+                      "row": {
+                        "entity": "input_datetime.scene_slot_11_time",
+                        "name": "Run Time"
+                      }
+                    },
+                    {
+                      "type": "conditional",
+                      "conditions": [
+                        {
+                          "entity": "input_select.scene_slot_11_schedule_type",
+                          "state": "sunrise"
+                        }
+                      ],
+                      "row": {
+                        "entity": "input_number.scene_slot_11_offset_minutes",
+                        "name": "Offset (min)"
+                      }
+                    },
+                    {
+                      "type": "conditional",
+                      "conditions": [
+                        {
+                          "entity": "input_select.scene_slot_11_schedule_type",
+                          "state": "sunset"
+                        }
+                      ],
+                      "row": {
+                        "entity": "input_number.scene_slot_11_offset_minutes",
+                        "name": "Offset (min)"
+                      }
+                    },
+                    {
+                      "entity": "sensor.scene_slot_11",
+                      "name": "Stored Payload"
+                    }
+                  ]
+                },
+                {
+                  "type": "horizontal-stack",
+                  "cards": [
+                    {
+                      "type": "button",
+                      "name": "Save",
+                      "icon": "mdi:content-save-outline",
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "script.save_scene",
+                        "data": {
+                          "slot_number": 11
+                        }
+                      }
+                    },
+                    {
+                      "type": "button",
+                      "name": "Load",
+                      "icon": "mdi:play-circle-outline",
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "script.load_scene",
+                        "data": {
+                          "slot_number": 11
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "vertical-stack",
+              "cards": [
+                {
+                  "type": "entities",
+                  "title": "Scene Slot 12",
+                  "entities": [
+                    {
+                      "entity": "input_text.scene_slot_12_name",
+                      "name": "Name"
+                    },
+                    {
+                      "entity": "input_boolean.scene_slot_12_schedule_enabled",
+                      "name": "Schedule Enabled"
+                    },
+                    {
+                      "entity": "input_select.scene_slot_12_schedule_type",
+                      "name": "Schedule Type"
+                    },
+                    {
+                      "type": "conditional",
+                      "conditions": [
+                        {
+                          "entity": "input_select.scene_slot_12_schedule_type",
+                          "state": "time"
+                        }
+                      ],
+                      "row": {
+                        "entity": "input_datetime.scene_slot_12_time",
+                        "name": "Run Time"
+                      }
+                    },
+                    {
+                      "type": "conditional",
+                      "conditions": [
+                        {
+                          "entity": "input_select.scene_slot_12_schedule_type",
+                          "state": "sunrise"
+                        }
+                      ],
+                      "row": {
+                        "entity": "input_number.scene_slot_12_offset_minutes",
+                        "name": "Offset (min)"
+                      }
+                    },
+                    {
+                      "type": "conditional",
+                      "conditions": [
+                        {
+                          "entity": "input_select.scene_slot_12_schedule_type",
+                          "state": "sunset"
+                        }
+                      ],
+                      "row": {
+                        "entity": "input_number.scene_slot_12_offset_minutes",
+                        "name": "Offset (min)"
+                      }
+                    },
+                    {
+                      "entity": "sensor.scene_slot_12",
+                      "name": "Stored Payload"
+                    }
+                  ]
+                },
+                {
+                  "type": "horizontal-stack",
+                  "cards": [
+                    {
+                      "type": "button",
+                      "name": "Save",
+                      "icon": "mdi:content-save-outline",
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "script.save_scene",
+                        "data": {
+                          "slot_number": 12
+                        }
+                      }
+                    },
+                    {
+                      "type": "button",
+                      "name": "Load",
+                      "icon": "mdi:play-circle-outline",
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "script.load_scene",
+                        "data": {
+                          "slot_number": 12
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
         }
       ],
       "title": "Master Dashboard"
