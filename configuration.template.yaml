@@ -95,6 +95,115 @@ input_number:
     unit_of_measurement: "minutes"
     icon: mdi:timer-outline
     initial: 5
+  # Scene schedule offsets (minutes)
+  scene_slot_1_offset_minutes:
+    name: "Scene 1 Offset"
+    min: -180
+    max: 180
+    step: 5
+    mode: slider
+    unit_of_measurement: "min"
+    icon: mdi:timeline-clock-outline
+    initial: 0
+  scene_slot_2_offset_minutes:
+    name: "Scene 2 Offset"
+    min: -180
+    max: 180
+    step: 5
+    mode: slider
+    unit_of_measurement: "min"
+    icon: mdi:timeline-clock-outline
+    initial: 0
+  scene_slot_3_offset_minutes:
+    name: "Scene 3 Offset"
+    min: -180
+    max: 180
+    step: 5
+    mode: slider
+    unit_of_measurement: "min"
+    icon: mdi:timeline-clock-outline
+    initial: 0
+  scene_slot_4_offset_minutes:
+    name: "Scene 4 Offset"
+    min: -180
+    max: 180
+    step: 5
+    mode: slider
+    unit_of_measurement: "min"
+    icon: mdi:timeline-clock-outline
+    initial: 0
+  scene_slot_5_offset_minutes:
+    name: "Scene 5 Offset"
+    min: -180
+    max: 180
+    step: 5
+    mode: slider
+    unit_of_measurement: "min"
+    icon: mdi:timeline-clock-outline
+    initial: 0
+  scene_slot_6_offset_minutes:
+    name: "Scene 6 Offset"
+    min: -180
+    max: 180
+    step: 5
+    mode: slider
+    unit_of_measurement: "min"
+    icon: mdi:timeline-clock-outline
+    initial: 0
+  scene_slot_7_offset_minutes:
+    name: "Scene 7 Offset"
+    min: -180
+    max: 180
+    step: 5
+    mode: slider
+    unit_of_measurement: "min"
+    icon: mdi:timeline-clock-outline
+    initial: 0
+  scene_slot_8_offset_minutes:
+    name: "Scene 8 Offset"
+    min: -180
+    max: 180
+    step: 5
+    mode: slider
+    unit_of_measurement: "min"
+    icon: mdi:timeline-clock-outline
+    initial: 0
+  scene_slot_9_offset_minutes:
+    name: "Scene 9 Offset"
+    min: -180
+    max: 180
+    step: 5
+    mode: slider
+    unit_of_measurement: "min"
+    icon: mdi:timeline-clock-outline
+    initial: 0
+  scene_slot_10_offset_minutes:
+    name: "Scene 10 Offset"
+    min: -180
+    max: 180
+    step: 5
+    mode: slider
+    unit_of_measurement: "min"
+    icon: mdi:timeline-clock-outline
+    initial: 0
+  scene_slot_11_offset_minutes:
+    name: "Scene 11 Offset"
+    min: -180
+    max: 180
+    step: 5
+    mode: slider
+    unit_of_measurement: "min"
+    icon: mdi:timeline-clock-outline
+    initial: 0
+  scene_slot_12_offset_minutes:
+    name: "Scene 12 Offset"
+    min: -180
+    max: 180
+    step: 5
+    mode: slider
+    unit_of_measurement: "min"
+    icon: mdi:timeline-clock-outline
+    initial: 0
 
 input_boolean:
   is_optimistic:
@@ -103,11 +212,85 @@ input_boolean:
   master_thermostat_heater:
     name: "Master Thermostat Heater"
     icon: mdi:thermostat
+  # Scene scheduling toggles
+  scene_slot_1_schedule_enabled:
+    name: "Scene 1 Schedule Enabled"
+    icon: mdi:clock-check-outline
+  scene_slot_2_schedule_enabled:
+    name: "Scene 2 Schedule Enabled"
+    icon: mdi:clock-check-outline
+  scene_slot_3_schedule_enabled:
+    name: "Scene 3 Schedule Enabled"
+    icon: mdi:clock-check-outline
+  scene_slot_4_schedule_enabled:
+    name: "Scene 4 Schedule Enabled"
+    icon: mdi:clock-check-outline
+  scene_slot_5_schedule_enabled:
+    name: "Scene 5 Schedule Enabled"
+    icon: mdi:clock-check-outline
+  scene_slot_6_schedule_enabled:
+    name: "Scene 6 Schedule Enabled"
+    icon: mdi:clock-check-outline
+  scene_slot_7_schedule_enabled:
+    name: "Scene 7 Schedule Enabled"
+    icon: mdi:clock-check-outline
+  scene_slot_8_schedule_enabled:
+    name: "Scene 8 Schedule Enabled"
+    icon: mdi:clock-check-outline
+  scene_slot_9_schedule_enabled:
+    name: "Scene 9 Schedule Enabled"
+    icon: mdi:clock-check-outline
+  scene_slot_10_schedule_enabled:
+    name: "Scene 10 Schedule Enabled"
+    icon: mdi:clock-check-outline
+  scene_slot_11_schedule_enabled:
+    name: "Scene 11 Schedule Enabled"
+    icon: mdi:clock-check-outline
+  scene_slot_12_schedule_enabled:
+    name: "Scene 12 Schedule Enabled"
+    icon: mdi:clock-check-outline
 
 
 input_text:
   owner_name:
     name: Owner Name
+  # Scene management
+  scene_slot_1_name:
+    name: "Scene 1 Name"
+    max: 64
+  scene_slot_2_name:
+    name: "Scene 2 Name"
+    max: 64
+  scene_slot_3_name:
+    name: "Scene 3 Name"
+    max: 64
+  scene_slot_4_name:
+    name: "Scene 4 Name"
+    max: 64
+  scene_slot_5_name:
+    name: "Scene 5 Name"
+    max: 64
+  scene_slot_6_name:
+    name: "Scene 6 Name"
+    max: 64
+  scene_slot_7_name:
+    name: "Scene 7 Name"
+    max: 64
+  scene_slot_8_name:
+    name: "Scene 8 Name"
+    max: 64
+  scene_slot_9_name:
+    name: "Scene 9 Name"
+    max: 64
+  scene_slot_10_name:
+    name: "Scene 10 Name"
+    max: 64
+  scene_slot_11_name:
+    name: "Scene 11 Name"
+    max: 64
+  scene_slot_12_name:
+    name: "Scene 12 Name"
+    max: 64
 
 input_select:
   timezone:
@@ -135,12 +318,170 @@ input_select:
       - "America/Halifax"
       - "America/St_Johns"
     initial: "America/New_York"
+  # Scene schedule types
+  scene_slot_1_schedule_type:
+    name: "Scene 1 Schedule Type"
+    options:
+      - time
+      - sunrise
+      - sunset
+    initial: time
+    icon: mdi:calendar-clock
+  scene_slot_2_schedule_type:
+    name: "Scene 2 Schedule Type"
+    options:
+      - time
+      - sunrise
+      - sunset
+    initial: time
+    icon: mdi:calendar-clock
+  scene_slot_3_schedule_type:
+    name: "Scene 3 Schedule Type"
+    options:
+      - time
+      - sunrise
+      - sunset
+    initial: time
+    icon: mdi:calendar-clock
+  scene_slot_4_schedule_type:
+    name: "Scene 4 Schedule Type"
+    options:
+      - time
+      - sunrise
+      - sunset
+    initial: time
+    icon: mdi:calendar-clock
+  scene_slot_5_schedule_type:
+    name: "Scene 5 Schedule Type"
+    options:
+      - time
+      - sunrise
+      - sunset
+    initial: time
+    icon: mdi:calendar-clock
+  scene_slot_6_schedule_type:
+    name: "Scene 6 Schedule Type"
+    options:
+      - time
+      - sunrise
+      - sunset
+    initial: time
+    icon: mdi:calendar-clock
+  scene_slot_7_schedule_type:
+    name: "Scene 7 Schedule Type"
+    options:
+      - time
+      - sunrise
+      - sunset
+    initial: time
+    icon: mdi:calendar-clock
+  scene_slot_8_schedule_type:
+    name: "Scene 8 Schedule Type"
+    options:
+      - time
+      - sunrise
+      - sunset
+    initial: time
+    icon: mdi:calendar-clock
+  scene_slot_9_schedule_type:
+    name: "Scene 9 Schedule Type"
+    options:
+      - time
+      - sunrise
+      - sunset
+    initial: time
+    icon: mdi:calendar-clock
+  scene_slot_10_schedule_type:
+    name: "Scene 10 Schedule Type"
+    options:
+      - time
+      - sunrise
+      - sunset
+    initial: time
+    icon: mdi:calendar-clock
+  scene_slot_11_schedule_type:
+    name: "Scene 11 Schedule Type"
+    options:
+      - time
+      - sunrise
+      - sunset
+    initial: time
+    icon: mdi:calendar-clock
+  scene_slot_12_schedule_type:
+    name: "Scene 12 Schedule Type"
+    options:
+      - time
+      - sunrise
+      - sunset
+    initial: time
+    icon: mdi:calendar-clock
 
 input_datetime:
   generator_run_start:
     name: Generator Run Start
     has_date: true
     has_time: true
+  # Scene schedule times
+  scene_slot_1_time:
+    name: "Scene 1 Time"
+    has_date: false
+    has_time: true
+    initial: '21:00:00'
+  scene_slot_2_time:
+    name: "Scene 2 Time"
+    has_date: false
+    has_time: true
+    initial: '21:00:00'
+  scene_slot_3_time:
+    name: "Scene 3 Time"
+    has_date: false
+    has_time: true
+    initial: '21:00:00'
+  scene_slot_4_time:
+    name: "Scene 4 Time"
+    has_date: false
+    has_time: true
+    initial: '21:00:00'
+  scene_slot_5_time:
+    name: "Scene 5 Time"
+    has_date: false
+    has_time: true
+    initial: '21:00:00'
+  scene_slot_6_time:
+    name: "Scene 6 Time"
+    has_date: false
+    has_time: true
+    initial: '21:00:00'
+  scene_slot_7_time:
+    name: "Scene 7 Time"
+    has_date: false
+    has_time: true
+    initial: '21:00:00'
+  scene_slot_8_time:
+    name: "Scene 8 Time"
+    has_date: false
+    has_time: true
+    initial: '21:00:00'
+  scene_slot_9_time:
+    name: "Scene 9 Time"
+    has_date: false
+    has_time: true
+    initial: '21:00:00'
+  scene_slot_10_time:
+    name: "Scene 10 Time"
+    has_date: false
+    has_time: true
+    initial: '21:00:00'
+  scene_slot_11_time:
+    name: "Scene 11 Time"
+    has_date: false
+    has_time: true
+    initial: '21:00:00'
+  scene_slot_12_time:
+    name: "Scene 12 Time"
+    has_date: false
+    has_time: true
+    initial: '21:00:00'
 
 sensor:
   - platform: rest
@@ -1710,20 +2051,65 @@ mqtt:
 
   sensor:
   # MQTT sensors for scene data storage using JSON attributes
-    - name: "Scene Scene 1"
+    - name: "Scene Slot 1"
       state_topic: "homeassistant/scenes/scene_1"
       value_template: "stored"
       json_attributes_topic: "homeassistant/scenes/scene_1"
       json_attributes_template: "{{ {'data': value | string} | to_json }}"
-    - name: "Scene Scene 2"
+    - name: "Scene Slot 2"
       state_topic: "homeassistant/scenes/scene_2"
       value_template: "stored"
       json_attributes_topic: "homeassistant/scenes/scene_2"
       json_attributes_template: "{{ {'data': value | string} | to_json }}"
-    - name: "Scene Scene 3"
+    - name: "Scene Slot 3"
       state_topic: "homeassistant/scenes/scene_3"
       value_template: "stored"
       json_attributes_topic: "homeassistant/scenes/scene_3"
+      json_attributes_template: "{{ {'data': value | string} | to_json }}"
+    - name: "Scene Slot 4"
+      state_topic: "homeassistant/scenes/scene_4"
+      value_template: "stored"
+      json_attributes_topic: "homeassistant/scenes/scene_4"
+      json_attributes_template: "{{ {'data': value | string} | to_json }}"
+    - name: "Scene Slot 5"
+      state_topic: "homeassistant/scenes/scene_5"
+      value_template: "stored"
+      json_attributes_topic: "homeassistant/scenes/scene_5"
+      json_attributes_template: "{{ {'data': value | string} | to_json }}"
+    - name: "Scene Slot 6"
+      state_topic: "homeassistant/scenes/scene_6"
+      value_template: "stored"
+      json_attributes_topic: "homeassistant/scenes/scene_6"
+      json_attributes_template: "{{ {'data': value | string} | to_json }}"
+    - name: "Scene Slot 7"
+      state_topic: "homeassistant/scenes/scene_7"
+      value_template: "stored"
+      json_attributes_topic: "homeassistant/scenes/scene_7"
+      json_attributes_template: "{{ {'data': value | string} | to_json }}"
+    - name: "Scene Slot 8"
+      state_topic: "homeassistant/scenes/scene_8"
+      value_template: "stored"
+      json_attributes_topic: "homeassistant/scenes/scene_8"
+      json_attributes_template: "{{ {'data': value | string} | to_json }}"
+    - name: "Scene Slot 9"
+      state_topic: "homeassistant/scenes/scene_9"
+      value_template: "stored"
+      json_attributes_topic: "homeassistant/scenes/scene_9"
+      json_attributes_template: "{{ {'data': value | string} | to_json }}"
+    - name: "Scene Slot 10"
+      state_topic: "homeassistant/scenes/scene_10"
+      value_template: "stored"
+      json_attributes_topic: "homeassistant/scenes/scene_10"
+      json_attributes_template: "{{ {'data': value | string} | to_json }}"
+    - name: "Scene Slot 11"
+      state_topic: "homeassistant/scenes/scene_11"
+      value_template: "stored"
+      json_attributes_topic: "homeassistant/scenes/scene_11"
+      json_attributes_template: "{{ {'data': value | string} | to_json }}"
+    - name: "Scene Slot 12"
+      state_topic: "homeassistant/scenes/scene_12"
+      value_template: "stored"
+      json_attributes_topic: "homeassistant/scenes/scene_12"
       json_attributes_template: "{{ {'data': value | string} | to_json }}"
 
 
