@@ -775,15 +775,60 @@ generator_start_with_verification:
 
 save_scene:
   alias: "Save Current Scene"
-  description: "Saves the current state of all lights and shades as a scene with the given name"
+  description: "Saves the current lights and shades state into a numbered scene slot"
   fields:
+    slot_number:
+      name: Scene Slot
+      description: Scene slot number to save (1-12)
+      required: true
+      selector:
+        number:
+          min: 1
+          max: 12
+          step: 1
     scene_name:
       name: Scene Name
-      description: Name to save this scene as
-      required: true
+      description: Friendly label stored with the scene (optional)
       selector:
         text:
   sequence:
+    - variables:
+        slot: "{{ slot_number | int }}"
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: "{{ not (1 <= slot <= 12) }}"
+          sequence:
+            - service: system_log.write
+              data:
+                message: >-
+                  SAVE SCENE - Invalid slot {{ slot_number }} requested. Valid range is 1-12.
+                level: warning
+            - service: notify.notify
+              data:
+                title: "Scene Save Failed"
+                message: "Scene slot {{ slot_number }} is invalid. Choose a value between 1 and 12."
+            - stop: "Invalid scene slot"
+    - variables:
+        helper_name_entity: "{{ 'input_text.scene_slot_' ~ slot ~ '_name' }}"
+        friendly_name: >-
+          {% set provided = scene_name | default('') | trim %}
+          {% set existing = states(helper_name_entity) | default('') | trim %}
+          {% if provided != '' %}
+            {{ provided }}
+          {% elif existing != '' %}
+            {{ existing }}
+          {% else %}
+            Scene Slot {{ slot }}
+          {% endif %}
+        mqtt_topic: "{{ 'homeassistant/scenes/scene_' ~ slot }}"
+        sensor_entity: "{{ 'sensor.scene_slot_' ~ slot }}"
+        slot_label: "{{ 'Scene Slot ' ~ slot }}"
+    - service: input_text.set_value
+      target:
+        entity_id: "{{ helper_name_entity }}"
+      data:
+        value: "{{ friendly_name }}"
     # Filter light entities - exclude groups (entities with entity_id attribute)
     - variables:
         all_light_entities: >-
@@ -868,7 +913,6 @@ save_scene:
     
     # Store the scene data using MQTT
     - variables:
-        mqtt_topic: "homeassistant/scenes/{{ scene_name | replace(' ', '_') | lower }}"
         # Create a simple string format: entity_id=value|entity_id=value|...
         simple_data: >-
           {% for entity_id, state in scene_data.items() %}{{ entity_id }}={{ state }}{% if not loop.last %}|{% endif %}{% endfor %}
@@ -878,7 +922,7 @@ save_scene:
       data:
         message: >
           SAVE SCENE - MQTT DATA:
-          Scene name: {{ scene_name }}
+          {{ slot_label }} friendly name: {{ friendly_name }}
           MQTT topic: {{ mqtt_topic }}
           Total entities in scene_data: {{ scene_data | length }}
           Light entities in scene_data: {{ scene_data.keys() | select('match', '^light\\.') | list | count }}
@@ -904,7 +948,6 @@ save_scene:
     
     # Verify the scene was saved by checking the corresponding sensor entity
     - variables:
-        sensor_entity: "sensor.scene_{{ scene_name | replace(' ', '_') | lower }}"
         saved_data: "{{ state_attr(sensor_entity, 'data') }}"
         save_successful: "{{ saved_data != none and saved_data is defined and saved_data | length > 0 }}"
     
@@ -913,7 +956,7 @@ save_scene:
       data:
         message: >
           SAVE SCENE VERIFICATION:
-          Scene name: {{ scene_name }}
+          {{ slot_label }} friendly name: {{ friendly_name }}
           Sensor entity: {{ sensor_entity }}
           Save successful: {{ save_successful }}
           Saved data length: {{ saved_data | length if saved_data is defined and saved_data != none else 0 }} characters
@@ -926,7 +969,7 @@ save_scene:
       data:
         message: >
           SAVE SCENE:
-          Scene name: {{ scene_name }}
+          {{ slot_label }} friendly name: {{ friendly_name }}
           Scene data length: {{ scene_data | length }} entities
           Light entities: {{ scene_data.keys() | select('match', '^light\\.') | list | count }}
           Cover entities: {{ scene_data.keys() | select('match', '^cover\\.') | list | count }}
@@ -937,30 +980,73 @@ save_scene:
       data:
         title: "Scene {{ 'Saved Successfully' if save_successful else 'Save Failed' }}"
         message: >
-          Scene '{{ scene_name }}' {{ 'has been saved with ' + (scene_data | length | string) + ' entities and verified in MQTT' if save_successful else 'failed to save to MQTT - check logs for details' }}
+          {{ slot_label }} ({{ friendly_name }}) {{ 'has been saved with ' + (scene_data | length | string) + ' entities and verified in MQTT' if save_successful else 'failed to save to MQTT - check logs for details' }}
 
 load_scene:
   alias: "Load Saved Scene"
-  description: "Loads a previously saved scene and applies it to all lights and shades"
+  description: "Loads a saved scene slot and applies it to all lights and shades"
   icon: mdi:palette
   mode: single
-  variables:
-    scene_clean: "{{ scene_name | replace(' ', '_') | lower }}"
-    sensor_entity: "sensor.scene_{{ scene_clean }}"
   fields:
-    scene_name:
-      name: Scene Name
-      description: Name of the scene to load
+    slot_number:
+      name: Scene Slot
+      description: Scene slot number to load (1-12)
       required: true
       selector:
-        text:
+        number:
+          min: 1
+          max: 12
+          step: 1
   sequence:
+    - variables:
+        slot: "{{ slot_number | int }}"
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: "{{ not (1 <= slot <= 12) }}"
+          sequence:
+            - service: system_log.write
+              data:
+                message: >-
+                  LOAD SCENE - Invalid slot {{ slot_number }} requested. Valid range is 1-12.
+                level: warning
+            - service: notify.notify
+              data:
+                title: "Scene Load Failed"
+                message: "Scene slot {{ slot_number }} is invalid. Choose a value between 1 and 12."
+            - stop: "Invalid scene slot"
+    - variables:
+        helper_name_entity: "{{ 'input_text.scene_slot_' ~ slot ~ '_name' }}"
+        friendly_name: >-
+          {% set current = states('input_text.scene_slot_' ~ slot ~ '_name') | default('') | trim %}
+          {% if current != '' %}
+            {{ current }}
+          {% else %}
+            Scene Slot {{ slot }}
+          {% endif %}
+        sensor_entity: "{{ 'sensor.scene_slot_' ~ slot }}"
+        camping_entity: "input_boolean.camping"
+        slot_label: "{{ 'Scene Slot ' ~ slot }}"
     # Log scene load attempt
     - service: system_log.write
       data:
-        message: "Loading scene: {{ scene_name }}"
+        message: "Loading {{ slot_label }} ({{ friendly_name }})"
         level: info
-    
+
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: "{{ is_state(camping_entity, 'off') }}"
+          sequence:
+            - service: system_log.write
+              data:
+                message: "{{ slot_label }} loaded while camping mode is off."
+                level: warning
+            - service: notify.notify
+              data:
+                title: "Scene Loaded (Camping Off)"
+                message: "{{ slot_label }} ({{ friendly_name }}) ran while camping mode is off."
+
     - variables:
         scene_data_raw: "{{ state_attr(sensor_entity, 'data') }}"
         scene_data_simple: "{{ scene_data_raw.data if scene_data_raw is mapping and 'data' in scene_data_raw else scene_data_raw }}"
@@ -970,19 +1056,31 @@ load_scene:
       data:
         message: >
           LOAD SCENE:
-          Scene name: {{ scene_name }}
+          {{ slot_label }} friendly name: {{ friendly_name }}
           MQTT sensor entity: {{ sensor_entity }}
           Scene data exists: {{ scene_data_raw != none }}
-          Scene data length: {{ scene_data_simple | length if scene_data_simple is defined and scene_data_simple != none else 0 }} characters
-          First 200 chars: {{ scene_data_simple[:200] if scene_data_simple is defined and scene_data_simple != none else 'undefined' }}
+          Scene data length: {{ (scene_data_simple | string | length) if scene_data_simple not in [none, '', 'None', 'unknown', 'unavailable'] else 0 }} characters
+          First 200 chars: {{ (scene_data_simple | string)[:200] if scene_data_simple not in [none, '', 'None', 'unknown', 'unavailable'] else 'undefined' }}
         level: info
+
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: "{{ scene_data_simple not in [none, '', 'None', 'unknown', 'unavailable'] }}"
+          sequence: []
+      default:
+        - service: notify.notify
+          data:
+            title: "Scene Load Failed"
+            message: "{{ slot_label }} ({{ friendly_name }}) does not have stored data yet."
+        - stop: "Scene slot empty"
     
     # Parse the simple data format into a dictionary
     - variables:
         # Initialize an empty dictionary
         scene_data: {}
         # Split the string by '|' to get entity_id=value pairs
-        entity_pairs: "{{ scene_data_simple.split('|') if scene_data_simple is defined and scene_data_simple != none and scene_data_simple != '' else [] }}"
+        entity_pairs: "{{ (scene_data_simple | string).split('|') if scene_data_simple not in [none, '', 'None', 'unknown', 'unavailable'] else [] }}"
     
     # Process each entity pair and add to scene_data
     - repeat:
@@ -1008,6 +1106,7 @@ load_scene:
       data:
         message: >
           PARSE SCENE DATA:
+          {{ slot_label }} friendly name: {{ friendly_name }}
           Pairs found: {{ entity_pairs | length }}
           Scene data parsed successfully: {{ scene_data is mapping }}
           Scene data keys: {{ scene_data.keys() | list | count if scene_data is mapping else 0 }}
@@ -1114,7 +1213,7 @@ load_scene:
     - service: notify.notify
       data:
         title: "Scene Loaded"
-        message: "Scene '{{ scene_name }}' has been loaded"
+        message: "{{ slot_label }} ({{ friendly_name }}) has been loaded"
 
 # Master Thermostat Control Scripts
 master_thermostat_set_cool:
@@ -1317,4 +1416,3 @@ master_thermostat_set_mode:
             - service: script.master_thermostat_set_auto
               data:
                 temperature: "{{ state_attr('climate.master_thermostat', 'temperature') | default(72) }}"
-

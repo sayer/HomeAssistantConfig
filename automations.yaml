@@ -1615,3 +1615,1056 @@
       data:
         # Set to 5 minutes ago to ensure we show some runtime
         datetime: "{{ now().timestamp() - 300 | timestamp_custom('%Y-%m-%d %H:%M:%S') }}"
+
+- id: 'scene_slot_01_schedule'
+  alias: Scenes - Slot 01 Scheduler
+  description: ''
+  trigger:
+    - platform: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_1_schedule_type') %}
+        {% if schedule_type != 'time' %}
+          false
+        {% else %}
+          {% set schedule_time = states('input_datetime.scene_slot_1_time') %}
+          {% if schedule_time in ['unknown', 'unavailable', '', 'None'] %}
+            false
+          {% else %}
+            {% set target = today_at(schedule_time) %}
+            {% set delta = as_timestamp(target) - as_timestamp(now()) %}
+            {{ -30 <= delta <= 30 }}
+          {% endif %}
+        {% endif %}
+      id: time
+    - platform: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_1_schedule_type') %}
+        {% if schedule_type != 'sunrise' %}
+          false
+        {% else %}
+          {% set offset = states('input_number.scene_slot_1_offset_minutes') | int(0) %}
+          {% set next_event = state_attr('sun.sun', 'next_rising') %}
+          {% if next_event == none %}
+            false
+          {% else %}
+            {% set target = as_timestamp(next_event) + (offset * 60) %}
+            {% set delta = target - as_timestamp(now()) %}
+            {{ -30 <= delta <= 30 }}
+          {% endif %}
+        {% endif %}
+      id: sunrise
+    - platform: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_1_schedule_type') %}
+        {% if schedule_type != 'sunset' %}
+          false
+        {% else %}
+          {% set offset = states('input_number.scene_slot_1_offset_minutes') | int(0) %}
+          {% set next_event = state_attr('sun.sun', 'next_setting') %}
+          {% if next_event == none %}
+            false
+          {% else %}
+            {% set target = as_timestamp(next_event) + (offset * 60) %}
+            {% set delta = target - as_timestamp(now()) %}
+            {{ -30 <= delta <= 30 }}
+          {% endif %}
+        {% endif %}
+      id: sunset
+  condition:
+    - condition: state
+      entity_id: input_boolean.scene_slot_1_schedule_enabled
+      state: 'on'
+    - condition: state
+      entity_id: input_boolean.camping
+      state: 'on'
+    - condition: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_1_schedule_type') %}
+        {% if trigger.id == 'time' %}
+          {{ schedule_type == 'time' }}
+        {% elif trigger.id == 'sunrise' %}
+          {{ schedule_type == 'sunrise' }}
+        {% elif trigger.id == 'sunset' %}
+          {{ schedule_type == 'sunset' }}
+        {% else %}
+          false
+        {% endif %}
+  action:
+    - service: system_log.write
+      data:
+        message: >-
+          SCENE SCHEDULE - Slot 1: Triggered via {{ trigger.id }} ({{ states('input_text.scene_slot_1_name') | default('Scene Slot 1') }})
+        level: info
+    - service: script.load_scene
+      data:
+        slot_number: 1
+  mode: single
+
+
+- id: 'scene_slot_02_schedule'
+  alias: Scenes - Slot 02 Scheduler
+  description: ''
+  trigger:
+    - platform: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_2_schedule_type') %}
+        {% if schedule_type != 'time' %}
+          false
+        {% else %}
+          {% set schedule_time = states('input_datetime.scene_slot_2_time') %}
+          {% if schedule_time in ['unknown', 'unavailable', '', 'None'] %}
+            false
+          {% else %}
+            {% set target = today_at(schedule_time) %}
+            {% set delta = as_timestamp(target) - as_timestamp(now()) %}
+            {{ -30 <= delta <= 30 }}
+          {% endif %}
+        {% endif %}
+      id: time
+    - platform: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_2_schedule_type') %}
+        {% if schedule_type != 'sunrise' %}
+          false
+        {% else %}
+          {% set offset = states('input_number.scene_slot_2_offset_minutes') | int(0) %}
+          {% set next_event = state_attr('sun.sun', 'next_rising') %}
+          {% if next_event == none %}
+            false
+          {% else %}
+            {% set target = as_timestamp(next_event) + (offset * 60) %}
+            {% set delta = target - as_timestamp(now()) %}
+            {{ -30 <= delta <= 30 }}
+          {% endif %}
+        {% endif %}
+      id: sunrise
+    - platform: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_2_schedule_type') %}
+        {% if schedule_type != 'sunset' %}
+          false
+        {% else %}
+          {% set offset = states('input_number.scene_slot_2_offset_minutes') | int(0) %}
+          {% set next_event = state_attr('sun.sun', 'next_setting') %}
+          {% if next_event == none %}
+            false
+          {% else %}
+            {% set target = as_timestamp(next_event) + (offset * 60) %}
+            {% set delta = target - as_timestamp(now()) %}
+            {{ -30 <= delta <= 30 }}
+          {% endif %}
+        {% endif %}
+      id: sunset
+  condition:
+    - condition: state
+      entity_id: input_boolean.scene_slot_2_schedule_enabled
+      state: 'on'
+    - condition: state
+      entity_id: input_boolean.camping
+      state: 'on'
+    - condition: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_2_schedule_type') %}
+        {% if trigger.id == 'time' %}
+          {{ schedule_type == 'time' }}
+        {% elif trigger.id == 'sunrise' %}
+          {{ schedule_type == 'sunrise' }}
+        {% elif trigger.id == 'sunset' %}
+          {{ schedule_type == 'sunset' }}
+        {% else %}
+          false
+        {% endif %}
+  action:
+    - service: system_log.write
+      data:
+        message: >-
+          SCENE SCHEDULE - Slot 2: Triggered via {{ trigger.id }} ({{ states('input_text.scene_slot_2_name') | default('Scene Slot 2') }})
+        level: info
+    - service: script.load_scene
+      data:
+        slot_number: 2
+  mode: single
+
+
+- id: 'scene_slot_03_schedule'
+  alias: Scenes - Slot 03 Scheduler
+  description: ''
+  trigger:
+    - platform: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_3_schedule_type') %}
+        {% if schedule_type != 'time' %}
+          false
+        {% else %}
+          {% set schedule_time = states('input_datetime.scene_slot_3_time') %}
+          {% if schedule_time in ['unknown', 'unavailable', '', 'None'] %}
+            false
+          {% else %}
+            {% set target = today_at(schedule_time) %}
+            {% set delta = as_timestamp(target) - as_timestamp(now()) %}
+            {{ -30 <= delta <= 30 }}
+          {% endif %}
+        {% endif %}
+      id: time
+    - platform: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_3_schedule_type') %}
+        {% if schedule_type != 'sunrise' %}
+          false
+        {% else %}
+          {% set offset = states('input_number.scene_slot_3_offset_minutes') | int(0) %}
+          {% set next_event = state_attr('sun.sun', 'next_rising') %}
+          {% if next_event == none %}
+            false
+          {% else %}
+            {% set target = as_timestamp(next_event) + (offset * 60) %}
+            {% set delta = target - as_timestamp(now()) %}
+            {{ -30 <= delta <= 30 }}
+          {% endif %}
+        {% endif %}
+      id: sunrise
+    - platform: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_3_schedule_type') %}
+        {% if schedule_type != 'sunset' %}
+          false
+        {% else %}
+          {% set offset = states('input_number.scene_slot_3_offset_minutes') | int(0) %}
+          {% set next_event = state_attr('sun.sun', 'next_setting') %}
+          {% if next_event == none %}
+            false
+          {% else %}
+            {% set target = as_timestamp(next_event) + (offset * 60) %}
+            {% set delta = target - as_timestamp(now()) %}
+            {{ -30 <= delta <= 30 }}
+          {% endif %}
+        {% endif %}
+      id: sunset
+  condition:
+    - condition: state
+      entity_id: input_boolean.scene_slot_3_schedule_enabled
+      state: 'on'
+    - condition: state
+      entity_id: input_boolean.camping
+      state: 'on'
+    - condition: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_3_schedule_type') %}
+        {% if trigger.id == 'time' %}
+          {{ schedule_type == 'time' }}
+        {% elif trigger.id == 'sunrise' %}
+          {{ schedule_type == 'sunrise' }}
+        {% elif trigger.id == 'sunset' %}
+          {{ schedule_type == 'sunset' }}
+        {% else %}
+          false
+        {% endif %}
+  action:
+    - service: system_log.write
+      data:
+        message: >-
+          SCENE SCHEDULE - Slot 3: Triggered via {{ trigger.id }} ({{ states('input_text.scene_slot_3_name') | default('Scene Slot 3') }})
+        level: info
+    - service: script.load_scene
+      data:
+        slot_number: 3
+  mode: single
+
+
+- id: 'scene_slot_04_schedule'
+  alias: Scenes - Slot 04 Scheduler
+  description: ''
+  trigger:
+    - platform: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_4_schedule_type') %}
+        {% if schedule_type != 'time' %}
+          false
+        {% else %}
+          {% set schedule_time = states('input_datetime.scene_slot_4_time') %}
+          {% if schedule_time in ['unknown', 'unavailable', '', 'None'] %}
+            false
+          {% else %}
+            {% set target = today_at(schedule_time) %}
+            {% set delta = as_timestamp(target) - as_timestamp(now()) %}
+            {{ -30 <= delta <= 30 }}
+          {% endif %}
+        {% endif %}
+      id: time
+    - platform: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_4_schedule_type') %}
+        {% if schedule_type != 'sunrise' %}
+          false
+        {% else %}
+          {% set offset = states('input_number.scene_slot_4_offset_minutes') | int(0) %}
+          {% set next_event = state_attr('sun.sun', 'next_rising') %}
+          {% if next_event == none %}
+            false
+          {% else %}
+            {% set target = as_timestamp(next_event) + (offset * 60) %}
+            {% set delta = target - as_timestamp(now()) %}
+            {{ -30 <= delta <= 30 }}
+          {% endif %}
+        {% endif %}
+      id: sunrise
+    - platform: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_4_schedule_type') %}
+        {% if schedule_type != 'sunset' %}
+          false
+        {% else %}
+          {% set offset = states('input_number.scene_slot_4_offset_minutes') | int(0) %}
+          {% set next_event = state_attr('sun.sun', 'next_setting') %}
+          {% if next_event == none %}
+            false
+          {% else %}
+            {% set target = as_timestamp(next_event) + (offset * 60) %}
+            {% set delta = target - as_timestamp(now()) %}
+            {{ -30 <= delta <= 30 }}
+          {% endif %}
+        {% endif %}
+      id: sunset
+  condition:
+    - condition: state
+      entity_id: input_boolean.scene_slot_4_schedule_enabled
+      state: 'on'
+    - condition: state
+      entity_id: input_boolean.camping
+      state: 'on'
+    - condition: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_4_schedule_type') %}
+        {% if trigger.id == 'time' %}
+          {{ schedule_type == 'time' }}
+        {% elif trigger.id == 'sunrise' %}
+          {{ schedule_type == 'sunrise' }}
+        {% elif trigger.id == 'sunset' %}
+          {{ schedule_type == 'sunset' }}
+        {% else %}
+          false
+        {% endif %}
+  action:
+    - service: system_log.write
+      data:
+        message: >-
+          SCENE SCHEDULE - Slot 4: Triggered via {{ trigger.id }} ({{ states('input_text.scene_slot_4_name') | default('Scene Slot 4') }})
+        level: info
+    - service: script.load_scene
+      data:
+        slot_number: 4
+  mode: single
+
+
+- id: 'scene_slot_05_schedule'
+  alias: Scenes - Slot 05 Scheduler
+  description: ''
+  trigger:
+    - platform: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_5_schedule_type') %}
+        {% if schedule_type != 'time' %}
+          false
+        {% else %}
+          {% set schedule_time = states('input_datetime.scene_slot_5_time') %}
+          {% if schedule_time in ['unknown', 'unavailable', '', 'None'] %}
+            false
+          {% else %}
+            {% set target = today_at(schedule_time) %}
+            {% set delta = as_timestamp(target) - as_timestamp(now()) %}
+            {{ -30 <= delta <= 30 }}
+          {% endif %}
+        {% endif %}
+      id: time
+    - platform: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_5_schedule_type') %}
+        {% if schedule_type != 'sunrise' %}
+          false
+        {% else %}
+          {% set offset = states('input_number.scene_slot_5_offset_minutes') | int(0) %}
+          {% set next_event = state_attr('sun.sun', 'next_rising') %}
+          {% if next_event == none %}
+            false
+          {% else %}
+            {% set target = as_timestamp(next_event) + (offset * 60) %}
+            {% set delta = target - as_timestamp(now()) %}
+            {{ -30 <= delta <= 30 }}
+          {% endif %}
+        {% endif %}
+      id: sunrise
+    - platform: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_5_schedule_type') %}
+        {% if schedule_type != 'sunset' %}
+          false
+        {% else %}
+          {% set offset = states('input_number.scene_slot_5_offset_minutes') | int(0) %}
+          {% set next_event = state_attr('sun.sun', 'next_setting') %}
+          {% if next_event == none %}
+            false
+          {% else %}
+            {% set target = as_timestamp(next_event) + (offset * 60) %}
+            {% set delta = target - as_timestamp(now()) %}
+            {{ -30 <= delta <= 30 }}
+          {% endif %}
+        {% endif %}
+      id: sunset
+  condition:
+    - condition: state
+      entity_id: input_boolean.scene_slot_5_schedule_enabled
+      state: 'on'
+    - condition: state
+      entity_id: input_boolean.camping
+      state: 'on'
+    - condition: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_5_schedule_type') %}
+        {% if trigger.id == 'time' %}
+          {{ schedule_type == 'time' }}
+        {% elif trigger.id == 'sunrise' %}
+          {{ schedule_type == 'sunrise' }}
+        {% elif trigger.id == 'sunset' %}
+          {{ schedule_type == 'sunset' }}
+        {% else %}
+          false
+        {% endif %}
+  action:
+    - service: system_log.write
+      data:
+        message: >-
+          SCENE SCHEDULE - Slot 5: Triggered via {{ trigger.id }} ({{ states('input_text.scene_slot_5_name') | default('Scene Slot 5') }})
+        level: info
+    - service: script.load_scene
+      data:
+        slot_number: 5
+  mode: single
+
+
+- id: 'scene_slot_06_schedule'
+  alias: Scenes - Slot 06 Scheduler
+  description: ''
+  trigger:
+    - platform: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_6_schedule_type') %}
+        {% if schedule_type != 'time' %}
+          false
+        {% else %}
+          {% set schedule_time = states('input_datetime.scene_slot_6_time') %}
+          {% if schedule_time in ['unknown', 'unavailable', '', 'None'] %}
+            false
+          {% else %}
+            {% set target = today_at(schedule_time) %}
+            {% set delta = as_timestamp(target) - as_timestamp(now()) %}
+            {{ -30 <= delta <= 30 }}
+          {% endif %}
+        {% endif %}
+      id: time
+    - platform: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_6_schedule_type') %}
+        {% if schedule_type != 'sunrise' %}
+          false
+        {% else %}
+          {% set offset = states('input_number.scene_slot_6_offset_minutes') | int(0) %}
+          {% set next_event = state_attr('sun.sun', 'next_rising') %}
+          {% if next_event == none %}
+            false
+          {% else %}
+            {% set target = as_timestamp(next_event) + (offset * 60) %}
+            {% set delta = target - as_timestamp(now()) %}
+            {{ -30 <= delta <= 30 }}
+          {% endif %}
+        {% endif %}
+      id: sunrise
+    - platform: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_6_schedule_type') %}
+        {% if schedule_type != 'sunset' %}
+          false
+        {% else %}
+          {% set offset = states('input_number.scene_slot_6_offset_minutes') | int(0) %}
+          {% set next_event = state_attr('sun.sun', 'next_setting') %}
+          {% if next_event == none %}
+            false
+          {% else %}
+            {% set target = as_timestamp(next_event) + (offset * 60) %}
+            {% set delta = target - as_timestamp(now()) %}
+            {{ -30 <= delta <= 30 }}
+          {% endif %}
+        {% endif %}
+      id: sunset
+  condition:
+    - condition: state
+      entity_id: input_boolean.scene_slot_6_schedule_enabled
+      state: 'on'
+    - condition: state
+      entity_id: input_boolean.camping
+      state: 'on'
+    - condition: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_6_schedule_type') %}
+        {% if trigger.id == 'time' %}
+          {{ schedule_type == 'time' }}
+        {% elif trigger.id == 'sunrise' %}
+          {{ schedule_type == 'sunrise' }}
+        {% elif trigger.id == 'sunset' %}
+          {{ schedule_type == 'sunset' }}
+        {% else %}
+          false
+        {% endif %}
+  action:
+    - service: system_log.write
+      data:
+        message: >-
+          SCENE SCHEDULE - Slot 6: Triggered via {{ trigger.id }} ({{ states('input_text.scene_slot_6_name') | default('Scene Slot 6') }})
+        level: info
+    - service: script.load_scene
+      data:
+        slot_number: 6
+  mode: single
+
+
+- id: 'scene_slot_07_schedule'
+  alias: Scenes - Slot 07 Scheduler
+  description: ''
+  trigger:
+    - platform: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_7_schedule_type') %}
+        {% if schedule_type != 'time' %}
+          false
+        {% else %}
+          {% set schedule_time = states('input_datetime.scene_slot_7_time') %}
+          {% if schedule_time in ['unknown', 'unavailable', '', 'None'] %}
+            false
+          {% else %}
+            {% set target = today_at(schedule_time) %}
+            {% set delta = as_timestamp(target) - as_timestamp(now()) %}
+            {{ -30 <= delta <= 30 }}
+          {% endif %}
+        {% endif %}
+      id: time
+    - platform: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_7_schedule_type') %}
+        {% if schedule_type != 'sunrise' %}
+          false
+        {% else %}
+          {% set offset = states('input_number.scene_slot_7_offset_minutes') | int(0) %}
+          {% set next_event = state_attr('sun.sun', 'next_rising') %}
+          {% if next_event == none %}
+            false
+          {% else %}
+            {% set target = as_timestamp(next_event) + (offset * 60) %}
+            {% set delta = target - as_timestamp(now()) %}
+            {{ -30 <= delta <= 30 }}
+          {% endif %}
+        {% endif %}
+      id: sunrise
+    - platform: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_7_schedule_type') %}
+        {% if schedule_type != 'sunset' %}
+          false
+        {% else %}
+          {% set offset = states('input_number.scene_slot_7_offset_minutes') | int(0) %}
+          {% set next_event = state_attr('sun.sun', 'next_setting') %}
+          {% if next_event == none %}
+            false
+          {% else %}
+            {% set target = as_timestamp(next_event) + (offset * 60) %}
+            {% set delta = target - as_timestamp(now()) %}
+            {{ -30 <= delta <= 30 }}
+          {% endif %}
+        {% endif %}
+      id: sunset
+  condition:
+    - condition: state
+      entity_id: input_boolean.scene_slot_7_schedule_enabled
+      state: 'on'
+    - condition: state
+      entity_id: input_boolean.camping
+      state: 'on'
+    - condition: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_7_schedule_type') %}
+        {% if trigger.id == 'time' %}
+          {{ schedule_type == 'time' }}
+        {% elif trigger.id == 'sunrise' %}
+          {{ schedule_type == 'sunrise' }}
+        {% elif trigger.id == 'sunset' %}
+          {{ schedule_type == 'sunset' }}
+        {% else %}
+          false
+        {% endif %}
+  action:
+    - service: system_log.write
+      data:
+        message: >-
+          SCENE SCHEDULE - Slot 7: Triggered via {{ trigger.id }} ({{ states('input_text.scene_slot_7_name') | default('Scene Slot 7') }})
+        level: info
+    - service: script.load_scene
+      data:
+        slot_number: 7
+  mode: single
+
+
+- id: 'scene_slot_08_schedule'
+  alias: Scenes - Slot 08 Scheduler
+  description: ''
+  trigger:
+    - platform: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_8_schedule_type') %}
+        {% if schedule_type != 'time' %}
+          false
+        {% else %}
+          {% set schedule_time = states('input_datetime.scene_slot_8_time') %}
+          {% if schedule_time in ['unknown', 'unavailable', '', 'None'] %}
+            false
+          {% else %}
+            {% set target = today_at(schedule_time) %}
+            {% set delta = as_timestamp(target) - as_timestamp(now()) %}
+            {{ -30 <= delta <= 30 }}
+          {% endif %}
+        {% endif %}
+      id: time
+    - platform: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_8_schedule_type') %}
+        {% if schedule_type != 'sunrise' %}
+          false
+        {% else %}
+          {% set offset = states('input_number.scene_slot_8_offset_minutes') | int(0) %}
+          {% set next_event = state_attr('sun.sun', 'next_rising') %}
+          {% if next_event == none %}
+            false
+          {% else %}
+            {% set target = as_timestamp(next_event) + (offset * 60) %}
+            {% set delta = target - as_timestamp(now()) %}
+            {{ -30 <= delta <= 30 }}
+          {% endif %}
+        {% endif %}
+      id: sunrise
+    - platform: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_8_schedule_type') %}
+        {% if schedule_type != 'sunset' %}
+          false
+        {% else %}
+          {% set offset = states('input_number.scene_slot_8_offset_minutes') | int(0) %}
+          {% set next_event = state_attr('sun.sun', 'next_setting') %}
+          {% if next_event == none %}
+            false
+          {% else %}
+            {% set target = as_timestamp(next_event) + (offset * 60) %}
+            {% set delta = target - as_timestamp(now()) %}
+            {{ -30 <= delta <= 30 }}
+          {% endif %}
+        {% endif %}
+      id: sunset
+  condition:
+    - condition: state
+      entity_id: input_boolean.scene_slot_8_schedule_enabled
+      state: 'on'
+    - condition: state
+      entity_id: input_boolean.camping
+      state: 'on'
+    - condition: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_8_schedule_type') %}
+        {% if trigger.id == 'time' %}
+          {{ schedule_type == 'time' }}
+        {% elif trigger.id == 'sunrise' %}
+          {{ schedule_type == 'sunrise' }}
+        {% elif trigger.id == 'sunset' %}
+          {{ schedule_type == 'sunset' }}
+        {% else %}
+          false
+        {% endif %}
+  action:
+    - service: system_log.write
+      data:
+        message: >-
+          SCENE SCHEDULE - Slot 8: Triggered via {{ trigger.id }} ({{ states('input_text.scene_slot_8_name') | default('Scene Slot 8') }})
+        level: info
+    - service: script.load_scene
+      data:
+        slot_number: 8
+  mode: single
+
+
+- id: 'scene_slot_09_schedule'
+  alias: Scenes - Slot 09 Scheduler
+  description: ''
+  trigger:
+    - platform: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_9_schedule_type') %}
+        {% if schedule_type != 'time' %}
+          false
+        {% else %}
+          {% set schedule_time = states('input_datetime.scene_slot_9_time') %}
+          {% if schedule_time in ['unknown', 'unavailable', '', 'None'] %}
+            false
+          {% else %}
+            {% set target = today_at(schedule_time) %}
+            {% set delta = as_timestamp(target) - as_timestamp(now()) %}
+            {{ -30 <= delta <= 30 }}
+          {% endif %}
+        {% endif %}
+      id: time
+    - platform: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_9_schedule_type') %}
+        {% if schedule_type != 'sunrise' %}
+          false
+        {% else %}
+          {% set offset = states('input_number.scene_slot_9_offset_minutes') | int(0) %}
+          {% set next_event = state_attr('sun.sun', 'next_rising') %}
+          {% if next_event == none %}
+            false
+          {% else %}
+            {% set target = as_timestamp(next_event) + (offset * 60) %}
+            {% set delta = target - as_timestamp(now()) %}
+            {{ -30 <= delta <= 30 }}
+          {% endif %}
+        {% endif %}
+      id: sunrise
+    - platform: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_9_schedule_type') %}
+        {% if schedule_type != 'sunset' %}
+          false
+        {% else %}
+          {% set offset = states('input_number.scene_slot_9_offset_minutes') | int(0) %}
+          {% set next_event = state_attr('sun.sun', 'next_setting') %}
+          {% if next_event == none %}
+            false
+          {% else %}
+            {% set target = as_timestamp(next_event) + (offset * 60) %}
+            {% set delta = target - as_timestamp(now()) %}
+            {{ -30 <= delta <= 30 }}
+          {% endif %}
+        {% endif %}
+      id: sunset
+  condition:
+    - condition: state
+      entity_id: input_boolean.scene_slot_9_schedule_enabled
+      state: 'on'
+    - condition: state
+      entity_id: input_boolean.camping
+      state: 'on'
+    - condition: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_9_schedule_type') %}
+        {% if trigger.id == 'time' %}
+          {{ schedule_type == 'time' }}
+        {% elif trigger.id == 'sunrise' %}
+          {{ schedule_type == 'sunrise' }}
+        {% elif trigger.id == 'sunset' %}
+          {{ schedule_type == 'sunset' }}
+        {% else %}
+          false
+        {% endif %}
+  action:
+    - service: system_log.write
+      data:
+        message: >-
+          SCENE SCHEDULE - Slot 9: Triggered via {{ trigger.id }} ({{ states('input_text.scene_slot_9_name') | default('Scene Slot 9') }})
+        level: info
+    - service: script.load_scene
+      data:
+        slot_number: 9
+  mode: single
+
+
+- id: 'scene_slot_10_schedule'
+  alias: Scenes - Slot 10 Scheduler
+  description: ''
+  trigger:
+    - platform: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_10_schedule_type') %}
+        {% if schedule_type != 'time' %}
+          false
+        {% else %}
+          {% set schedule_time = states('input_datetime.scene_slot_10_time') %}
+          {% if schedule_time in ['unknown', 'unavailable', '', 'None'] %}
+            false
+          {% else %}
+            {% set target = today_at(schedule_time) %}
+            {% set delta = as_timestamp(target) - as_timestamp(now()) %}
+            {{ -30 <= delta <= 30 }}
+          {% endif %}
+        {% endif %}
+      id: time
+    - platform: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_10_schedule_type') %}
+        {% if schedule_type != 'sunrise' %}
+          false
+        {% else %}
+          {% set offset = states('input_number.scene_slot_10_offset_minutes') | int(0) %}
+          {% set next_event = state_attr('sun.sun', 'next_rising') %}
+          {% if next_event == none %}
+            false
+          {% else %}
+            {% set target = as_timestamp(next_event) + (offset * 60) %}
+            {% set delta = target - as_timestamp(now()) %}
+            {{ -30 <= delta <= 30 }}
+          {% endif %}
+        {% endif %}
+      id: sunrise
+    - platform: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_10_schedule_type') %}
+        {% if schedule_type != 'sunset' %}
+          false
+        {% else %}
+          {% set offset = states('input_number.scene_slot_10_offset_minutes') | int(0) %}
+          {% set next_event = state_attr('sun.sun', 'next_setting') %}
+          {% if next_event == none %}
+            false
+          {% else %}
+            {% set target = as_timestamp(next_event) + (offset * 60) %}
+            {% set delta = target - as_timestamp(now()) %}
+            {{ -30 <= delta <= 30 }}
+          {% endif %}
+        {% endif %}
+      id: sunset
+  condition:
+    - condition: state
+      entity_id: input_boolean.scene_slot_10_schedule_enabled
+      state: 'on'
+    - condition: state
+      entity_id: input_boolean.camping
+      state: 'on'
+    - condition: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_10_schedule_type') %}
+        {% if trigger.id == 'time' %}
+          {{ schedule_type == 'time' }}
+        {% elif trigger.id == 'sunrise' %}
+          {{ schedule_type == 'sunrise' }}
+        {% elif trigger.id == 'sunset' %}
+          {{ schedule_type == 'sunset' }}
+        {% else %}
+          false
+        {% endif %}
+  action:
+    - service: system_log.write
+      data:
+        message: >-
+          SCENE SCHEDULE - Slot 10: Triggered via {{ trigger.id }} ({{ states('input_text.scene_slot_10_name') | default('Scene Slot 10') }})
+        level: info
+    - service: script.load_scene
+      data:
+        slot_number: 10
+  mode: single
+
+
+- id: 'scene_slot_11_schedule'
+  alias: Scenes - Slot 11 Scheduler
+  description: ''
+  trigger:
+    - platform: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_11_schedule_type') %}
+        {% if schedule_type != 'time' %}
+          false
+        {% else %}
+          {% set schedule_time = states('input_datetime.scene_slot_11_time') %}
+          {% if schedule_time in ['unknown', 'unavailable', '', 'None'] %}
+            false
+          {% else %}
+            {% set target = today_at(schedule_time) %}
+            {% set delta = as_timestamp(target) - as_timestamp(now()) %}
+            {{ -30 <= delta <= 30 }}
+          {% endif %}
+        {% endif %}
+      id: time
+    - platform: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_11_schedule_type') %}
+        {% if schedule_type != 'sunrise' %}
+          false
+        {% else %}
+          {% set offset = states('input_number.scene_slot_11_offset_minutes') | int(0) %}
+          {% set next_event = state_attr('sun.sun', 'next_rising') %}
+          {% if next_event == none %}
+            false
+          {% else %}
+            {% set target = as_timestamp(next_event) + (offset * 60) %}
+            {% set delta = target - as_timestamp(now()) %}
+            {{ -30 <= delta <= 30 }}
+          {% endif %}
+        {% endif %}
+      id: sunrise
+    - platform: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_11_schedule_type') %}
+        {% if schedule_type != 'sunset' %}
+          false
+        {% else %}
+          {% set offset = states('input_number.scene_slot_11_offset_minutes') | int(0) %}
+          {% set next_event = state_attr('sun.sun', 'next_setting') %}
+          {% if next_event == none %}
+            false
+          {% else %}
+            {% set target = as_timestamp(next_event) + (offset * 60) %}
+            {% set delta = target - as_timestamp(now()) %}
+            {{ -30 <= delta <= 30 }}
+          {% endif %}
+        {% endif %}
+      id: sunset
+  condition:
+    - condition: state
+      entity_id: input_boolean.scene_slot_11_schedule_enabled
+      state: 'on'
+    - condition: state
+      entity_id: input_boolean.camping
+      state: 'on'
+    - condition: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_11_schedule_type') %}
+        {% if trigger.id == 'time' %}
+          {{ schedule_type == 'time' }}
+        {% elif trigger.id == 'sunrise' %}
+          {{ schedule_type == 'sunrise' }}
+        {% elif trigger.id == 'sunset' %}
+          {{ schedule_type == 'sunset' }}
+        {% else %}
+          false
+        {% endif %}
+  action:
+    - service: system_log.write
+      data:
+        message: >-
+          SCENE SCHEDULE - Slot 11: Triggered via {{ trigger.id }} ({{ states('input_text.scene_slot_11_name') | default('Scene Slot 11') }})
+        level: info
+    - service: script.load_scene
+      data:
+        slot_number: 11
+  mode: single
+
+
+- id: 'scene_slot_12_schedule'
+  alias: Scenes - Slot 12 Scheduler
+  description: ''
+  trigger:
+    - platform: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_12_schedule_type') %}
+        {% if schedule_type != 'time' %}
+          false
+        {% else %}
+          {% set schedule_time = states('input_datetime.scene_slot_12_time') %}
+          {% if schedule_time in ['unknown', 'unavailable', '', 'None'] %}
+            false
+          {% else %}
+            {% set target = today_at(schedule_time) %}
+            {% set delta = as_timestamp(target) - as_timestamp(now()) %}
+            {{ -30 <= delta <= 30 }}
+          {% endif %}
+        {% endif %}
+      id: time
+    - platform: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_12_schedule_type') %}
+        {% if schedule_type != 'sunrise' %}
+          false
+        {% else %}
+          {% set offset = states('input_number.scene_slot_12_offset_minutes') | int(0) %}
+          {% set next_event = state_attr('sun.sun', 'next_rising') %}
+          {% if next_event == none %}
+            false
+          {% else %}
+            {% set target = as_timestamp(next_event) + (offset * 60) %}
+            {% set delta = target - as_timestamp(now()) %}
+            {{ -30 <= delta <= 30 }}
+          {% endif %}
+        {% endif %}
+      id: sunrise
+    - platform: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_12_schedule_type') %}
+        {% if schedule_type != 'sunset' %}
+          false
+        {% else %}
+          {% set offset = states('input_number.scene_slot_12_offset_minutes') | int(0) %}
+          {% set next_event = state_attr('sun.sun', 'next_setting') %}
+          {% if next_event == none %}
+            false
+          {% else %}
+            {% set target = as_timestamp(next_event) + (offset * 60) %}
+            {% set delta = target - as_timestamp(now()) %}
+            {{ -30 <= delta <= 30 }}
+          {% endif %}
+        {% endif %}
+      id: sunset
+  condition:
+    - condition: state
+      entity_id: input_boolean.scene_slot_12_schedule_enabled
+      state: 'on'
+    - condition: state
+      entity_id: input_boolean.camping
+      state: 'on'
+    - condition: template
+      value_template: >-
+        {% set schedule_type = states('input_select.scene_slot_12_schedule_type') %}
+        {% if trigger.id == 'time' %}
+          {{ schedule_type == 'time' }}
+        {% elif trigger.id == 'sunrise' %}
+          {{ schedule_type == 'sunrise' }}
+        {% elif trigger.id == 'sunset' %}
+          {{ schedule_type == 'sunset' }}
+        {% else %}
+          false
+        {% endif %}
+  action:
+    - service: system_log.write
+      data:
+        message: >-
+          SCENE SCHEDULE - Slot 12: Triggered via {{ trigger.id }} ({{ states('input_text.scene_slot_12_name') | default('Scene Slot 12') }})
+        level: info
+    - service: script.load_scene
+      data:
+        slot_number: 12
+  mode: single
+
+
+- id: 'scene_schedule_startup_sync'
+  alias: Scenes - Scheduler Startup Sync
+  description: 'Logs current schedule configuration for all scene slots when Home Assistant starts'
+  trigger:
+    - platform: homeassistant
+      event: start
+  action:
+    - delay:
+        seconds: 5
+    - repeat:
+        count: 12
+        sequence:
+          - variables:
+              slot: "{{ repeat.index }}"
+              friendly_name: >-
+                {% set value = states('input_text.scene_slot_' ~ repeat.index ~ '_name') | default('') | trim %}
+                {% if value != '' %}
+                  {{ value }}
+                {% else %}
+                  Scene Slot {{ repeat.index }}
+                {% endif %}
+              schedule_enabled: "{{ is_state('input_boolean.scene_slot_' ~ repeat.index ~ '_schedule_enabled', 'on') }}"
+              schedule_type: "{{ states('input_select.scene_slot_' ~ repeat.index ~ '_schedule_type') }}"
+              schedule_time: "{{ states('input_datetime.scene_slot_' ~ repeat.index ~ '_time') }}"
+              offset_minutes: "{{ states('input_number.scene_slot_' ~ repeat.index ~ '_offset_minutes') }}"
+          - service: system_log.write
+            data:
+              message: >-
+                SCENE SCHEDULE STARTUP - Slot {{ slot }} ({{ friendly_name }}):
+                Enabled={{ schedule_enabled }}, Type={{ schedule_type }}, Time={{ schedule_time }}, Offset={{ offset_minutes }} min
+              level: info
+  mode: single
