@@ -3216,6 +3216,25 @@
           "type": "masonry",
           "cards": [
             {
+              "type": "vertical-stack",
+              "cards": [
+                {
+                  "type": "entities",
+                  "title": "Camping Mode",
+                  "entities": [
+                    {
+                      "entity": "input_boolean.camping",
+                      "name": "Camping Mode"
+                    }
+                  ]
+                },
+                {
+                  "type": "markdown",
+                  "content": "Scheduled scene automations only run when Camping Mode is **enabled**."
+                }
+              ]
+            },
+            {
               "type": "entities",
               "title": "Scene Schedule Overview",
               "entities": [
