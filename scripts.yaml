@@ -175,7 +175,7 @@ good_night:
   - data: {}
     target:
       entity_id: light.all_ceiling_lights
-    action: light.turn_off
+    service: light.turn_off
   - delay:
       hours: 0
       minutes: 1
@@ -184,7 +184,7 @@ good_night:
   - data: {}
     target:
       entity_id: light.exterior_lights
-    action: light.turn_off
+    service: light.turn_off
   - delay:
       hours: 0
       minutes: 1
@@ -195,21 +195,21 @@ good_night:
       entity_id:
       - light.all_lights
       - light.entry_light_2
-    action: light.turn_off
+    service: light.turn_off
   - data: {}
     target:
       entity_id: lock.locks
-    action: lock.lock
+    service: lock.lock
   - data: {}
     target:
       entity_id: cover.all_night_shades
-    action: cover.close_cover
+    service: cover.close_cover
   - data: {}
     target:
       entity_id:
       - switch.auto_gen
       - switch.auto_gen_5
-    action: homeassistant.turn_on
+    service: homeassistant.turn_on
   mode: single
 good_morning:
   alias: Good Morning
@@ -233,7 +233,7 @@ good_morning:
       - light.rear_bath_accent
       - light.dimmer_3_10
       - light.entry_light_2
-    action: light.turn_on
+    service: light.turn_on
   - delay:
       hours: 0
       minutes: 5
@@ -245,7 +245,7 @@ good_morning:
       - cover.windshield_night
       - cover.d_s_living_room_night
       - cover.dinette_night
-    action: cover.open_cover
+    service: cover.open_cover
   mode: single
 evening:
   alias: Evening
@@ -267,7 +267,7 @@ evening:
       - light.interior_accents
       - light.porch_handle
       - light.awning_lights
-    action: light.turn_on
+    service: light.turn_on
   - delay:
       hours: 0
       minutes: 0
@@ -276,7 +276,7 @@ evening:
   - data: {}
     target:
       entity_id: cover.all_day_shades
-    action: cover.close_cover
+    service: cover.close_cover
   mode: single
   icon: mdi:clock-time-seven
 tv_time:
@@ -443,11 +443,11 @@ set_current_location_as_home:
       latitude: '{{ states(''sensor.gps_127_0_0_1_latitude'') | float }}'
       longitude: '{{ states(''sensor.gps_127_0_0_1_longitude'') | float }}'
     enabled: false
-    action: homeassistant.set_location
+    service: homeassistant.set_location
   - data:
       latitude: '{{ states(''sensor.gps_127_0_0_1_latitude'') | float }}'
       longitude: '{{ states(''sensor.gps_127_0_0_1_longitude'') | float }}'
-    action: homeassistant.set_location
+    service: homeassistant.set_location
   mode: single
 notify_iphone:
   alias: Notify iPhone
@@ -456,7 +456,7 @@ notify_iphone:
   - data:
       message: '{{message}}'
       title: '{{title}} — {{ states(''input_number.coach_number'') | int }}'
-    action: notify.mobile_app_iphone_15_pro_max
+    service: notify.mobile_app_iphone_15_pro_max
   mode: single
   fields:
     title:
@@ -507,15 +507,15 @@ notify_home:
   - data:
       message: '{{message}}'
       title: '{{title}}'
-    action: script.notify_iphone
+    service: script.notify_iphone
   - data:
       message: '{{message}}'
       title: '{{title}}'
-    action: script.tts_alert
+    service: script.tts_alert
   - data:
       title: '{{title}}'
       message: '{{message}}'
-    action: notify.persistent_notification
+    service: notify.persistent_notification
   mode: single
   fields:
     message:
@@ -533,10 +533,10 @@ ai_analyze_dash_video:
   sequence:
   - data:
       filename: /config/www/snapshot_dash.jpg
-    action: camera.snapshot
+    service: camera.snapshot
     target:
       device_id: eea91240afc6576d615f0b18aa1ec28e
-  - action: llmvision.stream_analyzer
+  - service: llmvision.stream_analyzer
     data:
       remember: false
       duration: 5
@@ -560,7 +560,7 @@ ai_analyze_dash_video:
       milliseconds: 0
   - data:
       message: 'Response received: {{ response.response_text }}'
-    action: system_log.write
+    service: system_log.write
   - condition: template
     value_template: '{{ response.response_text is not none and response.response_text
       | length > 0 }}'
@@ -568,8 +568,8 @@ ai_analyze_dash_video:
       value: '{{ response.response_text }}'
     target:
       entity_id: input_text.llmvision_response
-    action: input_text.set_value
-  - action: notify.mobile_app_iphone_15_pro_max
+    service: input_text.set_value
+  - service: notify.mobile_app_iphone_15_pro_max
     metadata: {}
     data:
       title: Foretravel - Dash
