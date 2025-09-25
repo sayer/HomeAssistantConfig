@@ -3241,62 +3241,86 @@
                 {
                   "type": "custom:template-entity-row",
                   "entity": "input_boolean.scene_slot_1_schedule_enabled",
-                  "name": "{{ (states('input_text.scene_slot_1_name') | default('') | trim) if (states('input_text.scene_slot_1_name') | default('') | trim) not in ['', 'unknown', 'unavailable', 'None'] else 'Slot 01' }}"
+                  "name": "{{ (states('input_text.scene_slot_1_name') | default('') | trim) if (states('input_text.scene_slot_1_name') | default('') | trim) not in ['', 'unknown', 'unavailable', 'None'] else 'Slot 01' }}",
+                  "state": "{{ 'Enabled' if is_state('input_boolean.scene_slot_1_schedule_enabled', 'on') else 'Disabled' }}",
+                  "state_color": true
                 },
                 {
                   "type": "custom:template-entity-row",
                   "entity": "input_boolean.scene_slot_2_schedule_enabled",
-                  "name": "{{ (states('input_text.scene_slot_2_name') | default('') | trim) if (states('input_text.scene_slot_2_name') | default('') | trim) not in ['', 'unknown', 'unavailable', 'None'] else 'Slot 02' }}"
+                  "name": "{{ (states('input_text.scene_slot_2_name') | default('') | trim) if (states('input_text.scene_slot_2_name') | default('') | trim) not in ['', 'unknown', 'unavailable', 'None'] else 'Slot 02' }}",
+                  "state": "{{ 'Enabled' if is_state('input_boolean.scene_slot_2_schedule_enabled', 'on') else 'Disabled' }}",
+                  "state_color": true
                 },
                 {
                   "type": "custom:template-entity-row",
                   "entity": "input_boolean.scene_slot_3_schedule_enabled",
-                  "name": "{{ (states('input_text.scene_slot_3_name') | default('') | trim) if (states('input_text.scene_slot_3_name') | default('') | trim) not in ['', 'unknown', 'unavailable', 'None'] else 'Slot 03' }}"
+                  "name": "{{ (states('input_text.scene_slot_3_name') | default('') | trim) if (states('input_text.scene_slot_3_name') | default('') | trim) not in ['', 'unknown', 'unavailable', 'None'] else 'Slot 03' }}",
+                  "state": "{{ 'Enabled' if is_state('input_boolean.scene_slot_3_schedule_enabled', 'on') else 'Disabled' }}",
+                  "state_color": true
                 },
                 {
                   "type": "custom:template-entity-row",
                   "entity": "input_boolean.scene_slot_4_schedule_enabled",
-                  "name": "{{ (states('input_text.scene_slot_4_name') | default('') | trim) if (states('input_text.scene_slot_4_name') | default('') | trim) not in ['', 'unknown', 'unavailable', 'None'] else 'Slot 04' }}"
+                  "name": "{{ (states('input_text.scene_slot_4_name') | default('') | trim) if (states('input_text.scene_slot_4_name') | default('') | trim) not in ['', 'unknown', 'unavailable', 'None'] else 'Slot 04' }}",
+                  "state": "{{ 'Enabled' if is_state('input_boolean.scene_slot_4_schedule_enabled', 'on') else 'Disabled' }}",
+                  "state_color": true
                 },
                 {
                   "type": "custom:template-entity-row",
                   "entity": "input_boolean.scene_slot_5_schedule_enabled",
-                  "name": "{{ (states('input_text.scene_slot_5_name') | default('') | trim) if (states('input_text.scene_slot_5_name') | default('') | trim) not in ['', 'unknown', 'unavailable', 'None'] else 'Slot 05' }}"
+                  "name": "{{ (states('input_text.scene_slot_5_name') | default('') | trim) if (states('input_text.scene_slot_5_name') | default('') | trim) not in ['', 'unknown', 'unavailable', 'None'] else 'Slot 05' }}",
+                  "state": "{{ 'Enabled' if is_state('input_boolean.scene_slot_5_schedule_enabled', 'on') else 'Disabled' }}",
+                  "state_color": true
                 },
                 {
                   "type": "custom:template-entity-row",
                   "entity": "input_boolean.scene_slot_6_schedule_enabled",
-                  "name": "{{ (states('input_text.scene_slot_6_name') | default('') | trim) if (states('input_text.scene_slot_6_name') | default('') | trim) not in ['', 'unknown', 'unavailable', 'None'] else 'Slot 06' }}"
+                  "name": "{{ (states('input_text.scene_slot_6_name') | default('') | trim) if (states('input_text.scene_slot_6_name') | default('') | trim) not in ['', 'unknown', 'unavailable', 'None'] else 'Slot 06' }}",
+                  "state": "{{ 'Enabled' if is_state('input_boolean.scene_slot_6_schedule_enabled', 'on') else 'Disabled' }}",
+                  "state_color": true
                 },
                 {
                   "type": "custom:template-entity-row",
                   "entity": "input_boolean.scene_slot_7_schedule_enabled",
-                  "name": "{{ (states('input_text.scene_slot_7_name') | default('') | trim) if (states('input_text.scene_slot_7_name') | default('') | trim) not in ['', 'unknown', 'unavailable', 'None'] else 'Slot 07' }}"
+                  "name": "{{ (states('input_text.scene_slot_7_name') | default('') | trim) if (states('input_text.scene_slot_7_name') | default('') | trim) not in ['', 'unknown', 'unavailable', 'None'] else 'Slot 07' }}",
+                  "state": "{{ 'Enabled' if is_state('input_boolean.scene_slot_7_schedule_enabled', 'on') else 'Disabled' }}",
+                  "state_color": true
                 },
                 {
                   "type": "custom:template-entity-row",
                   "entity": "input_boolean.scene_slot_8_schedule_enabled",
-                  "name": "{{ (states('input_text.scene_slot_8_name') | default('') | trim) if (states('input_text.scene_slot_8_name') | default('') | trim) not in ['', 'unknown', 'unavailable', 'None'] else 'Slot 08' }}"
+                  "name": "{{ (states('input_text.scene_slot_8_name') | default('') | trim) if (states('input_text.scene_slot_8_name') | default('') | trim) not in ['', 'unknown', 'unavailable', 'None'] else 'Slot 08' }}",
+                  "state": "{{ 'Enabled' if is_state('input_boolean.scene_slot_8_schedule_enabled', 'on') else 'Disabled' }}",
+                  "state_color": true
                 },
                 {
                   "type": "custom:template-entity-row",
                   "entity": "input_boolean.scene_slot_9_schedule_enabled",
-                  "name": "{{ (states('input_text.scene_slot_9_name') | default('') | trim) if (states('input_text.scene_slot_9_name') | default('') | trim) not in ['', 'unknown', 'unavailable', 'None'] else 'Slot 09' }}"
+                  "name": "{{ (states('input_text.scene_slot_9_name') | default('') | trim) if (states('input_text.scene_slot_9_name') | default('') | trim) not in ['', 'unknown', 'unavailable', 'None'] else 'Slot 09' }}",
+                  "state": "{{ 'Enabled' if is_state('input_boolean.scene_slot_9_schedule_enabled', 'on') else 'Disabled' }}",
+                  "state_color": true
                 },
                 {
                   "type": "custom:template-entity-row",
                   "entity": "input_boolean.scene_slot_10_schedule_enabled",
-                  "name": "{{ (states('input_text.scene_slot_10_name') | default('') | trim) if (states('input_text.scene_slot_10_name') | default('') | trim) not in ['', 'unknown', 'unavailable', 'None'] else 'Slot 10' }}"
+                  "name": "{{ (states('input_text.scene_slot_10_name') | default('') | trim) if (states('input_text.scene_slot_10_name') | default('') | trim) not in ['', 'unknown', 'unavailable', 'None'] else 'Slot 10' }}",
+                  "state": "{{ 'Enabled' if is_state('input_boolean.scene_slot_10_schedule_enabled', 'on') else 'Disabled' }}",
+                  "state_color": true
                 },
                 {
                   "type": "custom:template-entity-row",
                   "entity": "input_boolean.scene_slot_11_schedule_enabled",
-                  "name": "{{ (states('input_text.scene_slot_11_name') | default('') | trim) if (states('input_text.scene_slot_11_name') | default('') | trim) not in ['', 'unknown', 'unavailable', 'None'] else 'Slot 11' }}"
+                  "name": "{{ (states('input_text.scene_slot_11_name') | default('') | trim) if (states('input_text.scene_slot_11_name') | default('') | trim) not in ['', 'unknown', 'unavailable', 'None'] else 'Slot 11' }}",
+                  "state": "{{ 'Enabled' if is_state('input_boolean.scene_slot_11_schedule_enabled', 'on') else 'Disabled' }}",
+                  "state_color": true
                 },
                 {
                   "type": "custom:template-entity-row",
                   "entity": "input_boolean.scene_slot_12_schedule_enabled",
-                  "name": "{{ (states('input_text.scene_slot_12_name') | default('') | trim) if (states('input_text.scene_slot_12_name') | default('') | trim) not in ['', 'unknown', 'unavailable', 'None'] else 'Slot 12' }}"
+                  "name": "{{ (states('input_text.scene_slot_12_name') | default('') | trim) if (states('input_text.scene_slot_12_name') | default('') | trim) not in ['', 'unknown', 'unavailable', 'None'] else 'Slot 12' }}",
+                  "state": "{{ 'Enabled' if is_state('input_boolean.scene_slot_12_schedule_enabled', 'on') else 'Disabled' }}",
+                  "state_color": true
                 }
               ]
             },
