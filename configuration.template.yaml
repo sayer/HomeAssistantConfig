@@ -646,7 +646,7 @@ sensor:
         friendly_name: "Run time"
         value_template: >-
           {% if is_state('switch.generator', 'on') %}
-            {% if states('input_datetime.generator_run_start') not in ['unknown', 'unavailable', ''] %}
+            {% if states('input_datetime.generator_run_start') not in ['unknown', 'unavailable', '', '1970-01-01 00:00:00'] %}
               {% set start_str = states('input_datetime.generator_run_start') %}
               {% if start_str %}
                 {% set start = as_datetime(start_str) %}
@@ -3319,7 +3319,7 @@ template:
         unique_id: generator_current_session
         state: >-
           {% if is_state('switch.generator', 'on') %}
-            {% if states('input_datetime.generator_run_start') not in ['unknown', 'unavailable', ''] %}
+            {% if states('input_datetime.generator_run_start') not in ['unknown', 'unavailable', '', '1970-01-01 00:00:00'] %}
               {% set start_str = states('input_datetime.generator_run_start') %}
               {% if start_str %}
                 {% set start = as_datetime(start_str) %}
@@ -3356,7 +3356,7 @@ template:
         unique_id: generator_session_display
         state: >-
           {% if is_state('switch.generator', 'on') %}
-            {% if states('input_datetime.generator_run_start') not in ['unknown', 'unavailable', ''] %}
+            {% if states('input_datetime.generator_run_start') not in ['unknown', 'unavailable', '', '1970-01-01 00:00:00'] %}
               {% set start_str = states('input_datetime.generator_run_start') %}
               {% if start_str %}
                 {% set start = as_datetime(start_str) %}
