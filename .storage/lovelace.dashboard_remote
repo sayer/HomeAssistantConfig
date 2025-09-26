@@ -2439,31 +2439,11 @@
                   "columns": 2,
                   "cards": [
                     {
-                      "type": "conditional",
-                      "conditions": [
-                        {
-                          "condition": "state",
-                          "entity": "sensor.generator_2",
-                          "state_not": "0"
-                        },
-                        {
-                          "condition": "state",
-                          "entity": "sensor.generator_2",
-                          "state_not": "unavailable"
-                        },
-                        {
-                          "condition": "state",
-                          "entity": "sensor.generator_2",
-                          "state_not": "unknown"
-                        }
-                      ],
-                      "card": {
-                        "type": "gauge",
-                        "entity": "sensor.generator_2",
-                        "name": "Generator RPM",
-                        "max": 2000,
-                        "needle": true
-                      }
+                      "type": "gauge",
+                      "entity": "sensor.generator_2",
+                      "name": "Generator RPM",
+                      "max": 2000,
+                      "needle": true
                     },
                     {
                       "type": "custom:mushroom-entity-card",

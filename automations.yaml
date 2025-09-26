@@ -1463,7 +1463,7 @@
       entity_id: input_datetime.generator_run_start
     data:
       datetime: '{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}'
-    action: input_datetime.set_datetime
+    service: input_datetime.set_datetime
 
 - id: '1751577301702'
   alias: Generator Turned Off
@@ -1490,16 +1490,16 @@
       entity_id: input_number.generator_last_session_seconds
     data:
       value: '{{ duration }}'
-    action: input_number.set_value
-  - service: input_datetime.set_datetime
-    target:
-      entity_id: input_datetime.generator_run_start
-    data:
-      datetime: ""
+    service: input_number.set_value
   - service: persistent_notification.create
     data:
       title: "Generator Stopped"
       message: "Generator stopped after running for {{ duration_hours }} hours and {{ duration_minutes }} minutes"
+  - service: input_datetime.set_datetime
+    target:
+      entity_id: input_datetime.generator_run_start
+    data:
+      datetime: '1970-01-01 00:00:00'
   - service: script.notify_home
     data:
       title: "Foretravel"
@@ -1607,6 +1607,9 @@
             - condition: state
               entity_id: input_datetime.generator_run_start
               state: 'unavailable'
+            - condition: state
+              entity_id: input_datetime.generator_run_start
+              state: '1970-01-01 00:00:00'
             - condition: template
               value_template: "{{ states('input_datetime.generator_run_start') == '' }}"
     - service: input_datetime.set_datetime

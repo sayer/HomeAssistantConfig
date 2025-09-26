@@ -739,9 +739,9 @@ generator_start_with_verification:
         minutes: 30
     
     # Turn on generator
-    - service: switch.turn_on
-      target:
-        entity_id: switch.generator
+      - service: switch.turn_on
+            target:
+              entity_id: switch.generator
     
     # Wait 30 seconds for generator to start
     - delay:
@@ -761,7 +761,7 @@ generator_start_with_verification:
           # Wait 60 seconds before next check
           - delay:
               seconds: 60
-    
+
     # Final verification - if still off, send notification
     - condition: template
       value_template: "{{ is_state('switch.generator', 'off') }}"
@@ -772,6 +772,99 @@ generator_start_with_verification:
         data:
           priority: "high"
           channel: "alerts"
+
+generator_start_reliable:
+  alias: "Generator Start - Retry"
+  description: "Attempts to start the generator up to three times with notifications between retries"
+  mode: single
+  sequence:
+    # First attempt
+    - service: script.notify_home
+      data:
+        title: "Generator Start"
+        message: "Attempting to start the generator (try 1 of 3)."
+    - service: switch.turn_on
+      target:
+        entity_id: switch.generator
+    - delay:
+        seconds: 20
+    - choose:
+        - conditions:
+            - condition: state
+              entity_id: switch.generator
+              state: 'on'
+          sequence:
+            - service: script.notify_home
+              data:
+                title: "Generator Start"
+                message: "Generator started successfully on the first attempt."
+            - stop: "Generator started successfully"
+
+    # Wait before second attempt
+    - service: script.notify_home
+      data:
+        title: "Generator Start"
+        message: "Generator still off. Waiting 30 seconds before retrying (try 2 of 3)."
+    - delay:
+        seconds: 30
+
+    # Second attempt
+    - service: script.notify_home
+      data:
+        title: "Generator Start"
+        message: "Attempting to start the generator (try 2 of 3)."
+    - service: switch.turn_on
+      target:
+        entity_id: switch.generator
+    - delay:
+        seconds: 20
+    - choose:
+        - conditions:
+            - condition: state
+              entity_id: switch.generator
+              state: 'on'
+          sequence:
+            - service: script.notify_home
+              data:
+                title: "Generator Start"
+                message: "Generator started successfully on the second attempt."
+            - stop: "Generator started after second attempt"
+
+    # Wait before third attempt
+    - service: script.notify_home
+      data:
+        title: "Generator Start"
+        message: "Generator still off. Waiting 1 minute before the final attempt (try 3 of 3)."
+    - delay:
+        minutes: 1
+
+    # Third attempt
+    - service: script.notify_home
+      data:
+        title: "Generator Start"
+        message: "Attempting to start the generator (try 3 of 3)."
+    - service: switch.turn_on
+      target:
+        entity_id: switch.generator
+    - delay:
+        seconds: 20
+    - choose:
+        - conditions:
+            - condition: state
+              entity_id: switch.generator
+              state: 'on'
+          sequence:
+            - service: script.notify_home
+              data:
+                title: "Generator Start"
+                message: "Generator started successfully on the final attempt."
+            - stop: "Generator started after final attempt"
+
+    # All attempts failed
+    - service: script.notify_home
+      data:
+        title: "Generator Start"
+        message: "Generator failed to start after three attempts. Manual intervention required."
 
 save_scene:
   alias: "Save Current Scene"
