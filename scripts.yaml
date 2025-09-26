@@ -739,9 +739,9 @@ generator_start_with_verification:
         minutes: 30
     
     # Turn on generator
-      - service: switch.turn_on
-            target:
-              entity_id: switch.generator
+    - service: switch.turn_on
+      target:
+        entity_id: switch.generator
     
     # Wait 30 seconds for generator to start
     - delay:
