@@ -39,9 +39,11 @@
                       "type": "entity",
                       "entity": "script.drive_time",
                       "tap_action": {
-                        "action": "call-service",
-                        "service": "script.drive_time",
-                        "target": {}
+                        "action": "perform-action",
+                        "perform_action": "script.turn_on",
+                        "target": {
+                          "entity_id": "script.drive_time"
+                        }
                       },
                       "icon": "mdi:steering",
                       "name": "Drive",
@@ -54,9 +56,11 @@
                       "content_info": "name",
                       "icon": "mdi:parking",
                       "tap_action": {
-                        "action": "call-service",
-                        "service": "script.store_bus",
-                        "target": {}
+                        "action": "perform-action",
+                        "perform_action": "script.turn_on",
+                        "target": {
+                          "entity_id": "script.store_bus"
+                        }
                       }
                     },
                     {
@@ -66,18 +70,22 @@
                       "content_info": "name",
                       "icon": "mdi:sun-clock",
                       "tap_action": {
-                        "action": "call-service",
-                        "service": "script.good_morning",
-                        "target": {}
+                        "action": "perform-action",
+                        "perform_action": "script.turn_on",
+                        "target": {
+                          "entity_id": "script.good_morning"
+                        }
                       }
                     },
                     {
                       "type": "entity",
                       "entity": "script.evening",
                       "tap_action": {
-                        "action": "call-service",
-                        "service": "script.evening",
-                        "target": {}
+                        "action": "perform-action",
+                        "perform_action": "script.turn_on",
+                        "target": {
+                          "entity_id": "script.evening"
+                        }
                       },
                       "icon": "mdi:clock-time-seven",
                       "name": "Evening",
@@ -89,22 +97,26 @@
                       "name": "Night",
                       "content_info": "name",
                       "tap_action": {
-                        "action": "call-service",
-                        "service": "script.good_night",
-                        "target": {}
+                        "action": "perform-action",
+                        "perform_action": "script.turn_on",
+                        "target": {
+                          "entity_id": "script.good_night"
+                        }
                       },
                       "icon": "mdi:lightbulb-night"
                     },
                     {
                       "type": "entity",
-                      "entity": "person.stephen_ayers",
+                      "entity": "script.tv_time",
                       "name": "TV",
                       "content_info": "name",
                       "icon": "mdi:television",
                       "tap_action": {
-                        "action": "call-service",
-                        "service": "script.tv_time",
-                        "target": {}
+                        "action": "perform-action",
+                        "perform_action": "script.turn_on",
+                        "target": {
+                          "entity_id": "script.tv_time"
+                        }
                       }
                     }
                   ]
@@ -518,111 +530,6 @@
                   ],
                   "state_color": true,
                   "title": "Shades"
-                },
-                {
-                  "square": true,
-                  "type": "grid",
-                  "cards": [
-                    {
-                      "show_name": true,
-                      "show_icon": true,
-                      "type": "button",
-                      "entity": "script.save_scene",
-                      "name": "Scene 1",
-                      "tap_action": {
-                        "action": "perform-action",
-                        "perform_action": "script.save_scene",
-                        "target": {},
-                        "data": {
-                          "scene_name": "Scene 1"
-                        }
-                      }
-                    },
-                    {
-                      "show_name": true,
-                      "show_icon": true,
-                      "type": "button",
-                      "entity": "script.save_scene",
-                      "name": "Scene 2",
-                      "tap_action": {
-                        "action": "perform-action",
-                        "perform_action": "script.save_scene",
-                        "target": {},
-                        "data": {
-                          "scene_name": "Scene 2"
-                        }
-                      }
-                    },
-                    {
-                      "show_name": true,
-                      "show_icon": true,
-                      "type": "button",
-                      "entity": "script.save_scene",
-                      "name": "Scene 3",
-                      "tap_action": {
-                        "action": "perform-action",
-                        "perform_action": "script.save_scene",
-                        "target": {},
-                        "data": {
-                          "scene_name": "Scene 3"
-                        }
-                      }
-                    }
-                  ],
-                  "title": "Save Scene"
-                },
-                {
-                  "square": true,
-                  "type": "grid",
-                  "cards": [
-                    {
-                      "show_name": true,
-                      "show_icon": true,
-                      "type": "button",
-                      "entity": "script.load_saved_scene",
-                      "name": "Scene 1",
-                      "tap_action": {
-                        "action": "perform-action",
-                        "perform_action": "script.load_scene",
-                        "target": {},
-                        "data": {
-                          "scene_name": "Scene 1"
-                        }
-                      }
-                    },
-                    {
-                      "show_name": true,
-                      "show_icon": true,
-                      "type": "button",
-                      "entity": "script.load_saved_scene",
-                      "name": "Scene 2",
-                      "tap_action": {
-                        "action": "perform-action",
-                        "perform_action": "script.load_scene",
-                        "target": {},
-                        "data": {
-                          "scene_name": "Scene 2"
-                        }
-                      }
-                    },
-                    {
-                      "show_name": true,
-                      "show_icon": true,
-                      "type": "button",
-                      "entity": "script.load_saved_scene",
-                      "name": "Scene 3",
-                      "tap_action": {
-                        "action": "perform-action",
-                        "perform_action": "script.load_scene",
-                        "target": {},
-                        "data": {
-                          "scene_name": "Scene 3"
-                        }
-                      },
-                      "show_state": false
-                    }
-                  ],
-                  "title": "Load Scene"
                 }
               ]
             },
