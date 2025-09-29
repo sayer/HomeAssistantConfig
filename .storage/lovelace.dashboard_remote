@@ -2268,7 +2268,7 @@
                       "entity": "switch.generator",
                       "name": "Status",
                       "tap_action": {
-                        "action": "toggle"
+                        "action": "more-info"
                       },
                       "fill_container": true,
                       "icon": "mdi:turbine"
@@ -2280,7 +2280,8 @@
                       "icon": "{{ 'mdi:stop-circle' if is_state('switch.generator', 'on') else 'mdi:play-circle' }}\n",
                       "icon_color": "{{ 'red' if is_state('switch.generator', 'on') else 'green' }}\n",
                       "tap_action": {
-                        "action": "toggle"
+                        "action": "call-service",
+                        "service": "{{ 'script.stop_generator' if is_state('switch.generator', 'on') else 'script.start_generator' }}"
                       },
                       "fill_container": true
                     },

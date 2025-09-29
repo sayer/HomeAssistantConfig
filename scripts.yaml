@@ -656,10 +656,11 @@ generator_shutdown_with_verification:
     delay_minutes:
       description: "Number of minutes to wait before shutting down generator"
       example: 30
-      required: true
+      required: false
+      default: 0
       selector:
         number:
-          min: 1
+          min: 0
           max: 480
           step: 1
           unit_of_measurement: "minutes"
@@ -671,10 +672,18 @@ generator_shutdown_with_verification:
       selector:
         text:
   sequence:
+    - choose:
+        - conditions:
+            - condition: state
+              entity_id: switch.generator
+              state: 'off'
+          sequence:
+            - stop: "Generator already off"
+
     # Wait for the specified delay
     - delay:
-        minutes: 30
-    
+        minutes: "{{ delay_minutes | int }}"
+
     # Turn off generator
     - service: switch.turn_off
       target:
@@ -701,15 +710,18 @@ generator_shutdown_with_verification:
               seconds: 30
     
     # Final verification - if still running, send notification
-    - condition: template
-      value_template: "{{ is_state('switch.generator', 'on') }}"
-    - service: "{{ notification_service }}"
-      data:
-        title: "Generator Shutdown Failed"
-        message: "Unable to stop generator after {{ delay_minutes }} minutes and 3 retry attempts. Manual intervention required."
-        data:
-          priority: "high"
-          channel: "alerts"
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: "{{ is_state('switch.generator', 'on') }}"
+          sequence:
+            - service: "{{ notification_service }}"
+              data:
+                title: "Generator Shutdown Failed"
+                message: "Unable to stop generator after {{ delay_minutes }} minutes and 3 retry attempts. Manual intervention required."
+                data:
+                  priority: "high"
+                  channel: "alerts"
 
 # Generator Start with Verification Script
 generator_start_with_verification:
@@ -719,10 +731,11 @@ generator_start_with_verification:
     delay_minutes:
       description: "Number of minutes to wait before starting generator"
       example: 5
-      required: true
+      required: false
+      default: 0
       selector:
         number:
-          min: 1
+          min: 0
           max: 480
           step: 1
           unit_of_measurement: "minutes"
@@ -734,10 +747,18 @@ generator_start_with_verification:
       selector:
         text:
   sequence:
+    - choose:
+        - conditions:
+            - condition: state
+              entity_id: switch.generator
+              state: 'on'
+          sequence:
+            - stop: "Generator already running"
+
     # Wait for the specified delay
     - delay:
-        minutes: 30
-    
+        minutes: "{{ delay_minutes | int }}"
+
     # Turn on generator
     - service: switch.turn_on
       target:
@@ -763,15 +784,32 @@ generator_start_with_verification:
               seconds: 60
 
     # Final verification - if still off, send notification
-    - condition: template
-      value_template: "{{ is_state('switch.generator', 'off') }}"
-    - service: "{{ notification_service }}"
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: "{{ is_state('switch.generator', 'off') }}"
+          sequence:
+            - service: "{{ notification_service }}"
+              data:
+                title: "Generator Startup Failed"
+                message: "Unable to start generator after {{ delay_minutes }} minutes and 3 retry attempts. Manual intervention required."
+                data:
+                  priority: "high"
+                  channel: "alerts"
+
+start_generator:
+  alias: "Start Generator"
+  sequence:
+    - service: script.generator_start_with_verification
       data:
-        title: "Generator Startup Failed"
-        message: "Unable to start generator after {{ delay_minutes }} minutes and 3 retry attempts. Manual intervention required."
-        data:
-          priority: "high"
-          channel: "alerts"
+        delay_minutes: 0
+
+stop_generator:
+  alias: "Stop Generator"
+  sequence:
+    - service: script.generator_shutdown_with_verification
+      data:
+        delay_minutes: 0
 
 generator_start_reliable:
   alias: "Generator Start - Retry"
