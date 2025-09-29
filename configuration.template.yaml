@@ -3323,7 +3323,9 @@ template:
             {% if start_str not in ['unknown', 'unavailable', '', '1970-01-01 00:00:00'] %}
               {% set start = as_datetime(start_str) %}
               {% if start %}
-                {% set duration = (now() - start).total_seconds() | int %}
+                {% set start_naive = start.replace(tzinfo=None) %}
+                {% set now_naive = now().replace(tzinfo=None) %}
+                {% set duration = (now_naive - start_naive).total_seconds() | int %}
                 {{ [duration, 0] | max }}
               {% else %}
                 0
@@ -3356,7 +3358,9 @@ template:
             {% if start_str not in ['unknown', 'unavailable', '', '1970-01-01 00:00:00'] %}
               {% set start = as_datetime(start_str) %}
               {% if start %}
-                {% set duration_seconds = (now() - start).total_seconds() | int %}
+                {% set start_naive = start.replace(tzinfo=None) %}
+                {% set now_naive = now().replace(tzinfo=None) %}
+                {% set duration_seconds = (now_naive - start_naive).total_seconds() | int %}
                 {% set duration_seconds = [duration_seconds, 0] | max %}
               {% endif %}
             {% endif %}
