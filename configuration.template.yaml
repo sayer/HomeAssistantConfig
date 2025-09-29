@@ -65,7 +65,7 @@ input_number:
   generator_last_session_seconds:
     name: Last Generator Run
     min: 0
-    max: 86400
+    max: 604800
     step: 1
     unit_of_measurement: "s"
     initial: 0
@@ -3319,22 +3319,17 @@ template:
         unique_id: generator_current_session
         state: >-
           {% if is_state('switch.generator', 'on') %}
-            {% if states('input_datetime.generator_run_start') not in ['unknown', 'unavailable', '', '1970-01-01 00:00:00'] %}
-              {% set start_str = states('input_datetime.generator_run_start') %}
-              {% if start_str %}
-                {% set start = as_datetime(start_str) %}
-                {% if start %}
-                  {% set now_naive = now().replace(tzinfo=None) %}
-                  {% set start_naive = start.replace(tzinfo=None) %}
-                  {{ (now_naive - start_naive).total_seconds() | int }}
-                {% else %}
-                  60
-                {% endif %}
+            {% set start_str = states('input_datetime.generator_run_start') %}
+            {% if start_str not in ['unknown', 'unavailable', '', '1970-01-01 00:00:00'] %}
+              {% set start = as_datetime(start_str) %}
+              {% if start %}
+                {% set duration = (now() - start).total_seconds() | int %}
+                {{ [duration, 0] | max }}
               {% else %}
-                60
+                0
               {% endif %}
             {% else %}
-              60
+              0
             {% endif %}
           {% else %}
             {% if states('input_number.generator_last_session_seconds') not in ['unknown', 'unavailable', ''] %}
@@ -3356,26 +3351,18 @@ template:
         unique_id: generator_session_display
         state: >-
           {% if is_state('switch.generator', 'on') %}
-            {% if states('input_datetime.generator_run_start') not in ['unknown', 'unavailable', '', '1970-01-01 00:00:00'] %}
-              {% set start_str = states('input_datetime.generator_run_start') %}
-              {% if start_str %}
-                {% set start = as_datetime(start_str) %}
-                {% if start %}
-                  {% set now_naive = now().replace(tzinfo=None) %}
-                  {% set start_naive = start.replace(tzinfo=None) %}
-                  {% set duration_seconds = (now_naive - start_naive).total_seconds() | int %}
-                  {% set hours = duration_seconds // 3600 %}
-                  {% set minutes = (duration_seconds % 3600) // 60 %}
-                  Running: {{ hours }} hr {{ minutes }} min
-                {% else %}
-                  Running: 0 hr 1 min
-                {% endif %}
-              {% else %}
-                Running: 0 hr 1 min
+            {% set start_str = states('input_datetime.generator_run_start') %}
+            {% set duration_seconds = 0 %}
+            {% if start_str not in ['unknown', 'unavailable', '', '1970-01-01 00:00:00'] %}
+              {% set start = as_datetime(start_str) %}
+              {% if start %}
+                {% set duration_seconds = (now() - start).total_seconds() | int %}
+                {% set duration_seconds = [duration_seconds, 0] | max %}
               {% endif %}
-            {% else %}
-              Running: 0 hr 1 min
             {% endif %}
+            {% set hours = duration_seconds // 3600 %}
+            {% set minutes = (duration_seconds % 3600) // 60 %}
+            Running: {{ hours }} hr {{ minutes }} min
           {% else %}
             {% if states('input_number.generator_last_session_seconds') not in ['unknown', 'unavailable', ''] %}
               {% set duration_str = states('input_number.generator_last_session_seconds') %}
