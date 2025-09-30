@@ -630,16 +630,24 @@ sensor:
       ac_source:
         friendly_name: "Power Source"
         value_template: >-
-          {% set rms_current = states('sensor.power_rms_current') %}
-          {% set generator_status = states('sensor.generatorstatus') %}
-          {% if rms_current == 'unknown' and generator_status != 'running' %}
-          unknown
-          {% elif (rms_current == 0) or (rms_current == 'unknown') %}
-          Inverter
-          {% elif generator_status == 'running' %}
-          Generator
+          {% set switch_pos = states('sensor.ats_switch_position') | lower %}
+          {% set inverter_state = states('sensor.inverter_status') | lower %}
+          {% set inverter_valid = inverter_state not in ['unknown', 'unavailable'] %}
+          {% set generator_state = states('sensor.generatorstatus') | lower %}
+          {% if switch_pos == 'source 2' %}
+            Generator
+          {% elif switch_pos == 'source 1' %}
+            {% if inverter_valid and inverter_state in ['invert', 'waiting to invert'] %}
+              Inverter
+            {% else %}
+              Shore
+            {% endif %}
+          {% elif inverter_valid and inverter_state in ['invert', 'waiting to invert'] %}
+            Inverter
+          {% elif generator_state == 'running' %}
+            Generator
           {% else %}
-          Shore
+            unknown
           {% endif %}
 
       generator_current_run_time:
@@ -2707,6 +2715,68 @@ mqtt:
       state_class: measurement
       unit_of_measurement: "V"
       unique_id: "power_rms_voltage"
+    - name: "ATS Switch Position"
+      state_topic: "RVC/ATS_STATUS/1"
+      value_template: >-
+        {% set switch_pos = value_json.get('switch position definition') or value_json.get('switch position') %}
+        {% if switch_pos in [none, 'n/a', 'unknown', 'unavailable'] %}
+          unknown
+        {% else %}
+          {{ switch_pos }}
+        {% endif %}
+      unique_id: "ats_switch_position"
+    - name: "AC Line 1 Voltage"
+      state_topic: "RVC/INVERTER_AC_STATUS_1/1"
+      unit_of_measurement: "V"
+      device_class: voltage
+      state_class: measurement
+      value_template: >-
+        {% set voltage = value_json.get('rms voltage') %}
+        {% if voltage in [none, 'n/a', 'unknown', 'unavailable'] %}
+          unknown
+        {% else %}
+          {{ (voltage | float) | round(1) }}
+        {% endif %}
+      unique_id: "coach_power_line_1_voltage"
+    - name: "AC Line 1 Current"
+      state_topic: "RVC/INVERTER_AC_STATUS_1/1"
+      unit_of_measurement: "A"
+      device_class: current
+      state_class: measurement
+      value_template: >-
+        {% set current = value_json.get('rms current') %}
+        {% if current in [none, 'n/a', 'unknown', 'unavailable'] %}
+          unknown
+        {% else %}
+          {{ (current | float) | round(1) }}
+        {% endif %}
+      unique_id: "coach_power_line_1_current"
+    - name: "AC Line 2 Voltage"
+      state_topic: "RVC/INVERTER_AC_STATUS_1/2"
+      unit_of_measurement: "V"
+      device_class: voltage
+      state_class: measurement
+      value_template: >-
+        {% set voltage = value_json.get('rms voltage') %}
+        {% if voltage in [none, 'n/a', 'unknown', 'unavailable'] %}
+          unknown
+        {% else %}
+          {{ (voltage | float) | round(1) }}
+        {% endif %}
+      unique_id: "coach_power_line_2_voltage"
+    - name: "AC Line 2 Current"
+      state_topic: "RVC/INVERTER_AC_STATUS_1/2"
+      unit_of_measurement: "A"
+      device_class: current
+      state_class: measurement
+      value_template: >-
+        {% set current = value_json.get('rms current') %}
+        {% if current in [none, 'n/a', 'unknown', 'unavailable'] %}
+          unknown
+        {% else %}
+          {{ (current | float) | round(1) }}
+        {% endif %}
+      unique_id: "coach_power_line_2_current"
     - name: "Generator RPM"
       state_topic: "RVC/GENERATOR_STATUS_2"
       value_template: "{{ (((value_json['engine rpm']) | float) * 0.125) | int}}"

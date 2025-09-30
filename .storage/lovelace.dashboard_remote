@@ -2044,7 +2044,35 @@
                       "entity": "sensor.generator"
                     }
                   ],
-                  "title": "Power"
+                  "title": "Power Source",
+                  "state_color": true
+                },
+                {
+                  "show_name": true,
+                  "show_icon": true,
+                  "show_state": true,
+                  "type": "glance",
+                  "entities": [
+                    {
+                      "entity": "sensor.ac_line_1_voltage",
+                      "name": "Line 1 Voltage"
+                    },
+                    {
+                      "entity": "sensor.ac_line_1_current",
+                      "name": "Line 1 Current"
+                    },
+                    {
+                      "entity": "sensor.ac_line_2_voltage",
+                      "name": "Line 2 Voltage"
+                    },
+                    {
+                      "entity": "sensor.ac_line_2_current",
+                      "name": "Line 2 Current"
+                    }
+                  ],
+                  "title": "Line Load",
+                  "columns": 2,
+                  "state_color": true
                 },
                 {
                   "show_name": true,
