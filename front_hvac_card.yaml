@@ -12,6 +12,9 @@ cards:
       state: false
       mode: false
       fan: false
+    control:
+      hvac:
+        auto: false
     style: |
       ha-card {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
