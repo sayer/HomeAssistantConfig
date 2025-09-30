@@ -2719,7 +2719,7 @@ mqtt:
       state_topic: "RVC/ATS_STATUS/1"
       value_template: >-
         {% set switch_pos = value_json.get('switch position definition') or value_json.get('switch position') %}
-        {% if switch_pos in [none, 'n/a', 'unknown', 'unavailable'] %}
+        {% if switch_pos in [None, 'n/a', 'unknown', 'unavailable'] %}
           unknown
         {% else %}
           {{ switch_pos }}
@@ -2732,7 +2732,7 @@ mqtt:
       state_class: measurement
       value_template: >-
         {% set voltage = value_json.get('rms voltage') %}
-        {% if voltage in [none, 'n/a', 'unknown', 'unavailable'] %}
+        {% if voltage in [None, 'n/a', 'unknown', 'unavailable'] %}
           unknown
         {% else %}
           {{ (voltage | float) | round(1) }}
@@ -2745,7 +2745,7 @@ mqtt:
       state_class: measurement
       value_template: >-
         {% set current = value_json.get('rms current') %}
-        {% if current in [none, 'n/a', 'unknown', 'unavailable'] %}
+        {% if current in [None, 'n/a', 'unknown', 'unavailable'] %}
           unknown
         {% else %}
           {{ (current | float) | round(1) }}
@@ -2758,7 +2758,7 @@ mqtt:
       state_class: measurement
       value_template: >-
         {% set voltage = value_json.get('rms voltage') %}
-        {% if voltage in [none, 'n/a', 'unknown', 'unavailable'] %}
+        {% if voltage in [None, 'n/a', 'unknown', 'unavailable'] %}
           unknown
         {% else %}
           {{ (voltage | float) | round(1) }}
@@ -2771,7 +2771,7 @@ mqtt:
       state_class: measurement
       value_template: >-
         {% set current = value_json.get('rms current') %}
-        {% if current in [none, 'n/a', 'unknown', 'unavailable'] %}
+        {% if current in [None, 'n/a', 'unknown', 'unavailable'] %}
           unknown
         {% else %}
           {{ (current | float) | round(1) }}
