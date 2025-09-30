@@ -782,13 +782,19 @@ mqtt:
       - "off"
       - "cool"
       - "heat"
-      - "auto"
       - "fan_only"
     fan_modes:
       - "auto"
       - "on"
     mode_state_topic: "RVC/THERMOSTAT_STATUS_1/%%THERMOSTAT1%%"
-    mode_state_template: "{{ value_json['operating mode definition'] }}"
+    # RVC reports 'auto'; remap to a supported mode to hide Auto in HA.
+    mode_state_template: >-
+      {% set raw_mode = value_json['operating mode definition'] %}
+      {% if raw_mode == 'auto' %}
+        cool
+      {% else %}
+        {{ raw_mode }}
+      {% endif %}
     temperature_state_topic: "RVC/THERMOSTAT_STATUS_1/%%THERMOSTAT1%%"
     temperature_state_template: >-
       {% if value_json['operating mode definition'] == 'cool' or value_json['operating mode definition'] == 'auto' %}
@@ -811,7 +817,7 @@ mqtt:
     temperature_command_topic: "RVC/THERMOSTAT_COMMAND_1/%%THERMOSTAT1%%/set"
     temperature_command_template: '{"instance":%%THERMOSTAT1%%, "operating mode":1, "fan mode":0, "schedule mode":0, "fan speed":0, "setpoint temp heat":{{ ((value - 32) * 5/9) | int }}, "setpoint temp cool":{{ ((value - 32) * 5/9) | int }}}'
     mode_command_topic: "RVC/THERMOSTAT_COMMAND_1/%%THERMOSTAT1%%/set"
-    mode_command_template: '{"instance":%%THERMOSTAT1%%, "operating mode":{{ 0 if value == "off" else 1 if value == "cool" else 2 if value == "heat" else 3 if value == "auto" else 4 if value == "fan_only" else 0 }}, "fan mode":0, "schedule mode":0, "fan speed":0}'
+    mode_command_template: '{"instance":%%THERMOSTAT1%%, "operating mode":{{ 0 if value == "off" else 1 if value == "cool" else 2 if value == "heat" else 4 if value == "fan_only" else 0 }}, "fan mode":0, "schedule mode":0, "fan speed":0}'
 
     unique_id: "hvac_livingroom_thermostat"
     precision: 1.0
@@ -827,13 +833,19 @@ mqtt:
       - "off"
       - "cool"
       - "heat"
-      - "auto"
       - "fan_only"
     fan_modes:
       - "auto"
       - "on"
     mode_state_topic: "RVC/THERMOSTAT_STATUS_1/%%THERMOSTAT2%%"
-    mode_state_template: "{{ value_json['operating mode definition'] }}"
+    # RVC reports 'auto'; remap to a supported mode to hide Auto in HA.
+    mode_state_template: >-
+      {% set raw_mode = value_json['operating mode definition'] %}
+      {% if raw_mode == 'auto' %}
+        cool
+      {% else %}
+        {{ raw_mode }}
+      {% endif %}
     temperature_state_topic: "RVC/THERMOSTAT_STATUS_1/%%THERMOSTAT2%%"
     temperature_state_template: >-
       {% if value_json['operating mode definition'] == 'cool' or value_json['operating mode definition'] == 'auto' %}
@@ -856,7 +868,7 @@ mqtt:
     temperature_command_topic: "RVC/THERMOSTAT_COMMAND_1/%%THERMOSTAT2%%/set"
     temperature_command_template: '{"instance":%%THERMOSTAT2%%, "operating mode":1, "fan mode":0, "schedule mode":0, "fan speed":0, "setpoint temp heat":{{ ((value - 32) * 5/9) | int }}, "setpoint temp cool":{{ ((value - 32) * 5/9) | int }}}'
     mode_command_topic: "RVC/THERMOSTAT_COMMAND_1/%%THERMOSTAT2%%/set"
-    mode_command_template: '{"instance":%%THERMOSTAT2%%, "operating mode":{{ 0 if value == "off" else 1 if value == "cool" else 2 if value == "heat" else 3 if value == "auto" else 4 if value == "fan_only" else 0 }}, "fan mode":0, "schedule mode":0, "fan speed":0}'
+    mode_command_template: '{"instance":%%THERMOSTAT2%%, "operating mode":{{ 0 if value == "off" else 1 if value == "cool" else 2 if value == "heat" else 4 if value == "fan_only" else 0 }}, "fan mode":0, "schedule mode":0, "fan speed":0}'
 
     unique_id: "hvac_kitchen_thermostat"
     precision: 1.0
@@ -871,13 +883,19 @@ mqtt:
       - "off"
       - "cool"
       - "heat"
-      - "auto"
       - "fan_only"
     fan_modes:
       - "auto"
       - "on"
     mode_state_topic: "RVC/THERMOSTAT_STATUS_1/%%THERMOSTAT3%%"
-    mode_state_template: "{{ value_json['operating mode definition'] }}"
+    # RVC reports 'auto'; remap to a supported mode to hide Auto in HA.
+    mode_state_template: >-
+      {% set raw_mode = value_json['operating mode definition'] %}
+      {% if raw_mode == 'auto' %}
+        cool
+      {% else %}
+        {{ raw_mode }}
+      {% endif %}
     temperature_state_topic: "RVC/THERMOSTAT_STATUS_1/%%THERMOSTAT3%%"
     temperature_state_template: >-
       {% if value_json['operating mode definition'] == 'cool' or value_json['operating mode definition'] == 'auto' %}
@@ -900,7 +918,7 @@ mqtt:
     temperature_command_topic: "RVC/THERMOSTAT_COMMAND_1/%%THERMOSTAT3%%/set"
     temperature_command_template: '{"instance":%%THERMOSTAT3%%, "operating mode":1, "fan mode":0, "schedule mode":0, "fan speed":0, "setpoint temp heat":{{ ((value - 32) * 5/9) | int }}, "setpoint temp cool":{{ ((value - 32) * 5/9) | int }}}'
     mode_command_topic: "RVC/THERMOSTAT_COMMAND_1/%%THERMOSTAT3%%/set"
-    mode_command_template: '{"instance":%%THERMOSTAT3%%, "operating mode":{{ 0 if value == "off" else 1 if value == "cool" else 2 if value == "heat" else 3 if value == "auto" else 4 if value == "fan_only" else 0 }}, "fan mode":0, "schedule mode":0, "fan speed":0}'
+    mode_command_template: '{"instance":%%THERMOSTAT3%%, "operating mode":{{ 0 if value == "off" else 1 if value == "cool" else 2 if value == "heat" else 4 if value == "fan_only" else 0 }}, "fan mode":0, "schedule mode":0, "fan speed":0}'
 
     unique_id: "hvac_bedroom_thermostat"
     precision: 1.0
@@ -915,13 +933,19 @@ mqtt:
       - "off"
       - "cool"
       - "heat"
-      - "auto"
       - "fan_only"
     fan_modes:
       - "auto"
       - "on"
     mode_state_topic: "RVC/THERMOSTAT_STATUS_1/%%THERMOSTAT4%%"
-    mode_state_template: "{{ value_json['operating mode definition'] }}"
+    # RVC reports 'auto'; remap to a supported mode to hide Auto in HA.
+    mode_state_template: >-
+      {% set raw_mode = value_json['operating mode definition'] %}
+      {% if raw_mode == 'auto' %}
+        cool
+      {% else %}
+        {{ raw_mode }}
+      {% endif %}
     temperature_state_topic: "RVC/THERMOSTAT_STATUS_1/%%THERMOSTAT4%%"
     temperature_state_template: >-
       {% if value_json['operating mode definition'] == 'cool' or value_json['operating mode definition'] == 'auto' %}
@@ -944,7 +968,7 @@ mqtt:
     temperature_command_topic: "RVC/THERMOSTAT_COMMAND_1/%%THERMOSTAT4%%/set"
     temperature_command_template: '{"instance":%%THERMOSTAT4%%, "operating mode":1, "fan mode":0, "schedule mode":0, "fan speed":0, "setpoint temp heat":{{ ((value - 32) * 5/9) | int }}, "setpoint temp cool":{{ ((value - 32) * 5/9) | int }}}'
     mode_command_topic: "RVC/THERMOSTAT_COMMAND_1/%%THERMOSTAT4%%/set"
-    mode_command_template: '{"instance":%%THERMOSTAT4%%, "operating mode":{{ 0 if value == "off" else 1 if value == "cool" else 2 if value == "heat" else 3 if value == "auto" else 4 if value == "fan_only" else 0 }}, "fan mode":0, "schedule mode":0, "fan speed":0}'
+    mode_command_template: '{"instance":%%THERMOSTAT4%%, "operating mode":{{ 0 if value == "off" else 1 if value == "cool" else 2 if value == "heat" else 4 if value == "fan_only" else 0 }}, "fan mode":0, "schedule mode":0, "fan speed":0}'
 
     unique_id: "hvac_bathroom_thermostat"
     precision: 1.0
