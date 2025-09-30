@@ -32,6 +32,17 @@ fi
 cd "$REPO_DIR"
 log_message "Changed to repository directory: $REPO_DIR"
 
+# Capture initial git state so we can tell if anything changed
+INITIAL_HEAD=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
+INITIAL_STATUS=$(git status --porcelain=v1 2>/dev/null || echo "__GIT_STATUS_ERROR__")
+
+if [ "$INITIAL_STATUS" = "__GIT_STATUS_ERROR__" ]; then
+  log_message "WARNING: Unable to read initial git status"
+  INITIAL_STATUS=""
+elif [ -n "$INITIAL_STATUS" ]; then
+  log_message "NOTICE: Repository has local changes before update"
+fi
+
 # Check git for updates
 log_message "Checking for git updates..."
 
@@ -49,7 +60,7 @@ else
       
       if [ -n "$LOCAL" ] && [ -n "$REMOTE" ] && [ "$LOCAL" != "$REMOTE" ]; then
         log_message "Updates available, pulling changes..."
-        if git pull 2>/dev/null; then
+        if git pull --ff-only 2>/dev/null; then
           log_message "Git pull completed successfully"
         else
           log_message "ERROR: Git pull failed, possibly due to permissions or conflicts"
@@ -156,4 +167,39 @@ else
 fi
 
 log_message "Script completed successfully"
+
+# Summarize git state changes for troubleshooting
+FINAL_HEAD=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
+FINAL_STATUS=$(git status --porcelain=v1 2>/dev/null || echo "__GIT_STATUS_ERROR__")
+
+if [ "$FINAL_STATUS" = "__GIT_STATUS_ERROR__" ]; then
+  log_message "WARNING: Unable to read final git status"
+  FINAL_STATUS=""
+fi
+
+HEAD_CHANGED=0
+WORKTREE_CHANGED=0
+
+if [ "$INITIAL_HEAD" != "unknown" ] && [ "$FINAL_HEAD" != "unknown" ] && [ "$INITIAL_HEAD" != "$FINAL_HEAD" ]; then
+  HEAD_CHANGED=1
+fi
+
+if [ "$FINAL_STATUS" != "$INITIAL_STATUS" ]; then
+  WORKTREE_CHANGED=1
+fi
+
+if [ $HEAD_CHANGED -eq 1 ] || [ $WORKTREE_CHANGED -eq 1 ]; then
+  log_message "Git repository changed during update (HEAD changed: $HEAD_CHANGED, worktree changed: $WORKTREE_CHANGED)"
+  if [ -n "$FINAL_STATUS" ]; then
+    log_message "Current git status:"
+    while IFS= read -r status_line; do
+      [ -n "$status_line" ] && log_message "  $status_line"
+    done <<<"$FINAL_STATUS"
+  else
+    log_message "Current git status: clean"
+  fi
+else
+  log_message "Git repository unchanged by this run"
+fi
+
 exit 0
