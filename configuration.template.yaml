@@ -2718,12 +2718,11 @@ mqtt:
     - name: "ATS Switch Position"
       state_topic: "RVC/ATS_STATUS/1"
       value_template: >-
-        {% if 'switch position definition' in value_json %}
-          {{ value_json['switch position definition'] }}
-        {% elif 'switch position' in value_json %}
-          {{ value_json['switch position'] }}
+        {% set switch_pos = value_json.get('switch position definition') or value_json.get('switch position') %}
+        {% if switch_pos in [none, 'n/a', 'unknown', 'unavailable'] %}
+          unknown
         {% else %}
-          {{ states('sensor.ats_switch_position') }}
+          {{ switch_pos }}
         {% endif %}
       unique_id: "ats_switch_position"
     - name: "AC Line 1 Voltage"
@@ -2732,11 +2731,11 @@ mqtt:
       device_class: voltage
       state_class: measurement
       value_template: >-
-        {% set voltage = value_json['rms voltage'] if 'rms voltage' in value_json else none %}
-        {% if voltage not in [none, 'n/a', 'unknown', 'unavailable'] %}
-          {{ (voltage | float) | round(1) }}
+        {% set voltage = value_json.get('rms voltage') %}
+        {% if voltage in [none, 'n/a', 'unknown', 'unavailable'] %}
+          unknown
         {% else %}
-          {{ states('sensor.ac_line_1_voltage') }}
+          {{ (voltage | float) | round(1) }}
         {% endif %}
       unique_id: "coach_power_line_1_voltage"
     - name: "AC Line 1 Current"
@@ -2745,11 +2744,11 @@ mqtt:
       device_class: current
       state_class: measurement
       value_template: >-
-        {% set current = value_json['rms current'] if 'rms current' in value_json else none %}
-        {% if current not in [none, 'n/a', 'unknown', 'unavailable'] %}
-          {{ (current | float) | round(1) }}
+        {% set current = value_json.get('rms current') %}
+        {% if current in [none, 'n/a', 'unknown', 'unavailable'] %}
+          unknown
         {% else %}
-          {{ states('sensor.ac_line_1_current') }}
+          {{ (current | float) | round(1) }}
         {% endif %}
       unique_id: "coach_power_line_1_current"
     - name: "AC Line 2 Voltage"
@@ -2758,11 +2757,11 @@ mqtt:
       device_class: voltage
       state_class: measurement
       value_template: >-
-        {% set voltage = value_json['rms voltage'] if 'rms voltage' in value_json else none %}
-        {% if voltage not in [none, 'n/a', 'unknown', 'unavailable'] %}
-          {{ (voltage | float) | round(1) }}
+        {% set voltage = value_json.get('rms voltage') %}
+        {% if voltage in [none, 'n/a', 'unknown', 'unavailable'] %}
+          unknown
         {% else %}
-          {{ states('sensor.ac_line_2_voltage') }}
+          {{ (voltage | float) | round(1) }}
         {% endif %}
       unique_id: "coach_power_line_2_voltage"
     - name: "AC Line 2 Current"
@@ -2771,11 +2770,11 @@ mqtt:
       device_class: current
       state_class: measurement
       value_template: >-
-        {% set current = value_json['rms current'] if 'rms current' in value_json else none %}
-        {% if current not in [none, 'n/a', 'unknown', 'unavailable'] %}
-          {{ (current | float) | round(1) }}
+        {% set current = value_json.get('rms current') %}
+        {% if current in [none, 'n/a', 'unknown', 'unavailable'] %}
+          unknown
         {% else %}
-          {{ states('sensor.ac_line_2_current') }}
+          {{ (current | float) | round(1) }}
         {% endif %}
       unique_id: "coach_power_line_2_current"
     - name: "Generator RPM"
