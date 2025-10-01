@@ -649,8 +649,7 @@ sensor:
             or 'shore' in switch_pos
             or 'utility' in switch_pos
           ) %}
-          {% set generator_running = generator_state in ['running', 'on', 'starting', 'start']
-            or generator_switch == 'on' %}
+          {% set generator_running = generator_state in ['running', 'warmup', 'cooldown'] %}
           {% set inverter_inverting = inverter_valid and inverter_state in [
             'invert', 'inverting', 'waiting to invert', 'search'
           ] %}
