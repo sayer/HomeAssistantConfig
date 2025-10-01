@@ -634,6 +634,10 @@ sensor:
           {% set switch_pos = states('sensor.ats_switch_position') | lower %}
           {% set inverter_state = states('sensor.inverter_status') | lower %}
           {% set inverter_valid = inverter_state not in ['unknown', 'unavailable'] %}
+          {% set inverter_state_normalized = inverter_state
+            | replace(' ', '_')
+            | replace('-', '_')
+          %}
           {% set generator_state = states('sensor.generatorstatus') | lower %}
           {% set generator_switch = states('switch.generator') | lower %}
           {% set switch_is_generator = (
@@ -650,14 +654,18 @@ sensor:
             or 'utility' in switch_pos
           ) %}
           {% set generator_running = generator_state in ['running', 'warmup', 'cooldown'] %}
-          {% set inverter_inverting = inverter_valid and inverter_state in [
-            'invert', 'inverting', 'waiting to invert', 'search'
+          {% set inverter_inverting = inverter_valid and inverter_state_normalized in [
+            'invert', 'inverting', 'waiting_to_invert', 'search'
           ] %}
-          {% set inverter_ac_present = inverter_valid and inverter_state in [
-            'pass through', 'pass_through', 'pass-thru', 'passthru',
-            'support', 'charging', 'charger', 'bulk', 'absorb', 'float',
-            'silent', 'equalize'
-          ] %}
+          {% set inverter_ac_present = inverter_valid and (
+            inverter_state_normalized in [
+              'pass_through', 'passthru', 'support', 'charging', 'charger',
+              'bulk', 'absorb', 'float', 'silent', 'equalize',
+              'ac_passthru', 'ac_pass_thru', 'ac_pass_through'
+            ]
+            or inverter_state_normalized.startswith('charge_')
+            or inverter_state_normalized.endswith('_charge')
+          ) %}
           {% if switch_is_generator %}
             Generator
           {% elif switch_is_shore %}
@@ -678,6 +686,7 @@ sensor:
         attribute_templates:
           ats_switch_position: "{{ states('sensor.ats_switch_position') }}"
           inverter_status: "{{ states('sensor.inverter_status') }}"
+          inverter_status_normalized: "{{ inverter_state_normalized }}"
           generator_status: "{{ states('sensor.generatorstatus') }}"
           generator_switch: "{{ states('switch.generator') }}"
 
