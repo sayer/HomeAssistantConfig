@@ -50,29 +50,18 @@ log_message "Checking for git updates..."
 if [ ! -w "$REPO_DIR/.git" ]; then
   log_message "WARNING: No write permission to $REPO_DIR/.git directory, skipping git operations"
 else
-  # Check if branch has upstream configured
-  if git rev-parse --abbrev-ref @{upstream} >/dev/null 2>&1; then
-    # Upstream exists, proceed with fetch and compare
-    log_message "Fetching updates from remote repository..."
-    if git fetch origin 2>/dev/null; then
-      LOCAL=$(git rev-parse HEAD 2>/dev/null)
-      REMOTE=$(git rev-parse @{u} 2>/dev/null)
-      
-      if [ -n "$LOCAL" ] && [ -n "$REMOTE" ] && [ "$LOCAL" != "$REMOTE" ]; then
-        log_message "Updates available, pulling changes..."
-        if git pull --ff-only 2>/dev/null; then
-          log_message "Git pull completed successfully"
-        else
-          log_message "ERROR: Git pull failed, possibly due to permissions or conflicts"
-        fi
-      else
-        log_message "Repository is up to date"
-      fi
-    else
-      log_message "ERROR: Failed to fetch from remote repository"
-    fi
+  log_message "Running git pull origin main..."
+  PULL_OUTPUT=$(git pull origin main 2>&1)
+  PULL_STATUS=$?
+  if [ -n "$PULL_OUTPUT" ]; then
+    while IFS= read -r line; do
+      log_message "git: $line"
+    done <<<"$PULL_OUTPUT"
+  fi
+  if [ $PULL_STATUS -eq 0 ]; then
+    log_message "Git pull origin main completed"
   else
-    log_message "No upstream configured for current branch, skipping git update check"
+    log_message "ERROR: git pull origin main failed (exit code: $PULL_STATUS)"
   fi
 fi
 
