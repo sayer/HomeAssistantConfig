@@ -638,11 +638,13 @@ sensor:
           {% set switch_is_generator = (
             switch_pos in ['source 2', '2', 'secondary']
             or 'source 2' in switch_pos
+            or 'secondary' in switch_pos
             or 'generator' in switch_pos
           ) %}
           {% set switch_is_shore = (
             switch_pos in ['source 1', '1', 'primary']
             or 'source 1' in switch_pos
+            or 'primary' in switch_pos
             or 'shore' in switch_pos
             or 'utility' in switch_pos
           ) %}
