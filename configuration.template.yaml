@@ -629,6 +629,7 @@ sensor:
     sensors:
       ac_source:
         friendly_name: "Power Source"
+        unique_id: "ac_source"
         value_template: >-
           {% set switch_pos = states('sensor.ats_switch_position') | lower %}
           {% set inverter_state = states('sensor.inverter_status') | lower %}
