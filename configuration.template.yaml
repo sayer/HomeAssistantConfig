@@ -659,7 +659,7 @@ sensor:
           ] %}
           {% set inverter_ac_present = inverter_valid and (
             inverter_state_normalized in [
-              'pass_through', 'passthru', 'support', 'charging', 'charger',
+              'pass_through', 'passthru', 'pass_thru', 'support', 'charging', 'charger',
               'bulk', 'absorb', 'float', 'silent', 'equalize',
               'ac_passthru', 'ac_pass_thru', 'ac_pass_through'
             ]
