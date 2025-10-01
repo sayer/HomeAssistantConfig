@@ -634,9 +634,20 @@ sensor:
           {% set inverter_state = states('sensor.inverter_status') | lower %}
           {% set inverter_valid = inverter_state not in ['unknown', 'unavailable'] %}
           {% set generator_state = states('sensor.generatorstatus') | lower %}
-          {% if switch_pos == 'source 2' %}
+          {% set switch_is_generator = (
+            switch_pos in ['source 2', '2', 'secondary']
+            or 'source 2' in switch_pos
+            or 'generator' in switch_pos
+          ) %}
+          {% set switch_is_shore = (
+            switch_pos in ['source 1', '1', 'primary']
+            or 'source 1' in switch_pos
+            or 'shore' in switch_pos
+            or 'utility' in switch_pos
+          ) %}
+          {% if switch_is_generator %}
             Generator
-          {% elif switch_pos == 'source 1' %}
+          {% elif switch_is_shore %}
             {% if inverter_valid and inverter_state in ['invert', 'waiting to invert'] %}
               Inverter
             {% else %}
