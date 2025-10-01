@@ -718,6 +718,30 @@ sensor:
             n/a
           {% endif %}
 
+      rvc_temperature_debug:
+        friendly_name: "RV-C Temperature Debug"
+        unique_id: "rvc_temperature_debug"
+        value_template: >-
+          {% set raw = [
+            ('%%AMBIANT_TEMP%%', states('sensor.ambient_temperature')),
+            ('%%INDOOR_TEMP%%', states('sensor.inside_temperature')),
+            ('%%THERMOSTAT1_AMBIENT%%', state_attr('climate.livingroom_thermostat', 'current_temperature')),
+            ('%%THERMOSTAT2_AMBIENT%%', state_attr('climate.kitchen_thermostat', 'current_temperature')),
+            ('%%THERMOSTAT3_AMBIENT%%', state_attr('climate.bedroom_thermostat', 'current_temperature')),
+            ('%%THERMOSTAT4_AMBIENT%%', state_attr('climate.bathroom_thermostat', 'current_temperature'))
+          ] %}
+          {% set ns = namespace(parts=[]) %}
+          {% for code, temp in raw %}
+            {% set value = temp %}
+            {% if value in [none, 'none', '', 'unknown', 'unavailable'] %}
+              {% set value = 'n/a' %}
+            {% else %}
+              {% set value = (value | float) | round(1) %}
+            {% endif %}
+            {% set _ = ns.parts.append(code ~ ': ' ~ (value | string)) %}
+          {% endfor %}
+          {{ ns.parts | join(' | ') }}
+
 
 
 mqtt:
