@@ -635,6 +635,7 @@ sensor:
           {% set inverter_state = states('sensor.inverter_status') | lower %}
           {% set inverter_valid = inverter_state not in ['unknown', 'unavailable'] %}
           {% set generator_state = states('sensor.generatorstatus') | lower %}
+          {% set generator_switch = states('switch.generator') | lower %}
           {% set switch_is_generator = (
             switch_pos in ['source 2', '2', 'secondary']
             or 'source 2' in switch_pos
@@ -648,21 +649,38 @@ sensor:
             or 'shore' in switch_pos
             or 'utility' in switch_pos
           ) %}
+          {% set generator_running = generator_state in ['running', 'on', 'starting', 'start']
+            or generator_switch == 'on' %}
+          {% set inverter_inverting = inverter_valid and inverter_state in [
+            'invert', 'inverting', 'waiting to invert', 'search'
+          ] %}
+          {% set inverter_ac_present = inverter_valid and inverter_state in [
+            'pass through', 'pass_through', 'pass-thru', 'passthru',
+            'support', 'charging', 'charger', 'bulk', 'absorb', 'float',
+            'silent', 'equalize'
+          ] %}
           {% if switch_is_generator %}
             Generator
           {% elif switch_is_shore %}
-            {% if inverter_valid and inverter_state in ['invert', 'waiting to invert'] %}
+            {% if inverter_inverting %}
               Inverter
             {% else %}
               Shore
             {% endif %}
-          {% elif inverter_valid and inverter_state in ['invert', 'waiting to invert'] %}
+          {% elif inverter_inverting %}
             Inverter
-          {% elif generator_state == 'running' %}
+          {% elif generator_running %}
             Generator
+          {% elif inverter_ac_present %}
+            Shore
           {% else %}
             unknown
           {% endif %}
+        attribute_templates:
+          ats_switch_position: "{{ states('sensor.ats_switch_position') }}"
+          inverter_status: "{{ states('sensor.inverter_status') }}"
+          generator_status: "{{ states('sensor.generatorstatus') }}"
+          generator_switch: "{{ states('switch.generator') }}"
 
       generator_current_run_time:
         friendly_name: "Run time"
