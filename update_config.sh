@@ -22,6 +22,7 @@ fi
 CONFIG_TEMPLATE="${CONFIG_DIR}/configuration.template.yaml"
 CONFIG_FILE="${CONFIG_DIR}/configuration.yaml"
 BACKUP_FILE="${CONFIG_DIR}/configuration.yaml.bak"
+MODEL_YEAR_FILE="${CONFIG_DIR}/coach_model_year.txt"
 
 # Check if template file exists
 if [ ! -f "$CONFIG_TEMPLATE" ]; then
@@ -48,6 +49,15 @@ fi
 
 # Make a copy of the template
 cp "$CONFIG_TEMPLATE" "$CONFIG_FILE"
+
+# Persist the selected model year for other tooling/hooks
+if [ -n "$MODEL_YEAR" ]; then
+    if echo "$MODEL_YEAR" > "$MODEL_YEAR_FILE" 2>/dev/null; then
+        echo "Model year written to $MODEL_YEAR_FILE"
+    else
+        echo "Warning: Failed to write model year to $MODEL_YEAR_FILE"
+    fi
+fi
 
 # Since macOS uses an old version of bash that doesn't support associative arrays,
 # we'll use a simpler approach with separate variables
