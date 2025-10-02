@@ -3009,6 +3009,22 @@
                 {
                   "entity": "sensor.rvc_temperature_code_250",
                   "name": "Code 250"
+                },
+                {
+                  "entity": "sensor.thermostat1_zone_temperature",
+                  "name": "Thermostat 1"
+                },
+                {
+                  "entity": "sensor.thermostat2_zone_temperature",
+                  "name": "Thermostat 2"
+                },
+                {
+                  "entity": "sensor.thermostat3_zone_temperature",
+                  "name": "Thermostat 3"
+                },
+                {
+                  "entity": "sensor.thermostat4_zone_temperature",
+                  "name": "Thermostat 4"
                 }
               ]
             }
