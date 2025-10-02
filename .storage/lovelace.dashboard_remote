@@ -2870,6 +2870,10 @@
                 {
                   "entity": "sensor.processor_use",
                   "name": "Processor use"
+                },
+                {
+                  "entity": "sensor.rvc_temperature_debug",
+                  "name": "RV-C Temperature Codes"
                 }
               ],
               "title": "System Monitor"
