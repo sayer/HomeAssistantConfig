@@ -2870,13 +2870,33 @@
                 {
                   "entity": "sensor.processor_use",
                   "name": "Processor use"
-                },
-                {
-                  "entity": "sensor.rvc_temperature_debug",
-                  "name": "RV-C Temperature Codes"
                 }
               ],
               "title": "System Monitor"
+            },
+            {
+              "type": "entities",
+              "title": "RV-C Temperatures",
+              "entities": [
+                {
+                  "entity": "sensor.ambient_temperature"
+                },
+                {
+                  "entity": "sensor.inside_temperature"
+                },
+                {
+                  "entity": "sensor.thermostat1_zone_temperature"
+                },
+                {
+                  "entity": "sensor.thermostat2_zone_temperature"
+                },
+                {
+                  "entity": "sensor.thermostat3_zone_temperature"
+                },
+                {
+                  "entity": "sensor.thermostat4_zone_temperature"
+                }
+              ]
             },
             {
               "type": "custom:home-feed-card",
