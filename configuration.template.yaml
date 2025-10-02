@@ -718,44 +718,6 @@ sensor:
             n/a
           {% endif %}
 
-      rvc_temperature_debug:
-        friendly_name: "RV-C Temperature Debug"
-        unique_id: "rvc_temperature_debug"
-        value_template: >-
-          {% set invalid = ['unknown', 'unavailable', '', 'none', 'n/a', 'nan'] %}
-          {% set codes = {
-            '1': [states('sensor.ambient_temperature')],
-            '2': [states('sensor.inside_temperature')],
-            '249': [
-              state_attr('climate.livingroom_thermostat', 'current_temperature'),
-              state_attr('climate.kitchen_thermostat', 'current_temperature')
-            ],
-            '250': [
-              state_attr('climate.bedroom_thermostat', 'current_temperature'),
-              state_attr('climate.bathroom_thermostat', 'current_temperature')
-            ]
-          } %}
-          {% set parts = [] %}
-          {% for code, readings in codes.items() %}
-            {% set values = [] %}
-            {% for reading in readings %}
-              {% if reading is number %}
-                {% set values = values + ['%.1f' % reading] %}
-              {% else %}
-                {% set reading_str = (reading | string | lower) %}
-                {% if reading_str not in invalid %}
-                  {% set values = values + ['%.1f' % (reading | float)] %}
-                {% endif %}
-              {% endif %}
-            {% endfor %}
-            {% if values %}
-              {% set parts = parts + [code ~ ': ' ~ (values | join('/'))] %}
-            {% else %}
-              {% set parts = parts + [code ~ ': n/a'] %}
-            {% endif %}
-          {% endfor %}
-          {{ parts | join(' | ') }}
-
       thermostat1_zone_temperature:
         friendly_name: "Thermostat 1 Ambient (%%THERMOSTAT1_AMBIENT%%)"
         unique_id: "thermostat1_zone_temperature"
@@ -766,6 +728,86 @@ sensor:
             unknown
           {% else %}
             {{ temp | float | round(1) }}
+          {% endif %}
+
+      rvc_temperature_code_1:
+        friendly_name: "RV-C Temp Code 1"
+        unique_id: "rvc_temperature_code_1"
+        unit_of_measurement: "°F"
+        value_template: >-
+          {% set raw = states('sensor.ambient_temperature') %}
+          {% if raw in ['unknown', 'unavailable', '', none, 'none', 'n/a', 'nan'] %}
+            unknown
+          {% else %}
+            {{ raw | float | round(1) }}
+          {% endif %}
+
+      rvc_temperature_code_2:
+        friendly_name: "RV-C Temp Code 2"
+        unique_id: "rvc_temperature_code_2"
+        unit_of_measurement: "°F"
+        value_template: >-
+          {% set raw = states('sensor.inside_temperature') %}
+          {% if raw in ['unknown', 'unavailable', '', none, 'none', 'n/a', 'nan'] %}
+            unknown
+          {% else %}
+            {{ raw | float | round(1) }}
+          {% endif %}
+
+      rvc_temperature_code_249:
+        friendly_name: "RV-C Temp Code 249"
+        unique_id: "rvc_temperature_code_249"
+        unit_of_measurement: "°F"
+        value_template: >-
+          {% set invalid = ['unknown', 'unavailable', '', none, 'none', 'n/a', 'nan'] %}
+          {% set value = none %}
+          {% for reading in [
+            state_attr('climate.livingroom_thermostat', 'current_temperature'),
+            state_attr('climate.kitchen_thermostat', 'current_temperature')
+          ] %}
+            {% if reading is number %}
+              {% set value = reading %}
+              {% break %}
+            {% elif reading is string %}
+              {% set reading_lower = reading | lower %}
+              {% if reading_lower not in invalid %}
+                {% set value = reading | float %}
+                {% break %}
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+          {% if value is not none %}
+            {{ value | float | round(1) }}
+          {% else %}
+            unknown
+          {% endif %}
+
+      rvc_temperature_code_250:
+        friendly_name: "RV-C Temp Code 250"
+        unique_id: "rvc_temperature_code_250"
+        unit_of_measurement: "°F"
+        value_template: >-
+          {% set invalid = ['unknown', 'unavailable', '', none, 'none', 'n/a', 'nan'] %}
+          {% set value = none %}
+          {% for reading in [
+            state_attr('climate.bedroom_thermostat', 'current_temperature'),
+            state_attr('climate.bathroom_thermostat', 'current_temperature')
+          ] %}
+            {% if reading is number %}
+              {% set value = reading %}
+              {% break %}
+            {% elif reading is string %}
+              {% set reading_lower = reading | lower %}
+              {% if reading_lower not in invalid %}
+                {% set value = reading | float %}
+                {% break %}
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+          {% if value is not none %}
+            {{ value | float | round(1) }}
+          {% else %}
+            unknown
           {% endif %}
 
       thermostat2_zone_temperature:
@@ -941,7 +983,7 @@ mqtt:
     fan_mode_state_topic: "RVC/THERMOSTAT_STATUS_1/%%THERMOSTAT1%%"
     fan_mode_state_template: "{{ 'on' if value_json['fan mode'] == 1 else 'auto' }}"
     temperature_command_topic: "RVC/THERMOSTAT_COMMAND_1/%%THERMOSTAT1%%/set"
-    temperature_command_template: '{"instance":%%THERMOSTAT1%%, "operating mode":1, "fan mode":0, "schedule mode":0, "fan speed":0, "setpoint temp heat":{{ (((value | float) - 32) * 5 / 9) | round(0, "common") | int }}, "setpoint temp cool":{{ (((value | float) - 32) * 5 / 9) | round(0, "common") | int }}}'
+    temperature_command_template: '{"instance":%%THERMOSTAT1%%, "operating mode":1, "fan mode":0, "schedule mode":0, "fan speed":0, "setpoint temp heat":{{ (((value | float) - 32) * 5 / 9) | round(0) | int }}, "setpoint temp cool":{{ (((value | float) - 32) * 5 / 9) | round(0) | int }}}'
     mode_command_topic: "RVC/THERMOSTAT_COMMAND_1/%%THERMOSTAT1%%/set"
     mode_command_template: '{"instance":%%THERMOSTAT1%%, "operating mode":{{ 0 if value == "off" else 1 if value == "cool" else 2 if value == "heat" else 4 if value == "fan_only" else 0 }}, "fan mode":0, "schedule mode":0, "fan speed":0}'
 
@@ -992,7 +1034,7 @@ mqtt:
     fan_mode_state_topic: "RVC/THERMOSTAT_STATUS_1/%%THERMOSTAT2%%"
     fan_mode_state_template: "{{ 'on' if value_json['fan mode'] == 1 else 'auto' }}"
     temperature_command_topic: "RVC/THERMOSTAT_COMMAND_1/%%THERMOSTAT2%%/set"
-    temperature_command_template: '{"instance":%%THERMOSTAT2%%, "operating mode":1, "fan mode":0, "schedule mode":0, "fan speed":0, "setpoint temp heat":{{ (((value | float) - 32) * 5 / 9) | round(0, "common") | int }}, "setpoint temp cool":{{ (((value | float) - 32) * 5 / 9) | round(0, "common") | int }}}'
+    temperature_command_template: '{"instance":%%THERMOSTAT2%%, "operating mode":1, "fan mode":0, "schedule mode":0, "fan speed":0, "setpoint temp heat":{{ (((value | float) - 32) * 5 / 9) | round(0) | int }}, "setpoint temp cool":{{ (((value | float) - 32) * 5 / 9) | round(0) | int }}}'
     mode_command_topic: "RVC/THERMOSTAT_COMMAND_1/%%THERMOSTAT2%%/set"
     mode_command_template: '{"instance":%%THERMOSTAT2%%, "operating mode":{{ 0 if value == "off" else 1 if value == "cool" else 2 if value == "heat" else 4 if value == "fan_only" else 0 }}, "fan mode":0, "schedule mode":0, "fan speed":0}'
 
@@ -1042,7 +1084,7 @@ mqtt:
     fan_mode_state_topic: "RVC/THERMOSTAT_STATUS_1/%%THERMOSTAT3%%"
     fan_mode_state_template: "{{ 'on' if value_json['fan mode'] == 1 else 'auto' }}"
     temperature_command_topic: "RVC/THERMOSTAT_COMMAND_1/%%THERMOSTAT3%%/set"
-    temperature_command_template: '{"instance":%%THERMOSTAT3%%, "operating mode":1, "fan mode":0, "schedule mode":0, "fan speed":0, "setpoint temp heat":{{ (((value | float) - 32) * 5 / 9) | round(0, "common") | int }}, "setpoint temp cool":{{ (((value | float) - 32) * 5 / 9) | round(0, "common") | int }}}'
+    temperature_command_template: '{"instance":%%THERMOSTAT3%%, "operating mode":1, "fan mode":0, "schedule mode":0, "fan speed":0, "setpoint temp heat":{{ (((value | float) - 32) * 5 / 9) | round(0) | int }}, "setpoint temp cool":{{ (((value | float) - 32) * 5 / 9) | round(0) | int }}}'
     mode_command_topic: "RVC/THERMOSTAT_COMMAND_1/%%THERMOSTAT3%%/set"
     mode_command_template: '{"instance":%%THERMOSTAT3%%, "operating mode":{{ 0 if value == "off" else 1 if value == "cool" else 2 if value == "heat" else 4 if value == "fan_only" else 0 }}, "fan mode":0, "schedule mode":0, "fan speed":0}'
 
@@ -1092,7 +1134,7 @@ mqtt:
     fan_mode_state_topic: "RVC/THERMOSTAT_STATUS_1/%%THERMOSTAT4%%"
     fan_mode_state_template: "{{ 'on' if value_json['fan mode'] == 1 else 'auto' }}"
     temperature_command_topic: "RVC/THERMOSTAT_COMMAND_1/%%THERMOSTAT4%%/set"
-    temperature_command_template: '{"instance":%%THERMOSTAT4%%, "operating mode":1, "fan mode":0, "schedule mode":0, "fan speed":0, "setpoint temp heat":{{ (((value | float) - 32) * 5 / 9) | round(0, "common") | int }}, "setpoint temp cool":{{ (((value | float) - 32) * 5 / 9) | round(0, "common") | int }}}'
+    temperature_command_template: '{"instance":%%THERMOSTAT4%%, "operating mode":1, "fan mode":0, "schedule mode":0, "fan speed":0, "setpoint temp heat":{{ (((value | float) - 32) * 5 / 9) | round(0) | int }}, "setpoint temp cool":{{ (((value | float) - 32) * 5 / 9) | round(0) | int }}}'
     mode_command_topic: "RVC/THERMOSTAT_COMMAND_1/%%THERMOSTAT4%%/set"
     mode_command_template: '{"instance":%%THERMOSTAT4%%, "operating mode":{{ 0 if value == "off" else 1 if value == "cool" else 2 if value == "heat" else 4 if value == "fan_only" else 0 }}, "fan mode":0, "schedule mode":0, "fan speed":0}'
 

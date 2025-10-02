@@ -2995,7 +2995,20 @@
               "title": "RV-C Temperature Codes",
               "entities": [
                 {
-                  "entity": "sensor.rvc_temperature_debug"
+                  "entity": "sensor.rvc_temperature_code_1",
+                  "name": "Code 1"
+                },
+                {
+                  "entity": "sensor.rvc_temperature_code_2",
+                  "name": "Code 2"
+                },
+                {
+                  "entity": "sensor.rvc_temperature_code_249",
+                  "name": "Code 249"
+                },
+                {
+                  "entity": "sensor.rvc_temperature_code_250",
+                  "name": "Code 250"
                 }
               ]
             }
