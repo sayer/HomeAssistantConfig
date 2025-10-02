@@ -722,34 +722,39 @@ sensor:
         friendly_name: "RV-C Temperature Debug"
         unique_id: "rvc_temperature_debug"
         value_template: >-
+          {% set invalid = ['unknown', 'unavailable', '', 'none', 'n/a', 'nan'] %}
           {% set codes = {
             '1': [states('sensor.ambient_temperature')],
             '2': [states('sensor.inside_temperature')],
             '249': [
-              states('sensor.thermostat1_zone_temperature'),
-              states('sensor.thermostat2_zone_temperature')
+              state_attr('climate.livingroom_thermostat', 'current_temperature'),
+              state_attr('climate.kitchen_thermostat', 'current_temperature')
             ],
             '250': [
-              states('sensor.thermostat3_zone_temperature'),
-              states('sensor.thermostat4_zone_temperature')
+              state_attr('climate.bedroom_thermostat', 'current_temperature'),
+              state_attr('climate.bathroom_thermostat', 'current_temperature')
             ]
           } %}
-          {% set ns = namespace(parts=[]) %}
+          {% set parts = [] %}
           {% for code, readings in codes.items() %}
             {% set values = [] %}
             {% for reading in readings %}
-              {% if reading not in ['unknown', 'unavailable', '', none] %}
-                {% set values = values + ['{:.1f}'.format(reading | float)] %}
+              {% if reading is number %}
+                {% set values = values + ['%.1f' % reading] %}
+              {% else %}
+                {% set reading_str = (reading | string | lower) %}
+                {% if reading_str not in invalid %}
+                  {% set values = values + ['%.1f' % (reading | float)] %}
+                {% endif %}
               {% endif %}
             {% endfor %}
             {% if values %}
-              {% set part = code ~ ': ' ~ values | join('/') %}
+              {% set parts = parts + [code ~ ': ' ~ (values | join('/'))] %}
             {% else %}
-              {% set part = code ~ ': n/a' %}
+              {% set parts = parts + [code ~ ': n/a'] %}
             {% endif %}
-            {% set ns.parts = ns.parts + [part] %}
           {% endfor %}
-          {{ ns.parts | join(' | ') }}
+          {{ parts | join(' | ') }}
 
       thermostat1_zone_temperature:
         friendly_name: "Thermostat 1 Ambient (%%THERMOSTAT1_AMBIENT%%)"
