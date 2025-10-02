@@ -718,6 +718,30 @@ sensor:
             n/a
           {% endif %}
 
+      rvc_temperature_debug:
+        friendly_name: "RV-C Temperature Debug"
+        unique_id: "rvc_temperature_debug"
+        value_template: >-
+          {% set raw = [
+            ('%%AMBIANT_TEMP%%', states('sensor.ambient_temperature')),
+            ('%%INDOOR_TEMP%%', states('sensor.inside_temperature')),
+            ('%%THERMOSTAT1_AMBIENT%%', state_attr('climate.livingroom_thermostat', 'current_temperature')),
+            ('%%THERMOSTAT2_AMBIENT%%', state_attr('climate.kitchen_thermostat', 'current_temperature')),
+            ('%%THERMOSTAT3_AMBIENT%%', state_attr('climate.bedroom_thermostat', 'current_temperature')),
+            ('%%THERMOSTAT4_AMBIENT%%', state_attr('climate.bathroom_thermostat', 'current_temperature'))
+          ] %}
+          {% set ns = namespace(parts=[]) %}
+          {% for code, temp in raw %}
+            {% set value = temp %}
+            {% if value in [none, 'none', '', 'unknown', 'unavailable'] %}
+              {% set value = 'n/a' %}
+            {% else %}
+              {% set value = (value | float) | round(1) %}
+            {% endif %}
+            {% set _ = ns.parts.append(code ~ ': ' ~ (value | string)) %}
+          {% endfor %}
+          {{ ns.parts | join(' | ') }}
+
 
 
 mqtt:
@@ -855,7 +879,7 @@ mqtt:
     fan_mode_state_topic: "RVC/THERMOSTAT_STATUS_1/%%THERMOSTAT1%%"
     fan_mode_state_template: "{{ 'on' if value_json['fan mode'] == 1 else 'auto' }}"
     temperature_command_topic: "RVC/THERMOSTAT_COMMAND_1/%%THERMOSTAT1%%/set"
-    temperature_command_template: '{"instance":%%THERMOSTAT1%%, "operating mode":1, "fan mode":0, "schedule mode":0, "fan speed":0, "setpoint temp heat":{{ ((value - 32) * 5/9) | int }}, "setpoint temp cool":{{ ((value - 32) * 5/9) | int }}}'
+    temperature_command_template: '{"instance":%%THERMOSTAT1%%, "operating mode":1, "fan mode":0, "schedule mode":0, "fan speed":0, "setpoint temp heat":{{ (((value | float) - 32) * 5 / 9) | round(0, "half_up") | int }}, "setpoint temp cool":{{ (((value | float) - 32) * 5 / 9) | round(0, "half_up") | int }}}'
     mode_command_topic: "RVC/THERMOSTAT_COMMAND_1/%%THERMOSTAT1%%/set"
     mode_command_template: '{"instance":%%THERMOSTAT1%%, "operating mode":{{ 0 if value == "off" else 1 if value == "cool" else 2 if value == "heat" else 4 if value == "fan_only" else 0 }}, "fan mode":0, "schedule mode":0, "fan speed":0}'
 
@@ -906,7 +930,7 @@ mqtt:
     fan_mode_state_topic: "RVC/THERMOSTAT_STATUS_1/%%THERMOSTAT2%%"
     fan_mode_state_template: "{{ 'on' if value_json['fan mode'] == 1 else 'auto' }}"
     temperature_command_topic: "RVC/THERMOSTAT_COMMAND_1/%%THERMOSTAT2%%/set"
-    temperature_command_template: '{"instance":%%THERMOSTAT2%%, "operating mode":1, "fan mode":0, "schedule mode":0, "fan speed":0, "setpoint temp heat":{{ ((value - 32) * 5/9) | int }}, "setpoint temp cool":{{ ((value - 32) * 5/9) | int }}}'
+    temperature_command_template: '{"instance":%%THERMOSTAT2%%, "operating mode":1, "fan mode":0, "schedule mode":0, "fan speed":0, "setpoint temp heat":{{ (((value | float) - 32) * 5 / 9) | round(0, "half_up") | int }}, "setpoint temp cool":{{ (((value | float) - 32) * 5 / 9) | round(0, "half_up") | int }}}'
     mode_command_topic: "RVC/THERMOSTAT_COMMAND_1/%%THERMOSTAT2%%/set"
     mode_command_template: '{"instance":%%THERMOSTAT2%%, "operating mode":{{ 0 if value == "off" else 1 if value == "cool" else 2 if value == "heat" else 4 if value == "fan_only" else 0 }}, "fan mode":0, "schedule mode":0, "fan speed":0}'
 
@@ -956,7 +980,7 @@ mqtt:
     fan_mode_state_topic: "RVC/THERMOSTAT_STATUS_1/%%THERMOSTAT3%%"
     fan_mode_state_template: "{{ 'on' if value_json['fan mode'] == 1 else 'auto' }}"
     temperature_command_topic: "RVC/THERMOSTAT_COMMAND_1/%%THERMOSTAT3%%/set"
-    temperature_command_template: '{"instance":%%THERMOSTAT3%%, "operating mode":1, "fan mode":0, "schedule mode":0, "fan speed":0, "setpoint temp heat":{{ ((value - 32) * 5/9) | int }}, "setpoint temp cool":{{ ((value - 32) * 5/9) | int }}}'
+    temperature_command_template: '{"instance":%%THERMOSTAT3%%, "operating mode":1, "fan mode":0, "schedule mode":0, "fan speed":0, "setpoint temp heat":{{ (((value | float) - 32) * 5 / 9) | round(0, "half_up") | int }}, "setpoint temp cool":{{ (((value | float) - 32) * 5 / 9) | round(0, "half_up") | int }}}'
     mode_command_topic: "RVC/THERMOSTAT_COMMAND_1/%%THERMOSTAT3%%/set"
     mode_command_template: '{"instance":%%THERMOSTAT3%%, "operating mode":{{ 0 if value == "off" else 1 if value == "cool" else 2 if value == "heat" else 4 if value == "fan_only" else 0 }}, "fan mode":0, "schedule mode":0, "fan speed":0}'
 
@@ -1006,7 +1030,7 @@ mqtt:
     fan_mode_state_topic: "RVC/THERMOSTAT_STATUS_1/%%THERMOSTAT4%%"
     fan_mode_state_template: "{{ 'on' if value_json['fan mode'] == 1 else 'auto' }}"
     temperature_command_topic: "RVC/THERMOSTAT_COMMAND_1/%%THERMOSTAT4%%/set"
-    temperature_command_template: '{"instance":%%THERMOSTAT4%%, "operating mode":1, "fan mode":0, "schedule mode":0, "fan speed":0, "setpoint temp heat":{{ ((value - 32) * 5/9) | int }}, "setpoint temp cool":{{ ((value - 32) * 5/9) | int }}}'
+    temperature_command_template: '{"instance":%%THERMOSTAT4%%, "operating mode":1, "fan mode":0, "schedule mode":0, "fan speed":0, "setpoint temp heat":{{ (((value | float) - 32) * 5 / 9) | round(0, "half_up") | int }}, "setpoint temp cool":{{ (((value | float) - 32) * 5 / 9) | round(0, "half_up") | int }}}'
     mode_command_topic: "RVC/THERMOSTAT_COMMAND_1/%%THERMOSTAT4%%/set"
     mode_command_template: '{"instance":%%THERMOSTAT4%%, "operating mode":{{ 0 if value == "off" else 1 if value == "cool" else 2 if value == "heat" else 4 if value == "fan_only" else 0 }}, "fan mode":0, "schedule mode":0, "fan speed":0}'
 
