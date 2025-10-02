@@ -721,25 +721,33 @@ sensor:
       rvc_temperature_debug:
         friendly_name: "RV-C Temperature Debug"
         unique_id: "rvc_temperature_debug"
-        availability_template: "{{ true }}"
         value_template: >-
-          {% set raw = [
-            ('%%AMBIANT_TEMP%%', states('sensor.ambient_temperature')),
-            ('%%INDOOR_TEMP%%', states('sensor.inside_temperature')),
-            ('%%THERMOSTAT1_AMBIENT%%', states('sensor.thermostat1_zone_temperature')),
-            ('%%THERMOSTAT2_AMBIENT%%', states('sensor.thermostat2_zone_temperature')),
-            ('%%THERMOSTAT3_AMBIENT%%', states('sensor.thermostat3_zone_temperature')),
-            ('%%THERMOSTAT4_AMBIENT%%', states('sensor.thermostat4_zone_temperature'))
-          ] %}
+          {% set codes = {
+            '1': [states('sensor.ambient_temperature')],
+            '2': [states('sensor.inside_temperature')],
+            '249': [
+              states('sensor.thermostat1_zone_temperature'),
+              states('sensor.thermostat2_zone_temperature')
+            ],
+            '250': [
+              states('sensor.thermostat3_zone_temperature'),
+              states('sensor.thermostat4_zone_temperature')
+            ]
+          } %}
           {% set ns = namespace(parts=[]) %}
-          {% for code, temp in raw %}
-            {% set value = temp %}
-            {% if value in [none, 'none', '', 'unknown', 'unavailable'] %}
-              {% set value = 'n/a' %}
+          {% for code, readings in codes.items() %}
+            {% set values = [] %}
+            {% for reading in readings %}
+              {% if reading not in ['unknown', 'unavailable', '', none] %}
+                {% set values = values + ['{:.1f}'.format(reading | float)] %}
+              {% endif %}
+            {% endfor %}
+            {% if values %}
+              {% set part = code ~ ': ' ~ values | join('/') %}
             {% else %}
-              {% set value = (value | float) | round(1) %}
+              {% set part = code ~ ': n/a' %}
             {% endif %}
-            {% set _ = ns.parts.append(code ~ ': ' ~ (value | string)) %}
+            {% set ns.parts = ns.parts + [part] %}
           {% endfor %}
           {{ ns.parts | join(' | ') }}
 
