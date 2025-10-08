@@ -625,6 +625,7 @@ sensor:
               'passthru': 'ac passthru',
               'pass_thru': 'ac passthru',
               'pass_through': 'ac passthru',
+              'ac_use': 'ac passthru',
               'invert': 'invert',
               'inverting': 'invert',
               'search': 'search',
@@ -761,7 +762,7 @@ sensor:
             inverter_state_normalized in [
               'pass_through', 'passthru', 'pass_thru', 'support', 'charging', 'charger',
               'bulk', 'absorb', 'float', 'silent', 'equalize',
-              'ac_passthru', 'ac_pass_thru', 'ac_pass_through'
+              'ac_passthru', 'ac_pass_thru', 'ac_pass_through', 'ac_use'
             ]
             or inverter_state_normalized.startswith('charge_')
             or inverter_state_normalized.endswith('_charge')
