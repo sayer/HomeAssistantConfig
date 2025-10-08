@@ -1161,6 +1161,50 @@
       title: Foretravel
       message: High temperature warning
   mode: single
+- id: '1721257600001'
+  alias: Power - Mirror Outback Inverter Status
+  description: 'Publish synthesized inverter status when RV-C data is unavailable.'
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.outback1_inverter_mode
+    - sensor.outback1_ac_mode
+    - sensor.outback1_vac1_in_l2
+    - sensor.outback1_vac_out_l2
+    - sensor.outback1_voltage
+  - platform: state
+    entity_id:
+    - sensor.inverter_status
+  condition:
+  - condition: template
+    value_template: >-
+      {{ state_attr('sensor.inverter_status', 'source') == 'outback' }}
+  - condition: template
+    value_template: >-
+      {% set invalid = ['unknown', 'unavailable', '', 'none', none] %}
+      {{ states('sensor.inverter') in invalid }}
+  - condition: template
+    value_template: >-
+      {% set invalid = ['unknown', 'unavailable', '', 'none', none] %}
+      {{ states('sensor.inverter_status') not in invalid }}
+  action:
+  - service: mqtt.publish
+    data:
+      topic: RVC/INVERTER_STATUS/1
+      payload: >-
+        {
+          "status definition": "{{ states('sensor.inverter_status') }}",
+          "source": "outback",
+          "ac_mode": "{{ state_attr('sensor.inverter_status', 'ac_mode') | default('', true) }}",
+          "input_voltage": "{{ state_attr('sensor.inverter_status', 'input_voltage') | default('', true) }}",
+          "output_voltage": "{{ state_attr('sensor.inverter_status', 'output_voltage') | default('', true) }}",
+          "battery_voltage": "{{ state_attr('sensor.inverter_status', 'battery_voltage') | default('', true) }}",
+          "warning": "{{ state_attr('sensor.inverter_status', 'warning') | default('', true) }}",
+          "error": "{{ state_attr('sensor.inverter_status', 'error') | default('', true) }}"
+        }
+      retain: false
+  mode: queued
+  max: 5
 - id: '1708624859254'
   alias: Shore Power - Warn with engine on/brake released
   description: ''
