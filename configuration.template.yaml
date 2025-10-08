@@ -614,13 +614,15 @@ sensor:
       inverter_status:
         friendly_name: "Inverter Status"
         value_template: >-
-          {% set invalid = ['unknown', 'unavailable', '', 'none', none] %}
-          {% set outback_mode = states('sensor.outback1_inverter_mode') %}
+          {% set invalid = ['unknown', 'unavailable', '', 'none', none, 'undefined', '---', 'n/a', 'na'] %}
+          {% set outback_mode_raw = states('sensor.outback1_inverter_mode') %}
+          {% set outback_mode = outback_mode_raw | lower %}
           {% set outback_valid = outback_mode not in invalid %}
-          {% set mqtt_mode = states('sensor.inverter') %}
+          {% set mqtt_mode_raw = states('sensor.inverter') %}
+          {% set mqtt_mode = mqtt_mode_raw | lower %}
           {% set mqtt_valid = mqtt_mode not in invalid %}
           {% if outback_valid %}
-            {% set normalized = outback_mode | lower | replace(' ', '_') | replace('-', '_') %}
+            {% set normalized = outback_mode | replace(' ', '_') | replace('-', '_') %}
             {% set translation = {
               'passthru': 'ac passthru',
               'pass_thru': 'ac passthru',
@@ -643,68 +645,68 @@ sensor:
               'idle': 'idle',
               'off': 'off'
             } %}
-            {{ translation.get(normalized, outback_mode | lower) }}
+            {{ translation.get(normalized, outback_mode) }}
           {% elif mqtt_valid %}
-            {{ mqtt_mode | lower }}
+            {{ mqtt_mode }}
           {% else %}
             unknown
           {% endif %}
         attribute_templates:
           source: >-
-            {% set invalid = ['unknown', 'unavailable', '', 'none', none] %}
-            {% if states('sensor.outback1_inverter_mode') not in invalid %}
+            {% set invalid = ['unknown', 'unavailable', '', 'none', none, 'undefined', '---', 'n/a', 'na'] %}
+            {% if (states('sensor.outback1_inverter_mode') | lower) not in invalid %}
               outback
-            {% elif states('sensor.inverter') not in invalid %}
+            {% elif (states('sensor.inverter') | lower) not in invalid %}
               rvc
             {% else %}
               unknown
             {% endif %}
           ac_mode: >-
-            {% set invalid = ['unknown', 'unavailable', '', 'none', none] %}
-            {% set ac_mode = states('sensor.outback1_ac_mode') %}
-            {% if ac_mode not in invalid and states('sensor.outback1_inverter_mode') not in invalid %}
-              {{ ac_mode | lower }}
+            {% set invalid = ['unknown', 'unavailable', '', 'none', none, 'undefined', '---', 'n/a', 'na'] %}
+            {% set ac_mode = states('sensor.outback1_ac_mode') | lower %}
+            {% if ac_mode not in invalid and (states('sensor.outback1_inverter_mode') | lower) not in invalid %}
+              {{ ac_mode }}
             {% elif state_attr('sensor.inverter', 'ac_mode') is not none %}
               {{ state_attr('sensor.inverter', 'ac_mode') | lower }}
             {% else %}
               unknown
             {% endif %}
           input_voltage: >-
-            {% set invalid = ['unknown', 'unavailable', '', 'none', none] %}
+            {% set invalid = ['unknown', 'unavailable', '', 'none', none, 'undefined', '---', 'n/a', 'na'] %}
             {% set value = states('sensor.outback1_vac1_in_l2') %}
-            {% if value not in invalid and states('sensor.outback1_inverter_mode') not in invalid %}
+            {% if value not in invalid and (states('sensor.outback1_inverter_mode') | lower) not in invalid %}
               {{ value }}
             {% else %}
               {{ state_attr('sensor.inverter', 'input_voltage') }}
             {% endif %}
           output_voltage: >-
-            {% set invalid = ['unknown', 'unavailable', '', 'none', none] %}
+            {% set invalid = ['unknown', 'unavailable', '', 'none', none, 'undefined', '---', 'n/a', 'na'] %}
             {% set value = states('sensor.outback1_vac_out_l2') %}
-            {% if value not in invalid and states('sensor.outback1_inverter_mode') not in invalid %}
+            {% if value not in invalid and (states('sensor.outback1_inverter_mode') | lower) not in invalid %}
               {{ value }}
             {% else %}
               {{ state_attr('sensor.inverter', 'output_voltage') }}
             {% endif %}
           battery_voltage: >-
-            {% set invalid = ['unknown', 'unavailable', '', 'none', none] %}
+            {% set invalid = ['unknown', 'unavailable', '', 'none', none, 'undefined', '---', 'n/a', 'na'] %}
             {% set value = states('sensor.outback1_voltage') %}
-            {% if value not in invalid and states('sensor.outback1_inverter_mode') not in invalid %}
+            {% if value not in invalid and (states('sensor.outback1_inverter_mode') | lower) not in invalid %}
               {{ value }}
             {% else %}
               {{ state_attr('sensor.inverter', 'battery_voltage') }}
             {% endif %}
           warning: >-
-            {% set invalid = ['unknown', 'unavailable', '', 'none', none] %}
+            {% set invalid = ['unknown', 'unavailable', '', 'none', none, 'undefined', '---', 'n/a', 'na'] %}
             {% set warn = states('sensor.outback1_warning') %}
-            {% if warn not in invalid and states('sensor.outback1_inverter_mode') not in invalid %}
+            {% if warn not in invalid and (states('sensor.outback1_inverter_mode') | lower) not in invalid %}
               {{ warn | regex_replace(find="[^A-Za-z0-9 ,_-]", replace='') | trim }}
             {% else %}
               {{ state_attr('sensor.inverter', 'warning') }}
             {% endif %}
           error: >-
-            {% set invalid = ['unknown', 'unavailable', '', 'none', none] %}
+            {% set invalid = ['unknown', 'unavailable', '', 'none', none, 'undefined', '---', 'n/a', 'na'] %}
             {% set err = states('sensor.outback1_error') %}
-            {% if err not in invalid and states('sensor.outback1_inverter_mode') not in invalid %}
+            {% if err not in invalid and (states('sensor.outback1_inverter_mode') | lower) not in invalid %}
               {{ err | regex_replace(find="[^A-Za-z0-9 ,_-]", replace='') | trim }}
             {% else %}
               {{ state_attr('sensor.inverter', 'error') }}
