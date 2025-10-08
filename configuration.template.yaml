@@ -696,7 +696,7 @@ sensor:
             {% set invalid = ['unknown', 'unavailable', '', 'none', none] %}
             {% set warn = states('sensor.outback1_warning') %}
             {% if warn not in invalid and states('sensor.outback1_inverter_mode') not in invalid %}
-              {{ warn | replace('[', '') | replace(']', '') | replace(\"'\", '') | trim }}
+              {{ warn | regex_replace(find="[^A-Za-z0-9 ,_-]", replace='') | trim }}
             {% else %}
               {{ state_attr('sensor.inverter', 'warning') }}
             {% endif %}
@@ -704,7 +704,7 @@ sensor:
             {% set invalid = ['unknown', 'unavailable', '', 'none', none] %}
             {% set err = states('sensor.outback1_error') %}
             {% if err not in invalid and states('sensor.outback1_inverter_mode') not in invalid %}
-              {{ err | replace('[', '') | replace(']', '') | replace(\"'\", '') | trim }}
+              {{ err | regex_replace(find="[^A-Za-z0-9 ,_-]", replace='') | trim }}
             {% else %}
               {{ state_attr('sensor.inverter', 'error') }}
             {% endif %}
