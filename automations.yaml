@@ -1495,6 +1495,20 @@
       year: '{{ states(''input_number.model_year'') | int }}'
   mode: single
 
+- alias: Update Coach Number File on Change or HA Start
+  id: update_coach_number
+  trigger:
+  - platform: state
+    entity_id: input_number.coach_number
+  - platform: homeassistant
+    event: start
+  action:
+  - delay: 00:00:10
+  - service: shell_command.write_coach_number
+    data:
+      number: '{{ states(''input_number.coach_number'') | int }}'
+  mode: single
+
 - id: '1751576905430'
   alias: Generator Turned On
   description: ''
