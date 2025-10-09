@@ -20,11 +20,17 @@ SSH_OPTS=(-p "$SSH_PORT" -o ConnectTimeout=10 -o StrictHostKeyChecking=no)
 SHORT_NAMES=("ping" "restart" "updates" "info" "update_ha_config" "reboot" "ssh" "docker" "pull")
 COMMANDS=("" "ha core restart" "ha supervisor updates" "ha info" "/config/update_ha_config.sh" "ha host reboot" "" "" "cd /config && git pull origin main")
 
-declare -a SUMMARY_RESULTS=()
-declare -A CMD_TOTAL=()
-declare -A CMD_SUCCESS=()
-declare -A CMD_FAIL=()
+SUMMARY_RESULTS=()
+CMD_TOTALS=()
+CMD_SUCCESSES=()
+CMD_FAILURES=()
 OVERALL_EXIT=0
+
+for _ in "${SHORT_NAMES[@]}"; do
+  CMD_TOTALS+=(0)
+  CMD_SUCCESSES+=(0)
+  CMD_FAILURES+=(0)
+done
 
 usage() {
   echo "Usage: $0 [--host <pattern>] [ping] [restart] [updates] [info] [update_ha_config] [reboot] [ssh] [docker] [pull]"
@@ -38,6 +44,19 @@ usage() {
 if [ $# -eq 0 ]; then
   usage
 fi
+
+find_cmd_index() {
+  local target="$1"
+  local i
+  for i in "${!SHORT_NAMES[@]}"; do
+    if [ "${SHORT_NAMES[$i]}" = "$target" ]; then
+      echo "$i"
+      return 0
+    fi
+  done
+  echo "-1"
+  return 1
+}
 
 record_result() {
   local short="$1"
@@ -61,11 +80,15 @@ record_result() {
   fi
 
   SUMMARY_RESULTS+=("$short|$host|$status|$message")
-  CMD_TOTAL["$short"]=$(( ${CMD_TOTAL["$short"]:-0} + 1 ))
-  if [ "$status" -eq 0 ]; then
-    CMD_SUCCESS["$short"]=$(( ${CMD_SUCCESS["$short"]:-0} + 1 ))
-  else
-    CMD_FAIL["$short"]=$(( ${CMD_FAIL["$short"]:-0} + 1 ))
+  local idx
+  idx=$(find_cmd_index "$short")
+  if [ "$idx" -ge 0 ]; then
+    CMD_TOTALS[$idx]=$(( ${CMD_TOTALS[$idx]} + 1 ))
+    if [ "$status" -eq 0 ]; then
+      CMD_SUCCESSES[$idx]=$(( ${CMD_SUCCESSES[$idx]} + 1 ))
+    else
+      CMD_FAILURES[$idx]=$(( ${CMD_FAILURES[$idx]} + 1 ))
+    fi
   fi
 }
 
@@ -74,15 +97,34 @@ print_summary() {
     return
   fi
   echo "====== Command Summary ======"
-  declare -A seen=()
+  SEEN_CMDS=()
+  already_seen() {
+    local check="$1"
+    for item in "${SEEN_CMDS[@]}"; do
+      if [ "$item" = "$check" ]; then
+        return 0
+      fi
+    done
+    return 1
+  }
+  mark_seen() {
+    SEEN_CMDS+=("$1")
+  }
   for cmd in "${SHORTS_TO_RUN[@]}"; do
-    if [ -n "${seen[$cmd]+set}" ]; then
+    if already_seen "$cmd"; then
       continue
     fi
-    seen[$cmd]=1
-    local total=${CMD_TOTAL[$cmd]:-0}
-    local success=${CMD_SUCCESS[$cmd]:-0}
-    local fail=${CMD_FAIL[$cmd]:-0}
+    mark_seen "$cmd"
+    local idx
+    idx=$(find_cmd_index "$cmd")
+    local total=0
+    local success=0
+    local fail=0
+    if [ "$idx" -ge 0 ]; then
+      total=${CMD_TOTALS[$idx]}
+      success=${CMD_SUCCESSES[$idx]}
+      fail=${CMD_FAILURES[$idx]}
+    fi
     echo "Command '$cmd': $success/$total succeeded"
     for entry in "${SUMMARY_RESULTS[@]}"; do
       IFS='|' read -r e_short e_host e_status e_message <<<"$entry"
