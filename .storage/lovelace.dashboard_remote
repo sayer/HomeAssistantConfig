@@ -1872,59 +1872,6 @@
               ]
             },
             {
-              "type": "custom:mushroom-chips-card",
-              "chips": [
-                {
-                  "type": "entity",
-                  "entity": "script.good_morning",
-                  "name": "Morning",
-                  "content_info": "name",
-                  "icon": "mdi:sun-clock",
-                  "tap_action": {
-                    "action": "call-service",
-                    "service": "script.good_morning",
-                    "target": {}
-                  }
-                },
-                {
-                  "type": "entity",
-                  "entity": "script.evening",
-                  "tap_action": {
-                    "action": "call-service",
-                    "service": "script.evening",
-                    "target": {}
-                  },
-                  "icon": "mdi:clock-time-seven",
-                  "name": "Evening",
-                  "content_info": "name"
-                },
-                {
-                  "type": "entity",
-                  "entity": "script.good_night",
-                  "name": "Night",
-                  "content_info": "name",
-                  "tap_action": {
-                    "action": "call-service",
-                    "service": "script.good_night",
-                    "target": {}
-                  },
-                  "icon": "mdi:lightbulb-night"
-                },
-                {
-                  "type": "entity",
-                  "entity": "person.stephen_ayers",
-                  "name": "TV",
-                  "content_info": "name",
-                  "icon": "mdi:television",
-                  "tap_action": {
-                    "action": "call-service",
-                    "service": "script.tv_time",
-                    "target": {}
-                  }
-                }
-              ]
-            },
-            {
               "show_name": true,
               "show_icon": true,
               "show_state": true,

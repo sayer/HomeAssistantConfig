@@ -1,2 +1,3 @@
 # shell_commands.yaml
-write_coach_year: ./update_coach_year.sh
+write_coach_year: ./update_coach_year.sh {{ year }}
+write_coach_number: ./update_coach_number.sh {{ number }}
