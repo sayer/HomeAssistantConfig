@@ -20,6 +20,12 @@ SSH_OPTS=(-p "$SSH_PORT" -o ConnectTimeout=10 -o StrictHostKeyChecking=no)
 SHORT_NAMES=("ping" "restart" "updates" "info" "update_ha_config" "reboot" "ssh" "docker" "pull")
 COMMANDS=("" "ha core restart" "ha supervisor updates" "ha info" "/config/update_ha_config.sh" "ha host reboot" "" "" "cd /config && git pull origin main")
 
+declare -a SUMMARY_RESULTS=()
+declare -A CMD_TOTAL=()
+declare -A CMD_SUCCESS=()
+declare -A CMD_FAIL=()
+OVERALL_EXIT=0
+
 usage() {
   echo "Usage: $0 [--host <pattern>] [ping] [restart] [updates] [info] [update_ha_config] [reboot] [ssh] [docker] [pull]"
   echo "  --host <pattern>   Only run commands on hosts matching the pattern (full or partial match)."
@@ -32,6 +38,64 @@ usage() {
 if [ $# -eq 0 ]; then
   usage
 fi
+
+record_result() {
+  local short="$1"
+  local host="$2"
+  local status="$3"
+  local note="$4"
+  local message
+
+  if [ -z "$note" ]; then
+    if [ "$status" -eq 0 ]; then
+      message="success"
+    else
+      message="failed (exit $status)"
+    fi
+  else
+    message="$note"
+  fi
+
+  if [ "$status" -ne 0 ]; then
+    OVERALL_EXIT=1
+  fi
+
+  SUMMARY_RESULTS+=("$short|$host|$status|$message")
+  CMD_TOTAL["$short"]=$(( ${CMD_TOTAL["$short"]:-0} + 1 ))
+  if [ "$status" -eq 0 ]; then
+    CMD_SUCCESS["$short"]=$(( ${CMD_SUCCESS["$short"]:-0} + 1 ))
+  else
+    CMD_FAIL["$short"]=$(( ${CMD_FAIL["$short"]:-0} + 1 ))
+  fi
+}
+
+print_summary() {
+  if [ ${#SUMMARY_RESULTS[@]} -eq 0 ]; then
+    return
+  fi
+  echo "====== Command Summary ======"
+  declare -A seen=()
+  for cmd in "${SHORTS_TO_RUN[@]}"; do
+    if [ -n "${seen[$cmd]+set}" ]; then
+      continue
+    fi
+    seen[$cmd]=1
+    local total=${CMD_TOTAL[$cmd]:-0}
+    local success=${CMD_SUCCESS[$cmd]:-0}
+    local fail=${CMD_FAIL[$cmd]:-0}
+    echo "Command '$cmd': $success/$total succeeded"
+    for entry in "${SUMMARY_RESULTS[@]}"; do
+      IFS='|' read -r e_short e_host e_status e_message <<<"$entry"
+      if [ "$e_short" = "$cmd" ]; then
+        printf '  %s: %s\n' "$e_host" "$e_message"
+      fi
+    done
+    if [ "$fail" -gt 0 ]; then
+      echo "  Failures: $fail"
+    fi
+    echo ""
+  done
+}
 
 # Host filter logic
 HOST_FILTER=""
@@ -110,6 +174,8 @@ for HOST in "${HOSTS[@]}"; do
       if [ $status -ne 0 ]; then
         echo "Error: SSH connection to $HOST failed (exit code $status)."
       fi
+      record_result "$SHORT" "$HOST" "$status" ""
+      print_summary
       exit $status
     elif [ "$SHORT" = "docker" ]; then
       if [ ${#HOSTS[@]} -ne 1 ]; then
@@ -122,6 +188,8 @@ for HOST in "${HOSTS[@]}"; do
       if [ $status -ne 0 ]; then
         echo "Error: Docker shell on $HOST failed (exit code $status)."
       fi
+      record_result "$SHORT" "$HOST" "$status" ""
+      print_summary
       exit $status
     elif [ "$SHORT" = "ping" ]; then
       echo "Running: ping (SSH connectivity test)"
@@ -132,6 +200,7 @@ for HOST in "${HOSTS[@]}"; do
       else
         echo "Ping failed: Unable to connect to $HOST via SSH (exit code $status). Continuing to next host."
       fi
+      record_result "$SHORT" "$HOST" "$status" ""
     elif [ "$CMD" = "/config/update_ha_config.sh" ]; then
       echo "Running: update_ha_config (with sudo)"
       ssh -t "${SSH_OPTS[@]}" "$SSH_TARGET" "sudo bash -l -c '$CMD'"
@@ -139,6 +208,7 @@ for HOST in "${HOSTS[@]}"; do
       if [ $status -ne 0 ]; then
         echo "Error: Failed to run '$CMD' with sudo on $HOST (exit code $status). Continuing to next host."
       fi
+      record_result "$SHORT" "$HOST" "$status" ""
     elif [ "$SHORT" = "pull" ]; then
       echo "Running: git pull origin main"
       OUTPUT=$(ssh "${SSH_OPTS[@]}" "$SSH_TARGET" "$CMD" 2>&1)
@@ -147,10 +217,16 @@ for HOST in "${HOSTS[@]}"; do
       if [ $status -eq 0 ]; then
         echo "Pull succeeded on $HOST."
         PULL_SUCCESSES+=("$HOST")
+        note="updated"
+        if echo "$OUTPUT" | grep -qi "already up to date"; then
+          note="no changes"
+        fi
+        record_result "$SHORT" "$HOST" "$status" "$note"
       else
         echo "Error: git pull failed on $HOST (exit code $status). Continuing to next host."
         PULL_FAILURES+=("$HOST")
         PULL_FAILURE_LOGS+=("$OUTPUT")
+        record_result "$SHORT" "$HOST" "$status" ""
       fi
     else
       echo "Running: $CMD"
@@ -159,6 +235,7 @@ for HOST in "${HOSTS[@]}"; do
       if [ $status -ne 0 ]; then
         echo "Error: Failed to run '$CMD' on $HOST (exit code $status). Continuing to next host."
       fi
+      record_result "$SHORT" "$HOST" "$status" ""
     fi
     echo "------------------------------"
   done
@@ -186,3 +263,6 @@ if [ $PULL_REQUESTED -eq 1 ]; then
     echo "Pull failed on: none"
   fi
 fi
+
+print_summary
+exit $OVERALL_EXIT
