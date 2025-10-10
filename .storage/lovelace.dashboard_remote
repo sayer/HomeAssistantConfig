@@ -3006,9 +3006,13 @@
                       "type": "markdown",
                       "content": "Scheduled scene automations only run when Camping Mode is **enabled**."
                     }
-                  ]
+                  ],
+                  "grid_options": {
+                    "columns": "full"
+                  }
                 }
-              ]
+              ],
+              "column_span": 4
             },
             {
               "type": "grid",
@@ -4153,7 +4157,10 @@
                     }
                   ]
                 }
-              ]
+              ],
+              "columns": 4,
+              "square": false,
+              "column_span": 4
             }
           ]
         }
