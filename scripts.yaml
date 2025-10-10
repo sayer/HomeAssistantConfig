@@ -1346,6 +1346,84 @@ load_scene:
         title: "Scene Loaded"
         message: "{{ slot_label }} ({{ friendly_name }}) has been loaded"
 
+clear_scene_slot:
+  alias: "Clear Stored Scene"
+  description: "Clears stored scene data, name, and schedule for a slot"
+  icon: mdi:content-save-off-outline
+  mode: single
+  fields:
+    slot_number:
+      name: Scene Slot
+      description: Scene slot number to clear (1-12)
+      required: true
+      selector:
+        number:
+          min: 1
+          max: 12
+          step: 1
+  sequence:
+    - variables:
+        slot: "{{ slot_number | int }}"
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: "{{ not (1 <= slot <= 12) }}"
+          sequence:
+            - service: system_log.write
+              data:
+                message: >-
+                  CLEAR SCENE - Invalid slot {{ slot_number }} requested. Valid range is 1-12.
+                level: warning
+            - service: notify.notify
+              data:
+                title: "Scene Clear Failed"
+                message: "Scene slot {{ slot_number }} is invalid. Choose a value between 1 and 12."
+            - stop: "Invalid scene slot"
+    - variables:
+        helper_name_entity: "{{ 'input_text.scene_slot_' ~ slot ~ '_name' }}"
+        schedule_enabled_entity: "{{ 'input_boolean.scene_slot_' ~ slot ~ '_schedule_enabled' }}"
+        schedule_type_entity: "{{ 'input_select.scene_slot_' ~ slot ~ '_schedule_type' }}"
+        schedule_time_entity: "{{ 'input_datetime.scene_slot_' ~ slot ~ '_time' }}"
+        schedule_offset_entity: "{{ 'input_number.scene_slot_' ~ slot ~ '_offset_minutes' }}"
+        mqtt_topic: "{{ 'homeassistant/scenes/scene_' ~ slot }}"
+        slot_label: "{{ 'Scene Slot ' ~ slot }}"
+    - service: system_log.write
+      data:
+        message: "Clearing {{ slot_label }}"
+        level: info
+    - service: mqtt.publish
+      data:
+        topic: "{{ mqtt_topic }}"
+        payload: "{}"
+        retain: true
+    - service: input_text.set_value
+      target:
+        entity_id: "{{ helper_name_entity }}"
+      data:
+        value: ""
+    - service: input_boolean.turn_off
+      target:
+        entity_id: "{{ schedule_enabled_entity }}"
+    - service: input_select.select_option
+      target:
+        entity_id: "{{ schedule_type_entity }}"
+      data:
+        option: "time"
+    - service: input_number.set_value
+      target:
+        entity_id: "{{ schedule_offset_entity }}"
+      data:
+        value: 0
+    - service: input_datetime.set_datetime
+      target:
+        entity_id: "{{ schedule_time_entity }}"
+      data:
+        time: "21:00:00"
+    - service: notify.notify
+      data:
+        title: "Scene Cleared"
+        message: "{{ slot_label }} has been cleared."
+
 # Master Thermostat Control Scripts
 master_thermostat_set_cool:
   alias: "Master Thermostat - Set Cool Temperature"
