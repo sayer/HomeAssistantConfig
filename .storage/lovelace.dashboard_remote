@@ -1653,18 +1653,6 @@
                   "entity": "light.dimmer_3_17"
                 },
                 {
-                  "entity": "light.top_buck_accent"
-                },
-                {
-                  "entity": "light.top_bunk_reading"
-                },
-                {
-                  "entity": "light.bottom_bunk_accent"
-                },
-                {
-                  "entity": "light.bottom_bunk_reading"
-                },
-                {
                   "entity": "light.dimmer_3_15"
                 },
                 {
@@ -1674,6 +1662,38 @@
               "title": "Hallway",
               "state_color": true,
               "columns": 2
+            },
+            {
+              "type": "conditional",
+              "conditions": [
+                {
+                  "entity": "input_boolean.has_bunk_beds",
+                  "state": "on"
+                }
+              ],
+              "card": {
+                "show_name": true,
+                "show_icon": true,
+                "show_state": false,
+                "type": "glance",
+                "entities": [
+                  {
+                    "entity": "light.top_bunk_accent"
+                  },
+                  {
+                    "entity": "light.top_bunk_reading"
+                  },
+                  {
+                    "entity": "light.bottom_bunk_accent"
+                  },
+                  {
+                    "entity": "light.bottom_bunk_reading"
+                  }
+                ],
+                "title": "Bunk Lighting",
+                "state_color": true,
+                "columns": 2
+              }
             },
             {
               "type": "glance",
@@ -1934,16 +1954,36 @@
               "type": "glance",
               "entities": [
                 {
-                  "entity": "cover.top_bunk_night"
-                },
-                {
-                  "entity": "cover.botton_bunk_night"
-                },
-                {
                   "entity": "cover.mid_bath_night"
                 }
               ],
+              "title": "Hallway Night",
               "state_color": true
+            },
+            {
+              "type": "conditional",
+              "conditions": [
+                {
+                  "entity": "input_boolean.has_bunk_beds",
+                  "state": "on"
+                }
+              ],
+              "card": {
+                "show_name": true,
+                "show_icon": true,
+                "show_state": true,
+                "type": "glance",
+                "entities": [
+                  {
+                    "entity": "cover.top_bunk_night"
+                  },
+                  {
+                    "entity": "cover.bottom_bunk_night"
+                  }
+                ],
+                "title": "Bunk Night Shades",
+                "state_color": true
+              }
             },
             {
               "show_name": true,
@@ -2466,7 +2506,8 @@
                     "left": "50%",
                     "border-radius": "200%",
                     "text-align": "center",
-                    "background-color": "rgba(102, 102, 102, 0.2)"
+                    "background-color": "rgba(102, 102, 102, 0.2)",
+                    "display": "[[[ return states['input_boolean.has_bunk_beds'].state === 'on' ? 'block' : 'none'; ]]]"
                   }
                 },
                 {
@@ -2768,6 +2809,15 @@
                       }
                     }
                   ]
+                }
+              ]
+            },
+            {
+              "type": "entities",
+              "entities": [
+                {
+                  "entity": "input_boolean.has_bunk_beds",
+                  "name": "Coach Has Bunk Beds"
                 }
               ]
             },
