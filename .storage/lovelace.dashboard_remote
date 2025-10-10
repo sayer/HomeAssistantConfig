@@ -3077,7 +3077,18 @@
                         },
                         {
                           "entity": "sensor.scene_slot_1",
-                          "name": "Scene stored"
+                          "name": "Scene stored",
+                          "icon": "mdi:content-save",
+                          "tap_action": {
+                            "action": "call-service",
+                            "service": "script.clear_scene_slot",
+                            "service_data": {
+                              "slot_number": 1
+                            },
+                            "confirmation": {
+                              "text": "Clear Scene Slot 1?"
+                            }
+                          }
                         }
                       ]
                     },
@@ -3172,7 +3183,18 @@
                         },
                         {
                           "entity": "sensor.scene_slot_2",
-                          "name": "Scene stored"
+                          "name": "Scene stored",
+                          "icon": "mdi:content-save",
+                          "tap_action": {
+                            "action": "call-service",
+                            "service": "script.clear_scene_slot",
+                            "service_data": {
+                              "slot_number": 2
+                            },
+                            "confirmation": {
+                              "text": "Clear Scene Slot 2?"
+                            }
+                          }
                         }
                       ]
                     },
@@ -3267,7 +3289,18 @@
                         },
                         {
                           "entity": "sensor.scene_slot_3",
-                          "name": "Scene stored"
+                          "name": "Scene stored",
+                          "icon": "mdi:content-save",
+                          "tap_action": {
+                            "action": "call-service",
+                            "service": "script.clear_scene_slot",
+                            "service_data": {
+                              "slot_number": 3
+                            },
+                            "confirmation": {
+                              "text": "Clear Scene Slot 3?"
+                            }
+                          }
                         }
                       ]
                     },
@@ -3362,7 +3395,18 @@
                         },
                         {
                           "entity": "sensor.scene_slot_4",
-                          "name": "Scene stored"
+                          "name": "Scene stored",
+                          "icon": "mdi:content-save",
+                          "tap_action": {
+                            "action": "call-service",
+                            "service": "script.clear_scene_slot",
+                            "service_data": {
+                              "slot_number": 4
+                            },
+                            "confirmation": {
+                              "text": "Clear Scene Slot 4?"
+                            }
+                          }
                         }
                       ]
                     },
@@ -3457,7 +3501,18 @@
                         },
                         {
                           "entity": "sensor.scene_slot_5",
-                          "name": "Scene stored"
+                          "name": "Scene stored",
+                          "icon": "mdi:content-save",
+                          "tap_action": {
+                            "action": "call-service",
+                            "service": "script.clear_scene_slot",
+                            "service_data": {
+                              "slot_number": 5
+                            },
+                            "confirmation": {
+                              "text": "Clear Scene Slot 5?"
+                            }
+                          }
                         }
                       ]
                     },
@@ -3552,7 +3607,18 @@
                         },
                         {
                           "entity": "sensor.scene_slot_6",
-                          "name": "Scene stored"
+                          "name": "Scene stored",
+                          "icon": "mdi:content-save",
+                          "tap_action": {
+                            "action": "call-service",
+                            "service": "script.clear_scene_slot",
+                            "service_data": {
+                              "slot_number": 6
+                            },
+                            "confirmation": {
+                              "text": "Clear Scene Slot 6?"
+                            }
+                          }
                         }
                       ]
                     },
@@ -3647,7 +3713,18 @@
                         },
                         {
                           "entity": "sensor.scene_slot_7",
-                          "name": "Scene stored"
+                          "name": "Scene stored",
+                          "icon": "mdi:content-save",
+                          "tap_action": {
+                            "action": "call-service",
+                            "service": "script.clear_scene_slot",
+                            "service_data": {
+                              "slot_number": 7
+                            },
+                            "confirmation": {
+                              "text": "Clear Scene Slot 7?"
+                            }
+                          }
                         }
                       ]
                     },
@@ -3742,7 +3819,18 @@
                         },
                         {
                           "entity": "sensor.scene_slot_8",
-                          "name": "Scene stored"
+                          "name": "Scene stored",
+                          "icon": "mdi:content-save",
+                          "tap_action": {
+                            "action": "call-service",
+                            "service": "script.clear_scene_slot",
+                            "service_data": {
+                              "slot_number": 8
+                            },
+                            "confirmation": {
+                              "text": "Clear Scene Slot 8?"
+                            }
+                          }
                         }
                       ]
                     },
@@ -3837,7 +3925,18 @@
                         },
                         {
                           "entity": "sensor.scene_slot_9",
-                          "name": "Scene stored"
+                          "name": "Scene stored",
+                          "icon": "mdi:content-save",
+                          "tap_action": {
+                            "action": "call-service",
+                            "service": "script.clear_scene_slot",
+                            "service_data": {
+                              "slot_number": 9
+                            },
+                            "confirmation": {
+                              "text": "Clear Scene Slot 9?"
+                            }
+                          }
                         }
                       ]
                     },
@@ -3932,7 +4031,18 @@
                         },
                         {
                           "entity": "sensor.scene_slot_10",
-                          "name": "Scene stored"
+                          "name": "Scene stored",
+                          "icon": "mdi:content-save",
+                          "tap_action": {
+                            "action": "call-service",
+                            "service": "script.clear_scene_slot",
+                            "service_data": {
+                              "slot_number": 10
+                            },
+                            "confirmation": {
+                              "text": "Clear Scene Slot 10?"
+                            }
+                          }
                         }
                       ]
                     },
@@ -4027,7 +4137,18 @@
                         },
                         {
                           "entity": "sensor.scene_slot_11",
-                          "name": "Scene stored"
+                          "name": "Scene stored",
+                          "icon": "mdi:content-save",
+                          "tap_action": {
+                            "action": "call-service",
+                            "service": "script.clear_scene_slot",
+                            "service_data": {
+                              "slot_number": 11
+                            },
+                            "confirmation": {
+                              "text": "Clear Scene Slot 11?"
+                            }
+                          }
                         }
                       ]
                     },
@@ -4122,7 +4243,18 @@
                         },
                         {
                           "entity": "sensor.scene_slot_12",
-                          "name": "Scene stored"
+                          "name": "Scene stored",
+                          "icon": "mdi:content-save",
+                          "tap_action": {
+                            "action": "call-service",
+                            "service": "script.clear_scene_slot",
+                            "service_data": {
+                              "slot_number": 12
+                            },
+                            "confirmation": {
+                              "text": "Clear Scene Slot 12?"
+                            }
+                          }
                         }
                       ]
                     },
