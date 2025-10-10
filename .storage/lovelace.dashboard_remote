@@ -3077,7 +3077,7 @@
                         },
                         {
                           "entity": "sensor.scene_slot_1",
-                          "name": "Stored Payload"
+                          "name": "Scene stored"
                         }
                       ]
                     },
@@ -3172,7 +3172,7 @@
                         },
                         {
                           "entity": "sensor.scene_slot_2",
-                          "name": "Stored Payload"
+                          "name": "Scene stored"
                         }
                       ]
                     },
@@ -3267,7 +3267,7 @@
                         },
                         {
                           "entity": "sensor.scene_slot_3",
-                          "name": "Stored Payload"
+                          "name": "Scene stored"
                         }
                       ]
                     },
@@ -3362,7 +3362,7 @@
                         },
                         {
                           "entity": "sensor.scene_slot_4",
-                          "name": "Stored Payload"
+                          "name": "Scene stored"
                         }
                       ]
                     },
@@ -3457,7 +3457,7 @@
                         },
                         {
                           "entity": "sensor.scene_slot_5",
-                          "name": "Stored Payload"
+                          "name": "Scene stored"
                         }
                       ]
                     },
@@ -3552,7 +3552,7 @@
                         },
                         {
                           "entity": "sensor.scene_slot_6",
-                          "name": "Stored Payload"
+                          "name": "Scene stored"
                         }
                       ]
                     },
@@ -3647,7 +3647,7 @@
                         },
                         {
                           "entity": "sensor.scene_slot_7",
-                          "name": "Stored Payload"
+                          "name": "Scene stored"
                         }
                       ]
                     },
@@ -3742,7 +3742,7 @@
                         },
                         {
                           "entity": "sensor.scene_slot_8",
-                          "name": "Stored Payload"
+                          "name": "Scene stored"
                         }
                       ]
                     },
@@ -3837,7 +3837,7 @@
                         },
                         {
                           "entity": "sensor.scene_slot_9",
-                          "name": "Stored Payload"
+                          "name": "Scene stored"
                         }
                       ]
                     },
@@ -3932,7 +3932,7 @@
                         },
                         {
                           "entity": "sensor.scene_slot_10",
-                          "name": "Stored Payload"
+                          "name": "Scene stored"
                         }
                       ]
                     },
@@ -4027,7 +4027,7 @@
                         },
                         {
                           "entity": "sensor.scene_slot_11",
-                          "name": "Stored Payload"
+                          "name": "Scene stored"
                         }
                       ]
                     },
@@ -4122,7 +4122,7 @@
                         },
                         {
                           "entity": "sensor.scene_slot_12",
-                          "name": "Stored Payload"
+                          "name": "Scene stored"
                         }
                       ]
                     },
