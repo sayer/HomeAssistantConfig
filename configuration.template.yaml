@@ -212,6 +212,10 @@ input_boolean:
   master_thermostat_heater:
     name: "Master Thermostat Heater"
     icon: mdi:thermostat
+  has_bunk_beds:
+    name: "Coach Has Bunk Beds"
+    icon: mdi:bunk-bed
+    initial: true
   # Scene scheduling toggles
   scene_slot_1_schedule_enabled:
     name: "Scene 1 Schedule Enabled"

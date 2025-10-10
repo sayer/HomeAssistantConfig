@@ -14,6 +14,9 @@ This repository tracks the Home Assistant configuration for the Foretravel coach
 
 For timezone setup instructions, see [`TIMEZONE_SETUP.md`](TIMEZONE_SETUP.md).
 
+## Coach Features
+- Toggle `input_boolean.has_bunk_beds` (Systems view → System Configuration) to hide bunk lighting and shade controls on coaches without the bunk option.
+
 ## Power Monitoring
 - `sensor.ac_source` now keys off `sensor.ats_switch_position` and, when available, the inverter state to distinguish Shore, Generator, and Inverter feeds. `ATS_STATUS` advertises `source 1` (shore) and `source 2` (generator); inverter fallback only applies if `sensor.inverter_status` reports `invert`/`waiting to invert`.
 - `sensor.ac_line_1_voltage`, `sensor.ac_line_1_current`, `sensor.ac_line_2_voltage`, and `sensor.ac_line_2_current` read the ATS output legs from `RVC/INVERTER_AC_STATUS_1`. Each sensor holds the last reported value so alternating leg updates from the bridge do not blank the companion leg.
