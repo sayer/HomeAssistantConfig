@@ -1678,7 +1678,7 @@
                 "type": "glance",
                 "entities": [
                   {
-                    "entity": "light.top_bunk_accent"
+                    "entity": "light.top_buck_accent"
                   },
                   {
                     "entity": "light.top_bunk_reading"
@@ -1905,6 +1905,9 @@
                 },
                 {
                   "entity": "cover.entry_door_night"
+                },
+                {
+                  "entity": "cover.passenger_night"
                 }
               ],
               "state_color": true
@@ -1978,7 +1981,7 @@
                     "entity": "cover.top_bunk_night"
                   },
                   {
-                    "entity": "cover.bottom_bunk_night"
+                    "entity": "cover.botton_bunk_night"
                   }
                 ],
                 "title": "Bunk Night Shades",
