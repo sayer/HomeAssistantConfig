@@ -703,8 +703,8 @@ configure_2023_plus() {
     VENT_FAN_1="1"
     VENT_FAN_2="2"
     OPTIMISTIC_MODE="true"
-    AMBIANT_TEMP="1"
-    INDOOR_TEMP="2"
+    AMBIANT_TEMP="249"
+    INDOOR_TEMP="248"
     LIGHT_COMMAND_ON="0"
     LIGHT_COMMAND_OFF="3"
     # Thermostat instances
@@ -713,10 +713,10 @@ configure_2023_plus() {
     THERMOSTAT3="9"
     THERMOSTAT4="167"
     # Thermostat ambient instances (same for all model years)
-    THERMOSTAT1_AMBIENT="249"
-    THERMOSTAT2_AMBIENT="249"
-    THERMOSTAT3_AMBIENT="250"
-    THERMOSTAT4_AMBIENT="250"
+    THERMOSTAT1_AMBIENT="7"
+    THERMOSTAT2_AMBIENT="9"
+    THERMOSTAT3_AMBIENT="8"
+    THERMOSTAT4_AMBIENT="248"
     # Set shade codes
     set_shade_tokens "CODE_2023"
 }
