@@ -12,3 +12,12 @@ zigbee.db
 zigbee.db-shm
 zigbee.db-wal
 www/snapshot_dash.jpg
+configuration.yaml
+configuration.yaml.bak
+coach_model_year.txt
+coach_number.txt
+.HA_VERSION
+.cloud
+.ha_run.lock
+home-assistant-rollback.log
+update_ha_config.log
