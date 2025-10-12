@@ -954,6 +954,60 @@ sensor:
             {{ temp | float | round(1) }}
           {% endif %}
 
+      min_ambient_temperature:
+        friendly_name: "Min Ambient Temperature"
+        unique_id: "min_ambient_temperature"
+        unit_of_measurement: "°F"
+        device_class: temperature
+        state_class: measurement
+        icon: mdi:thermometer-minus
+        value_template: >-
+          {% set sensors = [
+            'sensor.thermostat1_zone_temperature',
+            'sensor.thermostat2_zone_temperature',
+            'sensor.thermostat3_zone_temperature',
+            'sensor.thermostat4_zone_temperature'
+          ] %}
+          {% set values = namespace(list=[]) %}
+          {% for sensor_id in sensors %}
+            {% set value = states(sensor_id) %}
+            {% if value not in ['unknown', 'unavailable', '', none, 'None'] %}
+              {% set values.list = values.list + [value | float] %}
+            {% endif %}
+          {% endfor %}
+          {% if values.list | length > 0 %}
+            {{ (values.list | min) | round(1) }}
+          {% else %}
+            unknown
+          {% endif %}
+
+      max_ambient_temperature:
+        friendly_name: "Max Ambient Temperature"
+        unique_id: "max_ambient_temperature"
+        unit_of_measurement: "°F"
+        device_class: temperature
+        state_class: measurement
+        icon: mdi:thermometer-plus
+        value_template: >-
+          {% set sensors = [
+            'sensor.thermostat1_zone_temperature',
+            'sensor.thermostat2_zone_temperature',
+            'sensor.thermostat3_zone_temperature',
+            'sensor.thermostat4_zone_temperature'
+          ] %}
+          {% set values = namespace(list=[]) %}
+          {% for sensor_id in sensors %}
+            {% set value = states(sensor_id) %}
+            {% if value not in ['unknown', 'unavailable', '', none, 'None'] %}
+              {% set values.list = values.list + [value | float] %}
+            {% endif %}
+          {% endfor %}
+          {% if values.list | length > 0 %}
+            {{ (values.list | max) | round(1) }}
+          {% else %}
+            unknown
+          {% endif %}
+
 
 
 mqtt:

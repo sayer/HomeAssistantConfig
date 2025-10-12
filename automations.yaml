@@ -1127,7 +1127,7 @@
   trigger:
   - platform: numeric_state
     entity_id:
-    - sensor.min_temperature
+    - sensor.min_ambient_temperature
     for:
       hours: 0
       minutes: 1
@@ -1147,7 +1147,7 @@
   trigger:
   - platform: numeric_state
     entity_id:
-    - sensor.max_temperature
+    - sensor.max_ambient_temperature
     for:
       hours: 0
       minutes: 1
