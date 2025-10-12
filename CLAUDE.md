@@ -196,7 +196,7 @@ mqtt:
 
 # System Configuration
 %%OPTIMISTIC_MODE%%          # true/false - Use optimistic MQTT mode
-%%AMBIANT_TEMP%%             # Ambient temperature sensor instance
+%%EXTERNAL_TEMP%%            # Exterior temperature sensor instance
 %%INDOOR_TEMP%%              # Indoor temperature sensor instance
 %%LIGHT_COMMAND_ON%%         # Light on command value (0 or other)
 %%LIGHT_COMMAND_OFF%%        # Light off command value (3 or other)
@@ -314,8 +314,8 @@ mqtt:
       icon: "mdi:fan"
 
   sensor:
-    - name: "Ambient Temperature"
-      state_topic: "RVC/THERMOSTAT_AMBIENT_STATUS/%%AMBIANT_TEMP%%"
+    - name: "External Temperature"
+      state_topic: "RVC/THERMOSTAT_AMBIENT_STATUS/%%EXTERNAL_TEMP%%"
       unique_id: "THERMOSTAT_AMBIENT_STATUS"
       unit_of_measurement: "F"
       state_class: measurement
