@@ -3078,8 +3078,8 @@ mqtt:
       device_class: voltage
       state_class: measurement
       value_template: "{{ value_json['charge voltage'] }}"
-    - name: "Ambient Temperature (%%AMBIANT_TEMP%%)"
-      state_topic: "RVC/THERMOSTAT_AMBIENT_STATUS/%%AMBIANT_TEMP%%"
+    - name: "External Temperature (%%EXTERNAL_TEMP%%)"
+      state_topic: "RVC/THERMOSTAT_AMBIENT_STATUS/%%EXTERNAL_TEMP%%"
       unique_id: "THERMOSTAT_AMBIENT_STATUS"
       unit_of_measurement: "F"
       state_class: measurement
