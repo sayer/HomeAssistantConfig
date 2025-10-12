@@ -958,9 +958,6 @@ sensor:
         friendly_name: "Min Ambient Temperature"
         unique_id: "min_ambient_temperature"
         unit_of_measurement: "°F"
-        device_class: temperature
-        state_class: measurement
-        icon: mdi:thermometer-minus
         value_template: >-
           {% set sensors = [
             'sensor.thermostat1_zone_temperature',
@@ -985,9 +982,6 @@ sensor:
         friendly_name: "Max Ambient Temperature"
         unique_id: "max_ambient_temperature"
         unit_of_measurement: "°F"
-        device_class: temperature
-        state_class: measurement
-        icon: mdi:thermometer-plus
         value_template: >-
           {% set sensors = [
             'sensor.thermostat1_zone_temperature',
