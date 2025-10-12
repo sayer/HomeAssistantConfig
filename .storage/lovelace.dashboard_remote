@@ -1337,16 +1337,16 @@
                     "show_icon": true,
                     "show_state": true,
                     "state_color": true,
-                    "entities": [
-                      {
-                        "entity": "sensor.min_temperature"
-                      },
-                      {
-                        "entity": "sensor.max_temperature"
-                      },
-                      {
-                        "entity": "sensor.thermostat_ambient_status"
-                      },
+                      "entities": [
+                        {
+                          "entity": "sensor.max_temperature"
+                        },
+                        {
+                          "entity": "sensor.min_temperature"
+                        },
+                        {
+                          "entity": "sensor.thermostat_ambient_status"
+                        },
                       {
                         "entity": "sensor.inside_temperature"
                       }
