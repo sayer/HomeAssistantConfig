@@ -1309,12 +1309,12 @@
                       "conditions": [
                         {
                           "condition": "state",
-                          "entity": "sensor.min_temperature",
+                          "entity": "sensor.min_ambient_temperature",
                           "state_not": "unavailable"
                         },
                         {
                           "condition": "state",
-                          "entity": "sensor.max_temperature",
+                          "entity": "sensor.max_ambient_temperature",
                           "state_not": "unavailable"
                         },
                         {
@@ -1339,10 +1339,10 @@
                     "state_color": true,
                       "entities": [
                         {
-                          "entity": "sensor.max_temperature"
+                          "entity": "sensor.max_ambient_temperature"
                         },
                         {
-                          "entity": "sensor.min_temperature"
+                          "entity": "sensor.min_ambient_temperature"
                         },
                         {
                           "entity": "sensor.thermostat_ambient_status"
