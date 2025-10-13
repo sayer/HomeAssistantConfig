@@ -672,23 +672,48 @@ generator_shutdown_with_verification:
       selector:
         text:
   sequence:
+    - service: input_text.set_value
+      data:
+        entity_id: input_text.generator_start_status
+        value: "Preparing to stop generator"
     - choose:
         - conditions:
             - condition: state
               entity_id: switch.generator
               state: 'off'
           sequence:
+            - service: input_text.set_value
+              data:
+                entity_id: input_text.generator_start_status
+                value: "Generator already off"
             - stop: "Generator already off"
 
     # Wait for the specified delay
+    - service: input_text.set_value
+      data:
+        entity_id: input_text.generator_start_status
+        value: >-
+          {% set delay = delay_minutes | int %}
+          {% if delay > 0 %}
+            Waiting to stop ({{ delay }} min)
+          {% else %}
+            Stopping generator
+          {% endif %}
     - delay:
         minutes: "{{ delay_minutes | int }}"
 
     # Turn off generator
+    - service: input_text.set_value
+      data:
+        entity_id: input_text.generator_start_status
+        value: "Stopping generator"
     - service: switch.turn_off
       target:
         entity_id: switch.generator
-      
+    - service: input_text.set_value
+      data:
+        entity_id: input_text.generator_start_status
+        value: "Verifying shutdown"
     # Wait 30 seconds for generator to shut down
     - delay:
         seconds: 30
@@ -700,28 +725,46 @@ generator_shutdown_with_verification:
           # Check if generator is still running
           - condition: template
             value_template: "{{ is_state('switch.generator', 'on') }}"
+          - service: input_text.set_value
+            data:
+              entity_id: input_text.generator_start_status
+              value: >-
+                Retrying generator shutdown (attempt {{ repeat.index + 1 }})
           # If still running, turn off again
           - service: switch.turn_off
             target:
               entity_id: switch.generator
-            
+          - service: input_text.set_value
+            data:
+              entity_id: input_text.generator_start_status
+              value: "Waiting before retry"
           # Wait 30 seconds before next check
           - delay:
               seconds: 30
     
-    # Final verification - if still running, send notification
+    # Final verification
     - choose:
         - conditions:
-            - condition: template
-              value_template: "{{ is_state('switch.generator', 'on') }}"
+            - condition: state
+              entity_id: switch.generator
+              state: 'off'
           sequence:
-            - service: "{{ notification_service }}"
+            - service: input_text.set_value
               data:
-                title: "Generator Shutdown Failed"
-                message: "Unable to stop generator after {{ delay_minutes }} minutes and 3 retry attempts. Manual intervention required."
-                data:
-                  priority: "high"
-                  channel: "alerts"
+                entity_id: input_text.generator_start_status
+                value: "Generator off"
+      default:
+        - service: input_text.set_value
+          data:
+            entity_id: input_text.generator_start_status
+            value: "Generator shutdown failed"
+        - service: "{{ notification_service }}"
+          data:
+            title: "Generator Shutdown Failed"
+            message: "Unable to stop generator after {{ delay_minutes }} minutes and 3 retry attempts. Manual intervention required."
+            data:
+              priority: "high"
+              channel: "alerts"
 
 # Generator Start with Verification Script
 generator_start_with_verification:
@@ -747,23 +790,48 @@ generator_start_with_verification:
       selector:
         text:
   sequence:
+    - service: input_text.set_value
+      data:
+        entity_id: input_text.generator_start_status
+        value: "Checking generator state"
     - choose:
         - conditions:
             - condition: state
               entity_id: switch.generator
               state: 'on'
           sequence:
+            - service: input_text.set_value
+              data:
+                entity_id: input_text.generator_start_status
+                value: "Generator already running"
             - stop: "Generator already running"
 
     # Wait for the specified delay
+    - service: input_text.set_value
+      data:
+        entity_id: input_text.generator_start_status
+        value: >-
+          {% set delay = delay_minutes | int %}
+          {% if delay > 0 %}
+            Waiting to start ({{ delay }} min)
+          {% else %}
+            Starting generator
+          {% endif %}
     - delay:
         minutes: "{{ delay_minutes | int }}"
 
     # Turn on generator
+    - service: input_text.set_value
+      data:
+        entity_id: input_text.generator_start_status
+        value: "Starting generator (attempt 1)"
     - service: switch.turn_on
       target:
         entity_id: switch.generator
-    
+    - service: input_text.set_value
+      data:
+        entity_id: input_text.generator_start_status
+        value: "Verifying start"
     # Wait 30 seconds for generator to start
     - delay:
         seconds: 30
@@ -775,27 +843,46 @@ generator_start_with_verification:
           # Check if generator is still off
           - condition: template
             value_template: "{{ is_state('switch.generator', 'off') }}"
+          - service: input_text.set_value
+            data:
+              entity_id: input_text.generator_start_status
+              value: >-
+                Retrying generator start (attempt {{ repeat.index + 1 }})
           # If still off, turn on again
           - service: switch.turn_on
             target:
               entity_id: switch.generator
+          - service: input_text.set_value
+            data:
+              entity_id: input_text.generator_start_status
+              value: "Waiting before retry"
           # Wait 60 seconds before next check
           - delay:
               seconds: 60
 
-    # Final verification - if still off, send notification
+    # Final verification
     - choose:
         - conditions:
-            - condition: template
-              value_template: "{{ is_state('switch.generator', 'off') }}"
+            - condition: state
+              entity_id: switch.generator
+              state: 'on'
           sequence:
-            - service: "{{ notification_service }}"
+            - service: input_text.set_value
               data:
-                title: "Generator Startup Failed"
-                message: "Unable to start generator after {{ delay_minutes }} minutes and 3 retry attempts. Manual intervention required."
-                data:
-                  priority: "high"
-                  channel: "alerts"
+                entity_id: input_text.generator_start_status
+                value: "Generator started"
+      default:
+        - service: input_text.set_value
+          data:
+            entity_id: input_text.generator_start_status
+            value: "Generator off (start failed)"
+        - service: "{{ notification_service }}"
+          data:
+            title: "Generator Startup Failed"
+            message: "Unable to start generator after {{ delay_minutes }} minutes and 3 retry attempts. Manual intervention required."
+            data:
+              priority: "high"
+              channel: "alerts"
 
 start_generator:
   alias: "Start Generator"

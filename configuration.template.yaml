@@ -258,6 +258,10 @@ input_boolean:
 input_text:
   owner_name:
     name: Owner Name
+  generator_start_status:
+    name: "Generator Start Status"
+    max: 64
+    initial: "Off"
   # Scene management
   scene_slot_1_name:
     name: "Scene 1 Name"

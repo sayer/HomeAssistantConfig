@@ -2335,6 +2335,13 @@
                     },
                     {
                       "type": "custom:mushroom-entity-card",
+                      "entity": "input_text.generator_start_status",
+                      "name": "Start Status",
+                      "fill_container": true,
+                      "icon": "mdi:information-outline"
+                    },
+                    {
+                      "type": "custom:mushroom-entity-card",
                       "entity": "sensor.generator_hours",
                       "name": "Total Hours",
                       "fill_container": true,
