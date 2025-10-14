@@ -510,10 +510,9 @@
     target:
       entity_id: light.all_lights
     action: light.turn_off
-  - data: {}
-    target:
-      entity_id: switch.generator
-    action: homeassistant.turn_on
+  - action: script.start_generator
+    data:
+      delay_minutes: 0
   - data:
       title: Foretravel
       message: House batteries critically low. Starting generator.
