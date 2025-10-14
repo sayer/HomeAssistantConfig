@@ -3106,7 +3106,6 @@ mqtt:
       state_topic: "RVC/DC_SOURCE_STATUS_1/1"
       unique_id: "DCHouseVoltage"
       unit_of_measurement: "V"
-      device_class: voltage
       state_class: measurement
       icon: mdi:car-battery
       value_template: "{{ value_json['dc voltage'] }}"
