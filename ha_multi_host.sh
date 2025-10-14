@@ -2,14 +2,15 @@
 
 # List of Home Assistant hosts
 HOSTS=(
-  "192.168.100.192"
+  "homeassistant-17.tail73c84.ts.net"
   "homeassistant-16.tail73c84.ts.net"
   "homeassistant-15.tail73c84.ts.net"
   "homeassistant-14.tail73c84.ts.net"
-  "homeassistant-12.tail73c84.ts.net"
   "homeassistant-13.tail73c84.ts.net"
-  "homeassistant-3.tail73c84.ts.net"
+  "homeassistant-12.tail73c84.ts.net"
   "homeassistant-8.tail73c84.ts.net"
+  "homeassistant-4.tail73c84.ts.net"
+  "homeassistant-3.tail73c84.ts.net"
 )
 
 ALL_HOSTS=("${HOSTS[@]}")
