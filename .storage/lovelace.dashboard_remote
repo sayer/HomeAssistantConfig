@@ -356,9 +356,9 @@
                               "state_not": "unknown"
                             },
                             {
-                              "condition": "state",
+                              "condition": "numeric_state",
                               "entity": "sensor.vehicle_speed",
-                              "state_not": "unknown"
+                              "above": 1
                             }
                           ]
                         }
