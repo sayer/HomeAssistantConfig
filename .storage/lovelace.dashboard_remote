@@ -346,14 +346,34 @@
                           "condition": "or",
                           "conditions": [
                             {
-                              "condition": "state",
-                              "entity": "sensor.parking_brake",
-                              "state_not": "unknown"
+                              "condition": "and",
+                              "conditions": [
+                                {
+                                  "condition": "state",
+                                  "entity": "sensor.parking_brake",
+                                  "state_not": "unknown"
+                                },
+                                {
+                                  "condition": "state",
+                                  "entity": "sensor.parking_brake",
+                                  "state_not": "undefined"
+                                }
+                              ]
                             },
                             {
-                              "condition": "state",
-                              "entity": "sensor.transmision_gear",
-                              "state_not": "unknown"
+                              "condition": "and",
+                              "conditions": [
+                                {
+                                  "condition": "state",
+                                  "entity": "sensor.transmision_gear",
+                                  "state_not": "unknown"
+                                },
+                                {
+                                  "condition": "state",
+                                  "entity": "sensor.transmision_gear",
+                                  "state_not": "undefined"
+                                }
+                              ]
                             },
                             {
                               "condition": "numeric_state",
