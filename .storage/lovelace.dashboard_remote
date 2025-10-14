@@ -348,17 +348,17 @@
                             {
                               "condition": "state",
                               "entity": "sensor.parking_brake",
-                              "state_not": "unavailable"
+                              "state_not": "unknown"
                             },
                             {
                               "condition": "state",
                               "entity": "sensor.transmision_gear",
-                              "state_not": "unavailable"
+                              "state_not": "unknown"
                             },
                             {
                               "condition": "state",
                               "entity": "sensor.vehicle_speed",
-                              "state_not": "unavailable"
+                              "state_not": "unknown"
                             }
                           ]
                         }
