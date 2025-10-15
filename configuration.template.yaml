@@ -3693,57 +3693,6 @@ mqtt:
       payload_off: "off"
       unique_id: "water_hookup"
 
-    - name: "AGS Overall Enabled"
-      state_topic: "RVC/AGS_DEMAND_CONFIGURATION_STATUS"
-      value_template: >-
-        {% set flags = [
-          (value_json['disable on park brake release definition'] | default('inactive')) | lower,
-          (value_json['disable on ignition definition'] | default('inactive')) | lower,
-          (value_json['disable on drive definition'] | default('inactive')) | lower,
-          (value_json['disable on motion definition'] | default('inactive')) | lower,
-          (value_json['disable on oem switch definition'] | default('inactive')) | lower,
-          (value_json['disable on service brake definition'] | default('inactive')) | lower,
-          (value_json['disable on monoxide detect definition'] | default('inactive')) | lower,
-          (value_json['disable on opened compartment definition'] | default('inactive')) | lower,
-          (value_json['disable on fire alarm definition'] | default('inactive')) | lower,
-          (value_json['disable on manual operation definition'] | default('inactive')) | lower,
-          (value_json['disable on genset fault definition'] | default('inactive')) | lower,
-          (value_json['disable on system fault definition'] | default('inactive')) | lower,
-          (value_json['disable on shore power definition'] | default('inactive')) | lower,
-          (value_json['disable on 50 amp shore definition'] | default('inactive')) | lower
-        ] %}
-        {% if 'active' in flags %}
-          OFF
-        {% else %}
-          ON
-        {% endif %}
-      payload_on: "ON"
-      payload_off: "OFF"
-      device_class: power
-      icon: "mdi:engine"
-      unique_id: "ags_overall_enabled"
-      json_attributes_topic: "RVC/AGS_DEMAND_CONFIGURATION_STATUS"
-      json_attributes_template: >-
-        {{ {
-          "disable_on_park_brake_release": value_json['disable on park brake release definition'] | default('inactive'),
-          "disable_on_ignition": value_json['disable on ignition definition'] | default('inactive'),
-          "disable_on_drive": value_json['disable on drive definition'] | default('inactive'),
-          "disable_on_motion": value_json['disable on motion definition'] | default('inactive'),
-          "disable_on_oem_switch": value_json['disable on oem switch definition'] | default('inactive'),
-          "disable_on_service_brake": value_json['disable on service brake definition'] | default('inactive'),
-          "disable_on_monoxide_detect": value_json['disable on monoxide detect definition'] | default('inactive'),
-          "disable_on_opened_compartment": value_json['disable on opened compartment definition'] | default('inactive'),
-          "disable_on_fire_alarm": value_json['disable on fire alarm definition'] | default('inactive'),
-          "disable_on_manual_operation": value_json['disable on manual operation definition'] | default('inactive'),
-          "disable_on_genset_fault": value_json['disable on genset fault definition'] | default('inactive'),
-          "disable_on_system_fault": value_json['disable on system fault definition'] | default('inactive'),
-          "disable_on_shore_power": value_json['disable on shore power definition'] | default('inactive'),
-          "disable_on_50_amp_shore": value_json['disable on 50 amp shore definition'] | default('inactive'),
-          "disable_after_days": value_json['disable ags after time span'] | default(None),
-          "days_remaining": value_json['days remaining before automatic disabling'] | default(None),
-          "timestamp": value_json.timestamp | default(None)
-        } | to_json }}
-
     - name: "Water Pump Active"
       state_topic: "RVC/WATER_PUMP_STATUS"
       value_template: "{{ value_json['operating status definition'] }}"
@@ -4092,6 +4041,35 @@ template:
         state: >
           {{ states('cover.entry_door_day') not in ['unknown', 'unavailable', ''] }}
         device_class: connectivity  # Optional, use if you want a toggle-style icon
+
+      - name: "AGS Overall Enabled"
+        unique_id: "ags_overall_enabled"
+        device_class: power
+        state: >-
+          {% set demand = state_attr('sensor.ags_generator_demand', 'generator_demand') | default('unknown') | lower %}
+          {% set external = state_attr('sensor.ags_generator_demand', 'external_activity') | default('unknown') | lower %}
+          {% set invalid = ['unknown', 'unavailable', 'none', ''] %}
+          {% if states('sensor.ags_generator_demand') | lower in invalid and external in invalid %}
+            unknown
+          {% elif external in ['automatic starting is disabled due to external activity', 'disabled', 'blocked'] %}
+            off
+          {% elif demand in ['automatic generator start disabled', 'ags disabled', 'disabled'] %}
+            off
+          {% else %}
+            on
+          {% endif %}
+        icon: mdi:engine
+        attributes:
+          generator_demand: "{{ state_attr('sensor.ags_generator_demand', 'generator_demand') }}"
+          internal_demand: "{{ state_attr('sensor.ags_generator_demand', 'internal_demand') }}"
+          network_demand: "{{ state_attr('sensor.ags_generator_demand', 'network_demand') }}"
+          external_activity: "{{ state_attr('sensor.ags_generator_demand', 'external_activity') }}"
+          ags_generator_demand_state: "{{ states('sensor.ags_generator_demand') }}"
+          ags_criterion_state: "{{ states('sensor.ags_criterion_status') }}"
+          ags_criterion_active_status: "{{ state_attr('sensor.ags_criterion_status', 'active_status') }}"
+          ags_criterion_current_demand: "{{ state_attr('sensor.ags_criterion_status', 'current_demand') }}"
+          last_changed: "{{ states.sensor.ags_generator_demand.last_changed }}"
+          last_updated: "{{ states.sensor.ags_generator_demand.last_updated }}"
 
   - sensor:
       - name: "Master Cool Target"
