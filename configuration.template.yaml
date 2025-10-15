@@ -3696,26 +3696,28 @@ mqtt:
     - name: "AGS Overall Enabled"
       state_topic: "RVC/AGS_DEMAND_CONFIGURATION_STATUS"
       value_template: >-
-        {% set flags = [
-          (value_json['disable on park brake release definition'] | default('inactive')) | lower,
-          (value_json['disable on ignition definition'] | default('inactive')) | lower,
-          (value_json['disable on drive definition'] | default('inactive')) | lower,
-          (value_json['disable on motion definition'] | default('inactive')) | lower,
-          (value_json['disable on oem switch definition'] | default('inactive')) | lower,
-          (value_json['disable on service brake definition'] | default('inactive')) | lower,
-          (value_json['disable on monoxide detect definition'] | default('inactive')) | lower,
-          (value_json['disable on opened compartment definition'] | default('inactive')) | lower,
-          (value_json['disable on fire alarm definition'] | default('inactive')) | lower,
-          (value_json['disable on manual operation definition'] | default('inactive')) | lower,
-          (value_json['disable on genset fault definition'] | default('inactive')) | lower,
-          (value_json['disable on system fault definition'] | default('inactive')) | lower,
-          (value_json['disable on shore power definition'] | default('inactive')) | lower,
-          (value_json['disable on 50 amp shore definition'] | default('inactive')) | lower
-        ] %}
-        {% if 'active' in flags %}
+        {% set data = value_json if value_json is mapping else {} %}
+        {% set ns = namespace(seen=0, active=0) %}
+        {% for key, val in data.items() %}
+          {% if key.startswith('disable on ') %}
+            {% set ns.seen = ns.seen + 1 %}
+            {% if 'definition' in key %}
+              {% if (val | string | lower) == 'active' %}
+                {% set ns.active = ns.active + 1 %}
+              {% endif %}
+            {% else %}
+              {% if val in [1, '1', true, 'true'] %}
+                {% set ns.active = ns.active + 1 %}
+              {% endif %}
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+        {% if ns.active > 0 %}
           OFF
-        {% else %}
+        {% elif ns.seen > 0 %}
           ON
+        {% else %}
+          unknown
         {% endif %}
       payload_on: "ON"
       payload_off: "OFF"
@@ -3724,24 +3726,63 @@ mqtt:
       unique_id: "ags_overall_enabled"
       json_attributes_topic: "RVC/AGS_DEMAND_CONFIGURATION_STATUS"
       json_attributes_template: >-
+        {% set data = value_json if value_json is mapping else {} %}
+        {% set park_brake = data.get('disable on park brake release definition', 'inactive') %}
+        {% set ignition = data.get('disable on ignition definition', 'inactive') %}
+        {% set drive = data.get('disable on drive definition', 'inactive') %}
+        {% set motion = data.get('disable on motion definition', 'inactive') %}
+        {% set oem_switch = data.get('disable on oem switch definition', 'inactive') %}
+        {% set service_brake = data.get('disable on service brake definition', 'inactive') %}
+        {% set monoxide = data.get('disable on monoxide detect definition', 'inactive') %}
+        {% set compartment = data.get('disable on opened compartment definition', 'inactive') %}
+        {% set fire_alarm = data.get('disable on fire alarm definition', 'inactive') %}
+        {% set manual = data.get('disable on manual operation definition', 'inactive') %}
+        {% set genset_fault = data.get('disable on genset fault definition', 'inactive') %}
+        {% set system_fault = data.get('disable on system fault definition', 'inactive') %}
+        {% set shore_power = data.get('disable on shore power definition', 'inactive') %}
+        {% set shore_50 = data.get('disable on 50 amp shore definition', 'inactive') %}
+        {% set disable_flags = [
+          ('disable_on_park_brake_release', park_brake),
+          ('disable_on_ignition', ignition),
+          ('disable_on_drive', drive),
+          ('disable_on_motion', motion),
+          ('disable_on_oem_switch', oem_switch),
+          ('disable_on_service_brake', service_brake),
+          ('disable_on_monoxide_detect', monoxide),
+          ('disable_on_opened_compartment', compartment),
+          ('disable_on_fire_alarm', fire_alarm),
+          ('disable_on_manual_operation', manual),
+          ('disable_on_genset_fault', genset_fault),
+          ('disable_on_system_fault', system_fault),
+          ('disable_on_shore_power', shore_power),
+          ('disable_on_50_amp_shore', shore_50)
+        ] %}
+        {% set active = [] %}
+        {% for flag in disable_flags %}
+          {% if (flag[1] | string | lower) == 'active' %}
+            {% set active = active + [flag[0]] %}
+          {% endif %}
+        {% endfor %}
         {{ {
-          "disable_on_park_brake_release": value_json['disable on park brake release definition'] | default('inactive'),
-          "disable_on_ignition": value_json['disable on ignition definition'] | default('inactive'),
-          "disable_on_drive": value_json['disable on drive definition'] | default('inactive'),
-          "disable_on_motion": value_json['disable on motion definition'] | default('inactive'),
-          "disable_on_oem_switch": value_json['disable on oem switch definition'] | default('inactive'),
-          "disable_on_service_brake": value_json['disable on service brake definition'] | default('inactive'),
-          "disable_on_monoxide_detect": value_json['disable on monoxide detect definition'] | default('inactive'),
-          "disable_on_opened_compartment": value_json['disable on opened compartment definition'] | default('inactive'),
-          "disable_on_fire_alarm": value_json['disable on fire alarm definition'] | default('inactive'),
-          "disable_on_manual_operation": value_json['disable on manual operation definition'] | default('inactive'),
-          "disable_on_genset_fault": value_json['disable on genset fault definition'] | default('inactive'),
-          "disable_on_system_fault": value_json['disable on system fault definition'] | default('inactive'),
-          "disable_on_shore_power": value_json['disable on shore power definition'] | default('inactive'),
-          "disable_on_50_amp_shore": value_json['disable on 50 amp shore definition'] | default('inactive'),
-          "disable_after_days": value_json['disable ags after time span'] | default(None),
-          "days_remaining": value_json['days remaining before automatic disabling'] | default(None),
-          "timestamp": value_json.timestamp | default(None)
+          "disable_on_park_brake_release": park_brake,
+          "disable_on_ignition": ignition,
+          "disable_on_drive": drive,
+          "disable_on_motion": motion,
+          "disable_on_oem_switch": oem_switch,
+          "disable_on_service_brake": service_brake,
+          "disable_on_monoxide_detect": monoxide,
+          "disable_on_opened_compartment": compartment,
+          "disable_on_fire_alarm": fire_alarm,
+          "disable_on_manual_operation": manual,
+          "disable_on_genset_fault": genset_fault,
+          "disable_on_system_fault": system_fault,
+          "disable_on_shore_power": shore_power,
+          "disable_on_50_amp_shore": shore_50,
+          "active_disable_conditions": active,
+          "active_disable_count": active | length,
+          "disable_after_days": data.get('disable ags after time span'),
+          "days_remaining": data.get('days remaining before automatic disabling'),
+          "timestamp": data.get('timestamp')
         } | to_json }}
 
     - name: "Water Pump Active"
