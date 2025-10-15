@@ -2321,58 +2321,90 @@
                 },
                 {
                   "type": "grid",
-                  "square": true,
-                  "columns": 2,
+                  "square": false,
+                  "columns": 3,
                   "cards": [
                     {
                       "type": "gauge",
                       "entity": "sensor.generator_2",
                       "name": "Generator RPM",
                       "max": 2000,
-                      "needle": true
-                    },
-                    {
-                      "type": "custom:mushroom-entity-card",
-                      "entity": "switch.generator",
-                      "name": "Status",
-                      "tap_action": {
-                        "action": "more-info"
-                      },
-                      "fill_container": true,
-                      "icon": "mdi:turbine"
+                      "needle": true,
+                      "grid_options": {
+                        "columns": "full"
+                      }
                     },
                     {
                       "type": "custom:mushroom-template-card",
                       "entity": "switch.generator",
-                      "primary": "{{ 'Stop Generator' if is_state('switch.generator', 'on') else 'Start Generator' }}\n",
-                      "icon": "{{ 'mdi:stop-circle' if is_state('switch.generator', 'on') else 'mdi:play-circle' }}\n",
-                      "icon_color": "{{ 'red' if is_state('switch.generator', 'on') else 'green' }}\n",
+                      "layout": "horizontal",
+                      "primary": "Generator Status",
+                      "secondary": "{{ 'Running' if is_state('switch.generator', 'on') else 'Stopped' }}",
+                      "icon": "mdi:turbine",
+                      "icon_color": "{{ 'green' if is_state('switch.generator', 'on') else 'grey' }}",
+                      "tap_action": {
+                        "action": "more-info"
+                      }
+                    },
+                    {
+                      "type": "custom:mushroom-template-card",
+                      "entity": "switch.generator",
+                      "layout": "horizontal",
+                      "primary": "{{ 'Stop Generator' if is_state('switch.generator', 'on') else 'Start Generator' }}",
+                      "icon": "{{ 'mdi:stop-circle' if is_state('switch.generator', 'on') else 'mdi:play-circle' }}",
+                      "icon_color": "{{ 'red' if is_state('switch.generator', 'on') else 'green' }}",
                       "tap_action": {
                         "action": "call-service",
                         "service": "{{ 'script.stop_generator' if is_state('switch.generator', 'on') else 'script.start_generator' }}"
                       },
-                      "fill_container": true
+                      "hold_action": {
+                        "action": "more-info"
+                      }
                     },
                     {
-                      "type": "custom:mushroom-entity-card",
+                      "type": "custom:mushroom-template-card",
+                      "entity": "binary_sensor.ags_overall_enabled",
+                      "layout": "horizontal",
+                      "primary": "AGS Overall",
+                      "secondary": "{{ 'Enabled' if is_state('binary_sensor.ags_overall_enabled', 'on') else 'Disabled' }}",
+                      "icon": "mdi:auto-mode",
+                      "icon_color": "{{ 'green' if is_state('binary_sensor.ags_overall_enabled', 'on') else 'grey' }}",
+                      "tap_action": {
+                        "action": "more-info"
+                      }
+                    },
+                    {
+                      "type": "custom:mushroom-template-card",
                       "entity": "input_text.generator_start_status",
-                      "name": "Start Status",
-                      "fill_container": true,
-                      "icon": "mdi:information-outline"
+                      "layout": "horizontal",
+                      "primary": "Start Status",
+                      "secondary": "{{ states('input_text.generator_start_status') }}",
+                      "icon": "mdi:information-outline",
+                      "tap_action": {
+                        "action": "more-info"
+                      }
                     },
                     {
-                      "type": "custom:mushroom-entity-card",
+                      "type": "custom:mushroom-template-card",
                       "entity": "sensor.generator_hours",
-                      "name": "Total Hours",
-                      "fill_container": true,
-                      "icon": "mdi:turbine"
+                      "layout": "horizontal",
+                      "primary": "Total Hours",
+                      "secondary": "{{ states('sensor.generator_hours') }}",
+                      "icon": "mdi:turbine",
+                      "tap_action": {
+                        "action": "more-info"
+                      }
                     },
                     {
-                      "type": "custom:mushroom-entity-card",
+                      "type": "custom:mushroom-template-card",
                       "entity": "sensor.generator_session_display",
-                      "name": "Session Time",
-                      "fill_container": true,
-                      "icon": "mdi:av-timer"
+                      "layout": "horizontal",
+                      "primary": "Session Time",
+                      "secondary": "{{ states('sensor.generator_session_display') }}",
+                      "icon": "mdi:av-timer",
+                      "tap_action": {
+                        "action": "more-info"
+                      }
                     }
                   ]
                 },
