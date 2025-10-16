@@ -165,8 +165,7 @@
                       "entity": "sensor.dc_house_voltage",
                       "above": 0
                     }
-                  ],
-                  "title": "Battereis"
+                  ]
                 },
                 {
                   "type": "vertical-stack",
@@ -175,7 +174,6 @@
                       "type": "custom:auto-entities",
                       "card": {
                         "type": "grid",
-                        "title": "Outback Inverters",
                         "square": false,
                         "columns": 4
                       },
