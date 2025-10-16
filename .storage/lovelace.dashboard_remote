@@ -297,10 +297,11 @@
                   "name": "Aqua-Hot Mode",
                   "fill_container": true,
                   "layout": "horizontal",
-                  "secondary_info": " ",
+                  "secondary_info": "name",
                   "card_mod": {
                     "style": "ha-card { grid-column: span 2; }"
-                  }
+                  },
+                  "primary_info": "state"
                 },
                 {
                   "square": false,
