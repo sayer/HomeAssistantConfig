@@ -295,7 +295,12 @@
                   "type": "custom:mushroom-entity-card",
                   "entity": "sensor.aqua_hot_operating_mode",
                   "name": "Aqua-Hot Mode",
-                  "fill_container": true
+                  "fill_container": true,
+                  "layout": "horizontal",
+                  "secondary_info": " ",
+                  "card_mod": {
+                    "style": "ha-card { grid-column: span 2; }"
+                  }
                 },
                 {
                   "square": false,
