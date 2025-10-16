@@ -2446,48 +2446,6 @@ mqtt:
       state_on: "running"
       state_off: "stopped"
 
-    - name: "AGS Generator Demand"
-      unique_id: "ags_generator_demand"
-      state_topic: "RVC/GENERATOR_DEMAND_STATUS"
-      value_template: "{{ value_json['generator demand definition'] | default('unknown') }}"
-      icon: "mdi:engine"
-      json_attributes_topic: "RVC/GENERATOR_DEMAND_STATUS"
-      json_attributes_template: >-
-        {{ {
-          "generator_demand_raw": value_json['generator demand'] | default(None),
-          "generator_demand": value_json['generator demand definition'] | default('unknown'),
-          "internal_demand_raw": value_json['internal generator demand'] | default(None),
-          "internal_demand": value_json['internal generator demand definition'] | default('unknown'),
-          "network_demand_raw": value_json['network generator demand'] | default(None),
-          "network_demand": value_json['network generator demand definition'] | default('unknown'),
-          "external_activity_raw": value_json['external activity detected'] | default(None),
-          "external_activity": value_json['external activity detected definition'] | default('unknown'),
-          "timestamp": value_json.timestamp | default(None)
-        } | to_json }}
-
-    - name: "AGS Battery Voltage"
-      unique_id: "ags_battery_voltage"
-      state_topic: "RVC/DC_SOURCE_STATUS_1/1"
-      unit_of_measurement: "V"
-      device_class: voltage
-      state_class: measurement
-      value_template: >-
-        {% if value_json['dc voltage'] is number %}
-          {{ value_json['dc voltage'] | float | round(2) }}
-        {% else %}
-          {{ value_json['dc voltage'] }}
-        {% endif %}
-      icon: "mdi:battery-heart-variant"
-      json_attributes_topic: "RVC/DC_SOURCE_STATUS_1/1"
-      json_attributes_template: >-
-        {{ {
-          "instance": value_json.instance | default('unknown'),
-          "battery_voltage": value_json['dc voltage'] | default(None),
-          "battery_current": value_json.get('dc current'),
-          "device_priority": value_json.get('device priority definition'),
-          "timestamp": value_json.timestamp | default(None)
-        } | to_json }}
-
     - name: "Water Autofill - old"
       state_topic: "RVC/AUTOFILL_STATUS"
       value_template: "{{ value_json['valve status definition'] }}"
