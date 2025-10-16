@@ -72,6 +72,10 @@
                     },
                     {
                       "entity": "sensor.generator"
+                    },
+                    {
+                      "entity": "binary_sensor.ags_overall_enabled",
+                      "name": "AGS Enabled"
                     }
                   ]
                 },
@@ -306,6 +310,28 @@
                       "icon_animation": true,
                       "show_oscillate_control": false,
                       "name": "Rear Bath Fan"
+                    }
+                  ]
+                },
+                {
+                  "type": "glance",
+                  "title": "Floor Heat",
+                  "show_name": true,
+                  "show_icon": true,
+                  "show_state": true,
+                  "state_color": true,
+                  "entities": [
+                    {
+                      "entity": "switch.floor_heat_1",
+                      "name": "Front"
+                    },
+                    {
+                      "entity": "switch.floor_heat_2",
+                      "name": "Middle"
+                    },
+                    {
+                      "entity": "switch.floor_heat_3",
+                      "name": "Rear"
                     }
                   ]
                 },
@@ -1357,19 +1383,19 @@
                     "show_icon": true,
                     "show_state": true,
                     "state_color": true,
-                      "entities": [
-                        {
-                          "entity": "sensor.max_ambient_temperature",
-                          "name": "Max Ambient"
-                        },
-                        {
-                          "entity": "sensor.min_ambient_temperature",
-                          "name": "Min Ambient"
-                        },
-                        {
-                          "entity": "sensor.thermostat_ambient_status",
-                          "name": "Outside"
-                        }
+                    "entities": [
+                      {
+                        "entity": "sensor.max_ambient_temperature",
+                        "name": "Max Ambient"
+                      },
+                      {
+                        "entity": "sensor.min_ambient_temperature",
+                        "name": "Min Ambient"
+                      },
+                      {
+                        "entity": "sensor.thermostat_ambient_status",
+                        "name": "Outside"
+                      }
                     ]
                   }
                 },
