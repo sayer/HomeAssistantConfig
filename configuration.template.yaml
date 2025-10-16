@@ -2446,27 +2446,6 @@ mqtt:
       state_on: "running"
       state_off: "stopped"
 
-    - name: "AGS Criterion Status"
-      unique_id: "ags_criterion_status"
-      state_topic: "RVC/AGS_CRITERION_STATUS/+"
-      value_template: >-
-        {% set inst = value_json.instance | default('unknown') %}
-        {% set active = value_json['active status definition'] | default('unknown') %}
-        {% set demand = value_json['current demand status definition'] | default('unknown') %}
-        Inst {{ inst }}: {{ active }} / {{ demand }}
-      icon: "mdi:flash-alert"
-      json_attributes_topic: "RVC/AGS_CRITERION_STATUS/+"
-      json_attributes_template: >-
-        {{ {
-          "instance": value_json.instance | default('unknown'),
-          "active_status_raw": value_json['active status'] | default(None),
-          "active_status": value_json['active status definition'] | default('unknown'),
-          "current_demand_raw": value_json['current demand status'] | default(None),
-          "current_demand": value_json['current demand status definition'] | default('unknown'),
-          "data": value_json.data | default(None),
-          "timestamp": value_json.timestamp | default(None)
-        } | to_json }}
-
     - name: "AGS Generator Demand"
       unique_id: "ags_generator_demand"
       state_topic: "RVC/GENERATOR_DEMAND_STATUS"
