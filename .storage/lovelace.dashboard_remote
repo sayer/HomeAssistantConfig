@@ -2322,7 +2322,7 @@
                 {
                   "type": "grid",
                   "square": false,
-                  "columns": 3,
+                  "columns": 2,
                   "cards": [
                     {
                       "type": "gauge",
@@ -2337,11 +2337,13 @@
                     {
                       "type": "custom:mushroom-template-card",
                       "entity": "switch.generator",
-                      "layout": "horizontal",
+                      "layout": "vertical",
                       "primary": "Generator Status",
                       "secondary": "{{ 'Running' if is_state('switch.generator', 'on') else 'Stopped' }}",
                       "icon": "mdi:turbine",
                       "icon_color": "{{ 'green' if is_state('switch.generator', 'on') else 'grey' }}",
+                      "fill_container": true,
+                      "icon_size": 46,
                       "tap_action": {
                         "action": "more-info"
                       }
@@ -2349,10 +2351,12 @@
                     {
                       "type": "custom:mushroom-template-card",
                       "entity": "switch.generator",
-                      "layout": "horizontal",
+                      "layout": "vertical",
                       "primary": "{{ 'Stop Generator' if is_state('switch.generator', 'on') else 'Start Generator' }}",
                       "icon": "{{ 'mdi:stop-circle' if is_state('switch.generator', 'on') else 'mdi:play-circle' }}",
                       "icon_color": "{{ 'red' if is_state('switch.generator', 'on') else 'green' }}",
+                      "fill_container": true,
+                      "icon_size": 46,
                       "tap_action": {
                         "action": "call-service",
                         "service": "{{ 'script.stop_generator' if is_state('switch.generator', 'on') else 'script.start_generator' }}"
@@ -2364,11 +2368,13 @@
                     {
                       "type": "custom:mushroom-template-card",
                       "entity": "binary_sensor.ags_overall_enabled",
-                      "layout": "horizontal",
+                      "layout": "vertical",
                       "primary": "AGS Overall",
                       "secondary": "{{ 'Enabled' if is_state('binary_sensor.ags_overall_enabled', 'on') else 'Disabled' }}",
                       "icon": "mdi:auto-mode",
                       "icon_color": "{{ 'green' if is_state('binary_sensor.ags_overall_enabled', 'on') else 'grey' }}",
+                      "fill_container": true,
+                      "icon_size": 46,
                       "tap_action": {
                         "action": "more-info"
                       }
@@ -2376,10 +2382,12 @@
                     {
                       "type": "custom:mushroom-template-card",
                       "entity": "input_text.generator_start_status",
-                      "layout": "horizontal",
+                      "layout": "vertical",
                       "primary": "Start Status",
                       "secondary": "{{ states('input_text.generator_start_status') }}",
                       "icon": "mdi:information-outline",
+                      "fill_container": true,
+                      "icon_size": 46,
                       "tap_action": {
                         "action": "more-info"
                       }
@@ -2387,10 +2395,12 @@
                     {
                       "type": "custom:mushroom-template-card",
                       "entity": "sensor.generator_hours",
-                      "layout": "horizontal",
+                      "layout": "vertical",
                       "primary": "Total Hours",
                       "secondary": "{{ states('sensor.generator_hours') }}",
                       "icon": "mdi:turbine",
+                      "fill_container": true,
+                      "icon_size": 46,
                       "tap_action": {
                         "action": "more-info"
                       }
@@ -2398,10 +2408,12 @@
                     {
                       "type": "custom:mushroom-template-card",
                       "entity": "sensor.generator_session_display",
-                      "layout": "horizontal",
+                      "layout": "vertical",
                       "primary": "Session Time",
                       "secondary": "{{ states('sensor.generator_session_display') }}",
                       "icon": "mdi:av-timer",
+                      "fill_container": true,
+                      "icon_size": 46,
                       "tap_action": {
                         "action": "more-info"
                       }
