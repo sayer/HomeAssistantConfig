@@ -733,7 +733,13 @@ sensor:
     name: Generator Oil Duration
     entity_id: sensor.generatorstatus
     state: "running"
-    start: '{{ states("input_datetime.reset_generator_on_time") | as_timestamp }}'
+    start: >-
+      {% set reset_at = states('input_datetime.reset_generator_on_time') %}
+      {% if reset_at not in ['unknown', 'unavailable', '', none] %}
+        {{ as_timestamp(reset_at) }}
+      {% else %}
+        {{ 0 }}
+      {% endif %}
     end: "{{ now() }}"
 
   - platform: template
@@ -811,6 +817,38 @@ sensor:
             {% endif %}
           generator_status: "{{ states('sensor.generatorstatus') }}"
           generator_switch: "{{ states('switch.generator') }}"
+
+      house_battery_state_of_charge:
+        friendly_name: "House Battery State of Charge"
+        unique_id: "house_battery_state_of_charge"
+        device_class: battery
+        state_class: measurement
+        unit_of_measurement: "%"
+        value_template: >-
+          {% set raw = states('sensor.smartbmv_battery') %}
+          {% if raw | is_number %}
+            {{ (raw | float) | round(1) }}
+          {% else %}
+            unknown
+          {% endif %}
+        availability: >-
+          {{ (states('sensor.smartbmv_battery') | is_number) }}
+
+      house_battery_voltage:
+        friendly_name: "House Battery Voltage"
+        unique_id: "house_battery_voltage"
+        device_class: voltage
+        state_class: measurement
+        unit_of_measurement: "V"
+        value_template: >-
+          {% set raw = states('sensor.dc_house_voltage') %}
+          {% if raw | is_number %}
+            {{ (raw | float) | round(2) }}
+          {% else %}
+            unknown
+          {% endif %}
+        availability: >-
+          {{ (states('sensor.dc_house_voltage') | is_number) }}
 
       generator_current_run_time:
         friendly_name: "Run time"
@@ -3336,7 +3374,7 @@ mqtt:
       value_template: >-
         {% set voltage = value_json.get('rms voltage') %}
         {% if voltage in [none, 'n/a', 'unknown', 'unavailable'] %}
-          unknown
+          0
         {% else %}
           {{ (voltage | float) | round(1) }}
         {% endif %}
@@ -3349,7 +3387,7 @@ mqtt:
       value_template: >-
         {% set current = value_json.get('rms current') %}
         {% if current in [none, 'n/a', 'unknown', 'unavailable'] %}
-          unknown
+          0
         {% else %}
           {{ (current | float) | round(1) }}
         {% endif %}
