@@ -75,7 +75,13 @@
           <tr>
             <td>{{ host_name }}</td>
             <td colspan="8">–</td>
-            <td class="status-error">{{ payload['__error'] }}</td>
+            <td class="status-error">
+              {{ payload['__error'] }}
+              {% set attempts = payload.get('__endpoints_attempted') %}
+              {% if attempts %}
+                (tried: {{ attempts|join(', ') }})
+              {% endif %}
+            </td>
           </tr>
         {% else %}
           {% set cpu = metrics.get('cpu_percent') %}
