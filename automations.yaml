@@ -234,16 +234,29 @@
       entity_id:
       - light.all_ceiling_lights
       - light.exterior_lights
-  - service: homeassistant.turn_on
-    data: {}
-    target:
-      entity_id:
-      - switch.auto_gen
-      - switch.auto_gen_5
-  - service: script.notify_home
-    data:
-      title: Foretravel
-      message: House batteries are low.
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: >-
+          {% set soc = states('sensor.house_battery_state_of_charge') | float(0) %}
+          {% set volts = states('sensor.house_battery_voltage') | float(0) %}
+          {{ soc > 0 or volts > 0 }}
+      sequence:
+      - service: homeassistant.turn_on
+        data: {}
+        target:
+          entity_id:
+          - switch.auto_gen
+          - switch.auto_gen_5
+      - service: script.notify_home
+        data:
+          title: Foretravel
+          message: House batteries are low. Auto generator enabled.
+    default:
+    - service: script.notify_home
+      data:
+        title: Foretravel
+        message: House batteries are low but readings are zero. Auto generator not enabled.
   mode: single
 - id: '1679623337905'
   alias: Evening Lights
@@ -510,13 +523,26 @@
     target:
       entity_id: light.all_lights
     action: light.turn_off
-  - action: script.start_generator
-    data:
-      delay_minutes: 0
-  - data:
-      title: Foretravel
-      message: House batteries critically low. Starting generator.
-    action: script.notify_home
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: >-
+          {% set soc = states('sensor.house_battery_state_of_charge') | float(0) %}
+          {% set volts = states('sensor.house_battery_voltage') | float(0) %}
+          {{ soc > 0 or volts > 0 }}
+      sequence:
+      - action: script.start_generator
+        data:
+          delay_minutes: 0
+      - data:
+          title: Foretravel
+          message: House batteries critically low. Starting generator.
+        action: script.notify_home
+    default:
+    - data:
+        title: Foretravel
+        message: House batteries critically low but readings are zero. Generator not started.
+      action: script.notify_home
   mode: single
 - id: '1681093699796'
   alias: No Motion - 30 mins - Ceiling off
