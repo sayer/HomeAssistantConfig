@@ -79,8 +79,17 @@ async def fetch_host(
 
 async def gather_hosts() -> List[Tuple[str, Dict[str, Any]]]:
     """Fetch stats for every configured host."""
-    timeout = httpx.Timeout(TIMEOUT_SECONDS)
-    limits = httpx.Limits(max_keepalive_connections=5, max_connections=10)
+    host_count = len(CONFIG["hosts"])
+    timeout = httpx.Timeout(
+        connect=TIMEOUT_SECONDS,
+        read=TIMEOUT_SECONDS,
+        write=TIMEOUT_SECONDS,
+        pool=TIMEOUT_SECONDS
+    )
+    limits = httpx.Limits(
+        max_keepalive_connections=max(10, host_count),
+        max_connections=max(10, host_count)
+    )
     async with httpx.AsyncClient(timeout=timeout, limits=limits) as client:
         tasks = [fetch_host(client, host_cfg) for host_cfg in CONFIG["hosts"]]
         return await asyncio.gather(*tasks)
