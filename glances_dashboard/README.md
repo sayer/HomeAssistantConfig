@@ -36,7 +36,9 @@ Mac monitoring station and only depends on HTTP access to each add-on.
 - `refresh_seconds`: Controls the auto-refresh interval for the dashboard.
 - `timeout_seconds`: HTTP timeout per request.
 - `hosts`: List of monitored systems. Optional keys: `api_version`,
-  `username`, and `password` for HTTP Basic Auth.
+  `username`, and `password` for HTTP Basic Auth. You can also set
+  `ha_port` (defaults to `8123`) or `ha_url` to control the link target
+  when clicking a host name in the dashboard.
 
 Restart the uvicorn process after editing `hosts.yaml` so the loader picks up
 the changes. Consider adding a LaunchAgent for unattended startup once
