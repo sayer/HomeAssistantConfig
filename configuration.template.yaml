@@ -822,7 +822,6 @@ sensor:
         friendly_name: "House Battery State of Charge"
         unique_id: "house_battery_state_of_charge"
         device_class: battery
-        state_class: measurement
         unit_of_measurement: "%"
         value_template: >-
           {% set raw = states('sensor.smartbmv_battery') %}
@@ -831,14 +830,13 @@ sensor:
           {% else %}
             unknown
           {% endif %}
-        availability: >-
+        availability_template: >-
           {{ (states('sensor.smartbmv_battery') | is_number) }}
 
       house_battery_voltage:
         friendly_name: "House Battery Voltage"
         unique_id: "house_battery_voltage"
         device_class: voltage
-        state_class: measurement
         unit_of_measurement: "V"
         value_template: >-
           {% set raw = states('sensor.dc_house_voltage') %}
@@ -847,7 +845,7 @@ sensor:
           {% else %}
             unknown
           {% endif %}
-        availability: >-
+        availability_template: >-
           {{ (states('sensor.dc_house_voltage') | is_number) }}
 
       generator_current_run_time:
