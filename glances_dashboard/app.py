@@ -69,8 +69,9 @@ async def fetch_host(
         payload["__fetched_at"] = datetime.now(timezone.utc).isoformat()
         return name, payload
     except Exception as err:
+        error_message = f"{type(err).__name__}: {err}"
         return name, {
-            "__error": str(err),
+            "__error": error_message,
             "__endpoint": endpoint,
             "__fetched_at": datetime.now(timezone.utc).isoformat()
         }
