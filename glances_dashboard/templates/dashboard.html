@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Glances Fleet Dashboard</title>
+  <meta http-equiv="refresh" content="{{ refresh_seconds }}">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background-color: #0f1115;
+      color: #f1f3f5;
+      margin: 0;
+      padding: 24px;
+    }
+    h1 {
+      margin-top: 0;
+      font-size: 24px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+    th, td {
+      text-align: left;
+      padding: 8px 10px;
+      border-bottom: 1px solid #1f232b;
+    }
+    tr:nth-child(even) {
+      background-color: #151821;
+    }
+    .status-ok {
+      color: #8be9c7;
+    }
+    .status-error {
+      color: #ff6b6b;
+    }
+    .metric-warn {
+      color: #f6c177;
+    }
+    .metric-mid {
+      color: #f9f871;
+    }
+    .metric-crit {
+      color: #ff6b6b;
+    }
+    footer {
+      margin-top: 16px;
+      font-size: 12px;
+      color: #a7acb2;
+    }
+  </style>
+</head>
+<body>
+  <h1>Glances Fleet Dashboard</h1>
+  <p>Last update: {{ updated }} (auto refresh {{ refresh_seconds }}s)</p>
+  <table>
+    <thead>
+      <tr>
+        <th>Host</th>
+        <th>CPU %</th>
+        <th>RAM %</th>
+        <th>RAM Used</th>
+        <th>Load 1m</th>
+        <th>WiFi</th>
+        <th>IP</th>
+        <th>Disk %</th>
+        <th>Uptime</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for host_name, payload, metrics in stats %}
+        {% if '__error' in payload %}
+          <tr>
+            <td>{{ host_name }}</td>
+            <td colspan="8">–</td>
+            <td class="status-error">{{ payload['__error'] }}</td>
+          </tr>
+        {% else %}
+          {% set cpu = metrics.get('cpu_percent') %}
+          {% set mem = metrics.get('mem_percent') %}
+          {% set load = metrics.get('load_1m') %}
+          {% set uptime = metrics.get('uptime') %}
+          {% set mem_used = metrics.get('mem_used') %}
+          {% set mem_total = metrics.get('mem_total') %}
+          {% set wifi_signal = metrics.get('wifi_signal') %}
+          {% set wifi_label = metrics.get('wifi_label') %}
+          {% set ip_private = metrics.get('ip_address') %}
+          {% set ip_public = metrics.get('public_ip') %}
+          {% set disk_percent = metrics.get('disk_percent') %}
+          <tr>
+            <td>{{ host_name }}</td>
+            <td class="{% if cpu and cpu >= 90 %}metric-crit{% elif cpu and cpu >= 75 %}metric-warn{% elif cpu and cpu >= 50 %}metric-mid{% endif %}">
+              {{ "%.1f"|format(cpu) if cpu is not none else "-" }}
+            </td>
+            <td class="{% if mem and mem >= 90 %}metric-crit{% elif mem and mem >= 75 %}metric-warn{% elif mem and mem >= 50 %}metric-mid{% endif %}">
+              {{ "%.1f"|format(mem) if mem is not none else "-" }}
+            </td>
+            <td>
+              {% if mem_used %}
+                {{ format_bytes(mem_used) }}{% if mem_total %} / {{ format_bytes(mem_total) }}{% endif %}
+              {% else %}
+                -
+              {% endif %}
+            </td>
+            <td>{{ "%.2f"|format(load) if load is not none else "-" }}</td>
+            <td>
+              {% if wifi_signal is not none %}
+                {{ wifi_signal }} dBm{% if wifi_label %} ({{ wifi_label }}){% endif %}
+              {% elif wifi_label %}
+                {{ wifi_label }}
+              {% else %}
+                -
+              {% endif %}
+            </td>
+            <td>
+              {% if ip_private and ip_public %}
+                {{ ip_private }} / {{ ip_public }}
+              {% elif ip_private %}
+                {{ ip_private }}
+              {% elif ip_public %}
+                {{ ip_public }}
+              {% else %}
+                -
+              {% endif %}
+            </td>
+            <td class="{% if disk_percent is not none and disk_percent >= 90 %}metric-crit{% elif disk_percent is not none and disk_percent >= 75 %}metric-warn{% elif disk_percent is not none and disk_percent >= 50 %}metric-mid{% endif %}">
+              {% if disk_percent is not none %}
+                {{ "%.1f"|format(disk_percent) }}
+              {% else %}
+                -
+              {% endif %}
+            </td>
+            <td>{{ uptime }}</td>
+            <td class="status-ok">OK</td>
+          </tr>
+        {% endif %}
+      {% endfor %}
+    </tbody>
+  </table>
+  <footer>
+    Data fetched from Glances REST API on each Home Assistant host.
+  </footer>
+</body>
+</html>
