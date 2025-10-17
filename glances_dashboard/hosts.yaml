@@ -1,5 +1,5 @@
 default_api_version: 3
-refresh_seconds: 10
+refresh_seconds: 900
 timeout_seconds: 3
 hosts:
   - name: Home Assistant 03
