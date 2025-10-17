@@ -3,7 +3,6 @@
 <head>
   <meta charset="utf-8">
   <title>Glances Fleet Dashboard</title>
-  <meta http-equiv="refresh" content="{{ refresh_seconds }}">
   <style>
     :root {
       color-scheme: dark;
@@ -244,14 +243,95 @@
         grid-template-columns: 1fr;
       }
     }
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .header-controls {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .icon-button {
+      appearance: none;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      background: rgba(20, 25, 35, 0.6);
+      color: inherit;
+      border-radius: 50%;
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+    }
+
+    .icon-button:hover {
+      transform: translateY(-2px);
+      border-color: rgba(97, 218, 251, 0.6);
+      background: rgba(97, 218, 251, 0.18);
+    }
+
+    .icon-button:active {
+      transform: translateY(0);
+      background: rgba(97, 218, 251, 0.26);
+    }
+
+    .icon-button svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
+
+    .icon-button .icon-play { display: none; }
+    .icon-button.is-paused .icon-pause { display: none; }
+    .icon-button.is-paused .icon-play { display: inline; }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
   </style>
 </head>
 <body>
-  <h1>Glances Fleet Dashboard</h1>
-  <p class="meta">
-    <span class="dot"></span>
-    Last update: {{ updated }} · Auto refresh every {{ refresh_seconds }}s
-  </p>
+  <header class="page-header">
+    <div>
+      <h1>Glances Fleet Dashboard</h1>
+      <p class="meta">
+        <span class="dot"></span>
+        Last update: {{ updated }} · <span id="auto-refresh-state">Auto refresh every {{ refresh_seconds }}s</span>
+      </p>
+    </div>
+    <div class="header-controls">
+      <button class="icon-button" id="refresh-btn" type="button" title="Refresh now">
+        <span class="sr-only">Refresh now</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4 7.58 4 4 7.58 4 12h2c0-3.31 2.69-6 6-6 1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35zM18 12c0 3.31-2.69 6-6 6-1.66 0-3.14-.69-4.22-1.78L11 13H4v7l2.35-2.35C7.8 19.1 9.79 20 12 20c4.42 0 8-3.58 8-8h-2z"/>
+        </svg>
+      </button>
+      <button class="icon-button" id="toggle-refresh-btn" type="button" title="Pause auto refresh" aria-pressed="false">
+        <span class="sr-only">Pause auto refresh</span>
+        <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+        </svg>
+        <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M8 5v14l11-7z"/>
+        </svg>
+      </button>
+    </div>
+  </header>
 
   <section class="host-grid">
     {% for host_name, payload, metrics in stats %}
@@ -394,5 +474,56 @@
   <footer>
     Observability via Glances REST API · Designed for quick fleet triage
   </footer>
+  <script>
+    (function() {
+      const REFRESH_INTERVAL = {{ refresh_seconds | int }} * 1000;
+      const refreshBtn = document.getElementById('refresh-btn');
+      const toggleBtn = document.getElementById('toggle-refresh-btn');
+      const stateEl = document.getElementById('auto-refresh-state');
+      let paused = false;
+      let timerId = null;
+
+      function scheduleRefresh() {
+        clearTimeout(timerId);
+        if (!paused) {
+          timerId = setTimeout(() => {
+            window.location.reload();
+          }, REFRESH_INTERVAL);
+        }
+      }
+
+      function updateStateText() {
+        if (stateEl) {
+          stateEl.textContent = paused ? 'Auto refresh paused' : `Auto refresh every {{ refresh_seconds }}s`;
+        }
+        if (toggleBtn) {
+          toggleBtn.classList.toggle('is-paused', paused);
+          toggleBtn.setAttribute('aria-pressed', paused ? 'true' : 'false');
+          toggleBtn.title = paused ? 'Resume auto refresh' : 'Pause auto refresh';
+          const sr = toggleBtn.querySelector('.sr-only');
+          if (sr) {
+            sr.textContent = paused ? 'Resume auto refresh' : 'Pause auto refresh';
+          }
+        }
+      }
+
+      if (refreshBtn) {
+        refreshBtn.addEventListener('click', () => {
+          window.location.reload();
+        });
+      }
+
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', () => {
+          paused = !paused;
+          updateStateText();
+          scheduleRefresh();
+        });
+      }
+
+      updateStateText();
+      scheduleRefresh();
+    })();
+  </script>
 </body>
 </html>
