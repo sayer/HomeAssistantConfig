@@ -35,17 +35,6 @@ CONFIG = load_config()
 DEFAULT_API_VERSION = int(CONFIG.get("default_api_version", 3))
 REFRESH_SECONDS = int(CONFIG.get("refresh_seconds", 10))
 TIMEOUT_SECONDS = float(CONFIG.get("timeout_seconds", 3))
-# Prefer newer Glances API versions first, while providing sensible fallbacks.
-DEFAULT_API_VERSION_CANDIDATES = tuple(
-    int(v)
-    for v in (
-        CONFIG.get("default_api_version", DEFAULT_API_VERSION),
-        4,
-        3,
-        2,
-        1,
-    )
-)
 
 ENV = Environment(
     loader=FileSystemLoader(str(TEMPLATES_DIR)),
@@ -55,32 +44,11 @@ ENV = Environment(
 APP = FastAPI(title="Glances Fleet Dashboard")
 
 
-def build_endpoint(base_url: str, api_version: int) -> str:
+def build_endpoint(host_cfg: Dict[str, Any]) -> str:
     """Build the base API endpoint for a host."""
+    base_url = host_cfg["url"].rstrip("/")
+    api_version = host_cfg.get("api_version", DEFAULT_API_VERSION)
     return f"{base_url}/api/{api_version}"
-
-
-def collect_api_versions(host_cfg: Dict[str, Any]) -> Iterable[int]:
-    """Yield unique API versions to try for a host, honoring overrides."""
-    seen = set()
-    candidates: Iterable[Any]
-    if "api_versions" in host_cfg and isinstance(host_cfg["api_versions"], list):
-        candidates = host_cfg["api_versions"]
-    else:
-        preferred = host_cfg.get("api_version", DEFAULT_API_VERSION)
-        candidates = (preferred, *DEFAULT_API_VERSION_CANDIDATES)
-
-    for candidate in candidates:
-        try:
-            version = int(candidate)
-        except (TypeError, ValueError):
-            continue
-        if version in seen:
-            continue
-        seen.add(version)
-        if version <= 0:
-            continue
-        yield version
 
 
 async def fetch_host(
@@ -93,31 +61,19 @@ async def fetch_host(
     if host_cfg.get("username") and host_cfg.get("password"):
         auth = (host_cfg["username"], host_cfg["password"])
 
-    base_url = host_cfg["url"].rstrip("/")
-    last_error: Optional[Exception] = None
-    attempted: List[str] = []
-
-    for version in collect_api_versions(host_cfg):
-        endpoint = f"{build_endpoint(base_url, version)}/all"
-        attempted.append(endpoint)
-        try:
-            response = await client.get(endpoint, auth=auth)
-            response.raise_for_status()
-            payload = response.json()
-            payload["__fetched_at"] = datetime.now(timezone.utc).isoformat()
-            payload["__api_version"] = version
-            host_cfg["_resolved_api_version"] = version  # cache for debugging
-            return name, payload
-        except Exception as err:
-            last_error = err
-            continue
-
-    error_message = str(last_error) if last_error else "Unknown error"
-    return name, {
-        "__error": error_message,
-        "__endpoints_attempted": attempted,
-        "__fetched_at": datetime.now(timezone.utc).isoformat()
-    }
+    endpoint = f"{build_endpoint(host_cfg)}/all"
+    try:
+        response = await client.get(endpoint, auth=auth)
+        response.raise_for_status()
+        payload = response.json()
+        payload["__fetched_at"] = datetime.now(timezone.utc).isoformat()
+        return name, payload
+    except Exception as err:
+        return name, {
+            "__error": str(err),
+            "__endpoint": endpoint,
+            "__fetched_at": datetime.now(timezone.utc).isoformat()
+        }
 
 
 async def gather_hosts() -> List[Tuple[str, Dict[str, Any]]]:
