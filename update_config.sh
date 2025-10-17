@@ -295,9 +295,6 @@ create_shade_groups_yaml() {
             echo "              - $shade" >> "$GROUPS_FILE"
         done
         
-        # Add device class to ensure both open/close are always available
-        echo "        device_class: shade" >> "$GROUPS_FILE"
-        
         # Add spacing for next group
         echo "" >> "$GROUPS_FILE"
     fi
@@ -417,8 +414,6 @@ create_shade_groups_yaml() {
             echo "              - $shade" >> "$GROUPS_FILE"
         done
         
-        # Add device class to ensure both open/close are always available
-        echo "        device_class: shade" >> "$GROUPS_FILE"
     fi
     
     # Create ds_so_day_shades group (Driver Side - Street Side Day Shades)

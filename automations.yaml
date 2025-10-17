@@ -486,25 +486,28 @@
   alias: House Batteries Critical Low
   description: ''
   triggers:
-  - type: battery_level
-    device_id: abe92fb7e658d969cd79015ee4856a3d
-    entity_id: 3e9afeb58864289e786ad18f509c6e7a
-    domain: sensor
-    for:
-      hours: 0
-      minutes: 2
-      seconds: 0
-    below: 20
-    trigger: device
   - entity_id:
-    - sensor.smartbmv_battery
+    - sensor.house_battery_state_of_charge
     for:
       hours: 0
       minutes: 2
       seconds: 0
-    below: 20
+    below: 20.01
     trigger: numeric_state
-  conditions: []
+  - entity_id:
+    - sensor.house_battery_voltage
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
+    below: 11
+    trigger: numeric_state
+  conditions:
+  - condition: state
+    entity_id: input_boolean.busparked
+    state: 'on'
+  - condition: template
+    value_template: "{{ states('sensor.ac_source') | lower not in ['shore'] }}"
   actions:
   - data: {}
     target:
