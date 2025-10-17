@@ -7,6 +7,7 @@ import asyncio
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
+from urllib.parse import urlparse, urlunparse
 
 import httpx
 import yaml
@@ -21,6 +22,33 @@ BASE_DIR = Path(__file__).resolve().parent
 CONFIG_PATH = BASE_DIR / "hosts.yaml"
 TEMPLATES_DIR = BASE_DIR / "templates"
 
+HOST_METADATA: Dict[str, Dict[str, Any]] = {}
+
+
+def derive_ha_dashboard_url(host_cfg: Dict[str, Any]) -> Optional[str]:
+    """Compute the Home Assistant dashboard URL for a host."""
+    if "ha_url" in host_cfg:
+        return host_cfg["ha_url"]
+
+    base_url = host_cfg.get("url")
+    if not base_url:
+        return None
+
+    parsed = urlparse(base_url)
+    hostname = parsed.hostname
+    if not hostname:
+        return None
+
+    try:
+        port = int(host_cfg.get("ha_port", 8123))
+    except (TypeError, ValueError):
+        port = 8123
+
+    scheme = parsed.scheme or "http"
+    netloc = f"{hostname}:{port}"
+    path = "/dashboard-remote/0"
+    return urlunparse((scheme, netloc, path, "", "", ""))
+
 
 def load_config() -> Dict[str, Any]:
     """Load the dashboard configuration from hosts.yaml."""
@@ -28,6 +56,14 @@ def load_config() -> Dict[str, Any]:
         config = yaml.safe_load(handle)
     if not config or "hosts" not in config:
         raise ValueError("hosts.yaml must define a 'hosts' list.")
+    HOST_METADATA.clear()
+    for host_cfg in config["hosts"]:
+        metadata: Dict[str, Any] = {}
+        ha_url = derive_ha_dashboard_url(host_cfg)
+        if ha_url:
+            metadata["ha_dashboard_url"] = ha_url
+        host_cfg["__meta"] = metadata
+        HOST_METADATA[host_cfg["name"]] = metadata
     return config
 
 
@@ -255,7 +291,8 @@ async def dashboard() -> HTMLResponse:
         stats=stats,
         updated=now_utc.isoformat(timespec="seconds"),
         refresh_seconds=REFRESH_SECONDS,
-        format_bytes=format_bytes
+        format_bytes=format_bytes,
+        host_meta=HOST_METADATA
     )
     return HTMLResponse(content=html)
 
@@ -293,6 +330,7 @@ async def config_dump() -> JSONResponse:
             "name": host_cfg["name"],
             "url": host_cfg["url"],
             "api_version": host_cfg.get("api_version", DEFAULT_API_VERSION),
+            "ha_dashboard_url": HOST_METADATA.get(host_cfg["name"], {}).get("ha_dashboard_url"),
         })
     return JSONResponse(content={
         "default_api_version": DEFAULT_API_VERSION,

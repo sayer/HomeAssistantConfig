@@ -71,9 +71,17 @@
     </thead>
     <tbody>
       {% for host_name, payload, metrics in stats %}
+        {% set meta = host_meta.get(host_name, {}) %}
+        {% set ha_url = meta.get('ha_dashboard_url') %}
         {% if '__error' in payload %}
           <tr>
-            <td>{{ host_name }}</td>
+            <td>
+              {% if ha_url %}
+                <a href="{{ ha_url }}" target="_blank" rel="noopener">{{ host_name }}</a>
+              {% else %}
+                {{ host_name }}
+              {% endif %}
+            </td>
             <td colspan="8">–</td>
             <td class="status-error">{{ payload['__error'] }}</td>
           </tr>
@@ -90,7 +98,13 @@
           {% set ip_public = metrics.get('public_ip') %}
           {% set disk_percent = metrics.get('disk_percent') %}
           <tr>
-            <td>{{ host_name }}</td>
+            <td>
+              {% if ha_url %}
+                <a href="{{ ha_url }}" target="_blank" rel="noopener">{{ host_name }}</a>
+              {% else %}
+                {{ host_name }}
+              {% endif %}
+            </td>
             <td class="{% if cpu and cpu >= 90 %}metric-crit{% elif cpu and cpu >= 75 %}metric-warn{% elif cpu and cpu >= 50 %}metric-mid{% endif %}">
               {{ "%.1f"|format(cpu) if cpu is not none else "-" }}
             </td>
