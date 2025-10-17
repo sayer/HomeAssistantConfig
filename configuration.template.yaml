@@ -818,36 +818,6 @@ sensor:
           generator_status: "{{ states('sensor.generatorstatus') }}"
           generator_switch: "{{ states('switch.generator') }}"
 
-      house_battery_state_of_charge:
-        friendly_name: "House Battery State of Charge"
-        unique_id: "house_battery_state_of_charge"
-        device_class: battery
-        unit_of_measurement: "%"
-        value_template: >-
-          {% set raw = states('sensor.smartbmv_battery') %}
-          {% if raw | is_number %}
-            {{ (raw | float) | round(1) }}
-          {% else %}
-            unknown
-          {% endif %}
-        availability_template: >-
-          {{ (states('sensor.smartbmv_battery') | is_number) }}
-
-      house_battery_voltage:
-        friendly_name: "House Battery Voltage"
-        unique_id: "house_battery_voltage"
-        device_class: voltage
-        unit_of_measurement: "V"
-        value_template: >-
-          {% set raw = states('sensor.dc_house_voltage') %}
-          {% if raw | is_number %}
-            {{ (raw | float) | round(2) }}
-          {% else %}
-            unknown
-          {% endif %}
-        availability_template: >-
-          {{ (states('sensor.dc_house_voltage') | is_number) }}
-
       generator_current_run_time:
         friendly_name: "Run time"
         value_template: >-
@@ -2741,6 +2711,7 @@ mqtt:
       unit_of_measurement: "V"
       device_class: "voltage"
       state_class: "measurement"
+      unique_id: "house_battery_voltage_rvc"
       value_template: >
         {% if value_json['dc voltage'] == "n/a" %}
           0
@@ -2754,6 +2725,7 @@ mqtt:
       unit_of_measurement: "A"
       device_class: "current"
       state_class: "measurement"
+      unique_id: "house_battery_current_rvc"
       value_template: >
         {% if value_json['dc current'] == "n/a" %}
           0
@@ -2767,6 +2739,7 @@ mqtt:
       unit_of_measurement: "%"
       device_class: "battery"
       state_class: "measurement"
+      unique_id: "house_battery_state_of_charge_rvc"
       value_template: >
         {% if value_json['state of charge'] == "n/a" %}
           0
@@ -2779,6 +2752,7 @@ mqtt:
       state_topic: "RVC/DC_SOURCE_STATUS_3/1"
       unit_of_measurement: "%"
       state_class: "measurement"
+      unique_id: "house_battery_health_rvc"
       value_template: >
         {% if value_json['state of health'] == "n/a" %}
           0
@@ -4068,6 +4042,34 @@ template:
           {% endif %}
         availability: >-
           {{ true }}
+
+      - name: "House Battery State of Charge"
+        unique_id: "house_battery_state_of_charge"
+        device_class: battery
+        unit_of_measurement: "%"
+        state: >-
+          {% set raw = states('sensor.smartbmv_battery') %}
+          {% if raw | is_number %}
+            {{ (raw | float) | round(1) }}
+          {% else %}
+            unknown
+          {% endif %}
+        availability: >-
+          {{ states('sensor.smartbmv_battery') | is_number }}
+
+      - name: "House Battery Voltage"
+        unique_id: "house_battery_voltage"
+        device_class: voltage
+        unit_of_measurement: "V"
+        state: >-
+          {% set raw = states('sensor.dc_house_voltage') %}
+          {% if raw | is_number %}
+            {{ (raw | float) | round(2) }}
+          {% else %}
+            unknown
+          {% endif %}
+        availability: >-
+          {{ states('sensor.dc_house_voltage') | is_number }}
 
 
   - binary_sensor:
