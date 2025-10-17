@@ -4043,34 +4043,6 @@ template:
         availability: >-
           {{ true }}
 
-      - name: "House Battery State of Charge"
-        unique_id: "house_battery_state_of_charge"
-        device_class: battery
-        unit_of_measurement: "%"
-        state: >-
-          {% set raw = states('sensor.smartbmv_battery') %}
-          {% if raw | is_number %}
-            {{ (raw | float) | round(1) }}
-          {% else %}
-            unknown
-          {% endif %}
-        availability: >-
-          {{ states('sensor.smartbmv_battery') | is_number }}
-
-      - name: "House Battery Voltage"
-        unique_id: "house_battery_voltage"
-        device_class: voltage
-        unit_of_measurement: "V"
-        state: >-
-          {% set raw = states('sensor.dc_house_voltage') %}
-          {% if raw | is_number %}
-            {{ (raw | float) | round(2) }}
-          {% else %}
-            unknown
-          {% endif %}
-        availability: >-
-          {{ states('sensor.dc_house_voltage') | is_number }}
-
 
   - binary_sensor:
       - name: "Has Entry Door Shade"
