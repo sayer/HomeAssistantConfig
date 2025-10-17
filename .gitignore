@@ -21,3 +21,4 @@ coach_number.txt
 .ha_run.lock
 home-assistant-rollback.log
 update_ha_config.log
+glances_dashboard/__pycache__/
