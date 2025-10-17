@@ -5,156 +5,394 @@
   <title>Glances Fleet Dashboard</title>
   <meta http-equiv="refresh" content="{{ refresh_seconds }}">
   <style>
+    :root {
+      color-scheme: dark;
+      --bg: radial-gradient(circle at top left, #1b2735, #090a0f 55%);
+      --card-bg: rgba(18, 21, 31, 0.8);
+      --card-border: rgba(255, 255, 255, 0.06);
+      --text-primary: #f1f3f5;
+      --text-secondary: #9ba4b0;
+      --accent: #61dafb;
+      --danger: #ff6b6b;
+      --warn: #f6c177;
+      --mid: #f4d35e;
+      --ok: #46d19b;
+      --shadow: 0 18px 45px rgba(10, 14, 25, 0.55);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background-color: #0f1115;
-      color: #f1f3f5;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
       margin: 0;
-      padding: 24px;
+      min-height: 100vh;
+      padding: 32px clamp(16px, 4vw, 56px);
+      backdrop-filter: blur(16px);
     }
+
     h1 {
-      margin-top: 0;
-      font-size: 24px;
+      margin: 0 0 4px;
+      font-size: clamp(28px, 3vw, 36px);
+      font-weight: 700;
+      letter-spacing: 0.01em;
     }
-    table {
+
+    p.meta {
+      margin: 0 0 32px;
+      color: var(--text-secondary);
+      font-size: 15px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    p.meta span.dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: inline-block;
+      box-shadow: 0 0 12px rgba(97, 218, 251, 0.6);
+    }
+
+    .host-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: clamp(18px, 2vw, 28px);
+    }
+
+    .host-card {
+      position: relative;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 20px 22px;
+      box-shadow: var(--shadow);
+      transition: transform 0.35s cubic-bezier(0.19, 1, 0.22, 1), border-color 0.35s;
+      backdrop-filter: blur(20px);
+    }
+
+    .host-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(97, 218, 251, 0.35);
+    }
+
+    .host-card__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .host-card__title {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .host-card__title a {
+      color: inherit;
+      text-decoration: none;
+      position: relative;
+    }
+
+    .host-card__title a::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -2px;
       width: 100%;
-      border-collapse: collapse;
-      margin-top: 16px;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(97, 218, 251, 0.4), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
     }
-    th, td {
-      text-align: left;
-      padding: 8px 10px;
-      border-bottom: 1px solid #1f232b;
+
+    .host-card__title a:hover::after {
+      opacity: 1;
     }
-    tr:nth-child(even) {
-      background-color: #151821;
-    }
-    .status-ok {
-      color: #8be9c7;
-    }
-    .status-error {
-      color: #ff6b6b;
-    }
-    .metric-warn {
-      color: #f6c177;
-    }
-    .metric-mid {
-      color: #f9f871;
-    }
-    .metric-crit {
-      color: #ff6b6b;
-    }
-    footer {
-      margin-top: 16px;
+
+    .status-chip {
+      border-radius: 999px;
+      padding: 4px 12px;
       font-size: 12px;
-      color: #a7acb2;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #0f1a24;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.55));
+      mix-blend-mode: screen;
+    }
+
+    .status-chip.ok {
+      color: var(--ok);
+      background: rgba(70, 209, 155, 0.16);
+      box-shadow: inset 0 0 0 1px rgba(70, 209, 155, 0.45);
+    }
+
+    .status-chip.error {
+      color: var(--danger);
+      background: rgba(255, 107, 107, 0.14);
+      box-shadow: inset 0 0 0 1px rgba(255, 107, 107, 0.45);
+    }
+
+    .metric-stack {
+      display: grid;
+      gap: 14px;
+    }
+
+    .metric {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .metric label {
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+    }
+
+    .metric-value {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .metric-value strong {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .metric-bar {
+      position: relative;
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+    }
+
+    .metric-bar span {
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(90deg, rgba(97, 218, 251, 0.12), rgba(97, 218, 251, 0.65));
+      transform-origin: left;
+      transform: scaleX(var(--value, 0));
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .metric-bar span.warn {
+      background: linear-gradient(90deg, rgba(246, 193, 119, 0.18), rgba(246, 193, 119, 0.8));
+    }
+
+    .metric-bar span.crit {
+      background: linear-gradient(90deg, rgba(255, 107, 107, 0.22), rgba(255, 107, 107, 0.85));
+    }
+
+    .details-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .details-grid strong {
+      display: block;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 11px;
+      margin-bottom: 4px;
+      color: var(--text-primary);
+    }
+
+    .host-card.error {
+      border-color: rgba(255, 107, 107, 0.4);
+      box-shadow: inset 0 0 0 1px rgba(255, 107, 107, 0.25), var(--shadow);
+    }
+
+    .error-message {
+      background: rgba(255, 107, 107, 0.12);
+      border: 1px solid rgba(255, 107, 107, 0.32);
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 13px;
+      line-height: 1.5;
+      color: #ffb4a8;
+      margin-top: 12px;
+    }
+
+    footer {
+      margin-top: 32px;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.55);
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+    }
+
+    @media (max-width: 720px) {
+      .details-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 <body>
   <h1>Glances Fleet Dashboard</h1>
-  <p>Last update: {{ updated }} (auto refresh {{ refresh_seconds }}s)</p>
-  <table>
-    <thead>
-      <tr>
-        <th>Host</th>
-        <th>CPU %</th>
-        <th>RAM %</th>
-        <th>RAM Used</th>
-        <th>Load 1m</th>
-        <th>WiFi</th>
-        <th>IP</th>
-        <th>Disk %</th>
-        <th>Uptime</th>
-        <th>Status</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for host_name, payload, metrics in stats %}
-        {% set meta = host_meta.get(host_name, {}) %}
-        {% set ha_url = meta.get('ha_dashboard_url') %}
-        {% if '__error' in payload %}
-          <tr>
-            <td>
+  <p class="meta">
+    <span class="dot"></span>
+    Last update: {{ updated }} · Auto refresh every {{ refresh_seconds }}s
+  </p>
+
+  <section class="host-grid">
+    {% for host_name, payload, metrics in stats %}
+      {% set meta = host_meta.get(host_name, {}) %}
+      {% set ha_url = meta.get('ha_dashboard_url') %}
+      {% if '__error' in payload %}
+        <article class="host-card error">
+          <div class="host-card__header">
+            <h2 class="host-card__title">
               {% if ha_url %}
                 <a href="{{ ha_url }}" target="_blank" rel="noopener">{{ host_name }}</a>
               {% else %}
                 {{ host_name }}
               {% endif %}
-            </td>
-            <td colspan="8">–</td>
-            <td class="status-error">{{ payload['__error'] }}</td>
-          </tr>
-        {% else %}
-          {% set cpu = metrics.get('cpu_percent') %}
-          {% set mem = metrics.get('mem_percent') %}
-          {% set load = metrics.get('load_1m') %}
-          {% set uptime = metrics.get('uptime') %}
-          {% set mem_used = metrics.get('mem_used') %}
-          {% set mem_total = metrics.get('mem_total') %}
-          {% set wifi_signal = metrics.get('wifi_signal') %}
-          {% set wifi_label = metrics.get('wifi_label') %}
-          {% set ip_private = metrics.get('ip_address') %}
-          {% set ip_public = metrics.get('public_ip') %}
-          {% set disk_percent = metrics.get('disk_percent') %}
-          <tr>
-            <td>
+            </h2>
+            <span class="status-chip error">Offline</span>
+          </div>
+          <p class="error-message">
+            {{ payload['__error'] or 'Unknown error' }}<br>
+            <small>Endpoint: {{ payload['__endpoint'] }}</small>
+          </p>
+        </article>
+      {% else %}
+        {% set cpu = metrics.get('cpu_percent') %}
+        {% set mem = metrics.get('mem_percent') %}
+        {% set load = metrics.get('load_1m') %}
+        {% set uptime = metrics.get('uptime') %}
+        {% set mem_used = metrics.get('mem_used') %}
+        {% set mem_total = metrics.get('mem_total') %}
+        {% set wifi_signal = metrics.get('wifi_signal') %}
+        {% set wifi_label = metrics.get('wifi_label') %}
+        {% set ip_private = metrics.get('ip_address') %}
+        {% set ip_public = metrics.get('public_ip') %}
+        {% set disk_percent = metrics.get('disk_percent') %}
+        <article class="host-card">
+          <div class="host-card__header">
+            <h2 class="host-card__title">
               {% if ha_url %}
                 <a href="{{ ha_url }}" target="_blank" rel="noopener">{{ host_name }}</a>
               {% else %}
                 {{ host_name }}
               {% endif %}
-            </td>
-            <td class="{% if cpu and cpu >= 90 %}metric-crit{% elif cpu and cpu >= 75 %}metric-warn{% elif cpu and cpu >= 50 %}metric-mid{% endif %}">
-              {{ "%.1f"|format(cpu) if cpu is not none else "-" }}
-            </td>
-            <td class="{% if mem and mem >= 90 %}metric-crit{% elif mem and mem >= 75 %}metric-warn{% elif mem and mem >= 50 %}metric-mid{% endif %}">
-              {{ "%.1f"|format(mem) if mem is not none else "-" }}
-            </td>
-            <td>
-              {% if mem_used %}
-                {{ format_bytes(mem_used) }}{% if mem_total %} / {{ format_bytes(mem_total) }}{% endif %}
-              {% else %}
-                -
-              {% endif %}
-            </td>
-            <td>{{ "%.2f"|format(load) if load is not none else "-" }}</td>
-            <td>
-              {% if wifi_signal is not none %}
-                {{ wifi_signal }} dBm{% if wifi_label %} ({{ wifi_label }}){% endif %}
-              {% elif wifi_label %}
-                {{ wifi_label }}
-              {% else %}
-                -
-              {% endif %}
-            </td>
-            <td>
-              {% if ip_private and ip_public %}
-                {{ ip_private }} / {{ ip_public }}
-              {% elif ip_private %}
-                {{ ip_private }}
-              {% elif ip_public %}
-                {{ ip_public }}
-              {% else %}
-                -
-              {% endif %}
-            </td>
-            <td class="{% if disk_percent is not none and disk_percent >= 90 %}metric-crit{% elif disk_percent is not none and disk_percent >= 75 %}metric-warn{% elif disk_percent is not none and disk_percent >= 50 %}metric-mid{% endif %}">
-              {% if disk_percent is not none %}
-                {{ "%.1f"|format(disk_percent) }}
-              {% else %}
-                -
-              {% endif %}
-            </td>
-            <td>{{ uptime }}</td>
-            <td class="status-ok">OK</td>
-          </tr>
-        {% endif %}
-      {% endfor %}
-    </tbody>
-  </table>
+            </h2>
+            <span class="status-chip ok">Operational</span>
+          </div>
+
+          <div class="metric-stack">
+            <div class="metric">
+              <label>CPU Utilization</label>
+              <div class="metric-value">
+                <strong>{{ "%.1f"|format(cpu) if cpu is not none else "-" }}%</strong>
+              </div>
+              <div class="metric-bar">
+                {% set cpu_scale = (cpu / 100.0) if cpu is not none else 0 %}
+                {% set cpu_class = 'crit' if cpu and cpu >= 90 else 'warn' if cpu and cpu >= 75 else '' %}
+                <span class="{{ cpu_class }}" style="--value: {{ cpu_scale }}"></span>
+              </div>
+            </div>
+
+            <div class="metric">
+              <label>Memory Usage</label>
+              <div class="metric-value">
+                <strong>{{ "%.1f"|format(mem) if mem is not none else "-" }}%</strong>
+                <span>
+                  {% if mem_used %}
+                    {{ format_bytes(mem_used) }}{% if mem_total %} / {{ format_bytes(mem_total) }}{% endif %}
+                  {% else %}
+                    &nbsp;
+                  {% endif %}
+                </span>
+              </div>
+              <div class="metric-bar">
+                {% set mem_scale = (mem / 100.0) if mem is not none else 0 %}
+                {% set mem_class = 'crit' if mem and mem >= 90 else 'warn' if mem and mem >= 75 else '' %}
+                <span class="{{ mem_class }}" style="--value: {{ mem_scale }}"></span>
+              </div>
+            </div>
+
+            <div class="metric">
+              <label>Load (1m)</label>
+              <div class="metric-value">
+                <strong>{{ "%.2f"|format(load) if load is not none else "-" }}</strong>
+              </div>
+            </div>
+
+            <div class="metric">
+              <label>Disk Utilization</label>
+              <div class="metric-value">
+                <strong>{{ "%.1f"|format(disk_percent) if disk_percent is not none else "-" }}%</strong>
+              </div>
+              <div class="metric-bar">
+                {% set disk_scale = (disk_percent / 100.0) if disk_percent is not none else 0 %}
+                {% set disk_class = 'crit' if disk_percent and disk_percent >= 90 else 'warn' if disk_percent and disk_percent >= 75 else '' %}
+                <span class="{{ disk_class }}" style="--value: {{ disk_scale }}"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="details-grid">
+            <div>
+              <strong>Uptime</strong>
+              <span>{{ uptime }}</span>
+            </div>
+            <div>
+              <strong>Network</strong>
+              <span>
+                {% if ip_private and ip_public %}
+                  {{ ip_private }} / {{ ip_public }}
+                {% elif ip_private %}
+                  {{ ip_private }}
+                {% elif ip_public %}
+                  {{ ip_public }}
+                {% else %}
+                  –
+                {% endif %}
+              </span>
+            </div>
+            <div>
+              <strong>Wi-Fi</strong>
+              <span>
+                {% if wifi_signal is not none %}
+                  {{ wifi_signal }} dBm{% if wifi_label %} · {{ wifi_label }}{% endif %}
+                {% elif wifi_label %}
+                  {{ wifi_label }}
+                {% else %}
+                  –
+                {% endif %}
+              </span>
+            </div>
+            <div>
+              <strong>Polled</strong>
+              <span>{{ payload['__fetched_at'] if payload.get('__fetched_at') else updated }}</span>
+            </div>
+          </div>
+        </article>
+      {% endif %}
+    {% endfor %}
+  </section>
+
   <footer>
-    Data fetched from Glances REST API on each Home Assistant host.
+    Observability via Glances REST API · Designed for quick fleet triage
   </footer>
 </body>
 </html>
