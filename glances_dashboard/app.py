@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """Aggregate Glances REST data from multiple Home Assistant hosts."""
 
+
 from __future__ import annotations
 
 import asyncio
+import re
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
@@ -295,6 +297,14 @@ async def dashboard() -> HTMLResponse:
     """Render the HTML dashboard."""
     raw_stats = await gather_hosts()
     stats = [(name, payload, extract_metrics(payload)) for name, payload in raw_stats]
+    stats = sorted(
+        stats,
+        key=lambda item: (
+            1 if "__error" in item[1] else 0,
+            _host_number(item[0]),
+            item[0].lower(),
+        ),
+    )
     template = ENV.get_template("dashboard.html")
     now_local = datetime.now(local_tz())
     html = template.render(
@@ -321,6 +331,17 @@ async def status() -> JSONResponse:
             for name, payload in raw_stats
         }
     })
+
+
+def _host_number(host_name: str) -> int:
+    """Extract a numeric suffix from host name for sorting, defaults high."""
+    match = re.search(r"(\d+)", host_name)
+    if match:
+        try:
+            return int(match.group(1))
+        except ValueError:
+            return 9999
+    return 9999
 
 
 @APP.get("/text", response_class=PlainTextResponse)
