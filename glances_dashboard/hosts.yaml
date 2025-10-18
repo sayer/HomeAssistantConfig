@@ -1,33 +1,21 @@
 default_api_version: 3
-refresh_seconds: 10
-timeout_seconds: 3
+refresh_seconds: 900
+timeout_seconds: 10
 hosts:
   - name: Home Assistant 03
     url: http://homeassistant-3.tail73c84.ts.net:61209
   - name: Home Assistant 04
     url: http://homeassistant-4.tail73c84.ts.net:61209
-  - name: Home Assistant 05
-    url: http://homeassistant-5.tail73c84.ts.net:61209
-  - name: Home Assistant 06
-    url: http://homeassistant-6.tail73c84.ts.net:61209
-  - name: Home Assistant 07
-    url: http://homeassistant-7.tail73c84.ts.net:61209
   - name: Home Assistant 08
     url: http://homeassistant-8.tail73c84.ts.net:61209
   - name: Home Assistant 09
     url: http://homeassistant-9.tail73c84.ts.net:61209
-  - name: Home Assistant 10
-    url: http://homeassistant-10.tail73c84.ts.net:61209
-  - name: Home Assistant 11
-    url: http://homeassistant-11.tail73c84.ts.net:61209
   - name: Home Assistant 12
     url: http://homeassistant-12.tail73c84.ts.net:61209
   - name: Home Assistant 13
     url: http://homeassistant-13.tail73c84.ts.net:61209
   - name: Home Assistant 14
     url: http://homeassistant-14.tail73c84.ts.net:61209
-  - name: Home Assistant 15
-    url: http://homeassistant-15.tail73c84.ts.net:61209
   - name: Home Assistant 16
     url: http://homeassistant-16.tail73c84.ts.net:61209
   - name: Home Assistant 17

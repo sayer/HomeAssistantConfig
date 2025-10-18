@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 """Aggregate Glances REST data from multiple Home Assistant hosts."""
 
+
 from __future__ import annotations
 
 import asyncio
-from datetime import datetime, timezone
+import re
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
+from urllib.parse import urlparse, urlunparse
 
 import httpx
 import yaml
@@ -21,6 +24,33 @@ BASE_DIR = Path(__file__).resolve().parent
 CONFIG_PATH = BASE_DIR / "hosts.yaml"
 TEMPLATES_DIR = BASE_DIR / "templates"
 
+HOST_METADATA: Dict[str, Dict[str, Any]] = {}
+
+
+def derive_ha_dashboard_url(host_cfg: Dict[str, Any]) -> Optional[str]:
+    """Compute the Home Assistant dashboard URL for a host."""
+    if "ha_url" in host_cfg:
+        return host_cfg["ha_url"]
+
+    base_url = host_cfg.get("url")
+    if not base_url:
+        return None
+
+    parsed = urlparse(base_url)
+    hostname = parsed.hostname
+    if not hostname:
+        return None
+
+    try:
+        port = int(host_cfg.get("ha_port", 8123))
+    except (TypeError, ValueError):
+        port = 8123
+
+    scheme = parsed.scheme or "http"
+    netloc = f"{hostname}:{port}"
+    path = "/dashboard-remote/0"
+    return urlunparse((scheme, netloc, path, "", "", ""))
+
 
 def load_config() -> Dict[str, Any]:
     """Load the dashboard configuration from hosts.yaml."""
@@ -28,6 +58,14 @@ def load_config() -> Dict[str, Any]:
         config = yaml.safe_load(handle)
     if not config or "hosts" not in config:
         raise ValueError("hosts.yaml must define a 'hosts' list.")
+    HOST_METADATA.clear()
+    for host_cfg in config["hosts"]:
+        metadata: Dict[str, Any] = {}
+        ha_url = derive_ha_dashboard_url(host_cfg)
+        if ha_url:
+            metadata["ha_dashboard_url"] = ha_url
+        host_cfg["__meta"] = metadata
+        HOST_METADATA[host_cfg["name"]] = metadata
     return config
 
 
@@ -66,23 +104,43 @@ async def fetch_host(
         response = await client.get(endpoint, auth=auth)
         response.raise_for_status()
         payload = response.json()
-        payload["__fetched_at"] = datetime.now(timezone.utc).isoformat()
+        payload["__fetched_at"] = current_timestamp()
         return name, payload
     except Exception as err:
+        error_message = f"{type(err).__name__}: {err}"
         return name, {
-            "__error": str(err),
+            "__error": error_message,
             "__endpoint": endpoint,
-            "__fetched_at": datetime.now(timezone.utc).isoformat()
+            "__fetched_at": current_timestamp()
         }
 
 
 async def gather_hosts() -> List[Tuple[str, Dict[str, Any]]]:
     """Fetch stats for every configured host."""
-    timeout = httpx.Timeout(TIMEOUT_SECONDS)
-    limits = httpx.Limits(max_keepalive_connections=5, max_connections=10)
+    host_count = len(CONFIG["hosts"])
+    timeout = httpx.Timeout(
+        connect=TIMEOUT_SECONDS,
+        read=TIMEOUT_SECONDS,
+        write=TIMEOUT_SECONDS,
+        pool=TIMEOUT_SECONDS
+    )
+    limits = httpx.Limits(
+        max_keepalive_connections=max(10, host_count),
+        max_connections=max(10, host_count)
+    )
     async with httpx.AsyncClient(timeout=timeout, limits=limits) as client:
         tasks = [fetch_host(client, host_cfg) for host_cfg in CONFIG["hosts"]]
         return await asyncio.gather(*tasks)
+
+
+def local_tz():
+    """Return the local timezone object."""
+    return datetime.now().astimezone().tzinfo
+
+
+def current_timestamp() -> str:
+    """Return the current time formatted in the local timezone."""
+    return datetime.now(local_tz()).strftime("%Y-%m-%d %H:%M:%S %Z")
 
 
 def format_bytes(num_bytes: Optional[float]) -> str:
@@ -239,13 +297,22 @@ async def dashboard() -> HTMLResponse:
     """Render the HTML dashboard."""
     raw_stats = await gather_hosts()
     stats = [(name, payload, extract_metrics(payload)) for name, payload in raw_stats]
+    stats = sorted(
+        stats,
+        key=lambda item: (
+            1 if "__error" in item[1] else 0,
+            _host_number(item[0]),
+            item[0].lower(),
+        ),
+    )
     template = ENV.get_template("dashboard.html")
-    now_utc = datetime.now(timezone.utc)
+    now_local = datetime.now(local_tz())
     html = template.render(
         stats=stats,
-        updated=now_utc.isoformat(timespec="seconds"),
+        updated=now_local.strftime("%Y-%m-%d %H:%M:%S %Z"),
         refresh_seconds=REFRESH_SECONDS,
-        format_bytes=format_bytes
+        format_bytes=format_bytes,
+        host_meta=HOST_METADATA
     )
     return HTMLResponse(content=html)
 
@@ -255,7 +322,7 @@ async def status() -> JSONResponse:
     """Expose the raw JSON data for other consumers."""
     raw_stats = await gather_hosts()
     return JSONResponse(content={
-        "updated": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "updated": datetime.now(local_tz()).strftime("%Y-%m-%d %H:%M:%S %Z"),
         "hosts": {
             name: {
                 "payload": payload,
@@ -264,6 +331,17 @@ async def status() -> JSONResponse:
             for name, payload in raw_stats
         }
     })
+
+
+def _host_number(host_name: str) -> int:
+    """Extract a numeric suffix from host name for sorting, defaults high."""
+    match = re.search(r"(\d+)", host_name)
+    if match:
+        try:
+            return int(match.group(1))
+        except ValueError:
+            return 9999
+    return 9999
 
 
 @APP.get("/text", response_class=PlainTextResponse)
@@ -283,6 +361,7 @@ async def config_dump() -> JSONResponse:
             "name": host_cfg["name"],
             "url": host_cfg["url"],
             "api_version": host_cfg.get("api_version", DEFAULT_API_VERSION),
+            "ha_dashboard_url": HOST_METADATA.get(host_cfg["name"], {}).get("ha_dashboard_url"),
         })
     return JSONResponse(content={
         "default_api_version": DEFAULT_API_VERSION,
