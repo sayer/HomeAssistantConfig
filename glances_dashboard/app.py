@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import asyncio
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 from urllib.parse import urlparse, urlunparse
@@ -102,14 +102,14 @@ async def fetch_host(
         response = await client.get(endpoint, auth=auth)
         response.raise_for_status()
         payload = response.json()
-        payload["__fetched_at"] = datetime.now(timezone.utc).isoformat()
+        payload["__fetched_at"] = current_timestamp()
         return name, payload
     except Exception as err:
         error_message = f"{type(err).__name__}: {err}"
         return name, {
             "__error": error_message,
             "__endpoint": endpoint,
-            "__fetched_at": datetime.now(timezone.utc).isoformat()
+            "__fetched_at": current_timestamp()
         }
 
 
@@ -129,6 +129,16 @@ async def gather_hosts() -> List[Tuple[str, Dict[str, Any]]]:
     async with httpx.AsyncClient(timeout=timeout, limits=limits) as client:
         tasks = [fetch_host(client, host_cfg) for host_cfg in CONFIG["hosts"]]
         return await asyncio.gather(*tasks)
+
+
+def local_tz():
+    """Return the local timezone object."""
+    return datetime.now().astimezone().tzinfo
+
+
+def current_timestamp() -> str:
+    """Return the current time formatted in the local timezone."""
+    return datetime.now(local_tz()).strftime("%Y-%m-%d %H:%M:%S %Z")
 
 
 def format_bytes(num_bytes: Optional[float]) -> str:
@@ -286,10 +296,10 @@ async def dashboard() -> HTMLResponse:
     raw_stats = await gather_hosts()
     stats = [(name, payload, extract_metrics(payload)) for name, payload in raw_stats]
     template = ENV.get_template("dashboard.html")
-    now_utc = datetime.now(timezone.utc)
+    now_local = datetime.now(local_tz())
     html = template.render(
         stats=stats,
-        updated=now_utc.isoformat(timespec="seconds"),
+        updated=now_local.strftime("%Y-%m-%d %H:%M:%S %Z"),
         refresh_seconds=REFRESH_SECONDS,
         format_bytes=format_bytes,
         host_meta=HOST_METADATA
@@ -302,7 +312,7 @@ async def status() -> JSONResponse:
     """Expose the raw JSON data for other consumers."""
     raw_stats = await gather_hosts()
     return JSONResponse(content={
-        "updated": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "updated": datetime.now(local_tz()).strftime("%Y-%m-%d %H:%M:%S %Z"),
         "hosts": {
             name: {
                 "payload": payload,
