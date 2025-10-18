@@ -52,6 +52,24 @@ def derive_ha_dashboard_url(host_cfg: Dict[str, Any]) -> Optional[str]:
     return urlunparse((scheme, netloc, path, "", "", ""))
 
 
+def derive_glances_url(host_cfg: Dict[str, Any]) -> Optional[str]:
+    """Compute the Glances web UI URL for a host."""
+    base_url = host_cfg.get("url")
+    if not base_url:
+        return None
+    parsed = urlparse(base_url)
+    hostname = parsed.hostname
+    if not hostname:
+        return None
+    try:
+        port = int(host_cfg.get("glances_port", parsed.port or 61209))
+    except (TypeError, ValueError):
+        port = parsed.port or 61209
+    scheme = parsed.scheme or "http"
+    netloc = f"{hostname}:{port}"
+    return urlunparse((scheme, netloc, "/", "", "", ""))
+
+
 def load_config() -> Dict[str, Any]:
     """Load the dashboard configuration from hosts.yaml."""
     with CONFIG_PATH.open("r", encoding="utf-8") as handle:
@@ -64,6 +82,9 @@ def load_config() -> Dict[str, Any]:
         ha_url = derive_ha_dashboard_url(host_cfg)
         if ha_url:
             metadata["ha_dashboard_url"] = ha_url
+        glances_url = derive_glances_url(host_cfg)
+        if glances_url:
+            metadata["glances_url"] = glances_url
         host_cfg["__meta"] = metadata
         HOST_METADATA[host_cfg["name"]] = metadata
     return config
