@@ -251,18 +251,25 @@ main() {
   # Capture initial git state so we can tell if anything changed
   INITIAL_HEAD=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
   INITIAL_STATUS=$(git status --porcelain=v1 2>/dev/null || echo "__GIT_STATUS_ERROR__")
+  local REPO_DIRTY=0
 
   if [ "$INITIAL_STATUS" = "__GIT_STATUS_ERROR__" ]; then
     log_message "WARNING: Unable to read initial git status"
     INITIAL_STATUS=""
   elif [ -n "$INITIAL_STATUS" ]; then
     log_message "NOTICE: Repository has local changes before update"
+    REPO_DIRTY=1
+  else
+    REPO_DIRTY=0
   fi
 
   # Check git for updates
   log_message "Checking for git updates..."
 
-  if [ ! -w "$REPO_DIR/.git" ]; then
+  if [ $REPO_DIRTY -eq 1 ]; then
+    log_message "WARNING: Local changes detected; skipping git pull to protect uncommitted work"
+    GIT_RESULT="skipped (local changes)"
+  elif [ ! -w "$REPO_DIR/.git" ]; then
     log_message "WARNING: No write permission to $REPO_DIR/.git directory, skipping git operations"
     GIT_RESULT="skipped (read-only)"
   else
