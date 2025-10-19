@@ -127,7 +127,10 @@ check_core_update() {
     return 1
   fi
 
-  local update_flag version latest
+  local update_flag=""
+  local version=""
+  local latest=""
+  local python_parse_failed=0
   if [ -n "$PYTHON_BIN" ]; then
     local parsed
     if ! parsed=$(printf '%s' "$core_raw" | "$PYTHON_BIN" - <<'PY'
@@ -147,17 +150,16 @@ latest = core.get("version_latest")
 print(f"{1 if update else 0}|{version or ''}|{latest or ''}")
 PY
 ); then
-      CORE_UPDATE_NOTE="failed to parse"
-      log_message "WARNING: Unable to parse Home Assistant core info JSON"
-      if [ -n "$core_raw" ]; then
-        while IFS= read -r line; do
-          [ -n "$line" ] && log_message "ha core info: $line"
-        done <<<"$core_raw"
-      fi
-      return 1
+      python_parse_failed=1
+    else
+      IFS='|' read -r update_flag version latest <<<"$parsed"
     fi
-    IFS='|' read -r update_flag version latest <<<"$parsed"
-  else
+  fi
+
+  if [ -z "$PYTHON_BIN" ] || [ $python_parse_failed -eq 1 ]; then
+    if [ $python_parse_failed -eq 1 ]; then
+      log_message "WARNING: Python parsing of HA core info failed; using fallback parser"
+    fi
     if echo "$core_raw" | grep -q '"update_available":[[:space:]]*true'; then
       update_flag=1
     else
@@ -200,6 +202,7 @@ update_addons() {
 
   local slugs=""
   local parse_failed=0
+  local python_parse_failed=0
   if [ -n "$PYTHON_BIN" ]; then
     slugs=$(printf '%s' "$addons_raw" | "$PYTHON_BIN" - <<'PY'
 import json, sys
@@ -216,12 +219,24 @@ for addon in addons:
 PY
 )
     if [ $? -ne 0 ]; then
-      parse_failed=1
+      python_parse_failed=1
     fi
-  else
+  fi
+
+  if [ -z "$PYTHON_BIN" ] || [ $python_parse_failed -eq 1 ]; then
+    if [ $python_parse_failed -eq 1 ]; then
+      log_message "WARNING: Python parsing of add-on list failed; using fallback parser"
+    fi
     if echo "$addons_raw" | grep -q '"update_available":[[:space:]]*true'; then
-      parse_failed=1
+      slugs=$(printf '%s' "$addons_raw" | sed -n 's/{\"name\":\"[^\"]*\",\"slug\":\"\([^\"]*\)\",[^}]*\"update_available\":true.*/\1/p')
+    else
+      slugs=""
     fi
+    parse_failed=0
+  fi
+
+  if [ $python_parse_failed -eq 1 ] && [ -z "$slugs" ] && echo "$addons_raw" | grep -q '"update_available":[[:space:]]*true'; then
+    parse_failed=1
   fi
 
   if [ $parse_failed -eq 1 ]; then
@@ -231,13 +246,8 @@ PY
         [ -n "$line" ] && log_message "ha addons list: $line"
       done <<<"$addons_raw"
     fi
-    if [ -n "$PYTHON_BIN" ]; then
-      ADDONS_RESULT="failed (parse)"
-      return 1
-    else
-      ADDONS_RESULT="skipped (parse unavailable)"
-      return 1
-    fi
+    ADDONS_RESULT="failed (parse)"
+    return 1
   fi
 
   if [ -z "$slugs" ]; then
