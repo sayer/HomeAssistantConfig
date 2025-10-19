@@ -112,15 +112,22 @@ check_core_update() {
     return 1
   fi
 
-  local core_json
-  if ! core_json=$(ha core info --raw-json 2>/dev/null); then
+  local core_raw
+  core_raw=$(ha core info --raw-json --no-progress 2>&1)
+  local status=$?
+  if [ $status -ne 0 ]; then
     CORE_UPDATE_NOTE="failed to query"
-    log_message "WARNING: Unable to determine Home Assistant core version (ha core info failed)"
+    log_message "WARNING: Unable to determine Home Assistant core version (ha core info exited $status)"
+    if [ -n "$core_raw" ]; then
+      while IFS= read -r line; do
+        [ -n "$line" ] && log_message "ha core info: $line"
+      done <<<"$core_raw"
+    fi
     return 1
   fi
 
   local parsed
-  if ! parsed=$(printf '%s' "$core_json" | python3 - <<'PY'
+  if ! parsed=$(printf '%s' "$core_raw" | python3 - <<'PY'
 import json, sys
 try:
     data = json.load(sys.stdin)
@@ -139,6 +146,11 @@ PY
 ); then
     CORE_UPDATE_NOTE="failed to parse"
     log_message "WARNING: Unable to parse Home Assistant core info JSON"
+    if [ -n "$core_raw" ]; then
+      while IFS= read -r line; do
+        [ -n "$line" ] && log_message "ha core info: $line"
+      done <<<"$core_raw"
+    fi
     return 1
   fi
 
@@ -162,15 +174,22 @@ update_addons() {
     return 1
   fi
 
-  local addons_json
-  if ! addons_json=$(ha addons list --raw-json 2>/dev/null); then
-    log_message "WARNING: Unable to retrieve add-on list; skipping updates"
+  local addons_raw
+  addons_raw=$(ha addons list --raw-json --no-progress 2>&1)
+  local status=$?
+  if [ $status -ne 0 ]; then
+    log_message "WARNING: Unable to retrieve add-on list (ha addons list exited $status); skipping updates"
+    if [ -n "$addons_raw" ]; then
+      while IFS= read -r line; do
+        [ -n "$line" ] && log_message "ha addons list: $line"
+      done <<<"$addons_raw"
+    fi
     ADDONS_RESULT="failed (list)"
     return 1
   fi
 
   local slugs
-  slugs=$(printf '%s' "$addons_json" | python3 - <<'PY'
+  slugs=$(printf '%s' "$addons_raw" | python3 - <<'PY'
 import json, sys
 try:
     data = json.load(sys.stdin)
@@ -186,6 +205,11 @@ PY
 )
   if [ $? -ne 0 ]; then
     log_message "WARNING: Failed to parse add-on list JSON"
+    if [ -n "$addons_raw" ]; then
+      while IFS= read -r line; do
+        [ -n "$line" ] && log_message "ha addons list: $line"
+      done <<<"$addons_raw"
+    fi
     ADDONS_RESULT="failed (parse)"
     return 1
   fi
@@ -201,7 +225,7 @@ PY
     [ -z "$slug" ] && continue
     log_message "Updating add-on: $slug"
     local update_output
-    if update_output=$(ha addons update "$slug" 2>&1); then
+    if update_output=$(ha addons update "$slug" --no-progress 2>&1); then
       if [ -n "$update_output" ]; then
         while IFS= read -r line; do
           [ -n "$line" ] && log_message "addon[$slug]: $line"
