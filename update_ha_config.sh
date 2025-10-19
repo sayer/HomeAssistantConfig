@@ -12,6 +12,7 @@ set -o pipefail
 LOG_FILE="/tmp/update_ha_config.log"
 REPO_DIR="/config"
 CONFIG_SCRIPT="${REPO_DIR}/update_config.sh"
+PYTHON_BIN="$(command -v python3 || command -v python || true)"
 
 EXIT_CODE=0
 GIT_RESULT="not-run"
@@ -126,8 +127,10 @@ check_core_update() {
     return 1
   fi
 
-  local parsed
-  if ! parsed=$(printf '%s' "$core_raw" | python3 - <<'PY'
+  local update_flag version latest
+  if [ -n "$PYTHON_BIN" ]; then
+    local parsed
+    if ! parsed=$(printf '%s' "$core_raw" | "$PYTHON_BIN" - <<'PY'
 import json, sys
 try:
     data = json.load(sys.stdin)
@@ -144,18 +147,25 @@ latest = core.get("version_latest")
 print(f"{1 if update else 0}|{version or ''}|{latest or ''}")
 PY
 ); then
-    CORE_UPDATE_NOTE="failed to parse"
-    log_message "WARNING: Unable to parse Home Assistant core info JSON"
-    if [ -n "$core_raw" ]; then
-      while IFS= read -r line; do
-        [ -n "$line" ] && log_message "ha core info: $line"
-      done <<<"$core_raw"
+      CORE_UPDATE_NOTE="failed to parse"
+      log_message "WARNING: Unable to parse Home Assistant core info JSON"
+      if [ -n "$core_raw" ]; then
+        while IFS= read -r line; do
+          [ -n "$line" ] && log_message "ha core info: $line"
+        done <<<"$core_raw"
+      fi
+      return 1
     fi
-    return 1
+    IFS='|' read -r update_flag version latest <<<"$parsed"
+  else
+    if echo "$core_raw" | grep -q '"update_available":[[:space:]]*true'; then
+      update_flag=1
+    else
+      update_flag=0
+    fi
+    version=$(printf '%s' "$core_raw" | sed -n 's/.*"version":"\([^"]*\)".*/\1/p' | head -n1)
+    latest=$(printf '%s' "$core_raw" | sed -n 's/.*"version_latest":"\([^"]*\)".*/\1/p' | head -n1)
   fi
-
-  local update_flag version latest
-  IFS='|' read -r update_flag version latest <<<"$parsed"
 
   if [ "$update_flag" = "1" ]; then
     CORE_UPDATE_NOTE="update available (current: ${version:-unknown}, latest: ${latest:-unknown})"
@@ -188,8 +198,10 @@ update_addons() {
     return 1
   fi
 
-  local slugs
-  slugs=$(printf '%s' "$addons_raw" | python3 - <<'PY'
+  local slugs=""
+  local parse_failed=0
+  if [ -n "$PYTHON_BIN" ]; then
+    slugs=$(printf '%s' "$addons_raw" | "$PYTHON_BIN" - <<'PY'
 import json, sys
 try:
     data = json.load(sys.stdin)
@@ -203,15 +215,29 @@ for addon in addons:
             print(slug)
 PY
 )
-  if [ $? -ne 0 ]; then
+    if [ $? -ne 0 ]; then
+      parse_failed=1
+    fi
+  else
+    if echo "$addons_raw" | grep -q '"update_available":[[:space:]]*true'; then
+      parse_failed=1
+    fi
+  fi
+
+  if [ $parse_failed -eq 1 ]; then
     log_message "WARNING: Failed to parse add-on list JSON"
     if [ -n "$addons_raw" ]; then
       while IFS= read -r line; do
         [ -n "$line" ] && log_message "ha addons list: $line"
       done <<<"$addons_raw"
     fi
-    ADDONS_RESULT="failed (parse)"
-    return 1
+    if [ -n "$PYTHON_BIN" ]; then
+      ADDONS_RESULT="failed (parse)"
+      return 1
+    else
+      ADDONS_RESULT="skipped (parse unavailable)"
+      return 1
+    fi
   fi
 
   if [ -z "$slugs" ]; then
