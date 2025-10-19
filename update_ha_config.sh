@@ -18,6 +18,8 @@ GIT_RESULT="not-run"
 CONFIG_RESULT="not-run"
 HA_CHECK_RESULT="not-run"
 RESTART_RESULT="not-run"
+ADDONS_RESULT="skipped"
+CORE_UPDATE_NOTE="not checked"
 INITIAL_HEAD=""
 INITIAL_STATUS=""
 FINAL_HEAD=""
@@ -79,6 +81,8 @@ print_summary() {
   log_message "Config render: $CONFIG_RESULT"
   log_message "HA core check: $HA_CHECK_RESULT"
   log_message "HA restart: $RESTART_RESULT"
+  log_message "Add-on updates: $ADDONS_RESULT"
+  log_message "HA core update status: $CORE_UPDATE_NOTE"
 
   if [ -n "$GIT_CHANGE_NOTE" ]; then
     log_message "Git repo state: $GIT_CHANGE_NOTE"
@@ -99,6 +103,129 @@ print_summary() {
     log_message "Overall result: SUCCESS"
   else
     log_message "Overall result: FAILURE (exit code $EXIT_CODE)"
+  fi
+}
+
+check_core_update() {
+  if ! command -v ha >/dev/null 2>&1; then
+    CORE_UPDATE_NOTE="'ha' command missing"
+    return 1
+  fi
+
+  local core_json
+  if ! core_json=$(ha core info --raw-json 2>/dev/null); then
+    CORE_UPDATE_NOTE="failed to query"
+    log_message "WARNING: Unable to determine Home Assistant core version (ha core info failed)"
+    return 1
+  fi
+
+  local parsed
+  if ! parsed=$(printf '%s' "$core_json" | python3 - <<'PY'
+import json, sys
+try:
+    data = json.load(sys.stdin)
+except Exception:
+    sys.exit(1)
+core = data.get("data")
+if core is None:
+    core = data
+update = core.get("update_available")
+if update is None:
+    update = core.get("version_update")
+version = core.get("version")
+latest = core.get("version_latest")
+print(f"{1 if update else 0}|{version or ''}|{latest or ''}")
+PY
+); then
+    CORE_UPDATE_NOTE="failed to parse"
+    log_message "WARNING: Unable to parse Home Assistant core info JSON"
+    return 1
+  fi
+
+  local update_flag version latest
+  IFS='|' read -r update_flag version latest <<<"$parsed"
+
+  if [ "$update_flag" = "1" ]; then
+    CORE_UPDATE_NOTE="update available (current: ${version:-unknown}, latest: ${latest:-unknown})"
+    log_message "WARNING: Home Assistant core update available: current ${version:-unknown}, latest ${latest:-unknown}. Run 'ha core update' when ready."
+  else
+    CORE_UPDATE_NOTE="up-to-date (current: ${version:-unknown})"
+  fi
+}
+
+update_addons() {
+  log_message "Checking for Home Assistant add-on updates..."
+
+  if ! command -v ha >/dev/null 2>&1; then
+    log_message "WARNING: 'ha' command not available, skipping add-on update check"
+    ADDONS_RESULT="'ha' command missing"
+    return 1
+  fi
+
+  local addons_json
+  if ! addons_json=$(ha addons list --raw-json 2>/dev/null); then
+    log_message "WARNING: Unable to retrieve add-on list; skipping updates"
+    ADDONS_RESULT="failed (list)"
+    return 1
+  fi
+
+  local slugs
+  slugs=$(printf '%s' "$addons_json" | python3 - <<'PY'
+import json, sys
+try:
+    data = json.load(sys.stdin)
+except Exception:
+    sys.exit(1)
+addons = data.get("data", {}).get("addons", [])
+for addon in addons:
+    if addon.get("update_available"):
+        slug = addon.get("slug")
+        if slug:
+            print(slug)
+PY
+)
+  if [ $? -ne 0 ]; then
+    log_message "WARNING: Failed to parse add-on list JSON"
+    ADDONS_RESULT="failed (parse)"
+    return 1
+  fi
+
+  if [ -z "$slugs" ]; then
+    log_message "No add-ons require updates"
+    ADDONS_RESULT="no updates"
+    return 0
+  fi
+
+  local update_failed=0
+  while IFS= read -r slug; do
+    [ -z "$slug" ] && continue
+    log_message "Updating add-on: $slug"
+    local update_output
+    if update_output=$(ha addons update "$slug" 2>&1); then
+      if [ -n "$update_output" ]; then
+        while IFS= read -r line; do
+          [ -n "$line" ] && log_message "addon[$slug]: $line"
+        done <<<"$update_output"
+      fi
+      log_message "Add-on $slug updated successfully"
+    else
+      log_message "ERROR: Failed to update add-on $slug"
+      if [ -n "$update_output" ]; then
+        while IFS= read -r line; do
+          [ -n "$line" ] && log_message "addon[$slug]: $line"
+        done <<<"$update_output"
+      fi
+      update_failed=1
+    fi
+  done <<<"$slugs"
+
+  if [ $update_failed -eq 0 ]; then
+    ADDONS_RESULT="updated"
+    return 0
+  else
+    ADDONS_RESULT="partial failure"
+    EXIT_CODE=1
+    return 1
   fi
 }
 
@@ -235,6 +362,8 @@ main() {
     return 1
   fi
 
+  check_core_update
+
   # Check Home Assistant configuration
   log_message "Checking Home Assistant configuration..."
   if ha core check 2>/dev/null; then
@@ -248,6 +377,7 @@ main() {
     if [ $RELOAD_STATUS -eq 0 ]; then
       log_message "All configurations reloaded successfully!"
       RESTART_RESULT="success"
+      update_addons
     else
       log_message "ERROR: Failed to reload Home Assistant configuration (exit code: $RELOAD_STATUS)"
       if [ -n "$RELOAD_OUTPUT" ]; then
@@ -263,6 +393,7 @@ main() {
     HA_CHECK_RESULT="failed"
     RESTART_RESULT="skipped"
     EXIT_CODE=1
+    ADDONS_RESULT="skipped"
   fi
 
   log_message "Update sequence finished"
