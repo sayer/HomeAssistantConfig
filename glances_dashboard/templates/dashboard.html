@@ -347,7 +347,13 @@
                 {{ host_name }}
               {% endif %}
             </h2>
-            <span class="status-chip error">Offline</span>
+            <span class="status-chip error">
+              {% if meta.get('glances_url') %}
+                <a href="{{ meta['glances_url'] }}" target="_blank" rel="noopener">Offline</a>
+              {% else %}
+                Offline
+              {% endif %}
+            </span>
           </div>
           <p class="error-message">
             {{ payload['__error'] or 'Unknown error' }}<br>
@@ -375,7 +381,13 @@
                 {{ host_name }}
               {% endif %}
             </h2>
-            <span class="status-chip ok">Operational</span>
+            <span class="status-chip ok">
+              {% if meta.get('glances_url') %}
+                <a href="{{ meta['glances_url'] }}" target="_blank" rel="noopener">Operational</a>
+              {% else %}
+                Operational
+              {% endif %}
+            </span>
           </div>
 
           <div class="metric-stack">
