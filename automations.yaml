@@ -933,6 +933,37 @@
     target:
       entity_id: light.entry_light_2
   mode: single
+- id: '1725398400001'
+  alias: Lights - Sync exterior with under slides
+  description: Mirror exterior group commands to the under slide lights for 2023+ coaches
+  trigger:
+  - platform: state
+    entity_id: light.exterior_lights
+  condition:
+  - condition: numeric_state
+    entity_id: input_number.model_year
+    above: 2022
+  action:
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: "{{ trigger.to_state.state == 'on' }}"
+      sequence:
+        - service: light.turn_on
+          target:
+            entity_id:
+            - light.under_slide_lights_1
+            - light.under_slide_lights_2
+    - conditions:
+      - condition: template
+        value_template: "{{ trigger.to_state.state == 'off' }}"
+      sequence:
+        - service: light.turn_off
+          target:
+            entity_id:
+            - light.under_slide_lights_1
+            - light.under_slide_lights_2
+  mode: single
 - id: '1686707309457'
   alias: Apple TV Play - TV Time
   description: ''
