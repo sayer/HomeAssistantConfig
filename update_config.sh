@@ -902,6 +902,22 @@ mv "$TEMP_FILE" "$CONFIG_FILE"
 cat "$CONFIG_FILE" | sed "s/%%LIGHT_COMMAND_OFF%%/$LIGHT_COMMAND_OFF/g" > "$TEMP_FILE"
 mv "$TEMP_FILE" "$CONFIG_FILE"
 
+# Handle optional exterior under-slide lights entries
+if [ "$MODEL_YEAR" -ge 2023 ]; then
+    awk '
+    {
+        if (index($0, "%%EXTERIOR_UNDER_SLIDE_LIGHTS%%") > 0) {
+            print "      - light.under_slide_lights_1"
+            print "      - light.under_slide_lights_2"
+        } else {
+            print
+        }
+    }' "$CONFIG_FILE" > "$TEMP_FILE"
+else
+    awk 'index($0, "%%EXTERIOR_UNDER_SLIDE_LIGHTS%%") == 0 { print }' "$CONFIG_FILE" > "$TEMP_FILE"
+fi
+mv "$TEMP_FILE" "$CONFIG_FILE"
+
 # Replace thermostat tokens
 cat "$CONFIG_FILE" | sed "s/%%THERMOSTAT1%%/$THERMOSTAT1/g" > "$TEMP_FILE"
 mv "$TEMP_FILE" "$CONFIG_FILE"

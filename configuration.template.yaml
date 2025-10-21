@@ -3842,6 +3842,7 @@ light:
       - light.awning_lights
       - light.exterior_accents
       - light.porch_handle
+      %%EXTERIOR_UNDER_SLIDE_LIGHTS%%
 
   # Bedroom lights group that works even if bedroom_sconce is unavailable
   - platform: template
