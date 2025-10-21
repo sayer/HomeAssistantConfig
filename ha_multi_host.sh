@@ -11,6 +11,7 @@ HOSTS=(
   "homeassistant-8.tail73c84.ts.net"
   "homeassistant-4.tail73c84.ts.net"
   "homeassistant-3.tail73c84.ts.net"
+  "192.168.1.18"
 )
 
 ALL_HOSTS=("${HOSTS[@]}")

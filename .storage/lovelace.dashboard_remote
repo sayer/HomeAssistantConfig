@@ -1625,30 +1625,97 @@
               "columns": 2
             },
             {
-              "show_name": true,
-              "show_icon": true,
-              "show_state": false,
-              "type": "glance",
-              "entities": [
+              "type": "conditional",
+              "conditions": [
                 {
-                  "entity": "light.exterior_lights"
-                },
-                {
-                  "entity": "light.exterior_accents"
-                },
-                {
-                  "entity": "light.awning_lights"
-                },
-                {
-                  "entity": "light.porch_handle"
-                },
-                {
-                  "entity": "light.awning_lights"
+                  "condition": "or",
+                  "conditions": [
+                    {
+                      "condition": "numeric_state",
+                      "entity": "input_number.model_year",
+                      "below": 2023
+                    },
+                    {
+                      "condition": "state",
+                      "entity": "input_number.model_year",
+                      "state": "unknown"
+                    },
+                    {
+                      "condition": "state",
+                      "entity": "input_number.model_year",
+                      "state": "unavailable"
+                    }
+                  ]
                 }
               ],
-              "title": "Exterior",
-              "columns": 2,
-              "state_color": true
+              "card": {
+                "show_name": true,
+                "show_icon": true,
+                "show_state": false,
+                "type": "glance",
+                "entities": [
+                  {
+                    "entity": "light.exterior_lights"
+                  },
+                  {
+                    "entity": "light.exterior_accents"
+                  },
+                  {
+                    "entity": "light.awning_lights"
+                  },
+                  {
+                    "entity": "light.porch_handle"
+                  },
+                  {
+                    "entity": "light.awning_lights"
+                  }
+                ],
+                "title": "Exterior",
+                "columns": 2,
+                "state_color": true
+              }
+            },
+            {
+              "type": "conditional",
+              "conditions": [
+                {
+                  "condition": "numeric_state",
+                  "entity": "input_number.model_year",
+                  "above": 2022
+                }
+              ],
+              "card": {
+                "show_name": true,
+                "show_icon": true,
+                "show_state": false,
+                "type": "glance",
+                "entities": [
+                  {
+                    "entity": "light.exterior_lights"
+                  },
+                  {
+                    "entity": "light.exterior_accents"
+                  },
+                  {
+                    "entity": "light.awning_lights"
+                  },
+                  {
+                    "entity": "light.porch_handle"
+                  },
+                  {
+                    "entity": "light.awning_lights"
+                  },
+                  {
+                    "entity": "light.under_slide_lights_1"
+                  },
+                  {
+                    "entity": "light.under_slide_lights_2"
+                  }
+                ],
+                "title": "Exterior",
+                "columns": 2,
+                "state_color": true
+              }
             },
             {
               "show_name": true,
