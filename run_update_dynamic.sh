@@ -231,7 +231,7 @@ resp="$(curl -sS -X POST \
   "${HA_URL%/}/api/services/script/turn_on" \
   || true)"
 
-if [[ "$resp" == "["*"]" ]]; then
+if [[ "$resp" == "["* ]]; then
   entity_list=""
   includes_script="unknown"
 
@@ -259,21 +259,26 @@ if [[ "$resp" == "["*"]" ]]; then
     fi
   fi
 
-  if [[ "$includes_script" == "no" ]]; then
-    if [[ -n "$entity_list" ]]; then
-      echo "API response did not include ${SCRIPT_ENTITY}. Entities: ${entity_list}" >&2
-    else
-      echo "API response did not include ${SCRIPT_ENTITY}. Raw response: $resp" >&2
-    fi
-    exit 2
-  fi
-
-  debug "Service response includes ${SCRIPT_ENTITY}: ${includes_script}"
+  case "$includes_script" in
+    yes)
+      debug "Service response includes ${SCRIPT_ENTITY}: yes"
+      ;;
+    no)
+      if [[ -n "$entity_list" ]]; then
+        echo "API response listed different entities (${entity_list}); expected ${SCRIPT_ENTITY}." >&2
+        exit 2
+      fi
+      debug "Service response did not list ${SCRIPT_ENTITY}; continuing (empty list)"
+      ;;
+    *)
+      debug "Service response did not expose entity list"
+      ;;
+  esac
 
   if [[ -n "$entity_list" ]]; then
     echo "Triggered ${SCRIPT_ENTITY} at ${HA_URL} (entities: ${entity_list})"
   else
-    echo "Triggered ${SCRIPT_ENTITY} at ${HA_URL} (entity list unavailable)"
+    echo "Triggered ${SCRIPT_ENTITY} at ${HA_URL}"
   fi
 else
   echo "API call may have failed. Response:" >&2
