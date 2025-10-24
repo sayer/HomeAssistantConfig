@@ -12,6 +12,7 @@ zigbee.db
 zigbee.db-shm
 zigbee.db-wal
 www/snapshot_dash.jpg
+www/
 configuration.yaml
 configuration.yaml.bak
 coach_model_year.txt
