@@ -232,8 +232,8 @@ resp="$(curl -sS -X POST \
   || true)"
 
 if [[ "$resp" == "["*"]" ]]; then
-  local entity_list=""
-  local includes_script="unknown"
+  entity_list=""
+  includes_script="unknown"
 
   if command -v jq >/dev/null 2>&1; then
     entity_list="$(jq -r 'map(.entity_id) | join(", ")' <<<"$resp" 2>/dev/null || true)"
@@ -244,12 +244,11 @@ if [[ "$resp" == "["*"]" ]]; then
       includes_script="no"
     fi
   else
-    local -a entity_array=()
+    entity_array=()
     mapfile -t entity_array < <(printf '%s\n' "$resp" | sed -n 's/.*"entity_id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
     if (( ${#entity_array[@]} > 0 )); then
       entity_list="$(printf '%s, ' "${entity_array[@]}")"
       entity_list="${entity_list%, }"
-      local entity
       for entity in "${entity_array[@]}"; do
         if [[ "$entity" == "$SCRIPT_ENTITY" ]]; then
           includes_script="yes"
