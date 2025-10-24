@@ -19,6 +19,24 @@ SSH_USER="hassio"
 SSH_PORT=2222
 SSH_OPTS=(-p "$SSH_PORT" -o ConnectTimeout=10 -o StrictHostKeyChecking=no)
 
+if [ -t 1 ]; then
+  COLOR_RESET=$'\033[0m'
+  COLOR_BOLD=$'\033[1m'
+  COLOR_GREEN=$'\033[32m'
+  COLOR_RED=$'\033[31m'
+  COLOR_YELLOW=$'\033[33m'
+  COLOR_BLUE=$'\033[34m'
+  COLOR_CYAN=$'\033[36m'
+else
+  COLOR_RESET=""
+  COLOR_BOLD=""
+  COLOR_GREEN=""
+  COLOR_RED=""
+  COLOR_YELLOW=""
+  COLOR_BLUE=""
+  COLOR_CYAN=""
+fi
+
 SHORT_NAMES=("ping" "restart" "updates" "info" "update_ha_config" "reboot" "ssh" "docker" "pull")
 COMMANDS=("" "ha core restart" "ha supervisor updates" "ha info" "/config/update_ha_config.sh" "ha host reboot" "" "" "cd /config && git pull origin main")
 
@@ -36,16 +54,54 @@ done
 
 usage() {
   echo "Usage: $0 [--host <pattern>] [ping] [restart] [updates] [info] [update_ha_config] [reboot] [ssh] [docker] [pull]"
-  echo "  --host <pattern>   Only run commands on hosts matching the pattern (full or partial match)."
+  echo "  --host <pattern>   Limit commands to a single host (pattern must resolve to exactly one host)."
+  echo "                     Omit --host or use '--host all' to run against every host (parallel for non-interactive commands)."
   echo "  ssh                Open an interactive SSH session to the specified host (must match exactly one host)."
   echo "  docker             Open an interactive SSH session to the specified host for Docker operations (must match exactly one host)."
   echo "  pull               Run git pull origin main in /config on the selected hosts."
-  echo "You may specify one or more commands to run on all hosts or filtered hosts."
+  echo "You may specify one or more commands to run on all hosts or a single selected host."
   exit 1
 }
 if [ $# -eq 0 ]; then
   usage
 fi
+
+progress_line() {
+  local phase="$1"
+  shift
+  local message="$*"
+  local label="INFO"
+  local color="$COLOR_BLUE"
+
+  case "$phase" in
+    start)
+      label="START"
+      color="$COLOR_BLUE"
+      ;;
+    step)
+      label="STEP"
+      color="$COLOR_CYAN"
+      ;;
+    success)
+      label="DONE"
+      color="$COLOR_GREEN"
+      ;;
+    fail)
+      label="FAIL"
+      color="$COLOR_RED"
+      ;;
+    warn)
+      label="WARN"
+      color="$COLOR_YELLOW"
+      ;;
+    info|*)
+      label="INFO"
+      color="$COLOR_BLUE"
+      ;;
+  esac
+
+  printf '%b[%s]%b %s\n' "${COLOR_BOLD}${color}" "$label" "$COLOR_RESET" "$message"
+}
 
 find_cmd_index() {
   local target="$1"
@@ -77,11 +133,34 @@ record_result() {
     message="$note"
   fi
 
+  local line="$short|$host|$status|$message"
+
+  if [ -n "${RESULTS_FILE:-}" ]; then
+    printf '%s\n' "$line" >>"$RESULTS_FILE"
+    return
+  fi
+
+  process_result_line "$line"
+}
+
+process_result_line() {
+  local line="$1"
+  local short=""
+  local host=""
+  local status=""
+  local message=""
+
+  IFS='|' read -r short host status message <<<"$line"
+
+  if [ -z "$short" ] || [ -z "$host" ] || [ -z "$status" ]; then
+    return
+  fi
+
   if [ "$status" -ne 0 ]; then
     OVERALL_EXIT=1
   fi
 
-  SUMMARY_RESULTS+=("$short|$host|$status|$message")
+  SUMMARY_RESULTS+=("$line")
   local idx
   idx=$(find_cmd_index "$short")
   if [ "$idx" -ge 0 ]; then
@@ -141,7 +220,146 @@ print_summary() {
   done
 }
 
-# Host filter logic
+run_commands_for_host() {
+  local host_index="$1"
+  local host="$2"
+  local output_file="$3"
+  local result_file="$4"
+  local pull_output_file="$5"
+  local notify_fifo="$6"
+
+  local ssh_target="${SSH_USER}@${host}"
+  local host_exit=0
+  local idx
+  local CMD
+  local SHORT
+  local status
+  local OUTPUT
+  local note
+
+  RESULTS_FILE="$result_file"
+  PULL_OUTPUT_FILE="$pull_output_file"
+  local total_cmds=${#COMMANDS_TO_RUN[@]}
+
+  : >"$result_file"
+  : >"$output_file"
+  : >"$pull_output_file"
+
+  {
+    echo "=============================="
+    echo "Connecting to $host"
+    echo "=============================="
+    for idx in "${!COMMANDS_TO_RUN[@]}"; do
+      CMD="${COMMANDS_TO_RUN[$idx]}"
+      SHORT="${SHORTS_TO_RUN[$idx]}"
+      local human_idx=$(( idx + 1 ))
+      progress_line step "$(printf '%s: command %d/%d -> %s' "$host" "$human_idx" "$total_cmds" "$SHORT")"
+      case "$SHORT" in
+        ping)
+          echo "Running: ping (SSH connectivity test)"
+          ssh -t "${SSH_OPTS[@]}" "$ssh_target" "echo pong"
+          status=$?
+          if [ $status -eq 0 ]; then
+            echo "Ping successful: SSH connection to $host is working."
+          else
+            echo "Ping failed: Unable to connect to $host via SSH (exit code $status). Continuing to next host."
+          fi
+          record_result "$SHORT" "$host" "$status" ""
+          ;;
+        update_ha_config)
+          echo "Running: update_ha_config (with sudo)"
+          ssh -t "${SSH_OPTS[@]}" "$ssh_target" "sudo bash -l -c '$CMD'"
+          status=$?
+          if [ $status -ne 0 ]; then
+            echo "Error: Failed to run '$CMD' with sudo on $host (exit code $status). Continuing to next host."
+          fi
+          record_result "$SHORT" "$host" "$status" ""
+          ;;
+        pull)
+          echo "Running: git pull origin main"
+          OUTPUT=$(ssh "${SSH_OPTS[@]}" "$ssh_target" "$CMD" 2>&1)
+          status=$?
+          printf '%s\n' "$OUTPUT"
+          if [ $status -eq 0 ]; then
+            echo "Pull succeeded on $host."
+            note="updated"
+            if echo "$OUTPUT" | grep -qi "already up to date"; then
+              note="no changes"
+            fi
+            record_result "$SHORT" "$host" "$status" "$note"
+            : >"$PULL_OUTPUT_FILE"
+          else
+            echo "Error: git pull failed on $host (exit code $status). Continuing to next host."
+            printf '%s\n' "$OUTPUT" >"$PULL_OUTPUT_FILE"
+            record_result "$SHORT" "$host" "$status" ""
+          fi
+          ;;
+        *)
+          echo "Running: $CMD"
+          ssh -t "${SSH_OPTS[@]}" "$ssh_target" "bash -l -c '$CMD'"
+          status=$?
+          if [ $status -ne 0 ]; then
+            echo "Error: Failed to run '$CMD' on $host (exit code $status). Continuing to next host."
+          fi
+          record_result "$SHORT" "$host" "$status" ""
+          ;;
+      esac
+      if [ $status -ne 0 ]; then
+        host_exit=$status
+        progress_line fail "$(printf '%s: command %d/%d failed (exit %d)' "$host" "$human_idx" "$total_cmds" "$status")"
+      else
+        progress_line success "$(printf '%s: command %d/%d completed' "$host" "$human_idx" "$total_cmds")"
+      fi
+      echo "------------------------------"
+    done
+    echo ""
+  } >"$output_file" 2>&1
+
+  unset RESULTS_FILE
+  unset PULL_OUTPUT_FILE
+
+  if [ -n "$notify_fifo" ]; then
+    printf '%s|%s|%d\n' "$host_index" "$host" "$host_exit" >"$notify_fifo"
+  fi
+
+  return $host_exit
+}
+
+process_host_results() {
+  local host_index="$1"
+  local result_file="$2"
+  local pull_output_file="$3"
+  local line
+  local short
+  local host
+  local status
+  local message
+
+  if [ ! -f "$result_file" ]; then
+    return
+  fi
+
+  while IFS= read -r line; do
+    [ -z "$line" ] && continue
+    process_result_line "$line"
+    IFS='|' read -r short host status message <<<"$line"
+    if [ "$short" = "pull" ]; then
+      if [ "$status" -eq 0 ]; then
+        PULL_SUCCESSES+=("$host")
+      else
+        PULL_FAILURES+=("$host")
+        if [ -f "$pull_output_file" ] && [ -s "$pull_output_file" ]; then
+          PULL_FAILURE_LOGS+=("$(cat "$pull_output_file")")
+        else
+          PULL_FAILURE_LOGS+=("")
+        fi
+      fi
+    fi
+  done <"$result_file"
+}
+
+# Host selection
+HOSTS=("${ALL_HOSTS[@]}")
 HOST_FILTER=""
 ARGS=("$@")
 if [ "$1" = "--host" ]; then
@@ -150,14 +368,11 @@ if [ "$1" = "--host" ]; then
     usage
   fi
   HOST_FILTER="$2"
-  # Remove --host and pattern from arguments
   ARGS=("${@:3}")
-  # Allow explicit selection of all hosts
   HOST_FILTER_LOWER=$(printf '%s' "$HOST_FILTER" | tr '[:upper:]' '[:lower:]')
   if [ "$HOST_FILTER_LOWER" = "all" ]; then
     HOSTS=("${ALL_HOSTS[@]}")
   else
-    # Filter HOSTS array
     FILTERED_HOSTS=()
     for h in "${ALL_HOSTS[@]}"; do
       if [[ "$h" == *"$HOST_FILTER"* ]]; then
@@ -167,9 +382,21 @@ if [ "$1" = "--host" ]; then
     if [ ${#FILTERED_HOSTS[@]} -eq 0 ]; then
       echo "No hosts match pattern: $HOST_FILTER"
       exit 1
+    elif [ ${#FILTERED_HOSTS[@]} -gt 1 ]; then
+      echo "Multiple hosts match pattern: $HOST_FILTER"
+      for h in "${FILTERED_HOSTS[@]}"; do
+        echo "  $h"
+      done
+      echo "Please specify a more precise host."
+      exit 1
     fi
-    HOSTS=("${FILTERED_HOSTS[@]}")
+    HOSTS=("${FILTERED_HOSTS[0]}")
   fi
+fi
+
+if [ ${#ARGS[@]} -eq 0 ]; then
+  echo "Error: No command specified."
+  usage
 fi
 
 # Build list of commands to run based on user input
@@ -198,93 +425,147 @@ for arg in "${ARGS[@]}"; do
   fi
 done
 
+progress_line info "$(printf 'Preparing %d command(s) for %d host(s)' "${#SHORTS_TO_RUN[@]}" "${#HOSTS[@]}")"
 
-for HOST in "${HOSTS[@]}"; do
+INTERACTIVE_MODE=0
+INTERACTIVE_SHORT=""
+for short_name in "${SHORTS_TO_RUN[@]}"; do
+  if [ "$short_name" = "ssh" ] || [ "$short_name" = "docker" ]; then
+    INTERACTIVE_MODE=1
+    INTERACTIVE_SHORT="$short_name"
+    break
+  fi
+done
+
+if [ $INTERACTIVE_MODE -eq 1 ]; then
+  if [ ${#SHORTS_TO_RUN[@]} -ne 1 ]; then
+    echo "Error: The '$INTERACTIVE_SHORT' command must be run alone."
+    exit 1
+  fi
+  if [ ${#HOSTS[@]} -ne 1 ]; then
+    echo "Error: The '$INTERACTIVE_SHORT' command requires exactly one host (use --host to specify)."
+    exit 1
+  fi
+  HOST="${HOSTS[0]}"
   SSH_TARGET="${SSH_USER}@${HOST}"
   echo "=============================="
   echo "Connecting to $HOST"
   echo "=============================="
-  for idx in "${!COMMANDS_TO_RUN[@]}"; do
-    CMD="${COMMANDS_TO_RUN[$idx]}"
-    SHORT="${SHORTS_TO_RUN[$idx]}"
-    if [ "$SHORT" = "ssh" ]; then
-      if [ ${#HOSTS[@]} -ne 1 ]; then
-        echo "Error: The 'ssh' command requires exactly one host to be selected (use --host to specify)."
-        exit 1
-      fi
-      echo "Opening interactive SSH session to $HOST..."
-      ssh "${SSH_OPTS[@]}" "$SSH_TARGET"
-      status=$?
-      if [ $status -ne 0 ]; then
-        echo "Error: SSH connection to $HOST failed (exit code $status)."
-      fi
-      record_result "$SHORT" "$HOST" "$status" ""
-      print_summary
-      exit $status
-    elif [ "$SHORT" = "docker" ]; then
-      if [ ${#HOSTS[@]} -ne 1 ]; then
-        echo "Error: The 'docker' command requires exactly one host to be selected (use --host to specify)."
-        exit 1
-      fi
-      echo "Running docker_shell.sh on $HOST..."
-      ssh -t "${SSH_OPTS[@]}" "$SSH_TARGET" "bash /config/docker_shell.sh"
-      status=$?
-      if [ $status -ne 0 ]; then
-        echo "Error: Docker shell on $HOST failed (exit code $status)."
-      fi
-      record_result "$SHORT" "$HOST" "$status" ""
-      print_summary
-      exit $status
-    elif [ "$SHORT" = "ping" ]; then
-      echo "Running: ping (SSH connectivity test)"
-      ssh -t "${SSH_OPTS[@]}" "$SSH_TARGET" "echo pong"
-      status=$?
-      if [ $status -eq 0 ]; then
-        echo "Ping successful: SSH connection to $HOST is working."
-      else
-        echo "Ping failed: Unable to connect to $HOST via SSH (exit code $status). Continuing to next host."
-      fi
-      record_result "$SHORT" "$HOST" "$status" ""
-    elif [ "$CMD" = "/config/update_ha_config.sh" ]; then
-      echo "Running: update_ha_config (with sudo)"
-      ssh -t "${SSH_OPTS[@]}" "$SSH_TARGET" "sudo bash -l -c '$CMD'"
-      status=$?
-      if [ $status -ne 0 ]; then
-        echo "Error: Failed to run '$CMD' with sudo on $HOST (exit code $status). Continuing to next host."
-      fi
-      record_result "$SHORT" "$HOST" "$status" ""
-    elif [ "$SHORT" = "pull" ]; then
-      echo "Running: git pull origin main"
-      OUTPUT=$(ssh "${SSH_OPTS[@]}" "$SSH_TARGET" "$CMD" 2>&1)
-      status=$?
-      printf '%s\n' "$OUTPUT"
-      if [ $status -eq 0 ]; then
-        echo "Pull succeeded on $HOST."
-        PULL_SUCCESSES+=("$HOST")
-        note="updated"
-        if echo "$OUTPUT" | grep -qi "already up to date"; then
-          note="no changes"
-        fi
-        record_result "$SHORT" "$HOST" "$status" "$note"
-      else
-        echo "Error: git pull failed on $HOST (exit code $status). Continuing to next host."
-        PULL_FAILURES+=("$HOST")
-        PULL_FAILURE_LOGS+=("$OUTPUT")
-        record_result "$SHORT" "$HOST" "$status" ""
-      fi
+  progress_line start "$(printf 'Host %s: establishing interactive session' "$HOST")"
+  if [ "$INTERACTIVE_SHORT" = "ssh" ]; then
+    echo "Opening interactive SSH session to $HOST..."
+    ssh "${SSH_OPTS[@]}" "$SSH_TARGET"
+    status=$?
+    if [ $status -ne 0 ]; then
+      echo "Error: SSH connection to $HOST failed (exit code $status)."
+      progress_line fail "$(printf 'Host %s: SSH session failed (exit %d)' "$HOST" "$status")"
     else
-      echo "Running: $CMD"
-      ssh -t "${SSH_OPTS[@]}" "$SSH_TARGET" "bash -l -c '$CMD'"
-      status=$?
-      if [ $status -ne 0 ]; then
-        echo "Error: Failed to run '$CMD' on $HOST (exit code $status). Continuing to next host."
-      fi
-      record_result "$SHORT" "$HOST" "$status" ""
+      progress_line success "$(printf 'Host %s: SSH session ended' "$HOST")"
     fi
-    echo "------------------------------"
+    record_result "$INTERACTIVE_SHORT" "$HOST" "$status" ""
+    print_summary
+    exit $status
+  else
+    echo "Running docker_shell.sh on $HOST..."
+    ssh -t "${SSH_OPTS[@]}" "$SSH_TARGET" "bash /config/docker_shell.sh"
+    status=$?
+    if [ $status -ne 0 ]; then
+      echo "Error: Docker shell on $HOST failed (exit code $status)."
+      progress_line fail "$(printf 'Host %s: docker shell failed (exit %d)' "$HOST" "$status")"
+    else
+      progress_line success "$(printf 'Host %s: docker shell session ended' "$HOST")"
+    fi
+    record_result "$INTERACTIVE_SHORT" "$HOST" "$status" ""
+    print_summary
+    exit $status
+  fi
+fi
+
+HOST_COUNT=${#HOSTS[@]}
+if [ "$HOST_COUNT" -eq 0 ]; then
+  echo "No hosts selected."
+  exit 1
+fi
+
+TEMP_DIR=$(mktemp -d 2>/dev/null || mktemp -d -t ha_multi_host.XXXXXX)
+if [ ! -d "$TEMP_DIR" ]; then
+  echo "Error: Unable to create temporary directory for host execution."
+  exit 1
+fi
+
+if [ "$HOST_COUNT" -eq 1 ]; then
+  host="${HOSTS[0]}"
+  output_file="$TEMP_DIR/host_0_output.log"
+  result_file="$TEMP_DIR/host_0_results.log"
+  pull_file="$TEMP_DIR/host_0_pull.log"
+  progress_line start "$(printf 'Host %s: queued for execution' "$host")"
+  if run_commands_for_host 0 "$host" "$output_file" "$result_file" "$pull_file" ""; then
+    progress_line success "$(printf 'Host %s: completed (1/1)' "$host")"
+  else
+    progress_line fail "$(printf 'Host %s: failed (1/1)' "$host")"
+    OVERALL_EXIT=1
+  fi
+  cat "$output_file"
+  process_host_results 0 "$result_file" "$pull_file"
+else
+  fifo="$TEMP_DIR/notify.fifo"
+  if ! mkfifo "$fifo"; then
+    echo "Error: Unable to create coordination FIFO."
+    rm -rf "$TEMP_DIR"
+    exit 1
+  fi
+
+  exec 3<>"$fifo"
+  HOST_OUTPUT_FILES=()
+  HOST_RESULT_FILES=()
+  HOST_PULL_FILES=()
+  HOST_PIDS=()
+
+  for idx in "${!HOSTS[@]}"; do
+    host="${HOSTS[$idx]}"
+    output_file="$TEMP_DIR/host_${idx}_output.log"
+    result_file="$TEMP_DIR/host_${idx}_results.log"
+    pull_file="$TEMP_DIR/host_${idx}_pull.log"
+    HOST_OUTPUT_FILES[$idx]="$output_file"
+    HOST_RESULT_FILES[$idx]="$result_file"
+    HOST_PULL_FILES[$idx]="$pull_file"
+    progress_line start "$(printf 'Host %s: queued for execution' "$host")"
+    run_commands_for_host "$idx" "$host" "$output_file" "$result_file" "$pull_file" "$fifo" &
+    HOST_PIDS[$idx]=$!
   done
-  echo ""
-done
+
+  hosts_remaining=$HOST_COUNT
+  hosts_completed=0
+  while [ $hosts_remaining -gt 0 ]; do
+    if ! IFS='|' read -r host_index host_name host_status <&3; then
+      break
+    fi
+    pid="${HOST_PIDS[$host_index]}"
+    if wait "$pid"; then
+      wait_status=0
+    else
+      wait_status=$?
+    fi
+    if [ "$wait_status" -ne 0 ] || [ "$host_status" -ne 0 ]; then
+      OVERALL_EXIT=1
+    fi
+    hosts_completed=$(( hosts_completed + 1 ))
+    if [ "$host_status" -eq 0 ] && [ "$wait_status" -eq 0 ]; then
+      progress_line success "$(printf 'Host %s: completed (%d/%d)' "$host_name" "$hosts_completed" "$HOST_COUNT")"
+    else
+      progress_line fail "$(printf 'Host %s: failed (%d/%d)' "$host_name" "$hosts_completed" "$HOST_COUNT")"
+    fi
+    cat "${HOST_OUTPUT_FILES[$host_index]}"
+    process_host_results "$host_index" "${HOST_RESULT_FILES[$host_index]}" "${HOST_PULL_FILES[$host_index]}"
+    hosts_remaining=$(( hosts_remaining - 1 ))
+  done
+  exec 3>&-
+  rm -f "$fifo"
+fi
+
+if [ -n "$TEMP_DIR" ] && [ -d "$TEMP_DIR" ]; then
+  rm -rf "$TEMP_DIR"
+fi
 
 if [ $PULL_REQUESTED -eq 1 ]; then
   echo "====== Pull Summary ======"
