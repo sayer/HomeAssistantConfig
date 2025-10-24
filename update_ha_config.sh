@@ -489,14 +489,47 @@ main() {
     log_message "WARNING: Unable to read initial git status"
     INITIAL_STATUS=""
   elif [ -n "$INITIAL_STATUS" ]; then
-    local tracked_changes
+    local tracked_lines_raw
+    local tracked_ignored_www_count=0
+    local tracked_effective_count=0
     local untracked_changes
-    tracked_changes=$(printf '%s\n' "$INITIAL_STATUS" | grep -vc '^??' || true)
+
+    tracked_lines_raw=$(printf '%s\n' "$INITIAL_STATUS" | grep -v '^??' || true)
+    if [ -n "$tracked_lines_raw" ]; then
+      local status_line path
+      while IFS= read -r status_line; do
+        [ -z "$status_line" ] && continue
+        path="${status_line:3}"
+        path="${path## }"
+        # Normalize rename entries (old -> new)
+        if [[ "$path" == *" -> "* ]]; then
+          local old_path="${path%% -> *}"
+          local new_path="${path##* -> }"
+          old_path="${old_path## }"
+          new_path="${new_path## }"
+          if [[ "$old_path" == www/* && "$new_path" == www/* ]]; then
+            tracked_ignored_www_count=$((tracked_ignored_www_count + 1))
+            continue
+          fi
+          path="$new_path"
+        fi
+        if [[ "$path" == www/* ]]; then
+          tracked_ignored_www_count=$((tracked_ignored_www_count + 1))
+          continue
+        fi
+        tracked_effective_count=$((tracked_effective_count + 1))
+      done <<<"$tracked_lines_raw"
+    fi
+
     untracked_changes=$(printf '%s\n' "$INITIAL_STATUS" | grep -c '^??' || true)
-    if [ "${tracked_changes:-0}" -gt 0 ]; then
+
+    if [ "$tracked_effective_count" -gt 0 ]; then
       log_message "NOTICE: Repository has tracked changes before update"
       REPO_DIRTY=1
     else
+      if [ "$tracked_ignored_www_count" -gt 0 ]; then
+        log_message "NOTICE: Tracked changes under www/ ignored for git pull"
+      fi
       if [ "${untracked_changes:-0}" -gt 0 ]; then
         log_message "NOTICE: Repository has untracked files (ignored for git pull)"
       fi
