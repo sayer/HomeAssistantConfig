@@ -21,6 +21,13 @@ debug() {
   fi
 }
 
+is_http_reachable() {
+  case "$1" in
+    200|401|403|301|302|307|308) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
 # Prefers Supervisor CLI JSON via jq, but falls back to parsing YAML output
 discover_ha_url() {
   local -a rows=() wired=() wifi=() others=() try_list=()
@@ -54,7 +61,7 @@ discover_ha_url() {
           ' <<<"${ha_output}" 2>/dev/null)" || true
         if [[ -n "${jq_rows}" ]]; then
           mapfile -t rows <<<"${jq_rows}"
-          debug "Extracted \\${#rows[@]} interface candidates via jq"
+          debug "Extracted ${#rows[@]} interface candidates via jq"
         fi
       fi
 
@@ -97,7 +104,7 @@ discover_ha_url() {
               ;;  # ignore other fields
           esac
         done <<<"${ha_output}"
-        debug "Extracted \\${#rows[@]} interface candidates via YAML parse"
+        debug "Extracted ${#rows[@]} interface candidates via YAML parse"
       fi
     fi
   fi
@@ -114,7 +121,7 @@ discover_ha_url() {
       *)                       others+=("$ip");;
     esac
   done
-  debug "Wired=\\${wired[*]} Wifi=\\${wifi[*]} Others=\\${others[*]}"
+  debug "Wired=${wired[*]} Wifi=${wifi[*]} Others=${others[*]}"
 
   try_list=( "${wired[@]}" "${wifi[@]}" "${others[@]}" )
 
@@ -122,11 +129,11 @@ discover_ha_url() {
     local host_ips_raw
     if host_ips_raw="$(hostname -I 2>/dev/null)"; then
       read -ra try_list <<<"${host_ips_raw}"
-      debug "Seeded try_list from hostname -I: \\${try_list[*]}"
+      debug "Seeded try_list from hostname -I: ${try_list[*]}"
     fi
     if [[ "${#try_list[@]}" -eq 0 ]] && command -v ip >/dev/null 2>&1; then
       mapfile -t try_list < <(ip -o -4 addr show scope global | awk '{print $4}' | cut -d/ -f1)
-      debug "Seeded try_list from ip addr: \\${try_list[*]}"
+      debug "Seeded try_list from ip addr: ${try_list[*]}"
     fi
   fi
 
@@ -155,7 +162,7 @@ discover_ha_url() {
     local code
     code="$(curl -m 2 -sS -o /dev/null -w '%{http_code}' "${url}/api/" 2>/dev/null)" || true
     debug "Tried ${url}/api/ -> ${code}"
-    if [[ "$code" == "200" ]]; then
+    if is_http_reachable "$code"; then
       echo "$url"
       debug "Selected reachable URL ${url}"
       return 0
@@ -173,7 +180,7 @@ discover_ha_url() {
     local code
     code="$(curl -m 2 -sS -o /dev/null -w '%{http_code}' "${candidate}/api/" 2>/dev/null)" || true
     debug "Fallback try ${candidate}/api/ -> ${code}"
-    if [[ "$code" == "200" ]]; then
+    if is_http_reachable "$code"; then
       echo "${candidate}"
       debug "Selected fallback URL ${candidate}"
       return 0
@@ -188,12 +195,14 @@ discover_ha_url() {
     local code
     code="$(curl -m 2 -sS -o /dev/null -w '%{http_code}' "${candidate}/api/" 2>/dev/null)" || true
     debug "Final fallback try ${candidate}/api/ -> ${code}"
-    if [[ "$code" == "200" ]]; then
+    if is_http_reachable "$code"; then
       echo "${candidate}"
       debug "Selected final fallback URL ${candidate}"
       return 0
     fi
   done
+
+  debug "All discovery candidates exhausted"
 
   echo "Unable to discover a reachable Home Assistant URL via 'ha network info'." >&2
   exit 3
