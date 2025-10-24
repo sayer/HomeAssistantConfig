@@ -489,8 +489,19 @@ main() {
     log_message "WARNING: Unable to read initial git status"
     INITIAL_STATUS=""
   elif [ -n "$INITIAL_STATUS" ]; then
-    log_message "NOTICE: Repository has local changes before update"
-    REPO_DIRTY=1
+    local tracked_changes
+    local untracked_changes
+    tracked_changes=$(printf '%s\n' "$INITIAL_STATUS" | grep -vc '^??' || true)
+    untracked_changes=$(printf '%s\n' "$INITIAL_STATUS" | grep -c '^??' || true)
+    if [ "${tracked_changes:-0}" -gt 0 ]; then
+      log_message "NOTICE: Repository has tracked changes before update"
+      REPO_DIRTY=1
+    else
+      if [ "${untracked_changes:-0}" -gt 0 ]; then
+        log_message "NOTICE: Repository has untracked files (ignored for git pull)"
+      fi
+      REPO_DIRTY=0
+    fi
   else
     REPO_DIRTY=0
   fi
