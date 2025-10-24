@@ -232,30 +232,49 @@ resp="$(curl -sS -X POST \
   || true)"
 
 if [[ "$resp" == "["*"]" ]]; then
-  entity_list=""
+  local entity_list=""
+  local includes_script="unknown"
+
   if command -v jq >/dev/null 2>&1; then
     entity_list="$(jq -r 'map(.entity_id) | join(", ")' <<<"$resp" 2>/dev/null || true)"
     [[ "$entity_list" == "null" ]] && entity_list=""
-  fi
-
-  if [[ -z "$entity_list" ]]; then
-    entity_array=()
+    if jq -e --arg target "$SCRIPT_ENTITY" 'map(.entity_id == $target) | any' <<<"$resp" >/dev/null 2>&1; then
+      includes_script="yes"
+    else
+      includes_script="no"
+    fi
+  else
+    local -a entity_array=()
     mapfile -t entity_array < <(printf '%s\n' "$resp" | sed -n 's/.*"entity_id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
     if (( ${#entity_array[@]} > 0 )); then
       entity_list="$(printf '%s, ' "${entity_array[@]}")"
       entity_list="${entity_list%, }"
+      local entity
+      for entity in "${entity_array[@]}"; do
+        if [[ "$entity" == "$SCRIPT_ENTITY" ]]; then
+          includes_script="yes"
+          break
+        fi
+      done
+      [[ "$includes_script" == "unknown" ]] && includes_script="no"
     fi
   fi
 
-  if [[ -n "$entity_list" && "$entity_list" != *"${SCRIPT_ENTITY}"* ]]; then
-    echo "API response did not include ${SCRIPT_ENTITY}. Entities: ${entity_list}" >&2
+  if [[ "$includes_script" == "no" ]]; then
+    if [[ -n "$entity_list" ]]; then
+      echo "API response did not include ${SCRIPT_ENTITY}. Entities: ${entity_list}" >&2
+    else
+      echo "API response did not include ${SCRIPT_ENTITY}. Raw response: $resp" >&2
+    fi
     exit 2
   fi
 
-  if [[ -z "$entity_list" ]]; then
-    echo "Triggered ${SCRIPT_ENTITY} at ${HA_URL} (entity list unavailable)"
-  else
+  debug "Service response includes ${SCRIPT_ENTITY}: ${includes_script}"
+
+  if [[ -n "$entity_list" ]]; then
     echo "Triggered ${SCRIPT_ENTITY} at ${HA_URL} (entities: ${entity_list})"
+  else
+    echo "Triggered ${SCRIPT_ENTITY} at ${HA_URL} (entity list unavailable)"
   fi
 else
   echo "API call may have failed. Response:" >&2
