@@ -14,30 +14,86 @@ fi
 SCRIPT_ENTITY="${SCRIPT_ENTITY:-${SCRIPT_ENTITY_DEFAULT}}"
 
 # --- pick the best reachable URL using `ha network info` ---
-# Requires Supervisor CLI and jq (both available in SSH & Web Terminal add-on)
+# Prefers Supervisor CLI JSON via jq, but falls back to parsing YAML output
 discover_ha_url() {
-  local -a rows wired wifi others try_list
+  local -a rows=() wired=() wifi=() others=() try_list=()
 
-  if command -v ha >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
-    local network_json
-    if network_json="$(ha network info 2>/dev/null)"; then
-      local jq_rows
-      if jq_rows="$(jq -r '
-          .interfaces
-          | to_entries[]
-          | . as $e
-          | ($e.value.ipv4.address // [])
-          | map([ $e.key, (split("/")[0]) ] | @tsv)
-          | .[]
-        ' <<<"${network_json}" 2>/dev/null)"; then
+  if command -v ha >/dev/null 2>&1; then
+    local ha_output=""
+    local ha_cmd
+    for ha_cmd in \
+        "ha network info --raw-json" \
+        "ha network info --json" \
+        "ha network info"; do
+      if ha_output="$(${ha_cmd} 2>/dev/null)"; then
+        if [[ -n "${ha_output}" ]]; then
+          break
+        fi
+      fi
+      ha_output=""
+    done
+
+    if [[ -n "${ha_output}" ]]; then
+      if command -v jq >/dev/null 2>&1 && [[ "${ha_output:0:1}" =~ [\{\[] ]]; then
+        local jq_rows
+        jq_rows="$(jq -r '
+            .interfaces
+            | to_entries[]
+            | . as $e
+            | ($e.value.ipv4.address // [])
+            | map([ $e.key, (split("/")[0]) ] | @tsv)
+            | .[]
+          ' <<<"${ha_output}" 2>/dev/null)" || true
         if [[ -n "${jq_rows}" ]]; then
           mapfile -t rows <<<"${jq_rows}"
         fi
+      fi
+
+      if [[ "${#rows[@]}" -eq 0 ]]; then
+        local iface="" section="" collecting=0 line trimmed ip
+        while IFS= read -r line; do
+          trimmed="${line}"
+          if [[ "${trimmed}" =~ ^[[:space:]]*(.*)$ ]]; then
+            trimmed="${BASH_REMATCH[1]}"
+          fi
+          case "${trimmed}" in
+            interface:*)
+              iface="${trimmed#interface: }"
+              ;;
+            ipv4:*)
+              section="ipv4"
+              collecting=0
+              ;;
+            ipv6:*)
+              section="ipv6"
+              collecting=0
+              ;;
+            address:*)
+              if [[ "${section}" == "ipv4" ]]; then
+                collecting=1
+              else
+                collecting=0
+              fi
+              ;;
+            -*)
+              if (( collecting )) && [[ -n "${iface}" ]]; then
+                ip="${trimmed#- }"
+                ip="${ip%%/*}"
+                if [[ -n "${ip}" ]]; then
+                  rows+=("${iface}"$'\t'"${ip}")
+                fi
+              fi
+              ;;
+            *)
+              ;;  # ignore other fields
+          esac
+        done <<<"${ha_output}"
       fi
     fi
   fi
 
   # Partition candidates: prefer wired (eth/en/ens/enp/eno) over wifi (wl/wlan)
+  local row
   for row in "${rows[@]}"; do
     local iface ip
     iface="${row%%$'\t'*}"
