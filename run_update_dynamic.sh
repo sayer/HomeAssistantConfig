@@ -18,7 +18,7 @@ SCRIPT_ENTITY="${SCRIPT_ENTITY:-${SCRIPT_ENTITY_DEFAULT}}"
 discover_ha_url() {
   local -a rows wired wifi others try_list
 
-  if command -v ha >/dev/null 2>&1; then
+  if command -v ha >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
     local network_json
     if network_json="$(ha network info 2>/dev/null)"; then
       local jq_rows
@@ -51,6 +51,16 @@ discover_ha_url() {
 
   try_list=( "${wired[@]}" "${wifi[@]}" "${others[@]}" )
 
+  if [[ "${#try_list[@]}" -eq 0 ]]; then
+    local host_ips_raw
+    if host_ips_raw="$(hostname -I 2>/dev/null)"; then
+      read -ra try_list <<<"${host_ips_raw}"
+    fi
+    if [[ "${#try_list[@]}" -eq 0 ]] && command -v ip >/dev/null 2>&1; then
+      mapfile -t try_list < <(ip -o -4 addr show scope global | awk '{print $4}' | cut -d/ -f1)
+    fi
+  fi
+
   # Allow manual hosts to seed discovery if CLI isn't available
   if [[ -n "${HA_HOST:-}" ]]; then
     try_list+=("${HA_HOST}")
@@ -72,7 +82,7 @@ discover_ha_url() {
       url="http://${candidate}:${HA_PORT}"
     fi
     local code
-    code="$(curl -m 2 -sS -o /dev/null -w '%{http_code}' "${url}/api/")" || true
+    code="$(curl -m 2 -sS -o /dev/null -w '%{http_code}' "${url}/api/" 2>/dev/null)" || true
     if [[ "$code" == "200" ]]; then
       echo "$url"
       return 0
@@ -82,10 +92,13 @@ discover_ha_url() {
   # Fallbacks if discovery fails (mDNS, docker parent, loopback inside host)
   for candidate in \
       "http://host.docker.internal:${HA_PORT}" \
+      "http://supervisor:${HA_PORT}" \
+      "http://172.30.32.1:${HA_PORT}" \
+      "http://172.30.33.1:${HA_PORT}" \
       "http://172.17.0.1:${HA_PORT}"
   do
     local code
-    code="$(curl -m 2 -sS -o /dev/null -w '%{http_code}' "${candidate}/api/")" || true
+    code="$(curl -m 2 -sS -o /dev/null -w '%{http_code}' "${candidate}/api/" 2>/dev/null)" || true
     if [[ "$code" == "200" ]]; then
       echo "${candidate}"
       return 0
@@ -98,7 +111,7 @@ discover_ha_url() {
       "http://127.0.0.1:${HA_PORT}"
   do
     local code
-    code="$(curl -m 2 -sS -o /dev/null -w '%{http_code}' "${candidate}/api/")" || true
+    code="$(curl -m 2 -sS -o /dev/null -w '%{http_code}' "${candidate}/api/" 2>/dev/null)" || true
     if [[ "$code" == "200" ]]; then
       echo "${candidate}"
       return 0
