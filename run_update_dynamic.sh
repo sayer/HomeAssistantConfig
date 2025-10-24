@@ -232,7 +232,31 @@ resp="$(curl -sS -X POST \
   || true)"
 
 if [[ "$resp" == "["*"]" ]]; then
-  echo "Triggered ${SCRIPT_ENTITY} at ${HA_URL}"
+  entity_list=""
+  if command -v jq >/dev/null 2>&1; then
+    entity_list="$(jq -r 'map(.entity_id) | join(", ")' <<<"$resp" 2>/dev/null || true)"
+    [[ "$entity_list" == "null" ]] && entity_list=""
+  fi
+
+  if [[ -z "$entity_list" ]]; then
+    entity_array=()
+    mapfile -t entity_array < <(printf '%s\n' "$resp" | sed -n 's/.*"entity_id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
+    if (( ${#entity_array[@]} > 0 )); then
+      entity_list="$(printf '%s, ' "${entity_array[@]}")"
+      entity_list="${entity_list%, }"
+    fi
+  fi
+
+  if [[ -n "$entity_list" && "$entity_list" != *"${SCRIPT_ENTITY}"* ]]; then
+    echo "API response did not include ${SCRIPT_ENTITY}. Entities: ${entity_list}" >&2
+    exit 2
+  fi
+
+  if [[ -z "$entity_list" ]]; then
+    echo "Triggered ${SCRIPT_ENTITY} at ${HA_URL} (entity list unavailable)"
+  else
+    echo "Triggered ${SCRIPT_ENTITY} at ${HA_URL} (entities: ${entity_list})"
+  fi
 else
   echo "API call may have failed. Response:" >&2
   echo "$resp" >&2
