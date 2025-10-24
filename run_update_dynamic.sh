@@ -14,6 +14,13 @@ fi
 SCRIPT_ENTITY="${SCRIPT_ENTITY:-${SCRIPT_ENTITY_DEFAULT}}"
 
 # --- pick the best reachable URL using `ha network info` ---
+# Enable discovery debug logs by exporting HA_DISCOVER_DEBUG=1
+debug() {
+  if [[ "${HA_DISCOVER_DEBUG:-0}" == "1" ]]; then
+    echo "[discover] $*" >&2
+  fi
+}
+
 # Prefers Supervisor CLI JSON via jq, but falls back to parsing YAML output
 discover_ha_url() {
   local -a rows=() wired=() wifi=() others=() try_list=()
@@ -26,6 +33,7 @@ discover_ha_url() {
         "ha network info --json" \
         "ha network info"; do
       if ha_output="$(${ha_cmd} 2>/dev/null)"; then
+        debug "Fetched network info via '${ha_cmd}'"
         if [[ -n "${ha_output}" ]]; then
           break
         fi
@@ -46,6 +54,7 @@ discover_ha_url() {
           ' <<<"${ha_output}" 2>/dev/null)" || true
         if [[ -n "${jq_rows}" ]]; then
           mapfile -t rows <<<"${jq_rows}"
+          debug "Extracted \\${#rows[@]} interface candidates via jq"
         fi
       fi
 
@@ -88,6 +97,7 @@ discover_ha_url() {
               ;;  # ignore other fields
           esac
         done <<<"${ha_output}"
+        debug "Extracted \\${#rows[@]} interface candidates via YAML parse"
       fi
     fi
   fi
@@ -104,6 +114,7 @@ discover_ha_url() {
       *)                       others+=("$ip");;
     esac
   done
+  debug "Wired=\\${wired[*]} Wifi=\\${wifi[*]} Others=\\${others[*]}"
 
   try_list=( "${wired[@]}" "${wifi[@]}" "${others[@]}" )
 
@@ -111,18 +122,22 @@ discover_ha_url() {
     local host_ips_raw
     if host_ips_raw="$(hostname -I 2>/dev/null)"; then
       read -ra try_list <<<"${host_ips_raw}"
+      debug "Seeded try_list from hostname -I: \\${try_list[*]}"
     fi
     if [[ "${#try_list[@]}" -eq 0 ]] && command -v ip >/dev/null 2>&1; then
       mapfile -t try_list < <(ip -o -4 addr show scope global | awk '{print $4}' | cut -d/ -f1)
+      debug "Seeded try_list from ip addr: \\${try_list[*]}"
     fi
   fi
 
   # Allow manual hosts to seed discovery if CLI isn't available
   if [[ -n "${HA_HOST:-}" ]]; then
     try_list+=("${HA_HOST}")
+    debug "Appended HA_HOST=${HA_HOST}"
   fi
   if [[ -n "${HA_IP:-}" ]]; then
     try_list+=("${HA_IP}")
+    debug "Appended HA_IP=${HA_IP}"
   fi
 
   # Check reachability: /api/ should return 200 without auth
@@ -139,8 +154,10 @@ discover_ha_url() {
     fi
     local code
     code="$(curl -m 2 -sS -o /dev/null -w '%{http_code}' "${url}/api/" 2>/dev/null)" || true
+    debug "Tried ${url}/api/ -> ${code}"
     if [[ "$code" == "200" ]]; then
       echo "$url"
+      debug "Selected reachable URL ${url}"
       return 0
     fi
   done
@@ -155,8 +172,10 @@ discover_ha_url() {
   do
     local code
     code="$(curl -m 2 -sS -o /dev/null -w '%{http_code}' "${candidate}/api/" 2>/dev/null)" || true
+    debug "Fallback try ${candidate}/api/ -> ${code}"
     if [[ "$code" == "200" ]]; then
       echo "${candidate}"
+      debug "Selected fallback URL ${candidate}"
       return 0
     fi
   done
@@ -168,8 +187,10 @@ discover_ha_url() {
   do
     local code
     code="$(curl -m 2 -sS -o /dev/null -w '%{http_code}' "${candidate}/api/" 2>/dev/null)" || true
+    debug "Final fallback try ${candidate}/api/ -> ${code}"
     if [[ "$code" == "200" ]]; then
       echo "${candidate}"
+      debug "Selected final fallback URL ${candidate}"
       return 0
     fi
   done
