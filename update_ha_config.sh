@@ -31,6 +31,7 @@ GIT_CHANGE_NOTE=""
 GIT_STATUS_AVAILABLE=0
 HACS_STORAGE_FILE="/config/.storage/hacs.repositories"
 RUN_DYNAMIC_SCRIPT="${REPO_DIR}/run_update_dynamic.sh"
+REMOTE_CREDENTIAL_FILE="/config/.remote"
 
 # Function to log messages
 log_message() {
@@ -594,39 +595,60 @@ main() {
 
   # Trigger dynamic update script via REST automation (best effort)
   local dynamic_cmd=()
-  if [ -x "$RUN_DYNAMIC_SCRIPT" ]; then
-    dynamic_cmd=("$RUN_DYNAMIC_SCRIPT")
-  elif [ -r "$RUN_DYNAMIC_SCRIPT" ]; then
-    log_message "NOTICE: run_update_dynamic.sh not executable; invoking with bash"
-    dynamic_cmd=(bash "$RUN_DYNAMIC_SCRIPT")
+  local dynamic_output=""
+  local dynamic_status=0
+  local has_dynamic_token=0
+
+  if [ -n "${HA_TOKEN:-}" ]; then
+    has_dynamic_token=1
+  elif [ -r "$REMOTE_CREDENTIAL_FILE" ] && grep -Eqs '^[[:space:]]*HA_TOKEN=' "$REMOTE_CREDENTIAL_FILE"; then
+    has_dynamic_token=1
   fi
 
-  if [ ${#dynamic_cmd[@]} -gt 0 ]; then
-    log_message "Triggering script.update_all_outdated via run_update_dynamic.sh..."
-    local dynamic_output=""
-    local dynamic_status=0
-    dynamic_output="$(${dynamic_cmd[@]} 2>&1)"
-    dynamic_status=$?
-    if [ $dynamic_status -eq 0 ]; then
-      DYNAMIC_SCRIPT_RESULT="success"
-      if [ -n "$dynamic_output" ]; then
-        while IFS= read -r line; do
-          [ -n "$line" ] && log_message "dynamic: $line"
-        done <<<"$dynamic_output"
-      fi
+  if [ $has_dynamic_token -eq 0 ]; then
+    DYNAMIC_SCRIPT_RESULT="skipped (missing HA_TOKEN)"
+    if [ -r "$REMOTE_CREDENTIAL_FILE" ]; then
+      log_message "WARNING: Skipping run_update_dynamic.sh because HA_TOKEN is not set in the environment or $REMOTE_CREDENTIAL_FILE"
     else
-      DYNAMIC_SCRIPT_RESULT="failed ($dynamic_status)"
-      log_message "ERROR: run_update_dynamic.sh failed (exit code: $dynamic_status)"
-      if [ -n "$dynamic_output" ]; then
-        while IFS= read -r line; do
-          [ -n "$line" ] && log_message "dynamic: $line"
-        done <<<"$dynamic_output"
-      fi
-      EXIT_CODE=1
+      log_message "WARNING: Skipping run_update_dynamic.sh because HA_TOKEN is not set in the environment and $REMOTE_CREDENTIAL_FILE is missing"
     fi
   else
-    DYNAMIC_SCRIPT_RESULT="skipped (missing)"
-    log_message "WARNING: run_update_dynamic.sh not found or not readable at $RUN_DYNAMIC_SCRIPT"
+    if [ -x "$RUN_DYNAMIC_SCRIPT" ]; then
+      dynamic_cmd=("$RUN_DYNAMIC_SCRIPT")
+    elif [ -r "$RUN_DYNAMIC_SCRIPT" ]; then
+      log_message "NOTICE: run_update_dynamic.sh not executable; invoking with bash"
+      dynamic_cmd=(bash "$RUN_DYNAMIC_SCRIPT")
+    fi
+
+    if [ ${#dynamic_cmd[@]} -gt 0 ]; then
+      log_message "Triggering script.update_all_outdated via run_update_dynamic.sh..."
+      dynamic_output="$("${dynamic_cmd[@]}" 2>&1)"
+      dynamic_status=$?
+      if [ $dynamic_status -eq 0 ]; then
+        DYNAMIC_SCRIPT_RESULT="success"
+        if [ -n "$dynamic_output" ]; then
+          while IFS= read -r line; do
+            [ -n "$line" ] && log_message "dynamic: $line"
+          done <<<"$dynamic_output"
+        fi
+      else
+        if printf '%s\n' "$dynamic_output" | grep -q "Missing HA_TOKEN"; then
+          DYNAMIC_SCRIPT_RESULT="skipped (missing HA_TOKEN)"
+          log_message "WARNING: run_update_dynamic.sh reported missing HA_TOKEN; skipping"
+        else
+          DYNAMIC_SCRIPT_RESULT="failed ($dynamic_status)"
+          log_message "ERROR: run_update_dynamic.sh failed (exit code: $dynamic_status)"
+        fi
+        if [ -n "$dynamic_output" ]; then
+          while IFS= read -r line; do
+            [ -n "$line" ] && log_message "dynamic: $line"
+          done <<<"$dynamic_output"
+        fi
+      fi
+    else
+      DYNAMIC_SCRIPT_RESULT="skipped (missing script)"
+      log_message "WARNING: run_update_dynamic.sh not found or not readable at $RUN_DYNAMIC_SCRIPT"
+    fi
   fi
 
   # Check if 'ha' command exists and is executable
