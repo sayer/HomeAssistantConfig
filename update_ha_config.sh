@@ -20,6 +20,7 @@ CONFIG_RESULT="not-run"
 HA_CHECK_RESULT="not-run"
 RESTART_RESULT="not-run"
 ADDONS_RESULT="skipped"
+HACS_RESULT="skipped"
 CORE_UPDATE_NOTE="not checked"
 INITIAL_HEAD=""
 INITIAL_STATUS=""
@@ -27,6 +28,7 @@ FINAL_HEAD=""
 FINAL_STATUS=""
 GIT_CHANGE_NOTE=""
 GIT_STATUS_AVAILABLE=0
+HACS_STORAGE_FILE="/config/.storage/hacs.repositories"
 
 # Function to log messages
 log_message() {
@@ -82,6 +84,7 @@ print_summary() {
   log_message "Config render: $CONFIG_RESULT"
   log_message "HA core check: $HA_CHECK_RESULT"
   log_message "HA restart: $RESTART_RESULT"
+  log_message "HACS updates: $HACS_RESULT"
   log_message "Add-on updates: $ADDONS_RESULT"
   log_message "HA core update status: $CORE_UPDATE_NOTE"
 
@@ -91,10 +94,25 @@ print_summary() {
 
   if [ $GIT_STATUS_AVAILABLE -eq 1 ]; then
     if [ -n "$FINAL_STATUS" ]; then
-      log_message "Working tree changes:"
-      while IFS= read -r status_line; do
-        [ -n "$status_line" ] && log_message "  $status_line"
-      done <<<"$FINAL_STATUS"
+      local tracked_count
+      local untracked_count
+      tracked_count=$(printf '%s\n' "$FINAL_STATUS" | grep -vc '^??')
+      untracked_count=$(printf '%s\n' "$FINAL_STATUS" | grep -c '^??')
+      local summary_parts=()
+      if [ "$tracked_count" -gt 0 ]; then
+        summary_parts+=("${tracked_count} tracked")
+      fi
+      if [ "$untracked_count" -gt 0 ]; then
+        summary_parts+=("${untracked_count} untracked")
+      fi
+      if [ ${#summary_parts[@]} -gt 0 ]; then
+        local summary_joined
+        local IFS=', '
+        summary_joined="${summary_parts[*]}"
+        log_message "Working tree dirty (${summary_joined})"
+      else
+        log_message "Working tree dirty"
+      fi
     else
       log_message "Working tree: clean"
     fi
@@ -289,6 +307,156 @@ PY
   fi
 }
 
+update_hacs() {
+  log_message "Checking for HACS integration updates..."
+
+  if [ ! -f "$HACS_STORAGE_FILE" ]; then
+    log_message "HACS storage file not found at $HACS_STORAGE_FILE; assuming HACS not installed"
+    HACS_RESULT="not installed"
+    return 0
+  fi
+
+  if [ -z "$PYTHON_BIN" ]; then
+    log_message "WARNING: No python interpreter available; skipping HACS updates"
+    HACS_RESULT="skipped (no python)"
+    return 1
+  fi
+
+  local parse_output
+  local status
+  parse_output=$(HACS_REPO_FILE="$HACS_STORAGE_FILE" "$PYTHON_BIN" - <<'PY'
+import json
+import os
+import sys
+
+path = os.environ.get("HACS_REPO_FILE")
+if not path:
+    sys.exit(3)
+
+try:
+    with open(path, "r", encoding="utf-8") as fh:
+        content = json.load(fh)
+except FileNotFoundError:
+    sys.exit(2)
+except Exception:
+    sys.exit(1)
+
+repos = []
+if isinstance(content, dict):
+    data = content.get("data")
+    if isinstance(data, dict):
+        repos = data.get("repos") or data.get("repositories") or data.get("items") or []
+        if isinstance(repos, dict):
+            repos = list(repos.values())
+    elif isinstance(data, list):
+        repos = data
+    else:
+        repos = []
+    if not repos and isinstance(content.get("repositories"), list):
+        repos = content["repositories"]
+elif isinstance(content, list):
+    repos = content
+
+updates = []
+for repo in repos:
+    if not isinstance(repo, dict):
+        continue
+    if not repo.get("installed", False):
+        continue
+    pending = repo.get("pending_update")
+    if pending is None:
+        installed = repo.get("installed_version")
+        available = repo.get("available_version") or repo.get("version") or repo.get("last_version")
+        if installed and available and installed != available:
+            pending = True
+        else:
+            pending = False
+    if not pending:
+        continue
+    repo_id = repo.get("repository_id") or repo.get("id") or repo.get("full_name")
+    if not repo_id:
+        continue
+    name = repo.get("full_name") or repo.get("name") or str(repo_id)
+    updates.append((str(repo_id), name))
+
+for repo_id, name in updates:
+    sys.stdout.write(f"{repo_id}|{name}\n")
+PY
+)
+  status=$?
+
+  if [ $status -eq 2 ]; then
+    log_message "HACS storage file disappeared during processing; skipping updates"
+    HACS_RESULT="not installed"
+    return 0
+  elif [ $status -ne 0 ]; then
+    log_message "WARNING: Failed to parse HACS repository metadata (exit status $status)"
+    HACS_RESULT="failed (parse)"
+    EXIT_CODE=1
+    return 1
+  fi
+
+  if [ -z "$parse_output" ]; then
+    log_message "No HACS integrations require updates"
+    HACS_RESULT="no updates"
+    return 0
+  fi
+
+  local update_failed=0
+  while IFS='|' read -r repo_id repo_name; do
+    [ -z "$repo_id" ] && continue
+    local repo_display="${repo_name:-$repo_id}"
+    log_message "Updating HACS repository $repo_display (id $repo_id)"
+    local args
+    args=$(printf '{"repository":"%s"}' "$repo_id")
+    local update_output
+    if update_output=$(ha service call hacs.repository_update --no-progress --arguments "$args" 2>&1); then
+      if [ -n "$update_output" ]; then
+        while IFS= read -r line; do
+          [ -n "$line" ] && log_message "hacs[$repo_display]: $line"
+        done <<<"$update_output"
+      fi
+      log_message "HACS repository $repo_display updated successfully"
+      continue
+    fi
+
+    log_message "WARNING: HACS update via repository id failed for $repo_display; retrying with repository name"
+    if [ -n "$update_output" ]; then
+      while IFS= read -r line; do
+        [ -n "$line" ] && log_message "hacs[$repo_display]: $line"
+      done <<<"$update_output"
+    fi
+
+    local args_name
+    args_name=$(printf '{"repository":"%s"}' "$repo_display")
+    if update_output=$(ha service call hacs.repository_update --no-progress --arguments "$args_name" 2>&1); then
+      if [ -n "$update_output" ]; then
+        while IFS= read -r line; do
+          [ -n "$line" ] && log_message "hacs[$repo_display]: $line"
+        done <<<"$update_output"
+      fi
+      log_message "HACS repository $repo_display updated successfully via name fallback"
+    else
+      log_message "ERROR: Failed to update HACS repository $repo_display"
+      if [ -n "$update_output" ]; then
+        while IFS= read -r line; do
+          [ -n "$line" ] && log_message "hacs[$repo_display]: $line"
+        done <<<"$update_output"
+      fi
+      update_failed=1
+    fi
+  done <<<"$parse_output"
+
+  if [ $update_failed -eq 0 ]; then
+    HACS_RESULT="updated"
+    return 0
+  else
+    HACS_RESULT="partial failure"
+    EXIT_CODE=1
+    return 1
+  fi
+}
+
 main() {
   log_message "Starting HA configuration update process"
 
@@ -436,6 +604,12 @@ main() {
   if ha core check 2>/dev/null; then
     log_message "Configuration check passed"
     HA_CHECK_RESULT="passed"
+
+    if update_hacs; then
+      log_message "HACS update step completed"
+    else
+      log_message "WARNING: Issues encountered during HACS update step"
+    fi
 
     log_message "Reloading Home Assistant YAML configuration..."
     RELOAD_OUTPUT=$(ha core restart 2>&1)
