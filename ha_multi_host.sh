@@ -2,16 +2,16 @@
 
 # List of Home Assistant hosts
 HOSTS=(
+  "homeassistant-20.tail73c84.ts.net"
+  "homeassistant-19.tail73c84.ts.net"
+  "homeassistant-18.tail73c84.ts.net"
   "homeassistant-17.tail73c84.ts.net"
   "homeassistant-16.tail73c84.ts.net"
-  "homeassistant-15.tail73c84.ts.net"
-  "homeassistant-14.tail73c84.ts.net"
   "homeassistant-13.tail73c84.ts.net"
   "homeassistant-12.tail73c84.ts.net"
   "homeassistant-8.tail73c84.ts.net"
   "homeassistant-4.tail73c84.ts.net"
   "homeassistant-3.tail73c84.ts.net"
-  "192.168.1.18"
 )
 
 ALL_HOSTS=("${HOSTS[@]}")
@@ -37,8 +37,19 @@ else
   COLOR_CYAN=""
 fi
 
-SHORT_NAMES=("ping" "restart" "updates" "info" "update_ha_config" "reboot" "ssh" "docker" "pull")
-COMMANDS=("" "ha core restart" "ha supervisor updates" "ha info" "/config/update_ha_config.sh" "ha host reboot" "" "" "cd /config && git pull origin main")
+SHORT_NAMES=("ping" "restart" "updates" "info" "stats" "update_ha_config" "reboot" "ssh" "docker" "pull")
+COMMANDS=(
+  ""
+  "ha core restart"
+  "ha supervisor updates"
+  "ha info"
+  "source /config/.remote 2>/dev/null && if [ -z \"\${HA_TOKEN:-}\" ]; then echo \"ERROR: HA_TOKEN not set\" >&2; exit 1; fi; RESPONSE=\$(curl -sS -X POST -H \"Authorization: Bearer \${HA_TOKEN}\" -H \"Content-Type: application/json\" --data \"{\\\"return_response\\\": true}\" http://supervisor/core/api/services/script/collect_coach_snapshot); STATUS=\$?; if [ \$STATUS -ne 0 ]; then echo \"ERROR: curl failed (exit \$STATUS)\" >&2; exit \$STATUS; fi; if command -v jq >/dev/null 2>&1; then printf \"%s\\n\" \"\$RESPONSE\" | jq '.[0].response.payload | (if type==\"string\" then fromjson else . end)'; else printf \"%s\\n\" \"\$RESPONSE\"; fi"
+  "/config/update_ha_config.sh"
+  "ha host reboot"
+  ""
+  ""
+  "cd /config && git pull origin main"
+)
 
 SUMMARY_RESULTS=()
 CMD_TOTALS=()
@@ -53,12 +64,13 @@ for _ in "${SHORT_NAMES[@]}"; do
 done
 
 usage() {
-  echo "Usage: $0 [--host <pattern>] [ping] [restart] [updates] [info] [update_ha_config] [reboot] [ssh] [docker] [pull]"
+  echo "Usage: $0 [--host <pattern>] [ping] [restart] [updates] [info] [stats] [update_ha_config] [reboot] [ssh] [docker] [pull]"
   echo "  --host <pattern>   Limit commands to a single host (pattern must resolve to exactly one host)."
   echo "                     Omit --host or use '--host all' to run against every host (parallel for non-interactive commands)."
   echo "  ssh                Open an interactive SSH session to the specified host (must match exactly one host)."
   echo "  docker             Open an interactive SSH session to the specified host for Docker operations (must match exactly one host)."
   echo "  pull               Run git pull origin main in /config on the selected hosts."
+  echo "  stats              Call script.collect_coach_snapshot and print the returned JSON payload."
   echo "You may specify one or more commands to run on all hosts or a single selected host."
   exit 1
 }
@@ -291,6 +303,17 @@ run_commands_for_host() {
           else
             echo "Error: git pull failed on $host (exit code $status). Continuing to next host."
             printf '%s\n' "$OUTPUT" >"$PULL_OUTPUT_FILE"
+            record_result "$SHORT" "$host" "$status" ""
+          fi
+          ;;
+        stats)
+          echo "Running: collect coach snapshot (script.collect_coach_snapshot)"
+          OUTPUT=$(ssh "${SSH_OPTS[@]}" "$ssh_target" "bash -l -c '$CMD'" 2>&1)
+          status=$?
+          printf '%s\n' "$OUTPUT"
+          if [ $status -eq 0 ]; then
+            record_result "$SHORT" "$host" "$status" "ok"
+          else
             record_result "$SHORT" "$host" "$status" ""
           fi
           ;;

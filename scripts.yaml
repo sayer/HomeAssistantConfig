@@ -87,6 +87,90 @@ auto_detect_timezone:
   mode: single
   icon: mdi:map-marker-clock
 
+collect_coach_snapshot:
+  alias: Collect Coach Metrics
+  description: "Gather live coach metadata, HA state, and resource metrics on demand"
+  mode: single
+  sequence:
+    - service: homeassistant.update_entity
+      target:
+        entity_id:
+          - sensor.chassis_battery
+          - sensor.house_battery_voltage
+          - sensor.fresh_water
+          - sensor.black_tank
+          - sensor.thermostat1_zone_temperature
+          - sensor.thermostat2_zone_temperature
+          - sensor.thermostat3_zone_temperature
+          - sensor.thermostat4_zone_temperature
+          - update.home_assistant_core_update
+    - delay:
+        seconds: 1
+    - variables:
+        payload_json: >
+          {% set invalid = ['unknown', 'unavailable', '', none, 'None'] %}
+          {% set zone_sensors = [
+            'sensor.thermostat1_zone_temperature',
+            'sensor.thermostat2_zone_temperature',
+            'sensor.thermostat3_zone_temperature',
+            'sensor.thermostat4_zone_temperature'
+          ] %}
+          {% set temps = namespace(values=[]) %}
+          {% for entity_id in zone_sensors %}
+            {% set value = states(entity_id) %}
+            {% if value not in invalid %}
+              {% set temps.values = temps.values + [value | float] %}
+            {% endif %}
+          {% endfor %}
+          {% set interior_temp = (temps.values | average) if temps.values | length > 0 else none %}
+          {% set pending = namespace(items=[]) %}
+          {% for item in states.update %}
+            {% if item.state == 'on' %}
+              {% set pending.items = pending.items + [{
+                "entity_id": item.entity_id,
+                "name": item.name,
+                "installed": item.attributes.installed_version | default(none),
+                "latest": item.attributes.latest_version | default(none),
+                "skipped": item.attributes.skipped_version | default(none)
+              }] %}
+            {% endif %}
+          {% endfor %}
+          {% set coach_number_raw = states('input_number.coach_number') %}
+          {% set coach_year_raw = states('input_number.model_year') %}
+          {% set owner_raw = states('input_text.owner_name') %}
+          {% set chassis_voltage_raw = states('sensor.chassis_battery') %}
+          {% set house_voltage_raw = states('sensor.house_battery_voltage') %}
+          {% set fresh_water_raw = states('sensor.fresh_water') %}
+          {% set black_tank_raw = states('sensor.black_tank') %}
+          {{
+            {
+              "timestamp": now().isoformat(),
+              "instance": hass.config.location_name,
+              "coach": {
+                "number": (coach_number_raw | int) if coach_number_raw not in invalid else none,
+                "year": (coach_year_raw | int) if coach_year_raw not in invalid else none,
+                "owner": owner_raw if owner_raw not in invalid else none
+              },
+              "ha": {
+                "version": hass.config.version,
+                "pending_update_count": pending.items | length,
+                "pending_updates": pending.items
+              },
+              "metrics": {
+                "chassis_battery_voltage": (chassis_voltage_raw | float) if chassis_voltage_raw not in invalid else none,
+                "house_battery_voltage": (house_voltage_raw | float) if house_voltage_raw not in invalid else none,
+                "interior_temperature": (interior_temp | round(1)) if interior_temp is not none else none,
+                "fresh_water_level": (fresh_water_raw | float) if fresh_water_raw not in invalid else none,
+                "black_tank_level": (black_tank_raw | float) if black_tank_raw not in invalid else none
+              }
+            } | to_json
+          }}
+    - service: script.set_response_variable
+      data:
+        variable: payload
+        value: "{{ payload_json }}"
+  response_variable: payload
+
 store_bus:
   alias: Store Bus
   sequence:
