@@ -288,22 +288,210 @@ run_commands_for_host() {
           record_result "$SHORT" "$host" "$status" ""
           ;;
         pull)
-          echo "Running: git pull origin main"
-          OUTPUT=$(ssh "${SSH_OPTS[@]}" "$ssh_target" "$CMD" 2>&1)
+          echo "Running: git pull origin main (autostash)"
+          OUTPUT=$(ssh "${SSH_OPTS[@]}" "$ssh_target" 'bash -s' <<'REMOTE'
+#!/bin/bash
+set -o pipefail
+
+log_message() {
+  echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
+}
+
+REPO_DIR="/config"
+RESULT_NOTE="failed"
+EXIT_STATUS=1
+
+if [ ! -d "$REPO_DIR" ]; then
+  log_message "ERROR: Repository directory $REPO_DIR not found"
+  RESULT_NOTE="missing_repo"
+  echo "PULL_RESULT: $RESULT_NOTE"
+  exit $EXIT_STATUS
+fi
+
+if [ ! -d "$REPO_DIR/.git" ]; then
+  log_message "ERROR: Git repository not found at $REPO_DIR"
+  RESULT_NOTE="missing_git"
+  echo "PULL_RESULT: $RESULT_NOTE"
+  exit $EXIT_STATUS
+fi
+
+if ! cd "$REPO_DIR"; then
+  log_message "ERROR: Unable to change to repository directory $REPO_DIR"
+  RESULT_NOTE="cannot_access_repo"
+  echo "PULL_RESULT: $RESULT_NOTE"
+  exit $EXIT_STATUS
+fi
+
+log_message "Changed to repository directory: $REPO_DIR"
+
+INITIAL_STATUS=$(git status --porcelain=v1 2>/dev/null || echo "__GIT_STATUS_ERROR__")
+REPO_DIRTY=0
+STASH_CREATED=0
+STASH_REF=""
+
+if [ "$INITIAL_STATUS" = "__GIT_STATUS_ERROR__" ]; then
+  log_message "WARNING: Unable to read initial git status"
+  INITIAL_STATUS=""
+elif [ -n "$INITIAL_STATUS" ]; then
+  tracked_lines_raw=$(printf '%s\n' "$INITIAL_STATUS" | grep -v '^??' || true)
+  tracked_ignored_www_count=0
+  tracked_effective_count=0
+
+  if [ -n "$tracked_lines_raw" ]; then
+    while IFS= read -r status_line; do
+      [ -z "$status_line" ] && continue
+      path="${status_line:3}"
+      path="${path## }"
+      if [[ "$path" == *" -> "* ]]; then
+        old_path="${path%% -> *}"
+        new_path="${path##* -> }"
+        old_path="${old_path## }"
+        new_path="${new_path## }"
+        if [[ "$old_path" == www/* && "$new_path" == www/* ]]; then
+          tracked_ignored_www_count=$((tracked_ignored_www_count + 1))
+          continue
+        fi
+        path="$new_path"
+      fi
+      if [[ "$path" == www/* ]]; then
+        tracked_ignored_www_count=$((tracked_ignored_www_count + 1))
+        continue
+      fi
+      tracked_effective_count=$((tracked_effective_count + 1))
+    done <<<"$tracked_lines_raw"
+  fi
+
+  if [ "$tracked_effective_count" -gt 0 ]; then
+    log_message "NOTICE: Repository has tracked changes before pull"
+    REPO_DIRTY=1
+  else
+    if [ "$tracked_ignored_www_count" -gt 0 ]; then
+      log_message "NOTICE: Tracked changes under www/ ignored for git pull"
+    fi
+    untracked_changes=$(printf '%s\n' "$INITIAL_STATUS" | grep -c '^??' || true)
+    if [ "${untracked_changes:-0}" -gt 0 ]; then
+      log_message "NOTICE: Repository has untracked files (ignored for git pull)"
+    fi
+    REPO_DIRTY=0
+  fi
+fi
+
+log_message "Checking for git updates..."
+
+if [ ! -w "$REPO_DIR/.git" ]; then
+  log_message "WARNING: No write permission to $REPO_DIR/.git directory, skipping git operations"
+  RESULT_NOTE="skipped_read_only"
+  echo "PULL_RESULT: $RESULT_NOTE"
+  exit 0
+fi
+
+if [ $REPO_DIRTY -eq 1 ]; then
+  STASH_NAME="ha-multi-pull-autostash-$(date +%s)"
+  log_message "NOTICE: Local tracked changes detected; stashing as $STASH_NAME to allow git pull"
+  STASH_OUTPUT=$(git stash push -m "$STASH_NAME" 2>&1)
+  STASH_STATUS=$?
+
+  if [ -n "$STASH_OUTPUT" ]; then
+    while IFS= read -r line; do
+      [ -n "$line" ] && log_message "stash: $line"
+    done <<<"$STASH_OUTPUT"
+  fi
+
+  if [ $STASH_STATUS -eq 0 ]; then
+    if echo "$STASH_OUTPUT" | grep -qi "No local changes to save"; then
+      log_message "WARNING: git stash reported no changes; proceeding without stash"
+    else
+      STASH_REF=$(git stash list | head -n 1 | cut -d: -f1)
+      if [ -z "$STASH_REF" ]; then
+        STASH_REF="stash@{0}"
+      fi
+      STASH_CREATED=1
+      log_message "Local changes stashed to $STASH_REF"
+    fi
+  else
+    log_message "WARNING: Failed to stash local changes (exit code: $STASH_STATUS); proceeding without stash"
+  fi
+fi
+
+log_message "Running git pull origin main..."
+PULL_OUTPUT=$(git pull origin main 2>&1)
+PULL_STATUS=$?
+
+if [ -n "$PULL_OUTPUT" ]; then
+  while IFS= read -r line; do
+    [ -n "$line" ] && log_message "git: $line"
+  done <<<"$PULL_OUTPUT"
+fi
+
+EXIT_STATUS=$PULL_STATUS
+
+if [ $PULL_STATUS -eq 0 ]; then
+  if echo "$PULL_OUTPUT" | grep -qi "already up to date"; then
+    RESULT_NOTE="no_updates"
+  else
+    RESULT_NOTE="updated"
+  fi
+  log_message "Git pull origin main completed"
+else
+  RESULT_NOTE="pull_failed"
+  log_message "ERROR: git pull origin main failed (exit code: $PULL_STATUS)"
+fi
+
+if [ $STASH_CREATED -eq 1 ]; then
+  if [ $PULL_STATUS -eq 0 ]; then
+    log_message "Restoring stashed changes from $STASH_REF..."
+    POP_OUTPUT=$(git stash pop "$STASH_REF" 2>&1)
+    POP_STATUS=$?
+
+    if [ -n "$POP_OUTPUT" ]; then
+      while IFS= read -r line; do
+        [ -n "$line" ] && log_message "stash: $line"
+      done <<<"$POP_OUTPUT"
+    fi
+
+    if [ $POP_STATUS -eq 0 ]; then
+      log_message "Stashed changes restored successfully"
+    else
+      log_message "ERROR: Failed to reapply stashed changes (exit code: $POP_STATUS)"
+      RESULT_NOTE="stash_pop_failed"
+      EXIT_STATUS=$POP_STATUS
+    fi
+  else
+    log_message "NOTICE: Local changes remain stashed at $STASH_REF due to git pull failure. Reapply manually with 'git stash pop $STASH_REF' after resolving issues."
+  fi
+fi
+
+echo "PULL_RESULT: $RESULT_NOTE"
+exit $EXIT_STATUS
+REMOTE
+)
           status=$?
           printf '%s\n' "$OUTPUT"
+          note_key=$(printf '%s\n' "$OUTPUT" | awk -F': ' '/^PULL_RESULT:/{print $2; exit}')
+          note=""
+          case "$note_key" in
+            updated) note="updated" ;;
+            no_updates) note="no changes" ;;
+            skipped_read_only) note="skipped (read-only)" ;;
+            missing_repo) note="missing repo" ;;
+            missing_git) note="missing .git" ;;
+            cannot_access_repo) note="cannot access repo" ;;
+            pull_failed) note="git pull failed" ;;
+            stash_pop_failed) note="stash pop failed" ;;
+            *) note="$note_key" ;;
+          esac
           if [ $status -eq 0 ]; then
-            echo "Pull succeeded on $host."
-            note="updated"
-            if echo "$OUTPUT" | grep -qi "already up to date"; then
-              note="no changes"
+            if [ -z "$note" ]; then
+              note="updated"
             fi
             record_result "$SHORT" "$host" "$status" "$note"
             : >"$PULL_OUTPUT_FILE"
           else
+            [ -z "$note" ] && note="git pull failed"
+            note="$note (exit $status)"
             echo "Error: git pull failed on $host (exit code $status). Continuing to next host."
             printf '%s\n' "$OUTPUT" >"$PULL_OUTPUT_FILE"
-            record_result "$SHORT" "$host" "$status" ""
+            record_result "$SHORT" "$host" "$status" "$note"
           fi
           ;;
         stats)

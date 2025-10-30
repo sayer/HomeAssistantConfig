@@ -484,6 +484,9 @@ main() {
   INITIAL_HEAD=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
   INITIAL_STATUS=$(git status --porcelain=v1 2>/dev/null || echo "__GIT_STATUS_ERROR__")
   local REPO_DIRTY=0
+  local STASH_CREATED=0
+  local STASH_REF=""
+  local STASH_NAME=""
 
   if [ "$INITIAL_STATUS" = "__GIT_STATUS_ERROR__" ]; then
     log_message "WARNING: Unable to read initial git status"
@@ -542,13 +545,38 @@ main() {
   # Check git for updates
   log_message "Checking for git updates..."
 
-  if [ $REPO_DIRTY -eq 1 ]; then
-    log_message "WARNING: Local changes detected; skipping git pull to protect uncommitted work"
-    GIT_RESULT="skipped (local changes)"
-  elif [ ! -w "$REPO_DIR/.git" ]; then
+  if [ ! -w "$REPO_DIR/.git" ]; then
     log_message "WARNING: No write permission to $REPO_DIR/.git directory, skipping git operations"
     GIT_RESULT="skipped (read-only)"
   else
+    if [ $REPO_DIRTY -eq 1 ]; then
+      STASH_NAME="ha-update-autostash-$(date +%s)"
+      log_message "NOTICE: Local tracked changes detected; stashing as $STASH_NAME to allow git pull"
+      STASH_OUTPUT=$(git stash push -m "$STASH_NAME" 2>&1)
+      STASH_STATUS=$?
+
+      if [ -n "$STASH_OUTPUT" ]; then
+        while IFS= read -r line; do
+          [ -n "$line" ] && log_message "stash: $line"
+        done <<<"$STASH_OUTPUT"
+      fi
+
+      if [ $STASH_STATUS -eq 0 ]; then
+        if echo "$STASH_OUTPUT" | grep -qi "No local changes to save"; then
+          log_message "WARNING: git stash reported no changes; proceeding without stash"
+        else
+          STASH_REF=$(git stash list | head -n 1 | cut -d: -f1)
+          if [ -z "$STASH_REF" ]; then
+            STASH_REF="stash@{0}"
+          fi
+          STASH_CREATED=1
+          log_message "Local changes stashed to $STASH_REF"
+        fi
+      else
+        log_message "WARNING: Failed to stash local changes (exit code: $STASH_STATUS); proceeding without stash"
+      fi
+    fi
+
     log_message "Running git pull origin main..."
     PULL_OUTPUT=$(git pull origin main 2>&1)
     PULL_STATUS=$?
@@ -570,6 +598,30 @@ main() {
       log_message "ERROR: git pull origin main failed (exit code: $PULL_STATUS)"
       GIT_RESULT="failed ($PULL_STATUS)"
       EXIT_CODE=1
+    fi
+
+    if [ $STASH_CREATED -eq 1 ]; then
+      if [ $PULL_STATUS -eq 0 ]; then
+        log_message "Restoring stashed changes from $STASH_REF..."
+        POP_OUTPUT=$(git stash pop "$STASH_REF" 2>&1)
+        POP_STATUS=$?
+
+        if [ -n "$POP_OUTPUT" ]; then
+          while IFS= read -r line; do
+            [ -n "$line" ] && log_message "stash: $line"
+          done <<<"$POP_OUTPUT"
+        fi
+
+        if [ $POP_STATUS -eq 0 ]; then
+          log_message "Stashed changes restored successfully"
+        else
+          log_message "ERROR: Failed to reapply stashed changes (exit code: $POP_STATUS)"
+          GIT_RESULT="$GIT_RESULT; stash pop failed"
+          EXIT_CODE=1
+        fi
+      else
+        log_message "NOTICE: Local changes remain stashed at $STASH_REF due to git pull failure. Reapply manually with 'git stash pop $STASH_REF' after resolving issues."
+      fi
     fi
   fi
 
