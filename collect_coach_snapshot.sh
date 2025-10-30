@@ -172,7 +172,7 @@ debug "Normalized HA_URL: ${HA_URL}"
 tmp_body="$(mktemp)"
 trap 'rm -f "$tmp_body"' EXIT
 
-read -r -d '' TEMPLATE <<'EOF'
+TEMPLATE=$(cat <<'EOF'
 {% set invalid = ['unknown', 'unavailable', '', none, 'None'] %}
 {% set zone_sensors = [
   'sensor.thermostat1_zone_temperature',
@@ -245,6 +245,7 @@ read -r -d '' TEMPLATE <<'EOF'
   } | to_json
 }}
 EOF
+)
 
 if ! command -v jq >/dev/null 2>&1; then
   echo "jq is required for collect_coach_snapshot.sh" >&2
