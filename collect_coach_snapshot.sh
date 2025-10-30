@@ -185,8 +185,18 @@ body="$(cat "$tmp_body")"
 
 if command -v jq >/dev/null 2>&1; then
   jq -er '
-    .[0].response.payload_json
-    | if type == "string" then (try fromjson catch .) else . end
+    def decode($v):
+      if ($v | type) == "string" then (try ($v | fromjson) catch $v) else $v end;
+    def extract:
+      if type == "array" then
+        (.[0].response // .[0])
+      else
+        (.response // .result // .)
+      end;
+    extract
+    | if has("payload") then decode(.payload)
+      elif has("payload_json") then decode(.payload_json)
+      else . end
   ' <<<"$body" 2>/dev/null || {
     printf '%s\n' "$body"
     exit 5
