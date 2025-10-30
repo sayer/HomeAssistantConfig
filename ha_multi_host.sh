@@ -289,7 +289,7 @@ run_commands_for_host() {
           ;;
         pull)
           echo "Running: git pull origin main (autostash)"
-          OUTPUT=$(ssh "${SSH_OPTS[@]}" "$ssh_target" 'bash -s' <<'REMOTE'
+          OUTPUT=$(ssh "${SSH_OPTS[@]}" "$ssh_target" 'sudo bash -s' <<'REMOTE'
 #!/bin/bash
 set -o pipefail
 
@@ -297,12 +297,28 @@ log_message() {
   echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
 }
 
-REPO_DIR="/config"
+REPO_DIR=""
 RESULT_NOTE="failed"
 EXIT_STATUS=1
 
-if [ ! -d "$REPO_DIR" ]; then
-  log_message "ERROR: Repository directory $REPO_DIR not found"
+for candidate in "/root/config" "/config"; do
+  if [ -d "$candidate/.git" ]; then
+    REPO_DIR="$candidate"
+    break
+  fi
+done
+
+if [ -z "$REPO_DIR" ]; then
+  for candidate in "/root/config" "/config"; do
+    if [ -d "$candidate" ]; then
+      REPO_DIR="$candidate"
+      break
+    fi
+  done
+fi
+
+if [ -z "$REPO_DIR" ]; then
+  log_message "ERROR: Configuration directory not found (checked /root/config and /config)"
   RESULT_NOTE="missing_repo"
   echo "PULL_RESULT: $RESULT_NOTE"
   exit $EXIT_STATUS
