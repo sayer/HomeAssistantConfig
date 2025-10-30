@@ -128,17 +128,31 @@ collect_coach_snapshot:
           {% set house_voltage_raw = states('sensor.house_battery_voltage') %}
           {% set fresh_water_raw = states('sensor.fresh_water') %}
           {% set black_tank_raw = states('sensor.black_tank') %}
+          {% set instance_name = state_attr('zone.home', 'friendly_name') | default('Home', true) %}
+          {% if instance_name in invalid %}
+            {% set instance_name = states('sensor.location_name') %}
+          {% endif %}
+          {% if instance_name in invalid %}
+            {% set instance_name = 'Home Assistant' %}
+          {% endif %}
+          {% set version_val = state_attr('update.home_assistant_core_update', 'installed_version') %}
+          {% if version_val in invalid %}
+            {% set version_val = state_attr('update.home_assistant_core_update', 'current_version') %}
+          {% endif %}
+          {% if version_val in invalid %}
+            {% set version_val = state_attr('update.home_assistant_core_update', 'latest_version') %}
+          {% endif %}
           {{
             {
               "timestamp": now().isoformat(),
-              "instance": hass.config.location_name,
+              "instance": instance_name,
               "coach": {
                 "number": (coach_number_raw | int) if coach_number_raw not in invalid else none,
                 "year": (coach_year_raw | int) if coach_year_raw not in invalid else none,
                 "owner": owner_raw if owner_raw not in invalid else none
               },
               "ha": {
-                "version": hass.config.version,
+                "version": version_val if version_val not in invalid else none,
                 "pending_update_count": pending.items | length,
                 "pending_updates": pending.items
               },
