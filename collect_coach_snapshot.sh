@@ -6,7 +6,6 @@ set -euo pipefail
 
 REMOTE_FILE="/config/.remote"
 HA_PORT="${HA_PORT:-8123}"
-TARGET_ENTITY="script.collect_coach_snapshot"
 
 if [[ -r "$REMOTE_FILE" ]]; then
   # shellcheck disable=SC1090
@@ -168,14 +167,12 @@ HA_URL="${HA_URL%/}"
 tmp_body="$(mktemp)"
 trap 'rm -f "$tmp_body"' EXIT
 
-PAYLOAD=$(printf '{"entity_id": "%s", "response_variable": "payload", "return_response": true}' "$TARGET_ENTITY")
-
 http_code="$(curl -sS -o "$tmp_body" -w '%{http_code}' \
   -X POST \
   -H "Authorization: Bearer ${HA_TOKEN}" \
   -H "Content-Type: application/json" \
-  -d "${PAYLOAD}" \
-  "${HA_URL}/api/services/script/turn_on" \
+  -d '{}' \
+  "${HA_URL}/api/services/script/collect_coach_snapshot" \
   || true)"
 
 if ! is_http_reachable "$http_code"; then
@@ -184,4 +181,22 @@ if ! is_http_reachable "$http_code"; then
   exit 2
 fi
 
-cat "$tmp_body"
+payload_state="$(curl -sS \
+  -H "Authorization: Bearer ${HA_TOKEN}" \
+  -H "Content-Type: application/json" \
+  "${HA_URL}/api/states/input_text.coach_snapshot_json" \
+  || true)"
+
+if [[ -z "${payload_state}" ]]; then
+  echo "Unable to read input_text.coach_snapshot_json" >&2
+  exit 4
+fi
+
+if command -v jq >/dev/null 2>&1; then
+  jq -er '.state' <<<"$payload_state" 2>/dev/null || {
+    echo "$payload_state"
+    exit 5
+  }
+else
+  printf '%s\n' "$payload_state" | sed -n 's/.*"state"[[:space:]]*:[[:space:]]*"\(.*\)".*/\1/p'
+fi
