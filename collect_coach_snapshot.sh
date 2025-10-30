@@ -138,7 +138,8 @@ discover_ha_url() {
     fi
 
     code="$(curl -m 2 -sS -o /dev/null -w '%{http_code}' "${url}/api/" 2>/dev/null)" || true
-    if is_http_reachable "$code"; then
+    debug "Probed ${url}/api -> status ${code}"
+    if is_http_reachable "$code" && [[ "$code" != "401" ]]; then
       debug "Discovered reachable HA URL ${url} (status ${code})"
       echo "$url"
       return 0
@@ -154,7 +155,7 @@ if [[ -n "${HA_URL:-}" ]]; then
   HA_URL="${HA_URL}"
 else
   HA_URL="$(discover_ha_url)"
-  debug "Discovered HA_URL: ${HA_URL}"
+  debug "Discovered HA_URL: ${HA_URL:-<none>}"
 fi
 
 if [[ "${HA_URL}" != http://* && "${HA_URL}" != https://* ]]; then
