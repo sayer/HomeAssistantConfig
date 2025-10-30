@@ -171,8 +171,8 @@ http_code="$(curl -sS -o "$tmp_body" -w '%{http_code}' \
   -X POST \
   -H "Authorization: Bearer ${HA_TOKEN}" \
   -H "Content-Type: application/json" \
-  -d '{"return_response": true}' \
-  "${HA_URL}/api/services/script/collect_coach_snapshot" \
+  -d '{"entity_id": "script.collect_coach_snapshot", "response_variable": "payload", "return_response": true}' \
+  "${HA_URL}/api/services/script/turn_on" \
   || true)"
 
 if ! is_http_reachable "$http_code"; then
