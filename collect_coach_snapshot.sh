@@ -6,8 +6,7 @@ set -euo pipefail
 
 REMOTE_FILE="/config/.remote"
 HA_PORT="${HA_PORT:-8123}"
-TARGET_SERVICE="script.collect_coach_snapshot"
-PAYLOAD='{"return_response": true}'
+TARGET_ENTITY="script.collect_coach_snapshot"
 
 if [[ -r "$REMOTE_FILE" ]]; then
   # shellcheck disable=SC1090
@@ -169,12 +168,14 @@ HA_URL="${HA_URL%/}"
 tmp_body="$(mktemp)"
 trap 'rm -f "$tmp_body"' EXIT
 
+PAYLOAD=$(printf '{"entity_id": "%s", "response_variable": "payload", "return_response": true}' "$TARGET_ENTITY")
+
 http_code="$(curl -sS -o "$tmp_body" -w '%{http_code}' \
   -X POST \
   -H "Authorization: Bearer ${HA_TOKEN}" \
   -H "Content-Type: application/json" \
   -d "${PAYLOAD}" \
-  "${HA_URL}/api/services/script/collect_coach_snapshot" \
+  "${HA_URL}/api/services/script/turn_on" \
   || true)"
 
 if ! is_http_reachable "$http_code"; then
