@@ -148,16 +148,16 @@ discover_ha_url() {
 
   try_list=("${wired[@]}" "${wifi[@]}" "${others[@]}")
   try_list+=(
-    "homeassistant.local"
     "127.0.0.1"
     "supervisor"
     "host.docker.internal"
     "172.30.32.1"
     "172.30.33.1"
     "172.17.0.1"
+    "homeassistant.local"
   )
 
-  local candidate url code
+  local candidate url code auth_required_url=""
   for candidate in "${try_list[@]}"; do
     [[ -n "$candidate" ]] || continue
 
@@ -169,12 +169,27 @@ discover_ha_url() {
 
     code="$(curl -m 2 -sS -o /dev/null -w '%{http_code}' "${url}/api/" 2>/dev/null)" || true
     debug "Probed ${url}/api -> status ${code}"
-    if is_http_reachable "$code"; then
-      debug "Discovered reachable HA URL ${url} (status ${code})"
-      echo "$url"
-      return 0
-    fi
+    case "$code" in
+      200|201|202|204)
+        debug "Discovered reachable HA URL ${url} (status ${code})"
+        echo "$url"
+        return 0
+        ;;
+      401|403)
+        if [[ -z "$auth_required_url" ]]; then
+          auth_required_url="$url"
+        fi
+        ;;
+      *)
+        ;;
+    esac
   done
+
+  if [[ -n "$auth_required_url" ]]; then
+    debug "Falling back to auth-required HA URL ${auth_required_url}"
+    echo "$auth_required_url"
+    return 0
+  fi
 
   echo "Unable to discover a reachable Home Assistant URL via 'ha network info'." >&2
   exit 3
@@ -215,7 +230,12 @@ case "${AUTH_STATUS}" in
   *)
     if command -v ha >/dev/null 2>&1; then
       debug "Existing HA_TOKEN rejected (status ${AUTH_STATUS}); attempting to fetch short-lived token via 'ha auth token'"
-      ha_token_output="$(ha auth token 2>/dev/null || true)"
+      if [[ "${COLLECT_DEBUG:-0}" == "1" ]]; then
+        ha_token_output="$(ha auth token 2>&1 || true)"
+        debug "'ha auth token' output: ${ha_token_output}"
+      else
+        ha_token_output="$(ha auth token 2>/dev/null || true)"
+      fi
       new_token="$(printf '%s\n' "$ha_token_output" | awk '/^Access token:/ {print $3; exit}')"
       if [[ -z "$new_token" ]]; then
         # Fallback: grab the last token-looking string (62+ chars of safe chars)
