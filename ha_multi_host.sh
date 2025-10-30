@@ -43,7 +43,7 @@ COMMANDS=(
   "ha core restart"
   "ha supervisor updates"
   "ha info"
-  "source /config/.remote 2>/dev/null && if [ -z \"\${HA_TOKEN:-}\" ]; then echo \"ERROR: HA_TOKEN not set\" >&2; exit 1; fi; RESPONSE=\$(curl -sS -X POST -H \"Authorization: Bearer \${HA_TOKEN}\" -H \"Content-Type: application/json\" --data \"{\\\"return_response\\\": true}\" http://supervisor/core/api/services/script/collect_coach_snapshot); STATUS=\$?; if [ \$STATUS -ne 0 ]; then echo \"ERROR: curl failed (exit \$STATUS)\" >&2; exit \$STATUS; fi; if command -v jq >/dev/null 2>&1; then printf \"%s\\n\" \"\$RESPONSE\" | jq '.[0].response.payload | (if type==\"string\" then fromjson else . end)'; else printf \"%s\\n\" \"\$RESPONSE\"; fi"
+  "/config/collect_coach_snapshot.sh"
   "/config/update_ha_config.sh"
   "ha host reboot"
   ""
@@ -310,10 +310,37 @@ run_commands_for_host() {
           echo "Running: collect coach snapshot (script.collect_coach_snapshot)"
           OUTPUT=$(ssh "${SSH_OPTS[@]}" "$ssh_target" "bash -l -c '$CMD'" 2>&1)
           status=$?
-          printf '%s\n' "$OUTPUT"
           if [ $status -eq 0 ]; then
+            if command -v jq >/dev/null 2>&1; then
+              PARSED=$(printf '%s\n' "$OUTPUT" | jq -c '
+                def decode($v):
+                  if $v == null then null
+                  elif ($v | type) == "string" then (try ($v | fromjson) catch $v)
+                  else $v
+                  end;
+                def unwrap:
+                  (.response.payload // .payload // .response // .) | decode(.);
+                if type == "array" then
+                  [ .[] | unwrap ] | (if length == 1 then .[0] else . end)
+                else
+                  unwrap
+                end
+              ' 2>/dev/null)
+              jq_status=$?
+              if [ $jq_status -eq 0 ] && [ -n "$PARSED" ]; then
+                printf '%s\n' "$PARSED"
+              else
+                printf '%s\n' "$OUTPUT"
+                if [ $jq_status -ne 0 ]; then
+                  echo "jq parse failed; raw response shown" >&2
+                fi
+              fi
+            else
+              printf '%s\n' "$OUTPUT"
+            fi
             record_result "$SHORT" "$host" "$status" "ok"
           else
+            printf '%s\n' "$OUTPUT"
             record_result "$SHORT" "$host" "$status" ""
           fi
           ;;
