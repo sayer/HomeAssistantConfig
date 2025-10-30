@@ -3,6 +3,7 @@ set -euo pipefail
 
 # Mirrors the authentication and discovery logic used by run_update_dynamic.sh
 # to call script.collect_coach_snapshot and emit the JSON payload.
+# 
 
 REMOTE_FILE="/config/.remote"
 HA_PORT="${HA_PORT:-8123}"
