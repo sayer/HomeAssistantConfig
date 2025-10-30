@@ -151,7 +151,10 @@ collect_coach_snapshot:
               }
             } | to_json
           }}
-  response_variable: payload_json
+    - service: script.set_response_variable
+      data:
+        variable: payload
+        value: "{{ payload_json }}"
 
 store_bus:
   alias: Store Bus
