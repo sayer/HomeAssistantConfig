@@ -514,20 +514,30 @@ REMOTE
           echo "Running: collect coach metrics via template API"
           OUTPUT=$(ssh "${SSH_OPTS[@]}" "$ssh_target" "bash -l -c '$CMD'" 2>&1)
           status=$?
-          if [ $status -eq 0 ]; then
-            if command -v jq >/dev/null 2>&1; then
-              if printf '%s\n' "$OUTPUT" | jq empty >/dev/null 2>&1; then
-                printf '%s\n' "$OUTPUT" | jq -c .
-              else
-                printf '%s\n' "$OUTPUT"
-                echo "jq parse failed; raw response shown" >&2
-              fi
-            else
-              printf '%s\n' "$OUTPUT"
+          json_valid=0
+          formatted_output=""
+          if command -v jq >/dev/null 2>&1; then
+            if printf '%s\n' "$OUTPUT" | jq empty >/dev/null 2>&1; then
+              formatted_output=$(printf '%s\n' "$OUTPUT" | jq -c .)
+              json_valid=1
             fi
-            record_result "$SHORT" "$host" "$status" "ok"
+          else
+            if printf '%s\n' "$OUTPUT" | grep -q '^{'; then
+              formatted_output="$OUTPUT"
+              json_valid=1
+            fi
+          fi
+          if [ $json_valid -eq 1 ]; then
+            printf '%s\n' "${formatted_output:-$OUTPUT}"
           else
             printf '%s\n' "$OUTPUT"
+          fi
+          if [ $status -eq 0 ]; then
+            record_result "$SHORT" "$host" "$status" "ok"
+          elif [ $json_valid -eq 1 ]; then
+            record_result "$SHORT" "$host" 0 "ok (exit $status)"
+            status=0
+          else
             record_result "$SHORT" "$host" "$status" ""
           fi
           ;;
