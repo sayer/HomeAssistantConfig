@@ -5,20 +5,34 @@ set -euo pipefail
 # to call script.collect_coach_snapshot and emit the JSON payload.
 # 
 
-REMOTE_FILE="/config/.remote"
-HA_PORT="${HA_PORT:-8123}"
-
-if [[ -r "$REMOTE_FILE" ]]; then
-  # shellcheck disable=SC1090
-  source "$REMOTE_FILE"
-fi
-: "${HA_TOKEN:?Missing HA_TOKEN in /config/.remote}"
-
 debug() {
   if [[ "${COLLECT_DEBUG:-0}" == "1" ]]; then
     echo "[collect] $*" >&2
   fi
 }
+
+REMOTE_FILE=""
+HA_PORT="${HA_PORT:-8123}"
+
+for candidate in "/root/config/.remote" "/config/.remote"; do
+  if [[ -z "$REMOTE_FILE" && -r "$candidate" ]]; then
+    REMOTE_FILE="$candidate"
+  fi
+done
+
+if [[ -n "$REMOTE_FILE" ]]; then
+  debug "Using credential file: $REMOTE_FILE"
+  # shellcheck disable=SC1090
+  source "$REMOTE_FILE"
+else
+  echo "collect_coach_snapshot: unable to locate .remote credentials (checked /root/config/.remote and /config/.remote)" >&2
+  exit 4
+fi
+
+if [[ -z "${HA_TOKEN:-}" ]]; then
+  echo "collect_coach_snapshot: HA_TOKEN missing in $REMOTE_FILE" >&2
+  exit 4
+fi
 
 is_http_reachable() {
   case "$1" in
