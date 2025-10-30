@@ -171,7 +171,7 @@ http_code="$(curl -sS -o "$tmp_body" -w '%{http_code}' \
   -X POST \
   -H "Authorization: Bearer ${HA_TOKEN}" \
   -H "Content-Type: application/json" \
-  -d '{}' \
+  -d '{"return_response": true}' \
   "${HA_URL}/api/services/script/collect_coach_snapshot" \
   || true)"
 
@@ -181,22 +181,16 @@ if ! is_http_reachable "$http_code"; then
   exit 2
 fi
 
-payload_state="$(curl -sS \
-  -H "Authorization: Bearer ${HA_TOKEN}" \
-  -H "Content-Type: application/json" \
-  "${HA_URL}/api/states/input_text.coach_snapshot_json" \
-  || true)"
-
-if [[ -z "${payload_state}" ]]; then
-  echo "Unable to read input_text.coach_snapshot_json" >&2
-  exit 4
-fi
+body="$(cat "$tmp_body")"
 
 if command -v jq >/dev/null 2>&1; then
-  jq -er '.state' <<<"$payload_state" 2>/dev/null || {
-    echo "$payload_state"
+  jq -er '
+    .[0].response.payload
+    | if type == "string" then (try fromjson catch .) else . end
+  ' <<<"$body" 2>/dev/null || {
+    printf '%s\n' "$body"
     exit 5
   }
 else
-  printf '%s\n' "$payload_state" | sed -n 's/.*"state"[[:space:]]*:[[:space:]]*"\(.*\)".*/\1/p'
+  printf '%s\n' "$body"
 fi
