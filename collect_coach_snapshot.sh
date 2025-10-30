@@ -185,7 +185,7 @@ body="$(cat "$tmp_body")"
 
 if command -v jq >/dev/null 2>&1; then
   jq -er '
-    .[0].response.payload
+    .[0].response.payload_json
     | if type == "string" then (try fromjson catch .) else . end
   ' <<<"$body" 2>/dev/null || {
     printf '%s\n' "$body"
