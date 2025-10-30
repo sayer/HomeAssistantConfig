@@ -34,6 +34,21 @@ if [[ -z "${HA_TOKEN:-}" ]]; then
   exit 4
 fi
 
+HA_TOKEN_RAW="$HA_TOKEN"
+# Strip quotes and whitespace characters that can sneak in when copying tokens
+HA_TOKEN="${HA_TOKEN//$'\r'/}"
+HA_TOKEN="${HA_TOKEN//$'\n'/}"
+HA_TOKEN="${HA_TOKEN//$'\t'/}"
+if [[ ${#HA_TOKEN} -ge 2 && ${HA_TOKEN:0:1} == '"' && ${HA_TOKEN: -1} == '"' ]]; then
+  HA_TOKEN="${HA_TOKEN:1:-1}"
+fi
+if [[ "$HA_TOKEN" != "$HA_TOKEN_RAW" ]]; then
+  debug "Normalized HA_TOKEN formatting from credential file"
+fi
+if [[ "${COLLECT_DEBUG:-0}" == "1" ]]; then
+  debug "HA_TOKEN (full): ${HA_TOKEN}"
+fi
+
 is_http_reachable() {
   case "$1" in
     200|201|202|204|301|302|307|308|401|403) return 0 ;;
@@ -182,6 +197,62 @@ if [[ "${HA_URL}" != http://* && "${HA_URL}" != https://* ]]; then
 fi
 HA_URL="${HA_URL%/}"
 debug "Normalized HA_URL: ${HA_URL}"
+
+auth_check() {
+  local url="$1"
+  curl -sS -m 5 -o /dev/null -w '%{http_code}' \
+    -H "Authorization: Bearer ${HA_TOKEN}" \
+    "${url}/api/" 2>/dev/null || true
+}
+
+AUTH_STATUS="$(auth_check "$HA_URL")"
+debug "Authorization probe against ${HA_URL}/api returned: ${AUTH_STATUS}"
+
+case "${AUTH_STATUS}" in
+  200|201|202|204)
+    :
+    ;;
+  *)
+    if command -v ha >/dev/null 2>&1; then
+      debug "Existing HA_TOKEN rejected (status ${AUTH_STATUS}); attempting to fetch short-lived token via 'ha auth token'"
+      ha_token_output="$(ha auth token 2>/dev/null || true)"
+      new_token="$(printf '%s\n' "$ha_token_output" | awk '/^Access token:/ {print $3; exit}')"
+      if [[ -z "$new_token" ]]; then
+        # Fallback: grab the last token-looking string (62+ chars of safe chars)
+        new_token="$(printf '%s\n' "$ha_token_output" | grep -Eo '[A-Za-z0-9_-]{30,}' | tail -n1)"
+      fi
+      if [[ -n "$new_token" ]]; then
+        HA_TOKEN="$new_token"
+        HA_TOKEN_RAW="$HA_TOKEN"
+        HA_TOKEN="${HA_TOKEN//$'\r'/}"
+        HA_TOKEN="${HA_TOKEN//$'\n'/}"
+        HA_TOKEN="${HA_TOKEN//$'\t'/}"
+        if [[ ${#HA_TOKEN} -ge 2 && ${HA_TOKEN:0:1} == '"' && ${HA_TOKEN: -1} == '"' ]]; then
+          HA_TOKEN="${HA_TOKEN:1:-1}"
+        fi
+        if [[ "$HA_TOKEN" != "$HA_TOKEN_RAW" ]]; then
+          debug "Normalized short-lived HA_TOKEN formatting"
+        fi
+        debug "HA_TOKEN (full): ${HA_TOKEN}"
+        debug "Using short-lived token retrieved from 'ha auth token'"
+        AUTH_STATUS="$(auth_check "$HA_URL")"
+        debug "Authorization probe with short-lived token returned: ${AUTH_STATUS}"
+      else
+        debug "Unable to parse token from 'ha auth token' output"
+      fi
+    fi
+    ;;
+esac
+
+case "${AUTH_STATUS}" in
+  200|201|202|204)
+    :
+    ;;
+  *)
+    echo "collect_coach_snapshot: authentication failed against ${HA_URL}/api (status ${AUTH_STATUS})" >&2
+    exit 2
+    ;;
+esac
 
 tmp_body="$(mktemp)"
 trap 'rm -f "$tmp_body"' EXIT
