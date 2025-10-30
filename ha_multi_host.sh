@@ -70,7 +70,7 @@ usage() {
   echo "  ssh                Open an interactive SSH session to the specified host (must match exactly one host)."
   echo "  docker             Open an interactive SSH session to the specified host for Docker operations (must match exactly one host)."
   echo "  pull               Run git pull origin main in /config on the selected hosts."
-  echo "  stats              Call script.collect_coach_snapshot and print the returned JSON payload."
+  echo "  stats              Query Home Assistant template API for coach metrics JSON."
   echo "You may specify one or more commands to run on all hosts or a single selected host."
   exit 1
 }
@@ -307,7 +307,7 @@ run_commands_for_host() {
           fi
           ;;
         stats)
-          echo "Running: collect coach snapshot (script.collect_coach_snapshot)"
+          echo "Running: collect coach metrics via template API"
           OUTPUT=$(ssh "${SSH_OPTS[@]}" "$ssh_target" "bash -l -c '$CMD'" 2>&1)
           status=$?
           if [ $status -eq 0 ]; then
