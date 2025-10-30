@@ -150,9 +150,11 @@ discover_ha_url() {
 }
 
 if [[ -n "${HA_URL:-}" ]]; then
+  debug "Using HA_URL from environment: ${HA_URL}"
   HA_URL="${HA_URL}"
 else
   HA_URL="$(discover_ha_url)"
+  debug "Discovered HA_URL: ${HA_URL}"
 fi
 
 if [[ "${HA_URL}" != http://* && "${HA_URL}" != https://* ]]; then
@@ -163,6 +165,7 @@ if [[ "${HA_URL}" != http://* && "${HA_URL}" != https://* ]]; then
   fi
 fi
 HA_URL="${HA_URL%/}"
+debug "Normalized HA_URL: ${HA_URL}"
 
 tmp_body="$(mktemp)"
 trap 'rm -f "$tmp_body"' EXIT
@@ -247,6 +250,7 @@ if ! command -v jq >/dev/null 2>&1; then
 fi
 
 template_json=$(printf '%s' "$TEMPLATE" | jq -Rs .)
+debug "Submitting template to ${HA_URL}/api/template"
 
 http_code="$(curl -sS -o "$tmp_body" -w '%{http_code}' \
   -X POST \
@@ -255,18 +259,23 @@ http_code="$(curl -sS -o "$tmp_body" -w '%{http_code}' \
   -d "{\"template\": ${template_json}}" \
   "${HA_URL}/api/template" \
   || true)"
+debug "Template HTTP status: ${http_code}"
 
 if ! is_http_reachable "$http_code"; then
+  debug "Template call failed; body: $(cat "$tmp_body")"
   cat "$tmp_body" >&2
   echo "Template request failed with status ${http_code}" >&2
   exit 2
 fi
 
 body="$(cat "$tmp_body")"
+debug "Template response: ${body}"
 
 payload=$(jq -r '.result' <<<"$body" 2>/dev/null || true)
+debug "Extracted payload: ${payload}"
 
 if [[ -z "$payload" || "$payload" == "null" ]]; then
+  debug "Payload extraction failed; emitting raw body"
   printf '%s\n' "$body"
   exit 5
 fi
