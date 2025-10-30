@@ -169,6 +169,10 @@ collect_coach_snapshot:
       data:
         variable: payload
         value: "{{ payload_json }}"
+    - service: input_text.set_value
+      data:
+        entity_id: input_text.coach_snapshot_json
+        value: "{{ payload_json }}"
   response_variable: payload
 
 store_bus:

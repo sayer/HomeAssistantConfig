@@ -312,28 +312,11 @@ run_commands_for_host() {
           status=$?
           if [ $status -eq 0 ]; then
             if command -v jq >/dev/null 2>&1; then
-              PARSED=$(printf '%s\n' "$OUTPUT" | jq -c '
-                def decode($v):
-                  if $v == null then null
-                  elif ($v | type) == "string" then (try ($v | fromjson) catch $v)
-                  else $v
-                  end;
-                def unwrap:
-                  (.response.payload // .payload // .response // .) | decode(.);
-                if type == "array" then
-                  [ .[] | unwrap ] | (if length == 1 then .[0] else . end)
-                else
-                  unwrap
-                end
-              ' 2>/dev/null)
-              jq_status=$?
-              if [ $jq_status -eq 0 ] && [ -n "$PARSED" ]; then
-                printf '%s\n' "$PARSED"
+              if printf '%s\n' "$OUTPUT" | jq empty >/dev/null 2>&1; then
+                printf '%s\n' "$OUTPUT" | jq -c .
               else
                 printf '%s\n' "$OUTPUT"
-                if [ $jq_status -ne 0 ]; then
-                  echo "jq parse failed; raw response shown" >&2
-                fi
+                echo "jq parse failed; raw response shown" >&2
               fi
             else
               printf '%s\n' "$OUTPUT"

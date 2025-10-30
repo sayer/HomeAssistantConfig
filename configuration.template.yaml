@@ -258,6 +258,9 @@ input_boolean:
 input_text:
   owner_name:
     name: Owner Name
+  coach_snapshot_json:
+    name: "Coach Snapshot JSON"
+    max: 4096
   generator_start_status:
     name: "Generator Start Status"
     max: 64
