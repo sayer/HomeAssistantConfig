@@ -5,7 +5,9 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import re
+import shlex
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
@@ -94,6 +96,9 @@ CONFIG = load_config()
 DEFAULT_API_VERSION = int(CONFIG.get("default_api_version", 3))
 REFRESH_SECONDS = int(CONFIG.get("refresh_seconds", 10))
 TIMEOUT_SECONDS = float(CONFIG.get("timeout_seconds", 3))
+COACH_STATS_CONFIG: Dict[str, Any] = CONFIG.get("coach_stats", {}) or {}
+COACH_STATS_DEFAULT_TIMEOUT = float(COACH_STATS_CONFIG.get("timeout_seconds", 5))
+COACH_STATS_ENABLED = bool(COACH_STATS_CONFIG.get("enabled", bool(COACH_STATS_CONFIG)))
 
 ENV = Environment(
     loader=FileSystemLoader(str(TEMPLATES_DIR)),
@@ -110,6 +115,125 @@ def build_endpoint(host_cfg: Dict[str, Any]) -> str:
     return f"{base_url}/api/{api_version}"
 
 
+def _coach_stats_allowed(host_cfg: Dict[str, Any]) -> bool:
+    if not COACH_STATS_ENABLED:
+        return False
+    override = host_cfg.get("coach_stats")
+    if isinstance(override, dict) and override.get("enabled") is False:
+        return False
+    return True
+
+
+def _merge_coach_stats_config(host_cfg: Dict[str, Any]) -> Dict[str, Any]:
+    cfg: Dict[str, Any] = {}
+    if isinstance(COACH_STATS_CONFIG, dict):
+        cfg.update(COACH_STATS_CONFIG)
+    override = host_cfg.get("coach_stats")
+    if isinstance(override, dict):
+        cfg.update(override)
+    return cfg
+
+
+async def fetch_coach_stats(host_cfg: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """Fetch supplemental coach stats (owner, coach info) via SSH."""
+    if not _coach_stats_allowed(host_cfg):
+        return None
+
+    stats_cfg = _merge_coach_stats_config(host_cfg)
+    if stats_cfg.get("enabled") is False:
+        return None
+
+    command = stats_cfg.get("command") or stats_cfg.get("remote_command")
+    if not command:
+        return None
+
+    parsed = urlparse(host_cfg.get("url", ""))
+    remote_host = stats_cfg.get("host") or parsed.hostname or host_cfg.get("name")
+    if not remote_host:
+        return None
+
+    ssh_user = stats_cfg.get("ssh_user", "hassio")
+    ssh_port = int(stats_cfg.get("ssh_port", 2222))
+    timeout_seconds = float(stats_cfg.get("timeout_seconds", COACH_STATS_DEFAULT_TIMEOUT))
+    connect_timeout = int(stats_cfg.get("connect_timeout", max(3, int(timeout_seconds))))
+    extra_options = stats_cfg.get("ssh_options")
+    if isinstance(extra_options, str):
+        extra_options = [extra_options]
+    extra_options = extra_options or []
+
+    remote_shell = stats_cfg.get("shell", "bash -l -c")
+    if remote_shell:
+        remote_command = f"{remote_shell} {shlex.quote(command)}"
+    else:
+        remote_command = command
+
+    ssh_cmd = [
+        "ssh",
+        "-p",
+        str(ssh_port),
+        "-o",
+        f"ConnectTimeout={connect_timeout}",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "StrictHostKeyChecking=no",
+    ]
+    ssh_cmd.extend(extra_options)
+    ssh_cmd.append(f"{ssh_user}@{remote_host}")
+    ssh_cmd.append(remote_command)
+
+    try:
+        process = await asyncio.create_subprocess_exec(
+            *ssh_cmd,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+    except FileNotFoundError as err:
+        return {"__error": f"ssh not available: {err}"}
+    except Exception as err:  # pragma: no cover - defensive guard
+        return {"__error": f"unable to spawn ssh: {err}"}
+
+    try:
+        stdout, stderr = await asyncio.wait_for(process.communicate(), timeout_seconds)
+    except asyncio.TimeoutError:
+        process.kill()
+        return {"__error": f"timeout after {timeout_seconds:.1f}s"}
+
+    raw_stdout = stdout.decode().strip()
+    raw_stderr = stderr.decode().strip()
+    if process.returncode != 0 and not raw_stdout:
+        return {
+            "__error": f"exit {process.returncode}",
+            "__stderr": raw_stderr or None,
+        }
+
+    # Attempt to parse JSON from stdout; fall back to scanning line-by-line.
+    def _parse_output(payload: str) -> Optional[Dict[str, Any]]:
+        candidate = payload.strip()
+        if not candidate:
+            return None
+        try:
+            return json.loads(candidate)
+        except json.JSONDecodeError:
+            return None
+
+    parsed_json = _parse_output(raw_stdout)
+    if parsed_json is None:
+        for line in reversed(raw_stdout.splitlines()):
+            parsed_json = _parse_output(line)
+            if parsed_json is not None:
+                break
+
+    if parsed_json is None:
+        return {
+            "__error": "invalid JSON",
+            "__stdout": raw_stdout or None,
+            "__stderr": raw_stderr or None,
+        }
+
+    return parsed_json
+
+
 async def fetch_host(
     client: httpx.AsyncClient,
     host_cfg: Dict[str, Any]
@@ -121,19 +245,30 @@ async def fetch_host(
         auth = (host_cfg["username"], host_cfg["password"])
 
     endpoint = f"{build_endpoint(host_cfg)}/all"
+    stats_task: Optional[asyncio.Task] = None
+    if _coach_stats_allowed(host_cfg):
+        stats_task = asyncio.create_task(fetch_coach_stats(host_cfg))
     try:
         response = await client.get(endpoint, auth=auth)
         response.raise_for_status()
         payload = response.json()
         payload["__fetched_at"] = current_timestamp()
-        return name, payload
     except Exception as err:
         error_message = f"{type(err).__name__}: {err}"
-        return name, {
+        stats_payload = await stats_task if stats_task else None
+        error_response = {
             "__error": error_message,
             "__endpoint": endpoint,
             "__fetched_at": current_timestamp()
         }
+        if isinstance(stats_payload, dict):
+            error_response["__coach_stats"] = stats_payload
+        return name, error_response
+
+    stats_payload = await stats_task if stats_task else None
+    if isinstance(stats_payload, dict):
+        payload["__coach_stats"] = stats_payload
+    return name, payload
 
 
 async def gather_hosts() -> List[Tuple[str, Dict[str, Any]]]:
@@ -183,8 +318,23 @@ def format_bytes(num_bytes: Optional[float]) -> str:
 
 def extract_metrics(payload: Dict[str, Any]) -> Dict[str, Any]:
     """Collect derived metrics for dashboard display."""
+    coach_stats = payload.get("__coach_stats") if isinstance(payload, dict) else None
+    coach_owner = None
+    coach_number = None
+    coach_year = None
+    if isinstance(coach_stats, dict):
+        coach_section = coach_stats.get("coach")
+        if isinstance(coach_section, dict):
+            coach_owner = coach_section.get("owner") or None
+            coach_number = coach_section.get("number")
+            coach_year = coach_section.get("year")
+
     if "__error" in payload:
-        return {}
+        return {
+            "coach_owner": coach_owner,
+            "coach_number": coach_number,
+            "coach_year": coach_year,
+        }
 
     def ensure_list(value: Any) -> List[Dict[str, Any]]:
         if isinstance(value, list):
@@ -241,6 +391,9 @@ def extract_metrics(payload: Dict[str, Any]) -> Dict[str, Any]:
         "wifi_signal": wifi_signal,
         "wifi_label": wifi_label,
         "disk_percent": disk_percent,
+        "coach_owner": coach_owner,
+        "coach_number": coach_number,
+        "coach_year": coach_year,
     }
 
 
@@ -262,8 +415,10 @@ def render_rich_table(
 
     for host_name, payload, metrics in stats:
         if "__error" in payload:
+            owner = metrics.get("coach_owner") if isinstance(metrics, dict) else None
+            host_display = f"{host_name} ({owner})" if owner else host_name
             table.add_row(
-                host_name,
+                host_display,
                 "-",
                 "-",
                 "-",
@@ -284,6 +439,7 @@ def render_rich_table(
         ip_address = metrics.get("ip_address") or "-"
         public_ip = metrics.get("public_ip")
         disk_percent = metrics.get("disk_percent")
+        coach_owner = metrics.get("coach_owner")
 
         wifi_display = "-"
         if wifi_signal is not None:
@@ -297,8 +453,10 @@ def render_rich_table(
         if public_ip:
             ip_display = f"{ip_address} / {public_ip}" if ip_address else public_ip
 
+        host_display = f"{host_name} ({coach_owner})" if coach_owner else host_name
+
         table.add_row(
-            host_name,
+            host_display,
             f"{cpu_total:.1f}" if cpu_total is not None else "-",
             f"{mem_percent:.1f}" if mem_percent is not None else "-",
             f"{load_1m:.2f}" if load_1m is not None else "-",

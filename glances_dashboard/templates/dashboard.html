@@ -88,10 +88,28 @@
       margin-bottom: 18px;
     }
 
+    .host-card__heading {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
     .host-card__title {
       margin: 0;
       font-size: 18px;
       font-weight: 600;
+    }
+
+    .host-card__subtitle {
+      margin: 0;
+      font-size: 13px;
+      color: var(--text-secondary);
+      letter-spacing: 0.02em;
+    }
+
+    .host-card__subtitle strong {
+      font-weight: 600;
+      color: var(--text-primary);
     }
 
     .host-card__title a {
@@ -338,15 +356,21 @@
       {% set meta = host_meta.get(host_name, {}) %}
       {% set ha_url = meta.get('ha_dashboard_url') %}
       {% if '__error' in payload %}
+        {% set owner = metrics.get('coach_owner') %}
         <article class="host-card error">
           <div class="host-card__header">
-            <h2 class="host-card__title">
-              {% if ha_url %}
-                <a href="{{ ha_url }}" target="_blank" rel="noopener">{{ host_name }}</a>
-              {% else %}
-                {{ host_name }}
+            <div class="host-card__heading">
+              <h2 class="host-card__title">
+                {% if ha_url %}
+                  <a href="{{ ha_url }}" target="_blank" rel="noopener">{{ host_name }}</a>
+                {% else %}
+                  {{ host_name }}
+                {% endif %}
+              </h2>
+              {% if owner %}
+                <p class="host-card__subtitle">Owner · <strong>{{ owner }}</strong></p>
               {% endif %}
-            </h2>
+            </div>
             <span class="status-chip error">
               {% if meta.get('glances_url') %}
                 <a href="{{ meta['glances_url'] }}" target="_blank" rel="noopener">Offline</a>
@@ -372,15 +396,21 @@
         {% set ip_private = metrics.get('ip_address') %}
         {% set ip_public = metrics.get('public_ip') %}
         {% set disk_percent = metrics.get('disk_percent') %}
+        {% set owner = metrics.get('coach_owner') %}
         <article class="host-card">
           <div class="host-card__header">
-            <h2 class="host-card__title">
-              {% if ha_url %}
-                <a href="{{ ha_url }}" target="_blank" rel="noopener">{{ host_name }}</a>
-              {% else %}
-                {{ host_name }}
+            <div class="host-card__heading">
+              <h2 class="host-card__title">
+                {% if ha_url %}
+                  <a href="{{ ha_url }}" target="_blank" rel="noopener">{{ host_name }}</a>
+                {% else %}
+                  {{ host_name }}
+                {% endif %}
+              </h2>
+              {% if owner %}
+                <p class="host-card__subtitle">Owner · <strong>{{ owner }}</strong></p>
               {% endif %}
-            </h2>
+            </div>
             <span class="status-chip ok">
               {% if meta.get('glances_url') %}
                 <a href="{{ meta['glances_url'] }}" target="_blank" rel="noopener">Operational</a>
