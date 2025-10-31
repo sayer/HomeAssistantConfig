@@ -379,13 +379,33 @@ fi
 body="$(cat "$tmp_body")"
 debug "Template response: ${body}"
 
-payload=$(jq -r '.result' <<<"$body" 2>/dev/null || true)
-debug "Extracted payload: ${payload}"
-
-if [[ -z "$payload" || "$payload" == "null" ]]; then
+if ! payload="$(
+  jq -cer '
+    if (type != "object") then
+      error("template response is not an object")
+    elif (.result? == null) then
+      error("template response missing result")
+    else
+      .result
+      | if type == "string" then
+          try (fromjson) catch (error("template result string is not valid JSON"))
+        else
+          .
+        end
+    end
+  ' <<<"$body" 2>/dev/null
+)"; then
   debug "Payload extraction failed; emitting raw body"
   printf '%s\n' "$body"
   exit 5
 fi
 
-printf '%s\n' "$payload" | jq -c .
+if [[ -z "$payload" || "$payload" == "null" ]]; then
+  debug "Payload extraction produced empty/null JSON; emitting raw body"
+  printf '%s\n' "$body"
+  exit 5
+fi
+
+debug "Extracted payload: ${payload}"
+
+printf '%s\n' "$payload"
