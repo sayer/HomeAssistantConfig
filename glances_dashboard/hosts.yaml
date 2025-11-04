@@ -1,6 +1,13 @@
 default_api_version: 3
 refresh_seconds: 900
 timeout_seconds: 10
+coach_stats:
+  enabled: true
+  command: /config/collect_coach_snapshot.sh
+  ssh_user: hassio
+  ssh_port: 2222
+  timeout_seconds: 8
+  connect_timeout: 5
 hosts:
   - name: Home Assistant
     url: http://homeassistant.tail73c84.ts.net:61209
@@ -24,4 +31,3 @@ hosts:
     url: http://homeassistant-19.tail73c84.ts.net:61209
   - name: Home Assistant 20
     url: http://homeassistant-20.tail73c84.ts.net:61209
-
