@@ -21,6 +21,24 @@ fi
 
 HA_CLI_HOME="${HA_CLI_HOME:-$REPO_DIR}"
 
+DEFAULT_HA_HOME="/root/.homeassistant"
+
+ensure_ha_core_uses_repo() {
+  if [ -L "$DEFAULT_HA_HOME" ]; then
+    local current_target
+    current_target=$(readlink "$DEFAULT_HA_HOME" || true)
+    if [ "$current_target" != "$REPO_DIR" ]; then
+      ln -sfn "$REPO_DIR" "$DEFAULT_HA_HOME"
+      log_message "Adjusted $DEFAULT_HA_HOME symlink to $REPO_DIR"
+    fi
+  elif [ ! -e "$DEFAULT_HA_HOME" ]; then
+    ln -s "$REPO_DIR" "$DEFAULT_HA_HOME"
+    log_message "Created $DEFAULT_HA_HOME symlink to $REPO_DIR"
+  else
+    log_message "WARNING: $DEFAULT_HA_HOME exists and is not a symlink; ha core check may target it instead of $REPO_DIR"
+  fi
+}
+
 EXIT_CODE=0
 GIT_RESULT="not-run"
 CONFIG_RESULT="not-run"
@@ -469,6 +487,7 @@ PY
 }
 
 main() {
+  ensure_ha_core_uses_repo
   log_message "Starting HA configuration update process"
 
   if [ ! -d "$REPO_DIR/.git" ]; then
