@@ -1,0 +1,1 @@
+"""Climate group custom integration."""
