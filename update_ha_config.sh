@@ -759,7 +759,14 @@ main() {
 
   # Check Home Assistant configuration
   log_message "Checking Home Assistant configuration..."
-  if ha core check 2>/dev/null; then
+  HA_CHECK_OUTPUT=$(ha core check 2>&1)
+  HA_CHECK_STATUS=$?
+  if [ $HA_CHECK_STATUS -eq 0 ]; then
+    if [ -n "$HA_CHECK_OUTPUT" ]; then
+      while IFS= read -r line; do
+        [ -n "$line" ] && log_message "ha core check: $line"
+      done <<<"$HA_CHECK_OUTPUT"
+    fi
     log_message "Configuration check passed"
     HA_CHECK_RESULT="passed"
 
@@ -789,6 +796,11 @@ main() {
     fi
   else
     log_message "ERROR: Home Assistant configuration check failed. YAML not reloaded."
+    if [ -n "$HA_CHECK_OUTPUT" ]; then
+      while IFS= read -r line; do
+        [ -n "$line" ] && log_message "ha core check: $line"
+      done <<<"$HA_CHECK_OUTPUT"
+    fi
     HA_CHECK_RESULT="failed"
     RESTART_RESULT="skipped"
     EXIT_CODE=1
