@@ -104,6 +104,26 @@ capture_git_state() {
   fi
 }
 
+run_config_check() {
+  local output status
+
+  if command -v docker >/dev/null 2>&1 && docker ps --format '{{.Names}}' 2>/dev/null | grep -qx 'homeassistant'; then
+    output=$(docker exec homeassistant python -m homeassistant --script check_config -c "$REPO_DIR" 2>&1)
+    status=$?
+    if [ $status -eq 0 ]; then
+      printf '%s' "$output"
+      return 0
+    fi
+    log_message "WARNING: docker-based config check failed (exit $status); falling back to ha CLI"
+  fi
+
+  local cmd="ha core check --config $REPO_DIR"
+  output=$(HOME="$HA_CLI_HOME" HASS_CONFIG="$REPO_DIR" bash -lc "$cmd" 2>&1)
+  status=$?
+  printf '%s' "$output"
+  return $status
+}
+
 print_summary() {
   capture_git_state
 
@@ -785,15 +805,8 @@ main() {
 
   # Check Home Assistant configuration
   log_message "Checking Home Assistant configuration..."
-  HA_CHECK_CMD=(ha core check --config "$REPO_DIR")
-  if pushd "$REPO_DIR" >/dev/null 2>&1; then
-    HA_CHECK_OUTPUT=$(HOME="$HA_CLI_HOME" HASS_CONFIG="$REPO_DIR" bash -lc "${HA_CHECK_CMD[*]}" 2>&1)
-    HA_CHECK_STATUS=$?
-    popd >/dev/null 2>&1
-  else
-    HA_CHECK_OUTPUT=$(HOME="$HA_CLI_HOME" HASS_CONFIG="$REPO_DIR" bash -lc "${HA_CHECK_CMD[*]}" 2>&1)
-    HA_CHECK_STATUS=$?
-  fi
+  HA_CHECK_OUTPUT=$(run_config_check)
+  HA_CHECK_STATUS=$?
   if [ $HA_CHECK_STATUS -eq 0 ]; then
     if [ -n "$HA_CHECK_OUTPUT" ]; then
       while IFS= read -r line; do
