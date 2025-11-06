@@ -19,6 +19,26 @@ if [ -z "${HASS_CONFIG:-}" ]; then
   export HASS_CONFIG="$REPO_DIR"
 fi
 
+HA_CLI_HOME="${HA_CLI_HOME:-$REPO_DIR}"
+
+DEFAULT_HA_HOME="/root/.homeassistant"
+
+ensure_ha_core_uses_repo() {
+  if [ -L "$DEFAULT_HA_HOME" ]; then
+    local current_target
+    current_target=$(readlink "$DEFAULT_HA_HOME" || true)
+    if [ "$current_target" != "$REPO_DIR" ]; then
+      ln -sfn "$REPO_DIR" "$DEFAULT_HA_HOME"
+      log_message "Adjusted $DEFAULT_HA_HOME symlink to $REPO_DIR"
+    fi
+  elif [ ! -e "$DEFAULT_HA_HOME" ]; then
+    ln -s "$REPO_DIR" "$DEFAULT_HA_HOME"
+    log_message "Created $DEFAULT_HA_HOME symlink to $REPO_DIR"
+  else
+    log_message "WARNING: $DEFAULT_HA_HOME exists and is not a symlink; ha core check may target it instead of $REPO_DIR"
+  fi
+}
+
 EXIT_CODE=0
 GIT_RESULT="not-run"
 CONFIG_RESULT="not-run"
@@ -82,6 +102,26 @@ capture_git_state() {
   else
     GIT_CHANGE_NOTE="unchanged"
   fi
+}
+
+run_config_check() {
+  local output status
+
+  if command -v docker >/dev/null 2>&1 && docker ps --format '{{.Names}}' 2>/dev/null | grep -qx 'homeassistant'; then
+    output=$(docker exec homeassistant python -m homeassistant --script check_config -c "$REPO_DIR" 2>&1)
+    status=$?
+    if [ $status -eq 0 ]; then
+      printf '%s' "$output"
+      return 0
+    fi
+    log_message "WARNING: docker-based config check failed (exit $status); falling back to ha CLI"
+  fi
+
+  local cmd="ha core check --config $REPO_DIR"
+  output=$(HOME="$HA_CLI_HOME" HASS_CONFIG="$REPO_DIR" bash -lc "$cmd" 2>&1)
+  status=$?
+  printf '%s' "$output"
+  return $status
 }
 
 print_summary() {
@@ -467,6 +507,7 @@ PY
 }
 
 main() {
+  ensure_ha_core_uses_repo
   log_message "Starting HA configuration update process"
 
   if [ ! -d "$REPO_DIR/.git" ]; then
@@ -764,8 +805,7 @@ main() {
 
   # Check Home Assistant configuration
   log_message "Checking Home Assistant configuration..."
-  HA_CHECK_CMD=(ha core check --config "$REPO_DIR")
-  HA_CHECK_OUTPUT=$("${HA_CHECK_CMD[@]}" 2>&1)
+  HA_CHECK_OUTPUT=$(run_config_check)
   HA_CHECK_STATUS=$?
   if [ $HA_CHECK_STATUS -eq 0 ]; then
     if [ -n "$HA_CHECK_OUTPUT" ]; then
