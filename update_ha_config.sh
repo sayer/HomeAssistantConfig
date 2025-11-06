@@ -14,6 +14,11 @@ REPO_DIR="/config"
 CONFIG_SCRIPT="${REPO_DIR}/update_config.sh"
 PYTHON_BIN="$(command -v python3 || command -v python || true)"
 
+# Ensure HA CLI picks up the repository config directory unless already set
+if [ -z "${HASS_CONFIG:-}" ]; then
+  export HASS_CONFIG="$REPO_DIR"
+fi
+
 EXIT_CODE=0
 GIT_RESULT="not-run"
 CONFIG_RESULT="not-run"
