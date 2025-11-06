@@ -592,6 +592,45 @@ create_shade_groups_yaml() {
     fi
 }
 
+remove_light_entry() {
+    local file_path="$1"
+    local light_name="$2"
+    local tmp_file
+
+    tmp_file=$(mktemp) || {
+        echo "Error: Unable to create temporary file while pruning ${light_name}"
+        exit 1
+    }
+
+    if awk -v name="$light_name" '
+        BEGIN { skip_block = 0 }
+        {
+            if (skip_block) {
+                if ($0 ~ /^[[:space:]]*-[[:space:]]+name: "/) {
+                    if ($0 ~ "^[[:space:]]*-[[:space:]]+name: \"" name "\"") {
+                        next
+                    }
+                    skip_block = 0
+                    print
+                    next
+                }
+                next
+            }
+            if ($0 ~ "^[[:space:]]*-[[:space:]]+name: \"" name "\"") {
+                skip_block = 1
+                next
+            }
+            print
+        }
+    ' "$file_path" > "$tmp_file"; then
+        mv "$tmp_file" "$file_path"
+    else
+        echo "Error: Failed to prune ${light_name} definition from ${file_path}"
+        rm -f "$tmp_file"
+        exit 1
+    fi
+}
+
 # Create the YAML entries one line at a time instead of using a single string
 create_shade_yaml() {
     local PREFIX="$1"
@@ -886,6 +925,14 @@ mv "$TEMP_FILE" "$CONFIG_FILE"
 
 cat "$CONFIG_FILE" | sed "s/%%UNDER_SLIDE_LIGHTS_2%%/$UNDER_SLIDE_LIGHTS_2_VALUE/g" > "$TEMP_FILE"
 mv "$TEMP_FILE" "$CONFIG_FILE"
+
+if [ -z "$UNDER_SLIDE_LIGHTS_1_VALUE" ]; then
+    remove_light_entry "$CONFIG_FILE" "$NAME_UNDER_SLIDE_LIGHTS_1"
+fi
+
+if [ -z "$UNDER_SLIDE_LIGHTS_2_VALUE" ]; then
+    remove_light_entry "$CONFIG_FILE" "$NAME_UNDER_SLIDE_LIGHTS_2"
+fi
 
 cat "$CONFIG_FILE" | sed "s/%%OPTIMISTIC_MODE%%/$OPTIMISTIC_MODE/g" > "$TEMP_FILE"
 mv "$TEMP_FILE" "$CONFIG_FILE"
