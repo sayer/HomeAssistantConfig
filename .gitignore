@@ -1,4 +1,6 @@
-custom_components
+custom_components/*
+!custom_components/climate_group/
+!custom_components/climate_group/**
 configuration.yaml.save
 deps
 home-assistant.log
