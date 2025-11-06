@@ -764,7 +764,8 @@ main() {
 
   # Check Home Assistant configuration
   log_message "Checking Home Assistant configuration..."
-  HA_CHECK_OUTPUT=$(ha core check 2>&1)
+  HA_CHECK_CMD=(ha core check --config "$REPO_DIR")
+  HA_CHECK_OUTPUT=$("${HA_CHECK_CMD[@]}" 2>&1)
   HA_CHECK_STATUS=$?
   if [ $HA_CHECK_STATUS -eq 0 ]; then
     if [ -n "$HA_CHECK_OUTPUT" ]; then
