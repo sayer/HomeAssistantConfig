@@ -850,7 +850,6 @@ sensor:
         friendly_name: "Thermostat 1 Ambient (%%THERMOSTAT1_AMBIENT%%)"
         unique_id: "thermostat1_zone_temperature"
         device_class: temperature
-        state_class: measurement
         unit_of_measurement: "°F"
         availability_template: >-
           {% set temp = state_attr('climate.livingroom_thermostat', 'current_temperature') %}
@@ -864,7 +863,6 @@ sensor:
         friendly_name: "RV-C Temp Code 1"
         unique_id: "rvc_temperature_code_1"
         device_class: temperature
-        state_class: measurement
         unit_of_measurement: "°F"
         availability_template: >-
           {% set raw = states('sensor.ambient_temperature') %}
@@ -878,7 +876,6 @@ sensor:
         friendly_name: "RV-C Temp Code 2"
         unique_id: "rvc_temperature_code_2"
         device_class: temperature
-        state_class: measurement
         unit_of_measurement: "°F"
         availability_template: >-
           {% set raw = states('sensor.inside_temperature') %}
@@ -892,7 +889,6 @@ sensor:
         friendly_name: "RV-C Temp Code 249"
         unique_id: "rvc_temperature_code_249"
         device_class: temperature
-        state_class: measurement
         unit_of_measurement: "°F"
         availability_template: >-
           {% set invalid = ['unknown', 'unavailable', '', none, 'none', 'n/a', 'nan'] %}
@@ -937,7 +933,6 @@ sensor:
         friendly_name: "RV-C Temp Code 250"
         unique_id: "rvc_temperature_code_250"
         device_class: temperature
-        state_class: measurement
         unit_of_measurement: "°F"
         availability_template: >-
           {% set invalid = ['unknown', 'unavailable', '', none, 'none', 'n/a', 'nan'] %}
@@ -982,7 +977,6 @@ sensor:
         friendly_name: "Thermostat 2 Ambient (%%THERMOSTAT2_AMBIENT%%)"
         unique_id: "thermostat2_zone_temperature"
         device_class: temperature
-        state_class: measurement
         unit_of_measurement: "°F"
         availability_template: >-
           {% set temp = state_attr('climate.kitchen_thermostat', 'current_temperature') %}
@@ -996,7 +990,6 @@ sensor:
         friendly_name: "Thermostat 3 Ambient (%%THERMOSTAT3_AMBIENT%%)"
         unique_id: "thermostat3_zone_temperature"
         device_class: temperature
-        state_class: measurement
         unit_of_measurement: "°F"
         availability_template: >-
           {% set temp = state_attr('climate.bedroom_thermostat', 'current_temperature') %}
@@ -1010,7 +1003,6 @@ sensor:
         friendly_name: "Thermostat 4 Ambient (%%THERMOSTAT4_AMBIENT%%)"
         unique_id: "thermostat4_zone_temperature"
         device_class: temperature
-        state_class: measurement
         unit_of_measurement: "°F"
         availability_template: >-
           {% set temp = state_attr('climate.bathroom_thermostat', 'current_temperature') %}
@@ -1024,7 +1016,6 @@ sensor:
         friendly_name: "Min Ambient Temperature"
         unique_id: "min_ambient_temperature"
         device_class: temperature
-        state_class: measurement
         unit_of_measurement: "°F"
         availability_template: >-
           {% set sensors = [
@@ -1063,7 +1054,6 @@ sensor:
         friendly_name: "Max Ambient Temperature"
         unique_id: "max_ambient_temperature"
         device_class: temperature
-        state_class: measurement
         unit_of_measurement: "°F"
         availability_template: >-
           {% set sensors = [
