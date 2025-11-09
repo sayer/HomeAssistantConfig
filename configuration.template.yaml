@@ -849,43 +849,70 @@ sensor:
       thermostat1_zone_temperature:
         friendly_name: "Thermostat 1 Ambient (%%THERMOSTAT1_AMBIENT%%)"
         unique_id: "thermostat1_zone_temperature"
+        device_class: temperature
+        state_class: measurement
         unit_of_measurement: "°F"
+        availability_template: >-
+          {% set temp = state_attr('climate.livingroom_thermostat', 'current_temperature') %}
+          {% set invalid = [none, 'unknown', 'unavailable', ''] %}
+          {{ temp not in invalid }}
         value_template: >-
           {% set temp = state_attr('climate.livingroom_thermostat', 'current_temperature') %}
-          {% if temp in [none, 'unknown', 'unavailable'] %}
-            unknown
-          {% else %}
-            {{ temp | float | round(1) }}
-          {% endif %}
+          {{ temp | float | round(1) }}
 
       rvc_temperature_code_1:
         friendly_name: "RV-C Temp Code 1"
         unique_id: "rvc_temperature_code_1"
+        device_class: temperature
+        state_class: measurement
         unit_of_measurement: "°F"
+        availability_template: >-
+          {% set raw = states('sensor.ambient_temperature') %}
+          {% set invalid = ['unknown', 'unavailable', '', none, 'none', 'n/a', 'nan'] %}
+          {{ raw not in invalid }}
         value_template: >-
           {% set raw = states('sensor.ambient_temperature') %}
-          {% if raw in ['unknown', 'unavailable', '', none, 'none', 'n/a', 'nan'] %}
-            unknown
-          {% else %}
-            {{ raw | float | round(1) }}
-          {% endif %}
+          {{ raw | float | round(1) }}
 
       rvc_temperature_code_2:
         friendly_name: "RV-C Temp Code 2"
         unique_id: "rvc_temperature_code_2"
+        device_class: temperature
+        state_class: measurement
         unit_of_measurement: "°F"
+        availability_template: >-
+          {% set raw = states('sensor.inside_temperature') %}
+          {% set invalid = ['unknown', 'unavailable', '', none, 'none', 'n/a', 'nan'] %}
+          {{ raw not in invalid }}
         value_template: >-
           {% set raw = states('sensor.inside_temperature') %}
-          {% if raw in ['unknown', 'unavailable', '', none, 'none', 'n/a', 'nan'] %}
-            unknown
-          {% else %}
-            {{ raw | float | round(1) }}
-          {% endif %}
+          {{ raw | float | round(1) }}
 
       rvc_temperature_code_249:
         friendly_name: "RV-C Temp Code 249"
         unique_id: "rvc_temperature_code_249"
+        device_class: temperature
+        state_class: measurement
         unit_of_measurement: "°F"
+        availability_template: >-
+          {% set invalid = ['unknown', 'unavailable', '', none, 'none', 'n/a', 'nan'] %}
+          {% set value = none %}
+          {% for reading in [
+            state_attr('climate.livingroom_thermostat', 'current_temperature'),
+            state_attr('climate.kitchen_thermostat', 'current_temperature')
+          ] %}
+            {% if reading is number %}
+              {% set value = reading %}
+              {% break %}
+            {% elif reading is string %}
+              {% set reading_lower = reading | lower %}
+              {% if reading_lower not in invalid %}
+                {% set value = reading | float %}
+                {% break %}
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+          {{ value is not none }}
         value_template: >-
           {% set invalid = ['unknown', 'unavailable', '', none, 'none', 'n/a', 'nan'] %}
           {% set value = none %}
@@ -904,16 +931,33 @@ sensor:
               {% endif %}
             {% endif %}
           {% endfor %}
-          {% if value is not none %}
-            {{ value | float | round(1) }}
-          {% else %}
-            unknown
-          {% endif %}
+          {{ value | float | round(1) }}
 
       rvc_temperature_code_250:
         friendly_name: "RV-C Temp Code 250"
         unique_id: "rvc_temperature_code_250"
+        device_class: temperature
+        state_class: measurement
         unit_of_measurement: "°F"
+        availability_template: >-
+          {% set invalid = ['unknown', 'unavailable', '', none, 'none', 'n/a', 'nan'] %}
+          {% set value = none %}
+          {% for reading in [
+            state_attr('climate.bedroom_thermostat', 'current_temperature'),
+            state_attr('climate.bathroom_thermostat', 'current_temperature')
+          ] %}
+            {% if reading is number %}
+              {% set value = reading %}
+              {% break %}
+            {% elif reading is string %}
+              {% set reading_lower = reading | lower %}
+              {% if reading_lower not in invalid %}
+                {% set value = reading | float %}
+                {% break %}
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+          {{ value is not none }}
         value_template: >-
           {% set invalid = ['unknown', 'unavailable', '', none, 'none', 'n/a', 'nan'] %}
           {% set value = none %}
@@ -932,52 +976,71 @@ sensor:
               {% endif %}
             {% endif %}
           {% endfor %}
-          {% if value is not none %}
-            {{ value | float | round(1) }}
-          {% else %}
-            unknown
-          {% endif %}
+          {{ value | float | round(1) }}
 
       thermostat2_zone_temperature:
         friendly_name: "Thermostat 2 Ambient (%%THERMOSTAT2_AMBIENT%%)"
         unique_id: "thermostat2_zone_temperature"
+        device_class: temperature
+        state_class: measurement
         unit_of_measurement: "°F"
+        availability_template: >-
+          {% set temp = state_attr('climate.kitchen_thermostat', 'current_temperature') %}
+          {% set invalid = [none, 'unknown', 'unavailable', ''] %}
+          {{ temp not in invalid }}
         value_template: >-
           {% set temp = state_attr('climate.kitchen_thermostat', 'current_temperature') %}
-          {% if temp in [none, 'unknown', 'unavailable'] %}
-            unknown
-          {% else %}
-            {{ temp | float | round(1) }}
-          {% endif %}
+          {{ temp | float | round(1) }}
 
       thermostat3_zone_temperature:
         friendly_name: "Thermostat 3 Ambient (%%THERMOSTAT3_AMBIENT%%)"
         unique_id: "thermostat3_zone_temperature"
+        device_class: temperature
+        state_class: measurement
         unit_of_measurement: "°F"
+        availability_template: >-
+          {% set temp = state_attr('climate.bedroom_thermostat', 'current_temperature') %}
+          {% set invalid = [none, 'unknown', 'unavailable', ''] %}
+          {{ temp not in invalid }}
         value_template: >-
           {% set temp = state_attr('climate.bedroom_thermostat', 'current_temperature') %}
-          {% if temp in [none, 'unknown', 'unavailable'] %}
-            unknown
-          {% else %}
-            {{ temp | float | round(1) }}
-          {% endif %}
+          {{ temp | float | round(1) }}
 
       thermostat4_zone_temperature:
         friendly_name: "Thermostat 4 Ambient (%%THERMOSTAT4_AMBIENT%%)"
         unique_id: "thermostat4_zone_temperature"
+        device_class: temperature
+        state_class: measurement
         unit_of_measurement: "°F"
+        availability_template: >-
+          {% set temp = state_attr('climate.bathroom_thermostat', 'current_temperature') %}
+          {% set invalid = [none, 'unknown', 'unavailable', ''] %}
+          {{ temp not in invalid }}
         value_template: >-
           {% set temp = state_attr('climate.bathroom_thermostat', 'current_temperature') %}
-          {% if temp in [none, 'unknown', 'unavailable'] %}
-            unknown
-          {% else %}
-            {{ temp | float | round(1) }}
-          {% endif %}
+          {{ temp | float | round(1) }}
 
       min_ambient_temperature:
         friendly_name: "Min Ambient Temperature"
         unique_id: "min_ambient_temperature"
+        device_class: temperature
+        state_class: measurement
         unit_of_measurement: "°F"
+        availability_template: >-
+          {% set sensors = [
+            'sensor.thermostat1_zone_temperature',
+            'sensor.thermostat2_zone_temperature',
+            'sensor.thermostat3_zone_temperature',
+            'sensor.thermostat4_zone_temperature'
+          ] %}
+          {% set values = namespace(list=[]) %}
+          {% for sensor_id in sensors %}
+            {% set value = states(sensor_id) %}
+            {% if value not in ['unknown', 'unavailable', '', none, 'None'] %}
+              {% set values.list = values.list + [value | float] %}
+            {% endif %}
+          {% endfor %}
+          {{ values.list | length > 0 }}
         value_template: >-
           {% set sensors = [
             'sensor.thermostat1_zone_temperature',
@@ -992,16 +1055,31 @@ sensor:
               {% set values.list = values.list + [value | float] %}
             {% endif %}
           {% endfor %}
-          {% if values.list | length > 0 %}
+          {% if values.list %}
             {{ (values.list | min) | round(1) }}
-          {% else %}
-            unknown
           {% endif %}
 
       max_ambient_temperature:
         friendly_name: "Max Ambient Temperature"
         unique_id: "max_ambient_temperature"
+        device_class: temperature
+        state_class: measurement
         unit_of_measurement: "°F"
+        availability_template: >-
+          {% set sensors = [
+            'sensor.thermostat1_zone_temperature',
+            'sensor.thermostat2_zone_temperature',
+            'sensor.thermostat3_zone_temperature',
+            'sensor.thermostat4_zone_temperature'
+          ] %}
+          {% set values = namespace(list=[]) %}
+          {% for sensor_id in sensors %}
+            {% set value = states(sensor_id) %}
+            {% if value not in ['unknown', 'unavailable', '', none, 'None'] %}
+              {% set values.list = values.list + [value | float] %}
+            {% endif %}
+          {% endfor %}
+          {{ values.list | length > 0 }}
         value_template: >-
           {% set sensors = [
             'sensor.thermostat1_zone_temperature',
@@ -1016,10 +1094,8 @@ sensor:
               {% set values.list = values.list + [value | float] %}
             {% endif %}
           {% endfor %}
-          {% if values.list | length > 0 %}
+          {% if values.list %}
             {{ (values.list | max) | round(1) }}
-          {% else %}
-            unknown
           {% endif %}
 
 
