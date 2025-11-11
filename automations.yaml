@@ -261,6 +261,7 @@
 - id: '1679623337905'
   alias: Evening Lights
   description: ''
+  enabled: false
   trigger:
   - platform: sun
     event: sunset
@@ -279,6 +280,7 @@
 - id: '1679624060266'
   alias: Good Night
   description: ''
+  enabled: false
   triggers:
   - at: '23:00:00'
     trigger: time
