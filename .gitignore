@@ -28,3 +28,4 @@ update_ha_config.log
 glances_dashboard/__pycache__/
 .DS_Store
 .DS_Store
+.DS_Store
