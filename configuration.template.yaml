@@ -1530,8 +1530,21 @@ mqtt:
           off
         {% endif %}
       command_topic: "RVC/DC_DIMMER_COMMAND_2/1/set"
-      command_on_template: '{"instance": 1, "desired level": 100, "command": %%LIGHT_COMMAND_ON%% }'
-      command_off_template: '{"instance": 1, "desired level": 0, "command": %%LIGHT_COMMAND_OFF%% }'
+      brightness_template: >-
+        {% set pct = value_json['operating status (brightness)'] | int(0) %}
+        {{ (pct / 100 * 255) | round(0) }}
+      command_template: >-
+        {# Use incoming brightness when provided, otherwise reuse current brightness or full on #}
+        {% set stored = state_attr('light.entry_light', 'brightness') %}
+        {% set raw_brightness = brightness if brightness is defined else (stored | default(255, true)) %}
+        {% set pct = ((raw_brightness | float(255)) / 255 * 100) | round(0) %}
+        {% if pct > 100 %}{% set pct = 100 %}{% endif %}
+        {% if pct < 0 %}{% set pct = 0 %}{% endif %}
+        {% if value == 'off' %}
+          {"instance": 1, "desired level": 0, "command": %%LIGHT_COMMAND_OFF%% }
+        {% else %}
+          {"instance": 1, "brightness_pct": {{ pct }}, "command": %%LIGHT_COMMAND_ON%% }
+        {% endif %}
       schema: "template"
       optimistic: %%OPTIMISTIC_MODE%%
 
