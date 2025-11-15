@@ -1453,8 +1453,12 @@ mqtt:
         {% endif %}
       command_topic: "RVC/DC_DIMMER_COMMAND_2/1/set"
       brightness_template: >-
-        {% set pct = value_json['operating status (brightness)'] | int(0) %}
-        {{ (pct / 100 * 255) | round(0) }}
+        {# Prefer operating status pct; fall back to common alt keys and clamp to 0-100 #}
+        {% set raw = value_json.get('operating status (brightness)', value_json.get('brightness_pct', value_json.get('desired level', value_json.get('brightness', 0)))) | float(0) %}
+        {% if raw > 200 %}{% set raw = 200 %}{% endif %}
+        {% if raw > 100 %}{% set raw = (raw / 2.0) %}{% endif %}
+        {% if raw < 0 %}{% set raw = 0 %}{% endif %}
+        {{ (raw / 100 * 255) | round(0) }}
       command_on_template: >-
         {# Use incoming brightness when provided, otherwise reuse current brightness or full on #}
         {% set stored = state_attr('light.entry_light', 'brightness') %}
