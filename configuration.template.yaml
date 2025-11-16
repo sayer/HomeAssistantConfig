@@ -1370,7 +1370,7 @@ mqtt:
       command_on_template: '{"instance": %%DOCKING_LIGHTS_CODE%%, "desired level": 100, "command": %%LIGHT_COMMAND_ON%% }'
       command_off_template: '{"instance": %%DOCKING_LIGHTS_CODE%%, "desired level": 0, "command": %%LIGHT_COMMAND_OFF%% }'
       schema: "template"
-      optimistic: true # force optimistic so UI reflects commanded brightness even if status update lags
+      optimistic: false
 
     - name: "Under Slide Lights 1"
       unique_id: "under_slide_lights_1"
@@ -1453,20 +1453,16 @@ mqtt:
         {% endif %}
       command_topic: "RVC/DC_DIMMER_COMMAND_2/1/set"
       brightness_template: >-
-        {# Prefer true status pct; fall back to brightness_pct; treat desired level as raw 0-200 unless already 0-100 #}
-        {% set has_oper = value_json is defined and value_json['operating status (brightness)'] is defined %}
-        {% set has_bpct = value_json is defined and value_json['brightness_pct'] is defined %}
-        {% set has_desired = value_json is defined and value_json['desired level'] is defined %}
-        {% if has_oper %}
+        {# Parse only reported status fields to avoid echo/command payloads skewing UI #}
+        {% if value_json is defined and value_json['operating status (brightness)'] is defined %}
           {% set raw = value_json['operating status (brightness)'] | float(0) %}
           {% set pct = raw if raw <= 100 else (raw / 2.0) %}
-        {% elif has_bpct %}
+        {% elif value_json is defined and value_json['brightness_pct'] is defined %}
           {% set pct = value_json['brightness_pct'] | float(0) %}
-        {% elif has_desired %}
-          {% set raw = value_json['desired level'] | float(0) %}
-          {% set pct = raw if raw <= 100 else (raw / 2.0) %}
+        {% elif value_json is defined and value_json['brightness'] is defined %}
+          {% set pct = value_json['brightness'] | float(0) %}
         {% else %}
-          {% set pct = value_json.get('brightness', 0) | float(0) %}
+          {% set pct = 0 %}
         {% endif %}
         {% if pct > 100 %}{% set pct = 100 %}{% endif %}
         {% if pct < 0 %}{% set pct = 0 %}{% endif %}
