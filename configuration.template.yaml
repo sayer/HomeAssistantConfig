@@ -1453,9 +1453,21 @@ mqtt:
         {% endif %}
       command_topic: "RVC/DC_DIMMER_COMMAND_2/1/set"
       brightness_template: >-
-        {# Convert to %: treat values >100 as raw 0-200 (0.5% steps), else assume already percent #}
-        {% set raw = value_json.get('operating status (brightness)', value_json.get('brightness_pct', value_json.get('desired level', value_json.get('brightness', 0)))) | float(0) %}
-        {% set pct = raw if raw <= 100 else (raw / 2.0) %}
+        {# Prefer true status pct; fall back to brightness_pct; treat desired level as raw 0-200 unless already 0-100 #}
+        {% set has_oper = value_json is defined and value_json['operating status (brightness)'] is defined %}
+        {% set has_bpct = value_json is defined and value_json['brightness_pct'] is defined %}
+        {% set has_desired = value_json is defined and value_json['desired level'] is defined %}
+        {% if has_oper %}
+          {% set raw = value_json['operating status (brightness)'] | float(0) %}
+          {% set pct = raw if raw <= 100 else (raw / 2.0) %}
+        {% elif has_bpct %}
+          {% set pct = value_json['brightness_pct'] | float(0) %}
+        {% elif has_desired %}
+          {% set raw = value_json['desired level'] | float(0) %}
+          {% set pct = raw if raw <= 100 else (raw / 2.0) %}
+        {% else %}
+          {% set pct = value_json.get('brightness', 0) | float(0) %}
+        {% endif %}
         {% if pct > 100 %}{% set pct = 100 %}{% endif %}
         {% if pct < 0 %}{% set pct = 0 %}{% endif %}
         {{ (pct / 100 * 255) | round(0) }}
