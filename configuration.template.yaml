@@ -1453,12 +1453,11 @@ mqtt:
         {% endif %}
       command_topic: "RVC/DC_DIMMER_COMMAND_2/1/set"
       brightness_template: >-
-        {# Prefer explicit pct; treat operating status as raw 0-200; treat desired level/brightness as already percent #}
+        {# Treat incoming values as already percent; prefer brightness_pct, then operating status, desired level, brightness #}
         {% if value_json is defined and value_json['brightness_pct'] is defined %}
           {% set pct = value_json['brightness_pct'] | float(0) %}
         {% elif value_json is defined and value_json['operating status (brightness)'] is defined %}
-          {% set raw = value_json['operating status (brightness)'] | float(0) %}
-          {% set pct = raw / 2.0 %}
+          {% set pct = value_json['operating status (brightness)'] | float(0) %}
         {% elif value_json is defined and value_json['desired level'] is defined %}
           {% set pct = value_json['desired level'] | float(0) %}
         {% elif value_json is defined and value_json['brightness'] is defined %}
