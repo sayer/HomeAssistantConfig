@@ -210,21 +210,13 @@
   alias: House Batteries Low
   description: ''
   trigger:
-  - platform: numeric_state
-    entity_id:
-    - sensor.house_battery_state_of_charge
-    below: 25.01
+  - platform: template
+    value_template: >-
+      {{ states('sensor.house_battery_state_of_charge') | float(0) < 25.01
+         and states('sensor.house_battery_voltage') | float(0) < 11.5 }}
     for:
       hours: 0
       minutes: 5
-      seconds: 0
-  - platform: numeric_state
-    entity_id:
-    - sensor.house_battery_voltage
-    below: 11.5
-    for:
-      hours: 0
-      minutes: 0
       seconds: 0
   condition: []
   action:
