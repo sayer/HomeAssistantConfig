@@ -500,6 +500,13 @@ sensor:
     value_template: "{{ value_json.timezone }}"
     icon: mdi:map-marker-clock
 
+  - platform: speedtestdotnet
+    manual: true
+    monitored_conditions:
+      - ping
+      - download
+      - upload
+
   - platform: rest
     name: "Outback 1"
     resource: "http://192.168.100.231/Dev_status.cgi?&Port=0"
