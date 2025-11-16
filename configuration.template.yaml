@@ -1475,8 +1475,8 @@ mqtt:
         {% set pct = ((raw_brightness | float(255)) / 255 * 100) | round(0) %}
         {% if pct > 100 %}{% set pct = 100 %}{% endif %}
         {% if pct < 0 %}{% set pct = 0 %}{% endif %}
-        {# Send aligned percent values (0-100) for both fields; no scaling #}
-        {"instance": 1, "desired level": {{ pct }}, "brightness_pct": {{ pct }}, "command": %%LIGHT_COMMAND_ON%% }
+        {# Send only brightness_pct as 0-100 to avoid mqtt2rvc level scaling #}
+        {"instance": 1, "brightness_pct": {{ pct }}, "command": %%LIGHT_COMMAND_ON%% }
       command_off_template: '{"instance": 1, "desired level": 0, "command": %%LIGHT_COMMAND_OFF%% }'
       schema: "template"
       optimistic: %%OPTIMISTIC_MODE%%
