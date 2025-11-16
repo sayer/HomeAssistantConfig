@@ -1453,9 +1453,14 @@ mqtt:
         {% endif %}
       command_topic: "RVC/DC_DIMMER_COMMAND_2/1/set"
       brightness_template: >-
-        {# Convert RVC raw dimmer level (0-200 where step=0.5%) to HA 0-255 #}
+        {# Convert to %: use raw RVC 0-200 scale only when present/needed; otherwise treat as already-percent #}
+        {% set raw_key_present = value_json is defined and value_json['operating status (brightness)'] is defined %}
         {% set raw = value_json.get('operating status (brightness)', value_json.get('brightness_pct', value_json.get('desired level', value_json.get('brightness', 0)))) | float(0) %}
-        {% set pct = (raw / 2.0) %}
+        {% if raw_key_present or raw > 100 %}
+          {% set pct = raw / 2.0 %}
+        {% else %}
+          {% set pct = raw %}
+        {% endif %}
         {% if pct > 100 %}{% set pct = 100 %}{% endif %}
         {% if pct < 0 %}{% set pct = 0 %}{% endif %}
         {{ (pct / 100 * 255) | round(0) }}
