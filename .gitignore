@@ -1,7 +1,4 @@
-custom_components/*
-!custom_components/climate_group/
-!custom_components/climate_group/**
-__pycache__/
+custom_components
 configuration.yaml.save
 deps
 home-assistant.log
@@ -15,7 +12,6 @@ zigbee.db
 zigbee.db-shm
 zigbee.db-wal
 www/snapshot_dash.jpg
-www/
 configuration.yaml
 configuration.yaml.bak
 coach_model_year.txt
@@ -26,6 +22,3 @@ coach_number.txt
 home-assistant-rollback.log
 update_ha_config.log
 glances_dashboard/__pycache__/
-.DS_Store
-.DS_Store
-.DS_Store

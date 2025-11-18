@@ -37,7 +37,7 @@ else
   COLOR_CYAN=""
 fi
 
-SHORT_NAMES=("ping" "restart" "updates" "info" "stats" "update_ha_config" "reboot" "ssh" "docker" "pull")
+SHORT_NAMES=("ping" "restart" "updates" "info" "stats" "update_ha_config" "reboot" "ssh" "docker" "pull" "cp")
 COMMANDS=(
   ""
   "ha core restart"
@@ -49,12 +49,15 @@ COMMANDS=(
   ""
   ""
   "cd /config && git pull origin main"
+  ""
 )
 
 SUMMARY_RESULTS=()
 CMD_TOTALS=()
 CMD_SUCCESSES=()
 CMD_FAILURES=()
+CP_SOURCES=()
+CP_DESTS=()
 OVERALL_EXIT=0
 
 for _ in "${SHORT_NAMES[@]}"; do
@@ -64,13 +67,16 @@ for _ in "${SHORT_NAMES[@]}"; do
 done
 
 usage() {
-  echo "Usage: $0 [--host <pattern>] [ping] [restart] [updates] [info] [stats] [update_ha_config] [reboot] [ssh] [docker] [pull]"
+  echo "Usage: $0 [--host <pattern>] [ping] [restart] [updates] [info] [stats] [update_ha_config] [reboot] [ssh] [docker] [pull] [cp <source> <dest>]"
   echo "  --host <pattern>   Limit commands to a single host (pattern must resolve to exactly one host)."
   echo "                     Omit --host or use '--host all' to run against every host (parallel for non-interactive commands)."
   echo "  ssh                Open an interactive SSH session to the specified host (must match exactly one host)."
   echo "  docker             Open an interactive SSH session to the specified host for Docker operations (must match exactly one host)."
   echo "  pull               Run git pull origin main in /config on the selected hosts."
   echo "  stats              Query Home Assistant template API for coach metrics JSON."
+  echo "  cp                 Copy a file from the remote Docker container used by 'docker' (auto container name match rvc2)."
+  echo "                     Example: $0 --host homeassistant-13 cp /config/remote_file.txt ."
+  echo "                     Use container:path to override container selection."
   echo "You may specify one or more commands to run on all hosts or a single selected host."
   exit 1
 }
@@ -510,6 +516,105 @@ REMOTE
             record_result "$SHORT" "$host" "$status" "$note"
           fi
           ;;
+        cp)
+          local cp_src cp_dest cp_error cp_container cp_path resolved_dest dest_dir tmp_dest
+          cp_src="${CP_SOURCES[$idx]}"
+          cp_dest="${CP_DESTS[$idx]}"
+          status=0
+          cp_error=0
+
+          if [ -z "$cp_src" ] || [ -z "$cp_dest" ]; then
+            echo "Error: cp requires both source and destination paths."
+            status=1
+            cp_error=1
+            record_result "$SHORT" "$host" "$status" "missing paths"
+          fi
+
+          cp_container="__AUTO_RVC2__"
+          cp_path="$cp_src"
+          if [ $cp_error -eq 0 ] && [[ "$cp_path" == *:* ]]; then
+            cp_container="${cp_path%%:*}"
+            cp_path="${cp_path#*:}"
+            if [ -z "$cp_container" ] || [ -z "$cp_path" ]; then
+              echo "Error: Invalid cp source; expected <container>:<path>."
+              status=1
+              cp_error=1
+              record_result "$SHORT" "$host" "$status" "invalid source"
+            fi
+          fi
+
+          if [ $cp_error -eq 0 ]; then
+            if [[ "$cp_path" != /* ]]; then
+              cp_path="/config/$cp_path"
+            fi
+
+            resolved_dest="$cp_dest"
+            if [ "$resolved_dest" = "." ]; then
+              resolved_dest="./$(basename "$cp_path")"
+            elif [ -d "$resolved_dest" ] || [[ "$resolved_dest" == */ ]]; then
+              resolved_dest="${resolved_dest%/}/$(basename "$cp_path")"
+            fi
+
+            dest_dir=$(dirname "$resolved_dest")
+            if ! mkdir -p "$dest_dir"; then
+              echo "Error: Unable to create destination directory $dest_dir."
+              status=1
+              cp_error=1
+              record_result "$SHORT" "$host" "$status" "cannot create dest"
+            fi
+          fi
+
+          tmp_dest=""
+          if [ $cp_error -eq 0 ]; then
+            tmp_dest=$(mktemp "$dest_dir/.ha_multi_cp.XXXXXX") || true
+            if [ -z "$tmp_dest" ]; then
+              echo "Error: Unable to create temporary file under $dest_dir."
+              status=1
+              cp_error=1
+              record_result "$SHORT" "$host" "$status" "no temp file"
+            fi
+          fi
+
+          if [ $cp_error -eq 0 ]; then
+          echo "Running: copy from ${cp_container:-auto-rvc2}:$cp_path on $host -> $resolved_dest"
+          ssh "${SSH_OPTS[@]}" "$ssh_target" "bash -s" -- "$cp_container" "$cp_path" <<'REMOTE' >"$tmp_dest"
+container="$1"
+path="$2"
+
+if [ -z "$container" ] || [ "$container" = "__AUTO_RVC2__" ]; then
+  container=$(sudo docker ps --filter "name=rvc2" --format "{{.Names}}" | head -n 1)
+fi
+
+if [ -z "$container" ]; then
+  echo "No container matching name=rvc2 found" >&2
+  exit 3
+fi
+
+if ! sudo docker exec "$container" sh -c "test -r \"$path\""; then
+  echo "Missing or unreadable: $container:$path" >&2
+  exit 3
+fi
+
+sudo docker exec "$container" sh -c "cat \"$path\""
+REMOTE
+            status=$?
+            if [ $status -eq 0 ]; then
+              if mv "$tmp_dest" "$resolved_dest"; then
+                record_result "$SHORT" "$host" "$status" "copied to $resolved_dest"
+              else
+                echo "Error: Failed to move temporary file into place at $resolved_dest."
+                status=1
+                cp_error=1
+                rm -f "$tmp_dest"
+                record_result "$SHORT" "$host" "$status" "move failed"
+              fi
+            else
+              rm -f "$tmp_dest"
+              echo "Error: copy failed from $cp_container:$cp_path on $host (exit code $status)."
+              record_result "$SHORT" "$host" "$status" "copy failed"
+            fi
+          fi
+          ;;
         stats)
           echo "Running: collect coach metrics via template API"
           OUTPUT=$(ssh "${SSH_OPTS[@]}" "$ssh_target" "bash -l -c '$CMD'" 2>&1)
@@ -649,16 +754,35 @@ fi
 # Build list of commands to run based on user input
 COMMANDS_TO_RUN=()
 SHORTS_TO_RUN=()
+COPY_REQUESTED=0
 PULL_REQUESTED=0
 PULL_SUCCESSES=()
 PULL_FAILURES=()
 PULL_FAILURE_LOGS=()
-for arg in "${ARGS[@]}"; do
+arg_index=0
+while [ $arg_index -lt ${#ARGS[@]} ]; do
+  arg="${ARGS[$arg_index]}"
+  if [ "$arg" = "cp" ]; then
+    if [ $(( arg_index + 2 )) -ge ${#ARGS[@]} ]; then
+      echo "Error: cp requires a source and destination path."
+      usage
+    fi
+    CP_SOURCES+=("${ARGS[$(( arg_index + 1 ))]}")
+    CP_DESTS+=("${ARGS[$(( arg_index + 2 ))]}")
+    COMMANDS_TO_RUN+=("${COMMANDS[$(find_cmd_index cp)]}")
+    SHORTS_TO_RUN+=("cp")
+    COPY_REQUESTED=1
+    arg_index=$(( arg_index + 3 ))
+    continue
+  fi
+
   found=0
   for i in "${!SHORT_NAMES[@]}"; do
     if [ "$arg" = "${SHORT_NAMES[$i]}" ]; then
       COMMANDS_TO_RUN+=("${COMMANDS[$i]}")
       SHORTS_TO_RUN+=("${SHORT_NAMES[$i]}")
+      CP_SOURCES+=("")
+      CP_DESTS+=("")
       if [ "$arg" = "pull" ]; then
         PULL_REQUESTED=1
       fi
@@ -667,12 +791,34 @@ for arg in "${ARGS[@]}"; do
     fi
   done
   if [ $found -eq 0 ]; then
+    remaining=$(( ${#ARGS[@]} - arg_index ))
+    if [ $COPY_REQUESTED -eq 0 ] && [ $remaining -eq 2 ]; then
+      CP_SOURCES+=("${ARGS[$arg_index]}")
+      CP_DESTS+=("${ARGS[$(( arg_index + 1 ))]}")
+      COMMANDS_TO_RUN+=("${COMMANDS[$(find_cmd_index cp)]}")
+      SHORTS_TO_RUN+=("cp")
+      COPY_REQUESTED=1
+      arg_index=$(( arg_index + 2 ))
+      continue
+    fi
     echo "Unknown command: $arg"
     usage
   fi
+  arg_index=$(( arg_index + 1 ))
 done
 
 progress_line info "$(printf 'Preparing %d command(s) for %d host(s)' "${#SHORTS_TO_RUN[@]}" "${#HOSTS[@]}")"
+
+if [ $COPY_REQUESTED -eq 1 ]; then
+  if [ ${#SHORTS_TO_RUN[@]} -ne 1 ]; then
+    echo "Error: The 'cp' command must be run alone."
+    exit 1
+  fi
+  if [ ${#HOSTS[@]} -ne 1 ]; then
+    echo "Error: The 'cp' command requires exactly one host (use --host to specify)."
+    exit 1
+  fi
+fi
 
 INTERACTIVE_MODE=0
 INTERACTIVE_SHORT=""
