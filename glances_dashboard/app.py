@@ -16,7 +16,7 @@ from urllib.parse import quote, urlparse, urlunparse
 
 import httpx
 import yaml
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from rich import box
@@ -32,7 +32,9 @@ SSH_CONFIG_PATH = SSH_DIR / "config"
 SSH_INCLUDE_DIRECTIVE = f"Include {SSH_SNIPPET_PATH}"
 
 HOST_METADATA: Dict[str, Dict[str, Any]] = {}
+HOST_LOOKUP: Dict[str, Dict[str, Any]] = {}
 UPDATE_COMMAND = 'bash -lc "sudo apt update && sudo apt dist-upgrade -y && sudo apt autoremove -y && sudo apt clean"'
+REBOOT_COMMAND = "sudo reboot"
 
 
 def derive_ha_dashboard_url(host_cfg: Dict[str, Any]) -> Optional[str]:
@@ -197,6 +199,7 @@ def load_config() -> Dict[str, Any]:
     if not isinstance(hosts, list):
         raise ValueError("'hosts' must be a list of host definitions.")
     HOST_METADATA.clear()
+    HOST_LOOKUP.clear()
     update_alias_specs: List[Dict[str, Any]] = []
     seen_names: set[str] = set()
     for index, host_cfg in enumerate(hosts):
@@ -214,7 +217,8 @@ def load_config() -> Dict[str, Any]:
             raise ValueError(f"Host '{name}' is missing a valid 'url'.")
         host_cfg["name"] = name
         host_cfg["url"] = raw_url.strip()
-        metadata: Dict[str, Any] = {}
+        slug = _slugify(name)
+        metadata: Dict[str, Any] = {"slug": slug}
         ha_url = derive_ha_dashboard_url(host_cfg)
         if ha_url:
             metadata["ha_dashboard_url"] = ha_url
@@ -240,6 +244,7 @@ def load_config() -> Dict[str, Any]:
         if glances_url:
             metadata["glances_url"] = glances_url
         host_cfg["__meta"] = metadata
+        HOST_LOOKUP[slug] = host_cfg
         HOST_METADATA[host_cfg["name"]] = metadata
     _sync_update_aliases(update_alias_specs)
     return config
@@ -648,6 +653,83 @@ def render_rich_table(
     return console.export_text()
 
 
+def _online_update_hosts(raw_stats: List[Tuple[str, Dict[str, Any]]]) -> List[Dict[str, Any]]:
+    online_names = {
+        name
+        for name, payload in raw_stats
+        if isinstance(payload, dict) and "__error" not in payload
+    }
+    return [
+        host_cfg
+        for host_cfg in CONFIG["hosts"]
+        if host_cfg["name"] in online_names and not host_cfg.get("update_disabled")
+    ]
+
+
+async def _run_remote_command(
+    host_cfg: Dict[str, Any],
+    command: str,
+    action: str
+) -> Dict[str, Any]:
+    """Run an arbitrary command over SSH for a single host."""
+    result: Dict[str, Any] = {"host": host_cfg["name"], "status": "skipped", "action": action}
+    ssh_user, ssh_host, ssh_port = _resolve_ssh_target(host_cfg)
+    if not ssh_user or not ssh_host:
+        result["reason"] = "ssh_disabled"
+        return result
+
+    ssh_cmd = [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "StrictHostKeyChecking=no",
+    ]
+    if ssh_port:
+        ssh_cmd.extend(["-p", str(ssh_port)])
+    ssh_cmd.append("-t")
+    ssh_cmd.append(f"{ssh_user}@{ssh_host}")
+    ssh_cmd.append(command)
+
+    try:
+        process = await asyncio.create_subprocess_exec(
+            *ssh_cmd,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        stdout, stderr = await process.communicate()
+    except Exception as err:  # pragma: no cover - defensive guard
+        result["status"] = "error"
+        result["error"] = str(err)
+        return result
+
+    result["returncode"] = process.returncode
+    if stdout:
+        lines = stdout.decode().strip().splitlines()
+        if lines:
+            result["stdout"] = lines[-1]
+    if stderr:
+        lines = stderr.decode().strip().splitlines()
+        if lines:
+            result["stderr"] = lines[-1]
+    if process.returncode == 0:
+        result["status"] = "success"
+    else:
+        result["status"] = "error"
+    return result
+
+
+async def _run_remote_update(host_cfg: Dict[str, Any]) -> Dict[str, Any]:
+    """Run the update command over SSH for a single host."""
+    update_command = host_cfg.get("update_command", UPDATE_COMMAND)
+    return await _run_remote_command(host_cfg, update_command, "update")
+
+
+async def _run_remote_reboot(host_cfg: Dict[str, Any]) -> Dict[str, Any]:
+    reboot_command = host_cfg.get("reboot_command", REBOOT_COMMAND)
+    return await _run_remote_command(host_cfg, reboot_command, "reboot")
+
+
 @APP.get("/", response_class=HTMLResponse)
 async def dashboard() -> HTMLResponse:
     """Render the HTML dashboard."""
@@ -725,3 +807,33 @@ async def config_dump() -> JSONResponse:
         "timeout_seconds": TIMEOUT_SECONDS,
         "hosts": sanitized_hosts
     })
+
+
+@APP.post("/updates", response_class=JSONResponse)
+async def trigger_updates() -> JSONResponse:
+    """Run the update command on every online host in parallel."""
+    raw_stats = await gather_hosts()
+    targets = _online_update_hosts(raw_stats)
+    if not targets:
+        return JSONResponse(content={
+            "requested": 0,
+            "results": [],
+        })
+
+    results = await asyncio.gather(*[_run_remote_update(cfg) for cfg in targets])
+    return JSONResponse(content={
+        "requested": len(targets),
+        "results": results,
+    })
+
+
+@APP.post("/hosts/{slug}/reboot", response_class=JSONResponse)
+async def reboot_host(slug: str) -> JSONResponse:
+    """Reboot a single host via SSH."""
+    host_cfg = HOST_LOOKUP.get(slug)
+    if not host_cfg:
+        raise HTTPException(status_code=404, detail="Host not found")
+    if host_cfg.get("update_disabled"):
+        raise HTTPException(status_code=400, detail="Host updates disabled")
+    result = await _run_remote_reboot(host_cfg)
+    return JSONResponse(content=result)

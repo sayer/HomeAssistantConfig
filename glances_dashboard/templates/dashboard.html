@@ -191,6 +191,17 @@
       transform: translateY(0);
     }
 
+    .action-button.danger {
+      border-color: rgba(255, 107, 107, 0.55);
+      color: var(--danger);
+      background: rgba(255, 107, 107, 0.18);
+    }
+
+    .action-button.danger:hover {
+      border-color: rgba(255, 107, 107, 0.85);
+      background: rgba(255, 107, 107, 0.25);
+    }
+
     .metric-stack {
       display: grid;
       gap: 14px;
@@ -340,6 +351,32 @@
       fill: currentColor;
     }
 
+    .pill-button {
+      border: 1px solid rgba(97, 218, 251, 0.45);
+      background: rgba(97, 218, 251, 0.15);
+      color: var(--accent);
+      border-radius: 999px;
+      padding: 8px 18px;
+      font-size: 13px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      cursor: pointer;
+      font-weight: 600;
+      transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+    }
+
+    .pill-button:hover:not([disabled]) {
+      border-color: rgba(97, 218, 251, 0.85);
+      background: rgba(97, 218, 251, 0.25);
+      transform: translateY(-1px);
+    }
+
+    .pill-button[disabled] {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
     .icon-button .icon-play { display: none; }
     .icon-button.is-paused .icon-pause { display: none; }
     .icon-button.is-paused .icon-play { display: inline; }
@@ -371,6 +408,9 @@
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4 7.58 4 4 7.58 4 12h2c0-3.31 2.69-6 6-6 1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35zM18 12c0 3.31-2.69 6-6 6-1.66 0-3.14-.69-4.22-1.78L11 13H4v7l2.35-2.35C7.8 19.1 9.79 20 12 20c4.42 0 8-3.58 8-8h-2z"/>
         </svg>
+      </button>
+      <button class="pill-button" id="bulk-updates-btn" type="button" title="Run updates on every online host">
+        Run all updates
       </button>
       <button class="icon-button" id="toggle-refresh-btn" type="button" title="Pause auto refresh" aria-pressed="false">
         <span class="sr-only">Pause auto refresh</span>
@@ -420,6 +460,9 @@
               {% if meta.get('update_url') %}
                 <a class="action-button" href="{{ meta['update_url'] }}">Run updates</a>
               {% endif %}
+              {% if meta.get('slug') %}
+                <button class="action-button danger reboot-button" type="button" data-slug="{{ meta['slug'] }}">Reboot</button>
+              {% endif %}
             </div>
           </div>
           <p class="error-message">
@@ -466,6 +509,9 @@
               </span>
               {% if meta.get('update_url') %}
                 <a class="action-button" href="{{ meta['update_url'] }}">Run updates</a>
+              {% endif %}
+              {% if meta.get('slug') %}
+                <button class="action-button danger reboot-button" type="button" data-slug="{{ meta['slug'] }}">Reboot</button>
               {% endif %}
             </div>
           </div>
@@ -588,9 +634,14 @@
       const REFRESH_INTERVAL = {{ refresh_seconds | int }} * 1000;
       const refreshBtn = document.getElementById('refresh-btn');
       const toggleBtn = document.getElementById('toggle-refresh-btn');
+      const bulkBtn = document.getElementById('bulk-updates-btn');
+      const rebootButtons = document.querySelectorAll('.reboot-button');
       const stateEl = document.getElementById('auto-refresh-state');
       let paused = false;
       let timerId = null;
+      const REFRESH_MESSAGE = `Auto refresh every {{ refresh_seconds }}s`;
+      let extraStateMessage = '';
+      let extraStateTimeout = null;
 
       function scheduleRefresh() {
         clearTimeout(timerId);
@@ -603,7 +654,8 @@
 
       function updateStateText() {
         if (stateEl) {
-          stateEl.textContent = paused ? 'Auto refresh paused' : `Auto refresh every {{ refresh_seconds }}s`;
+          const base = paused ? 'Auto refresh paused' : REFRESH_MESSAGE;
+          stateEl.textContent = extraStateMessage ? `${base} · ${extraStateMessage}` : base;
         }
         if (toggleBtn) {
           toggleBtn.classList.toggle('is-paused', paused);
@@ -613,6 +665,54 @@
           if (sr) {
             sr.textContent = paused ? 'Resume auto refresh' : 'Pause auto refresh';
           }
+        }
+      }
+
+      function setExtraStateMessage(message, durationMs = 8000) {
+        extraStateMessage = message || '';
+        updateStateText();
+        if (extraStateTimeout) {
+          clearTimeout(extraStateTimeout);
+          extraStateTimeout = null;
+        }
+        if (message && durationMs > 0) {
+          extraStateTimeout = setTimeout(() => {
+            extraStateMessage = '';
+            updateStateText();
+          }, durationMs);
+        }
+      }
+
+      async function triggerBulkUpdates() {
+        if (!bulkBtn) {
+          return;
+        }
+        const originalLabel = bulkBtn.textContent;
+        bulkBtn.disabled = true;
+        bulkBtn.textContent = 'Running...';
+        setExtraStateMessage('Running updates…', 0);
+        try {
+          const response = await fetch('/updates', { method: 'POST' });
+          const payload = await response.json();
+          const requested = payload.requested || 0;
+          const results = Array.isArray(payload.results) ? payload.results : [];
+          const success = results.filter((entry) => entry.status === 'success').length;
+          const failures = results.filter((entry) => entry.status === 'error').length;
+          if (!requested) {
+            setExtraStateMessage('No online hosts to update');
+          } else {
+            let message = `Updates ${success}/${requested} succeeded`;
+            if (failures) {
+              message += `, ${failures} failed`;
+            }
+            setExtraStateMessage(message);
+          }
+        } catch (error) {
+          console.error('Run updates failed', error);
+          setExtraStateMessage('Failed to run updates');
+        } finally {
+          bulkBtn.disabled = false;
+          bulkBtn.textContent = originalLabel;
         }
       }
 
@@ -629,6 +729,45 @@
           scheduleRefresh();
         });
       }
+
+      if (bulkBtn) {
+        bulkBtn.addEventListener('click', () => {
+          triggerBulkUpdates();
+        });
+      }
+
+      rebootButtons.forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const slug = btn.dataset.slug;
+          if (!slug) return;
+          if (!window.confirm(`Reboot ${slug.replace(/-/g, ' ')}?`)) {
+            return;
+          }
+          const originalText = btn.textContent;
+          btn.disabled = true;
+          btn.textContent = 'Rebooting...';
+          setExtraStateMessage(`Rebooting ${slug}`, 0);
+          try {
+            const response = await fetch(`/hosts/${slug}/reboot`, { method: 'POST' });
+            if (!response.ok) {
+              throw new Error(await response.text());
+            }
+            const payload = await response.json();
+            const status = payload.status || 'unknown';
+            if (status === 'success') {
+              setExtraStateMessage(`Reboot sent to ${payload.host}`, 6000);
+            } else {
+              setExtraStateMessage(`Reboot failed for ${payload.host || slug}`, 6000);
+            }
+          } catch (error) {
+            console.error('Reboot failed', error);
+            setExtraStateMessage(`Reboot failed for ${slug}`, 6000);
+          } finally {
+            btn.disabled = false;
+            btn.textContent = originalText;
+          }
+        });
+      });
 
       updateStateText();
       scheduleRefresh();

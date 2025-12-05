@@ -55,11 +55,16 @@ validated.
   sudo apt clean`. Set `update_command` per host (or globally) if you need a
   different maintenance routine, or add `update_disabled: true` to hide the
   button for a host.
+- A **Reboot** button on each card calls `/hosts/<slug>/reboot`, which SSHes in
+  and runs `sudo reboot` by default. Override per host with `reboot_command`.
 - The app maintains SSH host aliases in `~/.ssh/glances-dashboard` (and adds
   `Include ~/.ssh/glances-dashboard` to `~/.ssh/config` if needed) so those
   update buttons can target `ssh://glances-update-…` URLs that run the apt
   command automatically. Feel free to tweak or remove the generated aliases—just
   keep the Include line if you still want the dashboard buttons to work.
+- A **Run all updates** button in the header calls `/updates`, which checks every
+  currently online host and runs the update command in parallel via SSH. The
+  status chip briefly shows how many hosts succeeded or failed.
 
 ### Pending update counts
 
