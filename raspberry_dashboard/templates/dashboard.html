@@ -564,9 +564,6 @@
                   {% if updates_apt is not none %} · {% endif %}
                   Docker: {{ updates_docker }}
                 {% endif %}
-                {% if updates_apt is none and updates_docker is none %}
-                  –
-                {% endif %}
               </span>
             </div>
             {% endif %}

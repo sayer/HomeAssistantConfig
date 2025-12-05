@@ -1,0 +1,22 @@
+default_api_version: 4
+refresh_seconds: 900
+timeout_seconds: 10
+coach_stats:
+  enabled: false
+hosts:
+  - name: Raspberry Pi 01
+    url: http://raspberrypi1.local:61208
+  - name: Raspberry Pi 02
+    url: http://raspberrypi2.local:61208
+  - name: Raspberry Pi 03
+    url: http://raspberrypi3.local:61208
+  - name: Raspberry Pi 04
+    url: http://raspberrypi4.local:61208
+  - name: Raspberry Pi 05
+    url: http://raspberrypi5.local:61208
+  - name: Raspberry Pi 07
+    url: http://raspberrypi7.local:61208
+  - name: Raspberry Pi 08
+    url: http://raspberrypi8.local:61208
+  - name: Raspberry PDP
+    url: http://raspberry-pdp.local:61208

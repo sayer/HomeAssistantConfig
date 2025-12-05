@@ -1,4 +1,4 @@
-default_api_version: 3
+default_api_version: 4
 refresh_seconds: 900
 timeout_seconds: 10
 coach_stats:
@@ -10,24 +10,24 @@ coach_stats:
   connect_timeout: 5
 hosts:
   - name: Home Assistant
-    url: http://homeassistant.tail73c84.ts.net:61209
+    url: http://homeassistant.tail73c84.ts.net:61208
   - name: Home Assistant 03
-    url: http://homeassistant-3.tail73c84.ts.net:61209
+    url: http://homeassistant-3.tail73c84.ts.net:61208
   - name: Home Assistant 04
-    url: http://homeassistant-4.tail73c84.ts.net:61209
+    url: http://homeassistant-4.tail73c84.ts.net:61208
   - name: Home Assistant 08
-    url: http://homeassistant-8.tail73c84.ts.net:61209
+    url: http://homeassistant-8.tail73c84.ts.net:61208
   - name: Home Assistant 12
-    url: http://homeassistant-12.tail73c84.ts.net:61209
+    url: http://homeassistant-12.tail73c84.ts.net:61208
   - name: Home Assistant 13
-    url: http://homeassistant-13.tail73c84.ts.net:61209
+    url: http://homeassistant-13.tail73c84.ts.net:61208
   - name: Home Assistant 16
-    url: http://homeassistant-16.tail73c84.ts.net:61209
+    url: http://homeassistant-16.tail73c84.ts.net:61208
   - name: Home Assistant 17
-    url: http://homeassistant-17.tail73c84.ts.net:61209
+    url: http://homeassistant-17.tail73c84.ts.net:61208
   - name: Home Assistant 18
-    url: http://homeassistant-18.tail73c84.ts.net:61209
+    url: http://homeassistant-18.tail73c84.ts.net:61208
   - name: Home Assistant 19
-    url: http://homeassistant-19.tail73c84.ts.net:61209
+    url: http://homeassistant-19.tail73c84.ts.net:61208
   - name: Home Assistant 20
-    url: http://homeassistant-20.tail73c84.ts.net:61209
+    url: http://homeassistant-20.tail73c84.ts.net:61208

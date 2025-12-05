@@ -30,16 +30,59 @@ Mac monitoring station and only depends on HTTP access to each add-on.
 
 ## Configuration
 
-- `default_api_version`: Defaults to `3`, matching the add-on log output
-  (`.../api/3/`). Override per host if some instances expose a different
-  version.
+- `default_api_version`: Defaults to `4`, matching the Glances 4 REST namespace
+  (`.../api/4/`). Override per host if some instances expose a different
+  version (for legacy Glances 3 nodes, set `api_version: 3` per host).
 - `refresh_seconds`: Controls the auto-refresh interval for the dashboard.
 - `timeout_seconds`: HTTP timeout per request.
 - `hosts`: List of monitored systems. Optional keys: `api_version`,
-  `username`, and `password` for HTTP Basic Auth. You can also set
-  `ha_port` (defaults to `8123`) or `ha_url` to control the link target
+  `username`, and `password` for HTTP Basic Auth. Point each `url` at the
+  Glances web server base (defaults to `http://<host>:61208`). You can also
+  set `ha_port` (defaults to `8123`) or `ha_url` to control the link target
   when clicking a host name in the dashboard.
 
 Restart the uvicorn process after editing `hosts.yaml` so the loader picks up
 the changes. Consider adding a LaunchAgent for unattended startup once
 validated.
+
+### SSH shortcuts & remote actions
+
+- Clicking a host title launches `Terminal.app` and opens an SSH session as the
+  `sayer` user (via `ssh://` links). Override per-host behaviour by setting
+  `ssh_user`, `ssh_host`, `ssh_port`, or `ssh_disabled` inside `hosts.yaml`.
+- Each card also includes a **Run updates** button that executes, on the remote
+  host, `sudo apt update && sudo apt dist-upgrade -y && sudo apt autoremove -y &&
+  sudo apt clean`. Set `update_command` per host (or globally) if you need a
+  different maintenance routine, or add `update_disabled: true` to hide the
+  button for a host.
+- The app maintains SSH host aliases in `~/.ssh/glances-dashboard` (and adds
+  `Include ~/.ssh/glances-dashboard` to `~/.ssh/config` if needed) so those
+  update buttons can target `ssh://glances-update-…` URLs that run the apt
+  command automatically. Feel free to tweak or remove the generated aliases—just
+  keep the Include line if you still want the dashboard buttons to work.
+
+### Pending update counts
+
+If your `coach_stats` command returns JSON that includes an `updates` object, the
+dashboard surfaces those counts inside each host card. Example payload:
+
+```json
+{
+  "coach": {"owner": "Coach 12"},
+  "updates": {"apt_pending": 4, "docker_pending": 1}
+}
+```
+
+The remote command can be anything—from `apt list --upgradable | tail -n +2 |
+wc -l` to a Docker update checker—as long as it prints JSON with the keys
+`apt_pending`/`apt` and `docker_pending`/`docker`. Edit `coach_stats.command`
+in `hosts.yaml` (or per host) to run your script over SSH. Hosts without this
+data simply omit the Updates line.
+
+## Raspberry dashboard copy
+
+A second copy of this project lives in `../raspberry_dashboard` and targets the
+Raspberry Pi fleet (`raspberrypi1.local`–`raspberrypi8.local` plus
+`raspberry-pdp.local`). Start it the same way, just `cd` into that directory and
+pick a different uvicorn port (for example `--port 8081`) so both dashboards can
+run simultaneously.
