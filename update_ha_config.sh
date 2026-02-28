@@ -168,8 +168,10 @@ output_has_config_blockers() {
     return 1
   fi
 
+  # Treat only hard config validation/integration errors as blockers.
+  # Unknown device/entity warnings are common across mixed coach profiles.
   if printf '%s\n' "$check_output" | grep -Eiq \
-    'Incorrect config|Successful config \(partial\)|General Warnings:|(^|[[:space:]])ERROR:|Platform error'; then
+    'Incorrect config|Successful config \(partial\)|extra keys not allowed|Platform error|Integration .+ not found|Invalid config'; then
     return 0
   fi
 
