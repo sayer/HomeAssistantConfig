@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Aggregate Glances REST data from multiple Home Assistant hosts."""
+"""Aggregate Glances REST data from multiple Raspberry Pi hosts."""
 
 
 from __future__ import annotations
@@ -8,15 +8,15 @@ import asyncio
 import json
 import re
 import shlex
-from datetime import datetime
 import os
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 from urllib.parse import quote, urlparse, urlunparse
 
 import httpx
 import yaml
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from rich import box
@@ -35,31 +35,7 @@ HOST_METADATA: Dict[str, Dict[str, Any]] = {}
 HOST_LOOKUP: Dict[str, Dict[str, Any]] = {}
 UPDATE_COMMAND = 'bash -lc "sudo apt update && sudo apt dist-upgrade -y && sudo apt autoremove -y && sudo apt clean"'
 REBOOT_COMMAND = "sudo reboot"
-
-
-def derive_ha_dashboard_url(host_cfg: Dict[str, Any]) -> Optional[str]:
-    """Compute the Home Assistant dashboard URL for a host."""
-    if "ha_url" in host_cfg:
-        return host_cfg["ha_url"]
-
-    base_url = host_cfg.get("url")
-    if not base_url:
-        return None
-
-    parsed = urlparse(base_url)
-    hostname = parsed.hostname
-    if not hostname:
-        return None
-
-    try:
-        port = int(host_cfg.get("ha_port", 8123))
-    except (TypeError, ValueError):
-        port = 8123
-
-    scheme = parsed.scheme or "http"
-    netloc = f"{hostname}:{port}"
-    path = "/dashboard-remote/0"
-    return urlunparse((scheme, netloc, path, "", "", ""))
+RESTART_COMMAND = "sudo systemctl restart glances || sudo systemctl restart glances.service"
 
 
 def _resolve_ssh_target(host_cfg: Dict[str, Any]) -> Tuple[Optional[str], Optional[str], Optional[int]]:
@@ -114,6 +90,24 @@ def derive_glances_url(host_cfg: Dict[str, Any]) -> Optional[str]:
     scheme = parsed.scheme or "http"
     netloc = f"{hostname}:{port}"
     return urlunparse((scheme, netloc, "/", "", "", ""))
+
+
+def derive_vnc_url(host_cfg: Dict[str, Any]) -> Optional[str]:
+    """Compute the VNC URL for a host."""
+    if host_cfg.get("vnc_disabled"):
+        return None
+
+    vnc_host = host_cfg.get("vnc_host")
+    if not vnc_host:
+        _, ssh_host, _ = _resolve_ssh_target(host_cfg)
+        vnc_host = ssh_host
+    if not vnc_host:
+        parsed = urlparse(host_cfg.get("url", ""))
+        vnc_host = parsed.hostname
+    if not vnc_host:
+        return None
+
+    return urlunparse(("vnc", vnc_host, "", "", "", ""))
 
 
 def _slugify(value: str) -> str:
@@ -216,10 +210,10 @@ def load_config() -> Dict[str, Any]:
         host_cfg["name"] = name
         host_cfg["url"] = raw_url.strip()
         slug = _slugify(name)
-        metadata: Dict[str, Any] = {"slug": slug}
-        ha_url = derive_ha_dashboard_url(host_cfg)
-        if ha_url:
-            metadata["ha_dashboard_url"] = ha_url
+        metadata: Dict[str, Any] = {
+            "slug": slug,
+            "restart_allowed": not bool(host_cfg.get("restart_disabled")),
+        }
         ssh_url = derive_ssh_url(host_cfg)
         if ssh_url:
             metadata["ssh_url"] = ssh_url
@@ -241,6 +235,9 @@ def load_config() -> Dict[str, Any]:
         glances_url = derive_glances_url(host_cfg)
         if glances_url:
             metadata["glances_url"] = glances_url
+        vnc_url = derive_vnc_url(host_cfg)
+        if vnc_url:
+            metadata["vnc_url"] = vnc_url
         host_cfg["__meta"] = metadata
         HOST_LOOKUP[slug] = host_cfg
         HOST_METADATA[host_cfg["name"]] = metadata
@@ -723,6 +720,12 @@ async def _run_remote_reboot(host_cfg: Dict[str, Any]) -> Dict[str, Any]:
     return await _run_remote_command(host_cfg, reboot_command, "reboot")
 
 
+async def _run_remote_restart(host_cfg: Dict[str, Any]) -> Dict[str, Any]:
+    """Restart the configured monitoring service over SSH for a single host."""
+    restart_command = host_cfg.get("restart_command", RESTART_COMMAND)
+    return await _run_remote_command(host_cfg, restart_command, "restart")
+
+
 @APP.get("/", response_class=HTMLResponse)
 async def dashboard() -> HTMLResponse:
     """Render the HTML dashboard."""
@@ -792,7 +795,6 @@ async def config_dump() -> JSONResponse:
             "name": host_cfg["name"],
             "url": host_cfg["url"],
             "api_version": host_cfg.get("api_version", DEFAULT_API_VERSION),
-            "ha_dashboard_url": HOST_METADATA.get(host_cfg["name"], {}).get("ha_dashboard_url"),
         })
     return JSONResponse(content={
         "default_api_version": DEFAULT_API_VERSION,
@@ -828,4 +830,16 @@ async def reboot_host(slug: str) -> JSONResponse:
     if host_cfg.get("update_disabled"):
         raise HTTPException(status_code=400, detail="Host updates disabled")
     result = await _run_remote_reboot(host_cfg)
+    return JSONResponse(content=result)
+
+
+@APP.post("/hosts/{slug}/restart", response_class=JSONResponse)
+async def restart_host(slug: str) -> JSONResponse:
+    """Restart the monitoring service on a single host via SSH."""
+    host_cfg = HOST_LOOKUP.get(slug)
+    if not host_cfg:
+        raise HTTPException(status_code=404, detail="Host not found")
+    if host_cfg.get("restart_disabled"):
+        raise HTTPException(status_code=400, detail="Host restart disabled")
+    result = await _run_remote_restart(host_cfg)
     return JSONResponse(content=result)

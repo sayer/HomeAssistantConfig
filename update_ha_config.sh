@@ -13,6 +13,7 @@ LOG_FILE="/tmp/update_ha_config.log"
 REPO_DIR="/config"
 CONFIG_SCRIPT="${REPO_DIR}/update_config.sh"
 PYTHON_BIN="$(command -v python3 || command -v python || true)"
+SCRIPT_VERSION="2026-02-28.3"
 
 # Ensure HA CLI picks up the repository config directory unless already set
 if [ -z "${HASS_CONFIG:-}" ]; then
@@ -105,21 +106,110 @@ capture_git_state() {
 }
 
 run_config_check() {
-  local output status
+  local output=""
+  local status=1
+  local source="ha-cli"
+  local attempt=1
+  local max_attempts=4
+  local delay_seconds=4
+  local busy_re='Another job is running for job group (container_homeassistant|home_assistant_core)'
 
-  if command -v docker >/dev/null 2>&1 && docker ps --format '{{.Names}}' 2>/dev/null | grep -qx 'homeassistant'; then
-    output=$(docker exec homeassistant python -m homeassistant --script check_config -c "$REPO_DIR" 2>&1)
+  while [ "$attempt" -le "$max_attempts" ]; do
+    if command -v docker >/dev/null 2>&1 && docker ps --format '{{.Names}}' 2>/dev/null | grep -qx 'homeassistant'; then
+      output=$(docker exec homeassistant python -m homeassistant --script check_config -c "$REPO_DIR" 2>&1)
+      status=$?
+      source="docker"
+      if [ $status -eq 0 ]; then
+        :
+      elif printf '%s\n' "$output" | grep -Eq "$busy_re"; then
+        if [ "$attempt" -lt "$max_attempts" ]; then
+          log_message "NOTICE: docker config check busy (attempt ${attempt}/${max_attempts}); retrying in ${delay_seconds}s" >&2
+          sleep "$delay_seconds"
+          attempt=$((attempt + 1))
+          continue
+        fi
+      else
+        log_message "WARNING: docker-based config check failed (exit $status); falling back to ha CLI" >&2
+      fi
+    fi
+
+    if [ "$source" != "docker" ] || [ $status -ne 0 ]; then
+      local cmd="ha core check --config $REPO_DIR"
+      output=$(HOME="$HA_CLI_HOME" HASS_CONFIG="$REPO_DIR" bash -lc "$cmd" 2>&1)
+      status=$?
+      source="ha-cli"
+    fi
+
+    if printf '%s\n' "$output" | grep -Eq "$busy_re"; then
+      if [ "$attempt" -lt "$max_attempts" ]; then
+        log_message "NOTICE: ha core check busy (attempt ${attempt}/${max_attempts}); retrying in ${delay_seconds}s" >&2
+        sleep "$delay_seconds"
+        attempt=$((attempt + 1))
+        continue
+      fi
+    fi
+
+    break
+  done
+
+  # HA can sometimes return exit 0 while still reporting invalid/partial config.
+  if [ $status -eq 0 ] && output_has_config_blockers "$output"; then
+    log_message "WARNING: ${source} config check returned exit 0 but reported blockers" >&2
+    status=1
+  fi
+
+  printf '%s' "$output"
+  return $status
+}
+
+output_has_config_blockers() {
+  local check_output="$1"
+  if [ -z "$check_output" ]; then
+    return 1
+  fi
+
+  if printf '%s\n' "$check_output" | grep -Eiq \
+    'Incorrect config|Successful config \(partial\)|General Warnings:|(^|[[:space:]])ERROR:|Platform error'; then
+    return 0
+  fi
+
+  return 1
+}
+
+restart_home_assistant_with_retry() {
+  local max_attempts=5
+  local attempt=1
+  local delay_seconds=5
+  local output=""
+  local status=1
+
+  while [ "$attempt" -le "$max_attempts" ]; do
+    output=$(ha core restart 2>&1)
     status=$?
     if [ $status -eq 0 ]; then
       printf '%s' "$output"
       return 0
     fi
-    log_message "WARNING: docker-based config check failed (exit $status); falling back to ha CLI"
-  fi
 
-  local cmd="ha core check --config $REPO_DIR"
-  output=$(HOME="$HA_CLI_HOME" HASS_CONFIG="$REPO_DIR" bash -lc "$cmd" 2>&1)
-  status=$?
+    if printf '%s\n' "$output" | grep -q "Another job is running for job group home_assistant_core"; then
+      if [ "$attempt" -lt "$max_attempts" ]; then
+        log_message "NOTICE: Home Assistant core busy (attempt ${attempt}/${max_attempts}); retrying in ${delay_seconds}s"
+        sleep "$delay_seconds"
+        if [ "$delay_seconds" -lt 30 ]; then
+          delay_seconds=$((delay_seconds * 2))
+          if [ "$delay_seconds" -gt 30 ]; then
+            delay_seconds=30
+          fi
+        fi
+      fi
+    else
+      printf '%s' "$output"
+      return $status
+    fi
+
+    attempt=$((attempt + 1))
+  done
+
   printf '%s' "$output"
   return $status
 }
@@ -200,10 +290,19 @@ check_core_update() {
   local python_parse_failed=0
   if [ -n "$PYTHON_BIN" ]; then
     local parsed
-    if ! parsed=$(printf '%s' "$core_raw" | "$PYTHON_BIN" - <<'PY'
-import json, sys
+    if ! parsed=$(CORE_RAW="$core_raw" "$PYTHON_BIN" - <<'PY'
+import json
+import os
+import sys
+
+raw = os.environ.get("CORE_RAW", "")
+start = raw.find("{")
+end = raw.rfind("}")
+if start != -1 and end != -1 and end >= start:
+    raw = raw[start:end + 1]
+
 try:
-    data = json.load(sys.stdin)
+    data = json.loads(raw)
 except Exception:
     sys.exit(1)
 core = data.get("data")
@@ -271,10 +370,19 @@ update_addons() {
   local parse_failed=0
   local python_parse_failed=0
   if [ -n "$PYTHON_BIN" ]; then
-    slugs=$(printf '%s' "$addons_raw" | "$PYTHON_BIN" - <<'PY'
-import json, sys
+    slugs=$(ADDONS_RAW="$addons_raw" "$PYTHON_BIN" - <<'PY'
+import json
+import os
+import sys
+
+raw = os.environ.get("ADDONS_RAW", "")
+start = raw.find("{")
+end = raw.rfind("}")
+if start != -1 and end != -1 and end >= start:
+    raw = raw[start:end + 1]
+
 try:
-    data = json.load(sys.stdin)
+    data = json.loads(raw)
 except Exception:
     sys.exit(1)
 addons = data.get("data", {}).get("addons", [])
@@ -509,6 +617,7 @@ PY
 main() {
   ensure_ha_core_uses_repo
   log_message "Starting HA configuration update process"
+  log_message "Script version: $SCRIPT_VERSION"
 
   if [ ! -d "$REPO_DIR/.git" ]; then
     log_message "ERROR: Git repository not found at $REPO_DIR"
@@ -595,7 +704,16 @@ main() {
     log_message "WARNING: No write permission to $REPO_DIR/.git directory, skipping git operations"
     GIT_RESULT="skipped (read-only)"
   else
-    if [ $REPO_DIRTY -eq 1 ]; then
+    local unmerged_files
+    unmerged_files=$(git ls-files -u | awk '{print $4}' | sort -u)
+    if [ -n "$unmerged_files" ]; then
+      log_message "ERROR: Repository has unmerged files; skipping git pull until conflicts are resolved"
+      while IFS= read -r file; do
+        [ -n "$file" ] && log_message "git conflict: $file"
+      done <<<"$unmerged_files"
+      GIT_RESULT="blocked (unmerged files)"
+      EXIT_CODE=1
+    elif [ $REPO_DIRTY -eq 1 ]; then
       STASH_NAME="ha-update-autostash-$(date +%s)"
       log_message "NOTICE: Local tracked changes detected; stashing as $STASH_NAME to allow git pull"
       STASH_OUTPUT=$(git stash push -m "$STASH_NAME" 2>&1)
@@ -623,50 +741,52 @@ main() {
       fi
     fi
 
-    log_message "Running git pull origin main..."
-    PULL_OUTPUT=$(git pull origin main 2>&1)
-    PULL_STATUS=$?
+    if [ "$GIT_RESULT" != "blocked (unmerged files)" ]; then
+      log_message "Running git pull origin main..."
+      PULL_OUTPUT=$(git pull origin main 2>&1)
+      PULL_STATUS=$?
 
-    if [ -n "$PULL_OUTPUT" ]; then
-      while IFS= read -r line; do
-        log_message "git: $line"
-      done <<<"$PULL_OUTPUT"
-    fi
-
-    if [ $PULL_STATUS -eq 0 ]; then
-      if echo "$PULL_OUTPUT" | grep -qi "already up to date"; then
-        GIT_RESULT="no updates"
-      else
-        GIT_RESULT="updated"
+      if [ -n "$PULL_OUTPUT" ]; then
+        while IFS= read -r line; do
+          log_message "git: $line"
+        done <<<"$PULL_OUTPUT"
       fi
-      log_message "Git pull origin main completed"
-    else
-      log_message "ERROR: git pull origin main failed (exit code: $PULL_STATUS)"
-      GIT_RESULT="failed ($PULL_STATUS)"
-      EXIT_CODE=1
-    fi
 
-    if [ $STASH_CREATED -eq 1 ]; then
       if [ $PULL_STATUS -eq 0 ]; then
-        log_message "Restoring stashed changes from $STASH_REF..."
-        POP_OUTPUT=$(git stash pop "$STASH_REF" 2>&1)
-        POP_STATUS=$?
-
-        if [ -n "$POP_OUTPUT" ]; then
-          while IFS= read -r line; do
-            [ -n "$line" ] && log_message "stash: $line"
-          done <<<"$POP_OUTPUT"
-        fi
-
-        if [ $POP_STATUS -eq 0 ]; then
-          log_message "Stashed changes restored successfully"
+        if echo "$PULL_OUTPUT" | grep -qi "already up to date"; then
+          GIT_RESULT="no updates"
         else
-          log_message "ERROR: Failed to reapply stashed changes (exit code: $POP_STATUS)"
-          GIT_RESULT="$GIT_RESULT; stash pop failed"
-          EXIT_CODE=1
+          GIT_RESULT="updated"
         fi
+        log_message "Git pull origin main completed"
       else
-        log_message "NOTICE: Local changes remain stashed at $STASH_REF due to git pull failure. Reapply manually with 'git stash pop $STASH_REF' after resolving issues."
+        log_message "ERROR: git pull origin main failed (exit code: $PULL_STATUS)"
+        GIT_RESULT="failed ($PULL_STATUS)"
+        EXIT_CODE=1
+      fi
+
+      if [ $STASH_CREATED -eq 1 ]; then
+        if [ $PULL_STATUS -eq 0 ]; then
+          log_message "Restoring stashed changes from $STASH_REF..."
+          POP_OUTPUT=$(git stash pop "$STASH_REF" 2>&1)
+          POP_STATUS=$?
+
+          if [ -n "$POP_OUTPUT" ]; then
+            while IFS= read -r line; do
+              [ -n "$line" ] && log_message "stash: $line"
+            done <<<"$POP_OUTPUT"
+          fi
+
+          if [ $POP_STATUS -eq 0 ]; then
+            log_message "Stashed changes restored successfully"
+          else
+            log_message "ERROR: Failed to reapply stashed changes (exit code: $POP_STATUS)"
+            GIT_RESULT="$GIT_RESULT; stash pop failed"
+            EXIT_CODE=1
+          fi
+        else
+          log_message "NOTICE: Local changes remain stashed at $STASH_REF due to git pull failure. Reapply manually with 'git stash pop $STASH_REF' after resolving issues."
+        fi
       fi
     fi
   fi
@@ -823,7 +943,7 @@ main() {
     fi
 
     log_message "Reloading Home Assistant YAML configuration..."
-    RELOAD_OUTPUT=$(ha core restart 2>&1)
+    RELOAD_OUTPUT=$(restart_home_assistant_with_retry 2>&1)
     RELOAD_STATUS=$?
 
     if [ $RELOAD_STATUS -eq 0 ]; then

@@ -30,9 +30,8 @@ Mac monitoring station and only depends on HTTP access to each add-on.
 
 ## Configuration
 
-- `default_api_version`: Defaults to `4`, matching the Glances 4 REST namespace
-  (`.../api/4/`). Override per host if some instances expose a different
-  version (for legacy Glances 3 nodes, set `api_version: 3` per host).
+- `default_api_version`: Defaults to `3` unless overridden here. The service will
+  still fall back across common Glances API versions automatically when polling.
 - `refresh_seconds`: Controls the auto-refresh interval for the dashboard.
 - `timeout_seconds`: HTTP timeout per request.
 - `hosts`: List of monitored systems. Optional keys: `api_version`,
@@ -47,24 +46,12 @@ validated.
 
 ### SSH shortcuts & remote actions
 
-- Clicking a host title launches `Terminal.app` and opens an SSH session as the
-  `sayer` user (via `ssh://` links). Override per-host behaviour by setting
-  `ssh_user`, `ssh_host`, `ssh_port`, or `ssh_disabled` inside `hosts.yaml`.
-- Each card also includes a **Run updates** button that executes, on the remote
-  host, `sudo apt update && sudo apt dist-upgrade -y && sudo apt autoremove -y &&
-  sudo apt clean`. Set `update_command` per host (or globally) if you need a
-  different maintenance routine, or add `update_disabled: true` to hide the
-  button for a host.
-- A **Reboot** button on each card calls `/hosts/<slug>/reboot`, which SSHes in
-  and runs `sudo reboot` by default. Override per host with `reboot_command`.
-- The app maintains SSH host aliases in `~/.ssh/glances-dashboard` (and adds
-  `Include ~/.ssh/glances-dashboard` to `~/.ssh/config` if needed) so those
-  update buttons can target `ssh://glances-update-…` URLs that run the apt
-  command automatically. Feel free to tweak or remove the generated aliases—just
-  keep the Include line if you still want the dashboard buttons to work.
-- A **Run all updates** button in the header calls `/updates`, which checks every
-  currently online host and runs the update command in parallel via SSH. The
-  status chip briefly shows how many hosts succeeded or failed.
+- Hosts with SSH enabled include an **SSH** shortcut button (via `ssh://` links)
+  that macOS routes through `Terminal.app`. Override per-host behaviour by
+  setting `ssh_user`, `ssh_host`, `ssh_port`, or `ssh_disabled` inside `hosts.yaml`.
+- Remote reboot is exposed via `POST /hosts/{slug}/reboot` but is **disabled by
+  default**. To enable it, set `remote_actions_enabled: true` and optionally
+  configure `remote_actions_token` (sent as the `X-Auth-Token` header).
 
 ### Pending update counts
 

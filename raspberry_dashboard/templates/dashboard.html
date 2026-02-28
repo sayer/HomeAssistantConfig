@@ -165,6 +165,13 @@
       align-items: flex-end;
     }
 
+    .action-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
     .action-button {
       display: inline-flex;
       align-items: center;
@@ -417,6 +424,7 @@
     {% for host_name, payload, metrics in stats %}
       {% set meta = host_meta.get(host_name, {}) %}
       {% set ha_url = meta.get('ha_dashboard_url') %}
+      {% set glances_url = meta.get('glances_url') %}
       {% set ssh_url = meta.get('ssh_url') %}
       {% set updates_apt = metrics.get('updates_apt_pending') %}
       {% set updates_docker = metrics.get('updates_docker_pending') %}
@@ -430,6 +438,8 @@
                   <a href="{{ ssh_url }}">{{ host_name }}</a>
                 {% elif ha_url %}
                   <a href="{{ ha_url }}" target="_blank" rel="noopener">{{ host_name }}</a>
+                {% elif glances_url %}
+                  <a href="{{ glances_url }}" target="_blank" rel="noopener">{{ host_name }}</a>
                 {% else %}
                   {{ host_name }}
                 {% endif %}
@@ -447,7 +457,24 @@
                 {% endif %}
               </span>
               {% if meta.get('update_url') %}
-                <a class="action-button" href="{{ meta['update_url'] }}">Run updates</a>
+                <div class="action-row">
+                  <a class="action-button" href="{{ meta['update_url'] }}">Run updates</a>
+                  {% if meta.get('vnc_url') %}
+                    <a class="action-button" href="{{ meta['vnc_url'] }}">VNC</a>
+                  {% endif %}
+                  {% if meta.get('slug') %}
+                    <button class="action-button danger reboot-button" type="button" data-slug="{{ meta['slug'] }}">Reboot</button>
+                  {% endif %}
+                </div>
+              {% elif meta.get('vnc_url') and meta.get('slug') %}
+                <div class="action-row">
+                  <a class="action-button" href="{{ meta['vnc_url'] }}">VNC</a>
+                  <button class="action-button danger reboot-button" type="button" data-slug="{{ meta['slug'] }}">Reboot</button>
+                </div>
+              {% elif meta.get('vnc_url') %}
+                <a class="action-button" href="{{ meta['vnc_url'] }}">VNC</a>
+              {% elif meta.get('slug') %}
+                <button class="action-button danger reboot-button" type="button" data-slug="{{ meta['slug'] }}">Reboot</button>
               {% endif %}
             </div>
           </div>
@@ -477,6 +504,8 @@
                   <a href="{{ ssh_url }}">{{ host_name }}</a>
                 {% elif ha_url %}
                   <a href="{{ ha_url }}" target="_blank" rel="noopener">{{ host_name }}</a>
+                {% elif glances_url %}
+                  <a href="{{ glances_url }}" target="_blank" rel="noopener">{{ host_name }}</a>
                 {% else %}
                   {{ host_name }}
                 {% endif %}
@@ -494,7 +523,24 @@
                 {% endif %}
               </span>
               {% if meta.get('update_url') %}
-                <a class="action-button" href="{{ meta['update_url'] }}">Run updates</a>
+                <div class="action-row">
+                  <a class="action-button" href="{{ meta['update_url'] }}">Run updates</a>
+                  {% if meta.get('vnc_url') %}
+                    <a class="action-button" href="{{ meta['vnc_url'] }}">VNC</a>
+                  {% endif %}
+                  {% if meta.get('slug') %}
+                    <button class="action-button danger reboot-button" type="button" data-slug="{{ meta['slug'] }}">Reboot</button>
+                  {% endif %}
+                </div>
+              {% elif meta.get('vnc_url') and meta.get('slug') %}
+                <div class="action-row">
+                  <a class="action-button" href="{{ meta['vnc_url'] }}">VNC</a>
+                  <button class="action-button danger reboot-button" type="button" data-slug="{{ meta['slug'] }}">Reboot</button>
+                </div>
+              {% elif meta.get('vnc_url') %}
+                <a class="action-button" href="{{ meta['vnc_url'] }}">VNC</a>
+              {% elif meta.get('slug') %}
+                <button class="action-button danger reboot-button" type="button" data-slug="{{ meta['slug'] }}">Reboot</button>
               {% endif %}
             </div>
           </div>
@@ -615,6 +661,7 @@
       const refreshBtn = document.getElementById('refresh-btn');
       const toggleBtn = document.getElementById('toggle-refresh-btn');
       const bulkBtn = document.getElementById('bulk-updates-btn');
+      const rebootButtons = document.querySelectorAll('.reboot-button');
       const stateEl = document.getElementById('auto-refresh-state');
       let paused = false;
       let timerId = null;
@@ -714,6 +761,39 @@
           triggerBulkUpdates();
         });
       }
+
+      rebootButtons.forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const slug = btn.dataset.slug;
+          if (!slug) return;
+          if (!window.confirm(`Reboot ${slug.replace(/-/g, ' ')}?`)) {
+            return;
+          }
+          const originalText = btn.textContent;
+          btn.disabled = true;
+          btn.textContent = 'Rebooting...';
+          setExtraStateMessage(`Rebooting ${slug}`, 0);
+          try {
+            const response = await fetch(`/hosts/${slug}/reboot`, { method: 'POST' });
+            if (!response.ok) {
+              throw new Error(await response.text());
+            }
+            const payload = await response.json();
+            const status = payload.status || 'unknown';
+            if (status === 'success') {
+              setExtraStateMessage(`Reboot sent to ${payload.host}`, 6000);
+            } else {
+              setExtraStateMessage(`Reboot failed for ${payload.host || slug}`, 6000);
+            }
+          } catch (error) {
+            console.error('Reboot failed', error);
+            setExtraStateMessage(`Reboot failed for ${slug}`, 6000);
+          } finally {
+            btn.disabled = false;
+            btn.textContent = originalText;
+          }
+        });
+      });
 
       updateStateText();
       scheduleRefresh();

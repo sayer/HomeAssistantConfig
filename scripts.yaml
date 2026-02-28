@@ -1419,6 +1419,86 @@ clear_scene_slot:
         title: "Scene Cleared"
         message: "{{ slot_label }} has been cleared."
 
+scene_backup_schedule:
+  alias: "Scene Backup - MQTT Slots"
+  description: "Back up retained MQTT scene slot payloads to /config/scene_slot_backups"
+  icon: mdi:content-save
+  mode: single
+  fields:
+    backup_path:
+      name: Backup Path
+      description: Optional file path for the backup JSON
+      selector:
+        text:
+  sequence:
+    - variables:
+        resolved_path: >-
+          {% set provided = backup_path | default('') | trim %}
+          {% if provided != '' %}
+            {{ provided }}
+          {% else %}
+            /config/scene_slot_backups/scene_slots_{{ now().strftime('%Y%m%d_%H%M%S') }}.json
+          {% endif %}
+    - service: system_log.write
+      data:
+        message: "SCENE BACKUP - Saving MQTT scene slots to {{ resolved_path }}"
+        level: info
+    - service: shell_command.backup_scene_slots
+      data:
+        path: "{{ resolved_path }}"
+    - service: notify.notify
+      data:
+        title: "Scene Backup Complete"
+        message: "MQTT scene slots saved to {{ resolved_path }}"
+
+scene_restore_schedule:
+  alias: "Scene Restore - MQTT Slots"
+  description: "Restore retained MQTT scene slot payloads from a backup file"
+  icon: mdi:content-save-move
+  mode: single
+  fields:
+    backup_path:
+      name: Backup Path
+      description: Full path to the backup JSON to restore
+      required: true
+      selector:
+        text:
+    clear_missing:
+      name: Clear Missing Slots
+      description: If on, clears retained payloads for slots missing in the backup
+      selector:
+        boolean:
+  sequence:
+    - variables:
+        resolved_path: "{{ backup_path | default('') | trim }}"
+        resolved_clear: "{{ clear_missing | default(false) }}"
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: "{{ resolved_path == '' }}"
+          sequence:
+            - service: system_log.write
+              data:
+                message: "SCENE RESTORE - Missing backup path"
+                level: warning
+            - service: notify.notify
+              data:
+                title: "Scene Restore Failed"
+                message: "Backup path is required."
+            - stop: "Missing backup path"
+    - service: system_log.write
+      data:
+        message: "SCENE RESTORE - Restoring MQTT scene slots from {{ resolved_path }}"
+        level: info
+    - service: shell_command.restore_scene_slots
+      data:
+        path: "{{ resolved_path }}"
+        clear_missing: "{{ 'true' if resolved_clear else 'false' }}"
+    - service: notify.notify
+      data:
+        title: "Scene Restore Complete"
+        message: "MQTT scene slots restored from {{ resolved_path }}"
+
 # Master Thermostat Control Scripts
 master_thermostat_set_cool:
   alias: "Master Thermostat - Set Cool Temperature"
