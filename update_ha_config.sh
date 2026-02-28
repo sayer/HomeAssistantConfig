@@ -14,6 +14,7 @@ REPO_DIR="/config"
 CONFIG_SCRIPT="${REPO_DIR}/update_config.sh"
 PYTHON_BIN="$(command -v python3 || command -v python || true)"
 SCRIPT_VERSION="2026-02-28.3"
+SELF_RESTART_FLAG_VAR="HA_UPDATE_SELF_RESTARTED"
 
 # Ensure HA CLI picks up the repository config directory unless already set
 if [ -z "${HASS_CONFIG:-}" ]; then
@@ -616,6 +617,36 @@ PY
   fi
 }
 
+restart_if_self_updated() {
+  local previous_head="$1"
+  local pull_status="$2"
+
+  # Only restart when pull succeeded and moved HEAD.
+  if [ "$pull_status" -ne 0 ]; then
+    return 0
+  fi
+  if [ -z "$previous_head" ] || [ "$previous_head" = "unknown" ]; then
+    return 0
+  fi
+
+  local current_head
+  current_head=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
+  if [ "$current_head" = "unknown" ] || [ "$current_head" = "$previous_head" ]; then
+    return 0
+  fi
+
+  if git diff --name-only "${previous_head}..${current_head}" -- "update_ha_config.sh" | grep -qx "update_ha_config.sh"; then
+    if [ "${!SELF_RESTART_FLAG_VAR:-0}" = "1" ]; then
+      log_message "NOTICE: update_ha_config.sh changed by pull but self-restart already attempted"
+      return 0
+    fi
+
+    log_message "NOTICE: update_ha_config.sh was updated by git pull; restarting with latest script"
+    export "${SELF_RESTART_FLAG_VAR}=1"
+    exec "${REPO_DIR}/update_ha_config.sh"
+  fi
+}
+
 main() {
   ensure_ha_core_uses_repo
   log_message "Starting HA configuration update process"
@@ -790,6 +821,8 @@ main() {
           log_message "NOTICE: Local changes remain stashed at $STASH_REF due to git pull failure. Reapply manually with 'git stash pop $STASH_REF' after resolving issues."
         fi
       fi
+
+      restart_if_self_updated "$INITIAL_HEAD" "$PULL_STATUS"
     fi
   fi
 
