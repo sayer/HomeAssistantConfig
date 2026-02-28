@@ -275,7 +275,7 @@ run_commands_for_host() {
       case "$SHORT" in
         ping)
           echo "Running: ping (SSH connectivity test)"
-          ssh -t "${SSH_OPTS[@]}" "$ssh_target" "echo pong"
+          ssh "${SSH_OPTS[@]}" "$ssh_target" "echo pong"
           status=$?
           if [ $status -eq 0 ]; then
             echo "Ping successful: SSH connection to $host is working."
@@ -286,7 +286,7 @@ run_commands_for_host() {
           ;;
         update_ha_config)
           echo "Running: update_ha_config (with sudo)"
-          ssh -t "${SSH_OPTS[@]}" "$ssh_target" "sudo bash -l -c '$CMD'"
+          ssh "${SSH_OPTS[@]}" "$ssh_target" "sudo bash -l -c '$CMD'"
           status=$?
           if [ $status -ne 0 ]; then
             echo "Error: Failed to run '$CMD' with sudo on $host (exit code $status). Continuing to next host."
@@ -648,7 +648,7 @@ REMOTE
           ;;
         *)
           echo "Running: $CMD"
-          ssh -t "${SSH_OPTS[@]}" "$ssh_target" "bash -l -c '$CMD'"
+          ssh "${SSH_OPTS[@]}" "$ssh_target" "bash -l -c '$CMD'"
           status=$?
           if [ $status -ne 0 ]; then
             echo "Error: Failed to run '$CMD' on $host (exit code $status). Continuing to next host."
