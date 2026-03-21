@@ -15,6 +15,7 @@ CONFIG_SCRIPT="${REPO_DIR}/update_config.sh"
 PYTHON_BIN="$(command -v python3 || command -v python || true)"
 SCRIPT_VERSION="2026-02-28.3"
 SELF_RESTART_FLAG_VAR="HA_UPDATE_SELF_RESTARTED"
+CORE_BUSY_RE='Another job is running for job group (container_homeassistant|home_assistant_core)'
 
 # Ensure HA CLI picks up the repository config directory unless already set
 if [ -z "${HASS_CONFIG:-}" ]; then
@@ -113,7 +114,6 @@ run_config_check() {
   local attempt=1
   local max_attempts=4
   local delay_seconds=4
-  local busy_re='Another job is running for job group (container_homeassistant|home_assistant_core)'
 
   while [ "$attempt" -le "$max_attempts" ]; do
     if command -v docker >/dev/null 2>&1 && docker ps --format '{{.Names}}' 2>/dev/null | grep -qx 'homeassistant'; then
@@ -122,7 +122,7 @@ run_config_check() {
       source="docker"
       if [ $status -eq 0 ]; then
         :
-      elif printf '%s\n' "$output" | grep -Eq "$busy_re"; then
+      elif printf '%s\n' "$output" | grep -Eq "$CORE_BUSY_RE"; then
         if [ "$attempt" -lt "$max_attempts" ]; then
           log_message "NOTICE: docker config check busy (attempt ${attempt}/${max_attempts}); retrying in ${delay_seconds}s" >&2
           sleep "$delay_seconds"
@@ -141,7 +141,7 @@ run_config_check() {
       source="ha-cli"
     fi
 
-    if printf '%s\n' "$output" | grep -Eq "$busy_re"; then
+    if printf '%s\n' "$output" | grep -Eq "$CORE_BUSY_RE"; then
       if [ "$attempt" -lt "$max_attempts" ]; then
         log_message "NOTICE: ha core check busy (attempt ${attempt}/${max_attempts}); retrying in ${delay_seconds}s" >&2
         sleep "$delay_seconds"
@@ -180,7 +180,7 @@ output_has_config_blockers() {
 }
 
 restart_home_assistant_with_retry() {
-  local max_attempts=5
+  local max_attempts=8
   local attempt=1
   local delay_seconds=5
   local output=""
@@ -194,7 +194,7 @@ restart_home_assistant_with_retry() {
       return 0
     fi
 
-    if printf '%s\n' "$output" | grep -q "Another job is running for job group home_assistant_core"; then
+    if printf '%s\n' "$output" | grep -Eq "$CORE_BUSY_RE"; then
       if [ "$attempt" -lt "$max_attempts" ]; then
         log_message "NOTICE: Home Assistant core busy (attempt ${attempt}/${max_attempts}); retrying in ${delay_seconds}s"
         sleep "$delay_seconds"
@@ -204,6 +204,8 @@ restart_home_assistant_with_retry() {
             delay_seconds=30
           fi
         fi
+      else
+        log_message "NOTICE: Home Assistant core busy (attempt ${attempt}/${max_attempts}); retries exhausted"
       fi
     else
       printf '%s' "$output"
@@ -213,8 +215,76 @@ restart_home_assistant_with_retry() {
     attempt=$((attempt + 1))
   done
 
+  if printf '%s\n' "$output" | grep -Eq "$CORE_BUSY_RE"; then
+    printf '%s' "$output"
+    return 75
+  fi
+
   printf '%s' "$output"
   return $status
+}
+
+run_dynamic_update_script() {
+  local dynamic_cmd=()
+  local dynamic_output=""
+  local dynamic_status=0
+  local has_dynamic_token=0
+
+  if [ -n "${HA_TOKEN:-}" ]; then
+    has_dynamic_token=1
+  elif [ -r "$REMOTE_CREDENTIAL_FILE" ] && grep -Eqs '^[[:space:]]*HA_TOKEN=' "$REMOTE_CREDENTIAL_FILE"; then
+    has_dynamic_token=1
+  fi
+
+  if [ $has_dynamic_token -eq 0 ]; then
+    DYNAMIC_SCRIPT_RESULT="skipped (missing HA_TOKEN)"
+    if [ -r "$REMOTE_CREDENTIAL_FILE" ]; then
+      log_message "WARNING: Skipping run_update_dynamic.sh because HA_TOKEN is not set in the environment or $REMOTE_CREDENTIAL_FILE"
+    else
+      log_message "WARNING: Skipping run_update_dynamic.sh because HA_TOKEN is not set in the environment and $REMOTE_CREDENTIAL_FILE is missing"
+    fi
+    return 0
+  fi
+
+  if [ -x "$RUN_DYNAMIC_SCRIPT" ]; then
+    dynamic_cmd=("$RUN_DYNAMIC_SCRIPT")
+  elif [ -r "$RUN_DYNAMIC_SCRIPT" ]; then
+    log_message "NOTICE: run_update_dynamic.sh not executable; invoking with bash"
+    dynamic_cmd=(bash "$RUN_DYNAMIC_SCRIPT")
+  fi
+
+  if [ ${#dynamic_cmd[@]} -eq 0 ]; then
+    DYNAMIC_SCRIPT_RESULT="skipped (missing script)"
+    log_message "WARNING: run_update_dynamic.sh not found or not readable at $RUN_DYNAMIC_SCRIPT"
+    return 0
+  fi
+
+  log_message "Triggering script.update_all_outdated via run_update_dynamic.sh..."
+  dynamic_output="$("${dynamic_cmd[@]}" 2>&1)"
+  dynamic_status=$?
+  if [ $dynamic_status -eq 0 ]; then
+    DYNAMIC_SCRIPT_RESULT="success"
+    if [ -n "$dynamic_output" ]; then
+      while IFS= read -r line; do
+        [ -n "$line" ] && log_message "dynamic: $line"
+      done <<<"$dynamic_output"
+    fi
+    return 0
+  fi
+
+  if printf '%s\n' "$dynamic_output" | grep -q "Missing HA_TOKEN"; then
+    DYNAMIC_SCRIPT_RESULT="skipped (missing HA_TOKEN)"
+    log_message "WARNING: run_update_dynamic.sh reported missing HA_TOKEN; skipping"
+  else
+    DYNAMIC_SCRIPT_RESULT="failed ($dynamic_status)"
+    log_message "ERROR: run_update_dynamic.sh failed (exit code: $dynamic_status)"
+  fi
+
+  if [ -n "$dynamic_output" ]; then
+    while IFS= read -r line; do
+      [ -n "$line" ] && log_message "dynamic: $line"
+    done <<<"$dynamic_output"
+  fi
 }
 
 print_summary() {
@@ -890,64 +960,6 @@ main() {
     fi
   fi
 
-  # Trigger dynamic update script via REST automation (best effort)
-  local dynamic_cmd=()
-  local dynamic_output=""
-  local dynamic_status=0
-  local has_dynamic_token=0
-
-  if [ -n "${HA_TOKEN:-}" ]; then
-    has_dynamic_token=1
-  elif [ -r "$REMOTE_CREDENTIAL_FILE" ] && grep -Eqs '^[[:space:]]*HA_TOKEN=' "$REMOTE_CREDENTIAL_FILE"; then
-    has_dynamic_token=1
-  fi
-
-  if [ $has_dynamic_token -eq 0 ]; then
-    DYNAMIC_SCRIPT_RESULT="skipped (missing HA_TOKEN)"
-    if [ -r "$REMOTE_CREDENTIAL_FILE" ]; then
-      log_message "WARNING: Skipping run_update_dynamic.sh because HA_TOKEN is not set in the environment or $REMOTE_CREDENTIAL_FILE"
-    else
-      log_message "WARNING: Skipping run_update_dynamic.sh because HA_TOKEN is not set in the environment and $REMOTE_CREDENTIAL_FILE is missing"
-    fi
-  else
-    if [ -x "$RUN_DYNAMIC_SCRIPT" ]; then
-      dynamic_cmd=("$RUN_DYNAMIC_SCRIPT")
-    elif [ -r "$RUN_DYNAMIC_SCRIPT" ]; then
-      log_message "NOTICE: run_update_dynamic.sh not executable; invoking with bash"
-      dynamic_cmd=(bash "$RUN_DYNAMIC_SCRIPT")
-    fi
-
-    if [ ${#dynamic_cmd[@]} -gt 0 ]; then
-      log_message "Triggering script.update_all_outdated via run_update_dynamic.sh..."
-      dynamic_output="$("${dynamic_cmd[@]}" 2>&1)"
-      dynamic_status=$?
-      if [ $dynamic_status -eq 0 ]; then
-        DYNAMIC_SCRIPT_RESULT="success"
-        if [ -n "$dynamic_output" ]; then
-          while IFS= read -r line; do
-            [ -n "$line" ] && log_message "dynamic: $line"
-          done <<<"$dynamic_output"
-        fi
-      else
-        if printf '%s\n' "$dynamic_output" | grep -q "Missing HA_TOKEN"; then
-          DYNAMIC_SCRIPT_RESULT="skipped (missing HA_TOKEN)"
-          log_message "WARNING: run_update_dynamic.sh reported missing HA_TOKEN; skipping"
-        else
-          DYNAMIC_SCRIPT_RESULT="failed ($dynamic_status)"
-          log_message "ERROR: run_update_dynamic.sh failed (exit code: $dynamic_status)"
-        fi
-        if [ -n "$dynamic_output" ]; then
-          while IFS= read -r line; do
-            [ -n "$line" ] && log_message "dynamic: $line"
-          done <<<"$dynamic_output"
-        fi
-      fi
-    else
-      DYNAMIC_SCRIPT_RESULT="skipped (missing script)"
-      log_message "WARNING: run_update_dynamic.sh not found or not readable at $RUN_DYNAMIC_SCRIPT"
-    fi
-  fi
-
   # Check if 'ha' command exists and is executable
   if ! command -v ha >/dev/null 2>&1; then
     log_message "ERROR: 'ha' command not found in PATH"
@@ -985,6 +997,18 @@ main() {
       log_message "All configurations reloaded successfully!"
       RESTART_RESULT="success"
       update_addons
+    elif [ $RELOAD_STATUS -eq 75 ]; then
+      if [[ "$CORE_UPDATE_NOTE" == *"update available"* ]]; then
+        log_message "WARNING: HA core update is in progress; reload deferred (HA will restart after update completes)"
+        RESTART_RESULT="deferred (core update in progress)"
+      else
+        log_message "WARNING: Home Assistant core remained busy after retries; deferring reload"
+        RESTART_RESULT="deferred (core busy)"
+      fi
+      if [ -n "$RELOAD_OUTPUT" ]; then
+        log_message "$RELOAD_OUTPUT"
+      fi
+      ADDONS_RESULT="skipped"
     else
       log_message "ERROR: Failed to reload Home Assistant configuration (exit code: $RELOAD_STATUS)"
       if [ -n "$RELOAD_OUTPUT" ]; then
@@ -995,6 +1019,8 @@ main() {
       RESTART_RESULT="failed ($RELOAD_STATUS)"
       EXIT_CODE=1
     fi
+
+    run_dynamic_update_script
   else
     log_message "ERROR: Home Assistant configuration check failed. YAML not reloaded."
     if [ -n "$HA_CHECK_OUTPUT" ]; then
