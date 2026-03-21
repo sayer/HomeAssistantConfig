@@ -263,6 +263,31 @@ run_commands_for_host() {
   : >"$output_file"
   : >"$pull_output_file"
 
+  # Quick TCP pre-check: skip SSH entirely if host port is unreachable
+  if ! nc -z -w 5 "$host" "$SSH_PORT" 2>/dev/null; then
+    {
+      echo "=============================="
+      echo "Connecting to $host"
+      echo "=============================="
+      echo "Host unreachable on port $SSH_PORT (TCP connection timed out)"
+      local human_idx=0
+      for idx in "${!COMMANDS_TO_RUN[@]}"; do
+        SHORT="${SHORTS_TO_RUN[$idx]}"
+        human_idx=$(( idx + 1 ))
+        progress_line fail "$(printf '%s: command %d/%d -> %s (unreachable)' "$host" "$human_idx" "$total_cmds" "$SHORT")"
+        echo "------------------------------"
+      done
+    } >"$output_file" 2>&1
+    for idx in "${!COMMANDS_TO_RUN[@]}"; do
+      SHORT="${SHORTS_TO_RUN[$idx]}"
+      record_result "$SHORT" "$host" 255 "unreachable"
+    done
+    if [ -n "$notify_fifo" ]; then
+      printf '%s|%s|%d\n' "$host_index" "$host" 255 >"$notify_fifo"
+    fi
+    return 255
+  fi
+
   {
     echo "=============================="
     echo "Connecting to $host"
