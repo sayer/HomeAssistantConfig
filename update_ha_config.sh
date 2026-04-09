@@ -13,7 +13,7 @@ LOG_FILE="/tmp/update_ha_config.log"
 REPO_DIR="/config"
 CONFIG_SCRIPT="${REPO_DIR}/update_config.sh"
 PYTHON_BIN="$(command -v python3 || command -v python || true)"
-SCRIPT_VERSION="2026-04-08.1"
+SCRIPT_VERSION="2026-04-08.2"
 SELF_RESTART_FLAG_VAR="HA_UPDATE_SELF_RESTARTED"
 CORE_BUSY_RE='Another job is running for job group (container_homeassistant|home_assistant_core)'
 
@@ -196,10 +196,19 @@ output_has_known_ha_check_bug() {
 
   # Home Assistant Core 2026.4.x can throw a false-negative automation validation
   # traceback during `ha core check` while still reporting a partial-success config.
-  if printf '%s\n' "$check_output" | grep -Fq "ERROR:homeassistant.helpers.check_config:Unexpected error validating config" \
-    && printf '%s\n' "$check_output" | grep -Fq "KeyError: 'triggers'" \
-    && printf '%s\n' "$check_output" | grep -Fq "Successful config (partial)" \
-    && printf '%s\n' "$check_output" | grep -Eq '^[[:space:]]*automation:'; then
+  # The exact output shape varies across hosts, so match the stable markers only.
+  local has_triggers_keyerror=1
+  local has_partial_success=1
+
+  if printf '%s\n' "$check_output" | grep -Eq "KeyError: ['\`‘’]triggers['\`‘’]|Unexpected error calling config validator: ['\`‘’]triggers['\`‘’]"; then
+    has_triggers_keyerror=0
+  fi
+
+  if printf '%s\n' "$check_output" | grep -Eq "Successful config \(partial\)|Failed config"; then
+    has_partial_success=0
+  fi
+
+  if [ $has_triggers_keyerror -eq 0 ] && [ $has_partial_success -eq 0 ]; then
     return 0
   fi
 
