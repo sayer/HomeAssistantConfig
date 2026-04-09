@@ -535,7 +535,7 @@ ai_analyze_dash_video:
       filename: /config/www/snapshot_dash.jpg
     service: camera.snapshot
     target:
-      device_id: eea91240afc6576d615f0b18aa1ec28e
+      entity_id: camera.g5_flex_high_resolution_channel
   - service: llmvision.stream_analyzer
     data:
       remember: false
