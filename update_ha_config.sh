@@ -13,7 +13,7 @@ LOG_FILE="/tmp/update_ha_config.log"
 REPO_DIR="/config"
 CONFIG_SCRIPT="${REPO_DIR}/update_config.sh"
 PYTHON_BIN="$(command -v python3 || command -v python || true)"
-SCRIPT_VERSION="2026-04-08.3"
+SCRIPT_VERSION="2026-04-08.4"
 SELF_RESTART_FLAG_VAR="HA_UPDATE_SELF_RESTARTED"
 CORE_BUSY_RE='Another job is running for job group (container_homeassistant|home_assistant_core)'
 
@@ -51,6 +51,8 @@ RESTART_RESULT="not-run"
 ADDONS_RESULT="skipped"
 HACS_RESULT="skipped"
 CORE_UPDATE_NOTE="not checked"
+CURRENT_CORE_VERSION=""
+LATEST_CORE_VERSION=""
 INITIAL_HEAD=""
 INITIAL_STATUS=""
 FINAL_HEAD=""
@@ -194,21 +196,23 @@ output_has_known_ha_check_bug() {
     return 1
   fi
 
-  # Home Assistant Core 2026.4.x can throw a false-negative automation validation
-  # traceback during `ha core check` while still reporting a partial-success config.
-  # Normalize to simple substring checks because the CLI output format varies.
+  # Home Assistant Core 2026.4.1 has a known false-negative automation
+  # validation crash in `ha core check`. Keep this gate narrow so we do not
+  # suppress real configuration errors on other versions.
+  if [ -n "$CURRENT_CORE_VERSION" ] && [ "$CURRENT_CORE_VERSION" != "2026.4.1" ]; then
+    return 1
+  fi
+
+  # Normalize to simple substring checks because docker/CLI output formatting
+  # varies and may include banners, progress lines, or partial summaries.
   local normalized_output="$check_output"
   normalized_output="${normalized_output//$'\r'/}"
 
-  if printf '%s\n' "$normalized_output" | grep -Fq "KeyError:" \
-    && printf '%s\n' "$normalized_output" | grep -Fq "triggers" \
-    && printf '%s\n' "$normalized_output" | grep -Fq "Failed config" \
-    && printf '%s\n' "$normalized_output" | grep -Fq "Successful config (partial)"; then
-    return 0
-  fi
-
-  if printf '%s\n' "$normalized_output" | grep -Fq "Unexpected error calling config validator: 'triggers'" \
-    && printf '%s\n' "$normalized_output" | grep -Fq "Successful config (partial)"; then
+  if printf '%s\n' "$normalized_output" | grep -Fq "ERROR:homeassistant.helpers.check_config:Unexpected error validating config" \
+    && printf '%s\n' "$normalized_output" | grep -Fq "KeyError: 'triggers'" \
+    && printf '%s\n' "$normalized_output" | grep -Fq 'File "/usr/src/homeassistant/homeassistant/helpers/trigger.py"' \
+    && printf '%s\n' "$normalized_output" | grep -Eq 'Failed config|Successful config \(partial\)' \
+    && printf '%s\n' "$normalized_output" | grep -Eq '^[[:space:]]*automation:'; then
     return 0
   fi
 
@@ -384,6 +388,8 @@ check_core_update() {
   local status=$?
   if [ $status -ne 0 ]; then
     CORE_UPDATE_NOTE="failed to query"
+    CURRENT_CORE_VERSION=""
+    LATEST_CORE_VERSION=""
     log_message "WARNING: Unable to determine Home Assistant core version (ha core info exited $status)"
     if [ -n "$core_raw" ]; then
       while IFS= read -r line; do
@@ -450,6 +456,9 @@ PY
   else
     CORE_UPDATE_NOTE="up-to-date (current: ${version:-unknown})"
   fi
+
+  CURRENT_CORE_VERSION="${version:-}"
+  LATEST_CORE_VERSION="${latest:-}"
 }
 
 update_addons() {
