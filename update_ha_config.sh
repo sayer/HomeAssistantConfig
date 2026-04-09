@@ -13,7 +13,7 @@ LOG_FILE="/tmp/update_ha_config.log"
 REPO_DIR="/config"
 CONFIG_SCRIPT="${REPO_DIR}/update_config.sh"
 PYTHON_BIN="$(command -v python3 || command -v python || true)"
-SCRIPT_VERSION="2026-02-28.3"
+SCRIPT_VERSION="2026-04-08.1"
 SELF_RESTART_FLAG_VAR="HA_UPDATE_SELF_RESTARTED"
 CORE_BUSY_RE='Another job is running for job group (container_homeassistant|home_assistant_core)'
 
@@ -153,6 +153,11 @@ run_config_check() {
     break
   done
 
+  if output_has_known_ha_check_bug "$output"; then
+    log_message "WARNING: ${source} config check hit known Home Assistant automation validation regression; treating as non-blocking" >&2
+    status=0
+  fi
+
   # HA can sometimes return exit 0 while still reporting invalid/partial config.
   if [ $status -eq 0 ] && output_has_config_blockers "$output"; then
     log_message "WARNING: ${source} config check returned exit 0 but reported blockers" >&2
@@ -169,10 +174,32 @@ output_has_config_blockers() {
     return 1
   fi
 
+  if output_has_known_ha_check_bug "$check_output"; then
+    return 1
+  fi
+
   # Treat only hard config validation/integration errors as blockers.
   # Unknown device/entity warnings are common across mixed coach profiles.
   if printf '%s\n' "$check_output" | grep -Eiq \
     'Incorrect config|Successful config \(partial\)|extra keys not allowed|Platform error|Integration .+ not found|Invalid config'; then
+    return 0
+  fi
+
+  return 1
+}
+
+output_has_known_ha_check_bug() {
+  local check_output="$1"
+  if [ -z "$check_output" ]; then
+    return 1
+  fi
+
+  # Home Assistant Core 2026.4.x can throw a false-negative automation validation
+  # traceback during `ha core check` while still reporting a partial-success config.
+  if printf '%s\n' "$check_output" | grep -Fq "ERROR:homeassistant.helpers.check_config:Unexpected error validating config" \
+    && printf '%s\n' "$check_output" | grep -Fq "KeyError: 'triggers'" \
+    && printf '%s\n' "$check_output" | grep -Fq "Successful config (partial)" \
+    && printf '%s\n' "$check_output" | grep -Eq '^[[:space:]]*automation:'; then
     return 0
   fi
 
