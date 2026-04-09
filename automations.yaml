@@ -2,21 +2,15 @@
   alias: Bus - Temp Range
   description: ''
   trigger:
-  - type: temperature
-    platform: device
-    device_id: f19d9202e36b464f072f404896f84a2c
+  - platform: numeric_state
     entity_id: sensor.bus_sensor_air_temperature
-    domain: sensor
     above: 85
     for:
       hours: 0
       minutes: 10
       seconds: 0
-  - type: temperature
-    platform: device
-    device_id: f0dd4cb37e399fec19e8f2e0747e3526
+  - platform: numeric_state
     entity_id: sensor.bus_kitchen_motion_temperature
-    domain: sensor
     below: 45
     for:
       hours: 0
@@ -368,11 +362,9 @@
   alias: Motion Turns on front accents
   description: ''
   trigger:
-  - type: motion
-    platform: device
-    device_id: f0dd4cb37e399fec19e8f2e0747e3526
+  - platform: state
     entity_id: binary_sensor.bus_kitchen_motion
-    domain: binary_sensor
+    to: 'on'
     for:
       hours: 0
       minutes: 0
@@ -407,11 +399,9 @@
   alias: No motion - Turns off accents
   description: ''
   trigger:
-  - type: no_motion
-    platform: device
-    device_id: f0dd4cb37e399fec19e8f2e0747e3526
+  - platform: state
     entity_id: binary_sensor.bus_kitchen_motion
-    domain: binary_sensor
+    to: 'off'
     for:
       hours: 0
       minutes: 15
@@ -430,11 +420,9 @@
   alias: Opening Entry door turn on accent lights
   description: ''
   trigger:
-  - type: opened
-    platform: device
-    device_id: d6cedbc49583d517031af19065450111
+  - platform: state
     entity_id: binary_sensor.samjin_multi
-    domain: binary_sensor
+    to: 'on'
   - platform: state
     entity_id:
     - lock.entry_door_lock_2
@@ -542,11 +530,9 @@
   alias: No Motion - 30 mins - Ceiling off
   description: ''
   trigger:
-  - type: no_motion
-    platform: device
-    device_id: f0dd4cb37e399fec19e8f2e0747e3526
+  - platform: state
     entity_id: binary_sensor.bus_kitchen_motion
-    domain: binary_sensor
+    to: 'off'
     for:
       hours: 1
       minutes: 30
@@ -572,11 +558,9 @@
   alias: No motion - 1 hour - all lights off
   description: ''
   trigger:
-  - type: no_motion
-    platform: device
-    device_id: f0dd4cb37e399fec19e8f2e0747e3526
+  - platform: state
     entity_id: binary_sensor.bus_kitchen_motion
-    domain: binary_sensor
+    to: 'off'
     for:
       hours: 1
       minutes: 1
@@ -877,11 +861,8 @@
   alias: Freezer temp
   description: ''
   trigger:
-  - type: temperature
-    platform: device
-    device_id: 7cc88d86afc654053213e7bc5eb79d33
+  - platform: numeric_state
     entity_id: sensor.kitchen_freezer_temperature
-    domain: sensor
     above: 10
     for:
       hours: 0
@@ -1072,12 +1053,6 @@
     zone: zone.home
     event: enter
     trigger: zone
-  - device_id: 57ba748df517b4e46487f4c54395a276
-    domain: device_tracker
-    entity_id: d07b8dc644e3f95e16eb1a2841159346
-    type: enters
-    zone: zone.home
-    trigger: device
   conditions:
   - condition: state
     entity_id: input_boolean.busparked
@@ -1115,12 +1090,6 @@
     zone: zone.home
     event: leave
     trigger: zone
-  - device_id: 57ba748df517b4e46487f4c54395a276
-    domain: device_tracker
-    entity_id: d07b8dc644e3f95e16eb1a2841159346
-    type: leaves
-    zone: zone.home
-    trigger: device
   conditions:
   - condition: state
     entity_id: input_boolean.busparked
@@ -1135,11 +1104,8 @@
   alias: Kitchen - Fridge temp high
   description: ''
   trigger:
-  - type: temperature
-    platform: device
-    device_id: ba1ef5e342719adc479937ac24f7b783
-    entity_id: ccd37bd359c599cc2365674eeed2d916
-    domain: sensor
+  - platform: numeric_state
+    entity_id: sensor.refrigerator_temp_sensor_temperature
     above: 45
     for:
       hours: 0
@@ -1469,11 +1435,9 @@
   alias: AI - Dash Camera motion
   description: ''
   triggers:
-  - type: motion
-    device_id: eea91240afc6576d615f0b18aa1ec28e
-    entity_id: a0a40a7423ff2cdb6ef8cb153c366b96
-    domain: binary_sensor
-    trigger: device
+  - entity_id: binary_sensor.g5_flex_motion
+    to: 'on'
+    trigger: state
   conditions:
   - condition: state
     entity_id: input_boolean.camping
