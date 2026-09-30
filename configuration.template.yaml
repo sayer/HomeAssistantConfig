@@ -215,7 +215,7 @@ input_boolean:
   has_bunk_beds:
     name: "Coach Has Bunk Beds"
     icon: mdi:bunk-bed
-    initial: true
+    # Restore the owner's saved floor-plan choice across restarts.
   # Scene scheduling toggles
   scene_slot_1_schedule_enabled:
     name: "Scene 1 Schedule Enabled"
