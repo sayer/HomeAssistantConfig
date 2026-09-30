@@ -3328,7 +3328,7 @@ mqtt:
       value_template: >-
         {% set voltage = value_json.get('rms voltage') %}
         {% if voltage in [none, 'n/a', 'unknown', 'unavailable'] %}
-          unknown
+          {{ none }}
         {% else %}
           {{ (voltage | float) | round(1) }}
         {% endif %}
@@ -3341,7 +3341,7 @@ mqtt:
       value_template: >-
         {% set current = value_json.get('rms current') %}
         {% if current in [none, 'n/a', 'unknown', 'unavailable'] %}
-          unknown
+          {{ none }}
         {% else %}
           {{ (current | float) | round(1) }}
         {% endif %}
@@ -3354,7 +3354,7 @@ mqtt:
       value_template: >-
         {% set voltage = value_json.get('rms voltage') %}
         {% if voltage in [none, 'n/a', 'unknown', 'unavailable'] %}
-          unknown
+          {{ none }}
         {% else %}
           {{ (voltage | float) | round(1) }}
         {% endif %}
@@ -3367,7 +3367,7 @@ mqtt:
       value_template: >-
         {% set current = value_json.get('rms current') %}
         {% if current in [none, 'n/a', 'unknown', 'unavailable'] %}
-          unknown
+          {{ none }}
         {% else %}
           {{ (current | float) | round(1) }}
         {% endif %}

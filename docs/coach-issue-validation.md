@@ -1,6 +1,6 @@
 # Coach issue verification — 2026-09-30
 
-This review covers open issues #1–8, #36 and #49–51. Code fixes are ready for review; physical acceptance is pending. No generator, shades, lighting, or thermostats were actuated, and neither repository was deployed.
+This review covers open issues #1–8, #36 and #49–51. Code fixes have offline and targeted frontend evidence; physical acceptance remains pending where the issue requires it. No generator, shades, lighting, or thermostats were actuated, and neither repository was deployed.
 
 ## Disposition
 
@@ -12,14 +12,14 @@ This review covers open issues #1–8, #36 and #49–51. Code fixes are ready fo
 | #4 | Motor duty and last direction were treated as position/endpoints; group templates fabricated 50%. Removed these assumptions. | Physical movement and latency. Idle covers/groups now honestly show unknown position because these frames do not measure travel. |
 | #5 | False closed/open endpoints can disable a same-direction button after Stop. The #4 correction removes this cause. | Supervised open–stop–open and close–stop–close with bus traces. Bridge toggle command codes remain unchanged pending evidence. |
 | #6 | Startup omitted runtime defaults, accepted stale/coarse switch state, repeated starts during preheat, and could fail without a persistent error. Added fresh RV-C feedback, bounded attempts and persistent errors. Stop cancels pending starts and sends an explicit stop even before the first startup frame. | Multiple supervised starts/stops and failure traces on the affected generator/controller. Passive history showed running transitions on a representative host, but cannot attribute them to HA or resolve the original report. |
-| #7 | Line 2 missing telemetry was displayed as zero. It now remains unknown. Source normalization/fallbacks already exist. | Actual source and per-leg measurements against the coach panel. Unknown source needs its raw payload. |
+| #7 | Closed as historically resolved by the owner: merged PRs #23/#29/#32/#34, explicit “Resolved” in the body, and owner resolution on 2025-10-18. Eight current source-template scenarios passed. New missing-data correction maps all four numeric sensors to HA `None`, verified through actual MQTT entity ingestion. | No new independent SilverLeaf comparison is claimed. Outback-specific investigation remains #49. |
 | #8 | Runtime mixed timezone-aware and naive dates and startup fabricated five minutes. Use timestamps, preserve known starts on reconnect, exclude the unset sentinel, and show unavailable when start time is unknown. Generator action service used unsupported dashboard templating; Start/Stop now use static services. | Multi-minute UI stability and runtime comparison with SilverLeaf, including restart/reconnection. |
 | #36 | Integer Celsius conversion collapsed adjacent Fahrenheit settings. Preserve three decimal places. Earlier ambient-probe mapping fixes remain in place. | Verify +/- and slider against actual zone setpoints and interior probes. |
 | #49 | Existing Outback-first normalization and fallback logic found; no affected-coach raw payload was supplied. | Read-only Outback REST payload plus mode and panel comparison before changing mappings. Runtime defect remains unverified. |
 | #50 | False dresser 0/50/100% positions share #4's confirmed defect and correction. | Dresser Day availability requires affected coach, registry and bus trace; no speculative address change. |
-| #51 | `initial: true` reset the bunk choice on every restart. Remove it so HA restores the saved choice. | Confirm saved floor-plan choice and visibility after deployment/restart. Existing historical entity spelling is preserved. |
+| #51 | `initial: true` reset the bunk choice on every restart. Removed it. Real HA lifecycle test fails before the fix and passes afterward for both OFF and ON. Actual frontend: OFF hides both controls, ON shows both, OFF survives sandbox restart and remains hidden. | Acceptance met in the isolated HA/frontend; closure follows merge. This visibility issue does not require physical shade movement. |
 
-No issue is automatically closed by this change. A title beginning “Resolved” is not acceptance evidence.
+Issue #7 is closed on historical owner resolution plus retained implementation, not its title alone. Issue #51 has concrete sandbox acceptance. Other issues remain open for the specific evidence listed above.
 
 ## Generator behavior
 
@@ -37,11 +37,15 @@ Run the complete offline suite with Home Assistant's Python environment (verifie
 python -m unittest discover -s tests -v
 ```
 
-Result: 22 tests passed, no failures/skips. The suite uses a separate temporary `HomeAssistant` object, real HA templates and script engine, fake services, and shortened waits. It renders every configuration family (2017, 2020, 2023). It covers bounded retries, faults, transport failure, stale/missing telemetry, preheat completion, Stop before running, Fahrenheit precision, runtime timestamps/sentinel, missing power, shade payloads, bunk persistence configuration and dashboard action bindings. The injected transport failure intentionally logs an error while its reporting assertion passes. These are offline behavior/configuration tests, not physical or visual UI tests.
+Result: 24 tests passed, no failures/skips. The suite uses a separate temporary `HomeAssistant` object, real HA templates and script engine, fake services, and shortened waits. It renders every configuration family (2017, 2020, 2023). It covers bounded retries, faults, transport failure, stale/missing telemetry, preheat completion, Stop before running, Fahrenheit precision, runtime timestamps/sentinel, missing power, shade payloads, bunk persistence configuration and dashboard action bindings. The injected transport failure intentionally logs an error while its reporting assertion passes. Additional lifecycle tests prove both bunk choices restore from disk, and actual MQTT numeric entity ingestion proves missing data clears a prior reading without treating real zero as missing. These are offline behavior/configuration tests, separate from the frontend checks below.
 
-The bridge's complete offline suite passed four tests with actual Perl entrypoints/codecs and mocked MQTT/CAN. Both changed Perl scripts passed syntax checks. No configured automated UI suite exists in either repository; full visual UI testing was therefore not completed.
+The bridge's complete offline suite passed five tests with actual Perl entrypoints/codecs and mocked MQTT/CAN. Both changed Perl scripts passed syntax checks. No pre-existing automated browser suite exists. Targeted actual HA frontend testing now verifies the bunk conditional against the production card/helper, with synthetic cover states and no actuator integrations. Full coach hardware/UI acceptance remains pending for the other issues. Screenshots: [bunks visible](evidence/bunks-on.jpg), [bunks hidden after restart](evidence/bunks-off-after-restart.jpg).
 
-A full isolated HA `check_config --fail-on-warnings` was attempted against the generated 2023 configuration. It is **blocked**, not passed: missing `homeassistant/notify_leaving_zone.yaml` and `valentinfrlch/event_summary.yaml` blueprints, an absent Apple TV device registry entry, and unavailable custom `climate_group` integration. These pre-existing host dependencies were not copied from production or bypassed. Production `ha core check` on the final candidate remains a deployment gate. The isolated test did not reload or restart production HA.
+Full isolated HA `check_config --fail-on-warnings` now **passes on Core 2026.9.4** for the generated 2023 candidate. The earlier missing-dependency result was an incomplete test setup: both blueprints are tracked in this repository, and the climate-group component/device registry were available on the existing host. Dependencies were copied into a temporary directory for validation; no production configuration was replaced or restarted.
+
+The same candidate/dependencies on coach host `homeassistant-13` (model year 2023, coach 9180, Core 2026.4.1) hit the existing Core validator defect `KeyError: 'triggers'`, already recognized by the repository's update script. That version-specific result is not recorded as a pass. The original September 2025 feedback contains no coach number/model, so coach 9180 is a known validation environment, not a verified match for those reports. Driver Day's inoperative motor was explicitly noted in that original feedback and must not be mistaken for a software failure.
+
+The frontend sandbox ran in its own temporary configuration and localhost-only port, with Supervisor credentials removed from its process environment. It used the exact production bunk conditional/helper and synthetic shade states. OFF → ON → OFF → process restart → OFF passed, including readback that both synthetic shade entities existed while hidden. No real shade command was sent.
 
 ## Supervised acceptance
 
