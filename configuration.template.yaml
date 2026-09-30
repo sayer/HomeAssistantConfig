@@ -215,7 +215,7 @@ input_boolean:
   has_bunk_beds:
     name: "Coach Has Bunk Beds"
     icon: mdi:bunk-bed
-    initial: true
+    # Restore the owner's saved floor-plan choice across restarts.
   # Scene scheduling toggles
   scene_slot_1_schedule_enabled:
     name: "Scene 1 Schedule Enabled"
@@ -809,27 +809,12 @@ sensor:
       generator_current_run_time:
         friendly_name: "Run time"
         value_template: >-
-          {% if is_state('switch.generator', 'on') %}
-            {% if states('input_datetime.generator_run_start') not in ['unknown', 'unavailable', '', '1970-01-01 00:00:00'] %}
-              {% set start_str = states('input_datetime.generator_run_start') %}
-              {% if start_str %}
-                {% set start = as_datetime(start_str) %}
-                {% if start %}
-                  {% set now_naive = now().replace(tzinfo=None) %}
-                  {% set start_naive = start.replace(tzinfo=None) %}
-                  {% set duration_seconds = (now_naive - start_naive).total_seconds() | int %}
-                  {% set hours = duration_seconds // 3600 %}
-                  {% set minutes = (duration_seconds % 3600) // 60 %}
-                  {{ hours }} hours and {{ minutes }} minutes
-                {% else %}
-                  0 hours and 1 minutes
-                {% endif %}
-              {% else %}
-                0 hours and 1 minutes
-              {% endif %}
-            {% else %}
-              0 hours and 1 minutes
-            {% endif %}
+          {% set start = state_attr('input_datetime.generator_run_start', 'timestamp') | float(0) %}
+          {% if is_state('switch.generator', 'on') and start > 0 and states('input_datetime.generator_run_start') != '1970-01-01 00:00:00' %}
+            {% set seconds = [0, (as_timestamp(now()) - start) | int(0)] | max %}
+            {{ seconds // 3600 }} hours and {{ (seconds % 3600) // 60 }} minutes
+          {% elif is_state('switch.generator', 'on') %}
+            Runtime unavailable
           {% else %}
             n/a
           {% endif %}
@@ -1148,7 +1133,7 @@ mqtt:
     fan_mode_state_template: "{{ 'on' if value_json['fan mode'] == 1 else 'auto' }}"
     temperature_command_topic: "RVC/THERMOSTAT_COMMAND_1/%%THERMOSTAT1%%/set"
     temperature_command_template: >-
-      {% set temp_c = (((value | float) - 32) * 5 / 9) | round(0) | int %}
+      {% set temp_c = (((value | float) - 32) * 5 / 9) | round(3) %}
       {% set requested_mode = (hvac_mode | default(states('climate.livingroom_thermostat'))) %}
       {% set operating_mode = 0 %}
       {% if requested_mode == 'cool' %}
@@ -1210,7 +1195,7 @@ mqtt:
     fan_mode_state_template: "{{ 'on' if value_json['fan mode'] == 1 else 'auto' }}"
     temperature_command_topic: "RVC/THERMOSTAT_COMMAND_1/%%THERMOSTAT2%%/set"
     temperature_command_template: >-
-      {% set temp_c = (((value | float) - 32) * 5 / 9) | round(0) | int %}
+      {% set temp_c = (((value | float) - 32) * 5 / 9) | round(3) %}
       {% set requested_mode = (hvac_mode | default(states('climate.kitchen_thermostat'))) %}
       {% set operating_mode = 0 %}
       {% if requested_mode == 'cool' %}
@@ -1271,7 +1256,7 @@ mqtt:
     fan_mode_state_template: "{{ 'on' if value_json['fan mode'] == 1 else 'auto' }}"
     temperature_command_topic: "RVC/THERMOSTAT_COMMAND_1/%%THERMOSTAT3%%/set"
     temperature_command_template: >-
-      {% set temp_c = (((value | float) - 32) * 5 / 9) | round(0) | int %}
+      {% set temp_c = (((value | float) - 32) * 5 / 9) | round(3) %}
       {% set requested_mode = (hvac_mode | default(states('climate.bedroom_thermostat'))) %}
       {% set operating_mode = 0 %}
       {% if requested_mode == 'cool' %}
@@ -1332,7 +1317,7 @@ mqtt:
     fan_mode_state_template: "{{ 'on' if value_json['fan mode'] == 1 else 'auto' }}"
     temperature_command_topic: "RVC/THERMOSTAT_COMMAND_1/%%THERMOSTAT4%%/set"
     temperature_command_template: >-
-      {% set temp_c = (((value | float) - 32) * 5 / 9) | round(0) | int %}
+      {% set temp_c = (((value | float) - 32) * 5 / 9) | round(3) %}
       {% set requested_mode = (hvac_mode | default(states('climate.bathroom_thermostat'))) %}
       {% set operating_mode = 0 %}
       {% if requested_mode == 'cool' %}
@@ -3286,6 +3271,17 @@ mqtt:
       state_topic: "RVC/GENERATOR_STATUS_1"
       value_template: "{{ value_json['status definition'] }}"
       unique_id: "generatorstatus"
+    # Separate feedback entity keeps existing generator entity IDs unchanged.
+    # Timestamp comes from the CAN frame, so old/replayed data cannot confirm start.
+    - name: "Generator Start Feedback"
+      unique_id: "generator_start_feedback"
+      state_topic: "RVC/GENERATOR_STATUS_1"
+      value_template: "{{ value_json['status definition'] | default('unknown') }}"
+      json_attributes_topic: "RVC/GENERATOR_STATUS_1"
+      json_attributes_template: >-
+        {{ {'timestamp': value_json.timestamp | default(0)} | tojson }}
+      expire_after: 30
+      force_update: true
     - name: "Generator Hours"
       state_topic: "RVC/GENERATOR_STATUS_1"
       value_template: "{{ (value_json['engine run time'] / 60) | int }}"
@@ -3358,7 +3354,7 @@ mqtt:
       value_template: >-
         {% set voltage = value_json.get('rms voltage') %}
         {% if voltage in [none, 'n/a', 'unknown', 'unavailable'] %}
-          0
+          unknown
         {% else %}
           {{ (voltage | float) | round(1) }}
         {% endif %}
@@ -3371,7 +3367,7 @@ mqtt:
       value_template: >-
         {% set current = value_json.get('rms current') %}
         {% if current in [none, 'n/a', 'unknown', 'unavailable'] %}
-          0
+          unknown
         {% else %}
           {{ (current | float) | round(1) }}
         {% endif %}
@@ -3989,72 +3985,34 @@ template:
       - name: Generator Current Session Time
         unique_id: generator_current_session
         state: >-
-          {% if is_state('switch.generator', 'on') %}
-            {% set start_str = states('input_datetime.generator_run_start') %}
-            {% if start_str not in ['unknown', 'unavailable', '', '1970-01-01 00:00:00'] %}
-              {% set start = as_datetime(start_str) %}
-              {% if start %}
-                {% set start_naive = start.replace(tzinfo=None) %}
-                {% set now_naive = now().replace(tzinfo=None) %}
-                {% set duration = (now_naive - start_naive).total_seconds() | int %}
-                {{ [duration, 0] | max }}
-              {% else %}
-                0
-              {% endif %}
-            {% else %}
-              0
-            {% endif %}
+          {% set start = state_attr('input_datetime.generator_run_start', 'timestamp') | float(0) %}
+          {% if is_state('switch.generator', 'on') and start > 0 and states('input_datetime.generator_run_start') != '1970-01-01 00:00:00' %}
+            {{ [0, (as_timestamp(now()) - start) | int(0)] | max }}
           {% else %}
-            {% if states('input_number.generator_last_session_seconds') not in ['unknown', 'unavailable', ''] %}
-              {% set duration_str = states('input_number.generator_last_session_seconds') %}
-              {% if duration_str %}
-                {{ duration_str | int(0) }}
-              {% else %}
-                0
-              {% endif %}
-            {% else %}
-              0
-            {% endif %}
+            {{ states('input_number.generator_last_session_seconds') | int(0) }}
           {% endif %}
         unit_of_measurement: "s"
         availability: >-
-          {{ true }}
+          {{ states('switch.generator') in ['on', 'off'] and
+             (is_state('switch.generator', 'off') or
+              (state_attr('input_datetime.generator_run_start', 'timestamp') | float(0) > 0
+               and states('input_datetime.generator_run_start') != '1970-01-01 00:00:00')) }}
 
       - name: "Generator Session Display"
         unique_id: generator_session_display
         state: >-
-          {% if is_state('switch.generator', 'on') %}
-            {% set start_str = states('input_datetime.generator_run_start') %}
-            {% set duration_seconds = 0 %}
-            {% if start_str not in ['unknown', 'unavailable', '', '1970-01-01 00:00:00'] %}
-              {% set start = as_datetime(start_str) %}
-              {% if start %}
-                {% set start_naive = start.replace(tzinfo=None) %}
-                {% set now_naive = now().replace(tzinfo=None) %}
-                {% set duration_seconds = (now_naive - start_naive).total_seconds() | int %}
-                {% set duration_seconds = [duration_seconds, 0] | max %}
-              {% endif %}
-            {% endif %}
-            {% set hours = duration_seconds // 3600 %}
-            {% set minutes = (duration_seconds % 3600) // 60 %}
-            Running: {{ hours }} hr {{ minutes }} min
+          {% set start = state_attr('input_datetime.generator_run_start', 'timestamp') | float(0) %}
+          {% if is_state('switch.generator', 'on') and start > 0 and states('input_datetime.generator_run_start') != '1970-01-01 00:00:00' %}
+            {% set seconds = [0, (as_timestamp(now()) - start) | int(0)] | max %}
+            Running: {{ seconds // 3600 }} hr {{ (seconds % 3600) // 60 }} min
+          {% elif is_state('switch.generator', 'on') %}
+            Running: runtime unavailable
+          {% elif is_state('switch.generator', 'off') %}
+            {% set seconds = states('input_number.generator_last_session_seconds') | int(0) %}
+            Last Run: {{ seconds // 3600 }} hr {{ (seconds % 3600) // 60 }} min
           {% else %}
-            {% if states('input_number.generator_last_session_seconds') not in ['unknown', 'unavailable', ''] %}
-              {% set duration_str = states('input_number.generator_last_session_seconds') %}
-              {% if duration_str %}
-                {% set duration_seconds = duration_str | int(0) %}
-                {% set hours = duration_seconds // 3600 %}
-                {% set minutes = (duration_seconds % 3600) // 60 %}
-                Last Run: {{ hours }} hr {{ minutes }} min
-              {% else %}
-                Last Run: 0 hr 0 min
-              {% endif %}
-            {% else %}
-              Last Run: 0 hr 0 min
-            {% endif %}
+            Generator state unavailable
           {% endif %}
-        availability: >-
-          {{ true }}
 
 
   - binary_sensor:

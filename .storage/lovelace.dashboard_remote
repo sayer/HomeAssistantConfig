@@ -2053,6 +2053,26 @@
               "state_color": true
             },
             {
+              "type": "entity-filter",
+              "entities": [
+                "cover.kitchen_day",
+                "cover.kitchen_night"
+              ],
+              "state_filter": [
+                "open",
+                "closed",
+                "opening",
+                "closing",
+                "unknown"
+              ],
+              "show_empty": false,
+              "card": {
+                "type": "entities",
+                "title": "Kitchen Shades",
+                "show_header_toggle": false
+              }
+            },
+            {
               "show_name": true,
               "show_icon": true,
               "show_state": true,
@@ -2442,7 +2462,7 @@
                       "entity": "switch.generator",
                       "layout": "vertical",
                       "primary": "Generator Status",
-                      "secondary": "{{ 'Running' if is_state('switch.generator', 'on') else 'Stopped' }}",
+                      "secondary": "{{ states('sensor.generator_start_feedback') | title }}",
                       "icon": "mdi:turbine",
                       "icon_color": "{{ 'green' if is_state('switch.generator', 'on') else 'grey' }}",
                       "fill_container": true,
@@ -2452,21 +2472,43 @@
                       }
                     },
                     {
-                      "type": "custom:mushroom-template-card",
-                      "entity": "switch.generator",
-                      "layout": "vertical",
-                      "primary": "{{ 'Stop Generator' if is_state('switch.generator', 'on') else 'Start Generator' }}",
-                      "icon": "{{ 'mdi:stop-circle' if is_state('switch.generator', 'on') else 'mdi:play-circle' }}",
-                      "icon_color": "{{ 'red' if is_state('switch.generator', 'on') else 'green' }}",
-                      "fill_container": true,
-                      "icon_size": 46,
-                      "tap_action": {
-                        "action": "call-service",
-                        "service": "{{ 'script.stop_generator' if is_state('switch.generator', 'on') else 'script.start_generator' }}"
-                      },
-                      "hold_action": {
-                        "action": "more-info"
-                      }
+                      "type": "horizontal-stack",
+                      "cards": [
+                        {
+                          "type": "custom:mushroom-template-card",
+                          "entity": "switch.generator",
+                          "layout": "vertical",
+                          "primary": "Start Generator",
+                          "icon": "mdi:play-circle",
+                          "icon_color": "green",
+                          "fill_container": true,
+                          "icon_size": 46,
+                          "tap_action": {
+                            "action": "call-service",
+                            "service": "script.start_generator"
+                          },
+                          "hold_action": {
+                            "action": "more-info"
+                          }
+                        },
+                        {
+                          "type": "custom:mushroom-template-card",
+                          "entity": "switch.generator",
+                          "layout": "vertical",
+                          "primary": "Stop Generator",
+                          "icon": "mdi:stop-circle",
+                          "icon_color": "red",
+                          "fill_container": true,
+                          "icon_size": 46,
+                          "tap_action": {
+                            "action": "call-service",
+                            "service": "script.stop_generator"
+                          },
+                          "hold_action": {
+                            "action": "more-info"
+                          }
+                        }
+                      ]
                     },
                     {
                       "type": "custom:mushroom-template-card",

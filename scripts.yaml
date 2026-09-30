@@ -672,22 +672,14 @@ generator_shutdown_with_verification:
       selector:
         text:
   sequence:
+    # Stop queued/delayed starts before requesting shutdown so retries cannot restart it.
+    - service: script.turn_off
+      target:
+        entity_id: script.generator_start_with_verification
     - service: input_text.set_value
       data:
         entity_id: input_text.generator_start_status
         value: "Preparing to stop generator"
-    - choose:
-        - conditions:
-            - condition: state
-              entity_id: switch.generator
-              state: 'off'
-          sequence:
-            - service: input_text.set_value
-              data:
-                entity_id: input_text.generator_start_status
-                value: "Generator already off"
-            - stop: "Generator already off"
-
     # Wait for the specified delay
     - service: input_text.set_value
       data:
@@ -702,12 +694,16 @@ generator_shutdown_with_verification:
     - delay:
         minutes: "{{ delay_minutes | int }}"
 
+    # Always send Stop: an accepted Start may still be awaiting its first frame.
+    - variables:
+        shutdown_requested_at: "{{ as_timestamp(now()) }}"
     # Turn off generator
     - service: input_text.set_value
       data:
         entity_id: input_text.generator_start_status
         value: "Stopping generator"
     - service: switch.turn_off
+      continue_on_error: true
       target:
         entity_id: switch.generator
     - service: input_text.set_value
@@ -724,7 +720,10 @@ generator_shutdown_with_verification:
         sequence:
           # Check if generator is still running
           - condition: template
-            value_template: "{{ is_state('switch.generator', 'on') }}"
+            value_template: >-
+              {{ not (is_state('sensor.generator_start_feedback', 'stopped')
+                 and state_attr('sensor.generator_start_feedback', 'timestamp') | float(0) >= shutdown_requested_at
+                 and -5 <= as_timestamp(now()) - state_attr('sensor.generator_start_feedback', 'timestamp') | float(0) <= 30) }}
           - service: input_text.set_value
             data:
               entity_id: input_text.generator_start_status
@@ -732,6 +731,7 @@ generator_shutdown_with_verification:
                 Retrying generator shutdown (attempt {{ repeat.index + 1 }})
           # If still running, turn off again
           - service: switch.turn_off
+            continue_on_error: true
             target:
               entity_id: switch.generator
           - service: input_text.set_value
@@ -745,9 +745,11 @@ generator_shutdown_with_verification:
     # Final verification
     - choose:
         - conditions:
-            - condition: state
-              entity_id: switch.generator
-              state: 'off'
+            - condition: template
+              value_template: >-
+                {{ is_state('sensor.generator_start_feedback', 'stopped')
+                   and state_attr('sensor.generator_start_feedback', 'timestamp') | float(0) >= shutdown_requested_at
+                   and -5 <= as_timestamp(now()) - state_attr('sensor.generator_start_feedback', 'timestamp') | float(0) <= 30 }}
           sequence:
             - service: input_text.set_value
               data:
@@ -758,7 +760,13 @@ generator_shutdown_with_verification:
           data:
             entity_id: input_text.generator_start_status
             value: "Generator shutdown failed"
-        - service: "{{ notification_service }}"
+        - service: persistent_notification.create
+          data:
+            notification_id: generator_shutdown_failed
+            title: "Generator Shutdown Failed"
+            message: "Stopped feedback was not confirmed after four stop requests. Check the generator and bridge."
+        - service: "{{ notification_service | default('notify.mobile_app') }}"
+          continue_on_error: true
           data:
             title: "Generator Shutdown Failed"
             message: "Unable to stop generator after {{ delay_minutes }} minutes and 3 retry attempts. Manual intervention required."
@@ -769,7 +777,8 @@ generator_shutdown_with_verification:
 # Generator Start with Verification Script
 generator_start_with_verification:
   alias: "Generator Start with Verification"
-  description: "Turn on generator after specified minutes, verify startup, retry if needed, and notify on failure"
+  description: "Request start only from fresh stopped feedback; confirm running or report a bounded failure"
+  mode: single
   fields:
     delay_minutes:
       description: "Number of minutes to wait before starting generator"
@@ -783,106 +792,128 @@ generator_start_with_verification:
           step: 1
           unit_of_measurement: "minutes"
     notification_service:
-      description: "Notification service to use for alerts"
-      example: "notify.mobile_app"
+      description: "Optional mobile notify service; failures always appear in Home Assistant"
       required: false
-      default: "notify.mobile_app"
+      default: ""
       selector:
         text:
   sequence:
+    # Field defaults populate the UI, not calls from other scripts/automations.
+    - variables:
+        delay_minutes: "{{ [480, [0, delay_minutes | default(0) | int(0)] | max] | min }}"
+        notification_service: "{{ notification_service | default('', true) }}"
+        start_attempts: 0
+        start_failed: false
+        failure_reason: "Generator did not report running after four start attempts."
     - service: input_text.set_value
       data:
         entity_id: input_text.generator_start_status
-        value: "Checking generator state"
-    - choose:
-        - conditions:
-            - condition: state
-              entity_id: switch.generator
-              state: 'on'
-          sequence:
-            - service: input_text.set_value
-              data:
-                entity_id: input_text.generator_start_status
-                value: "Generator already running"
-            - stop: "Generator already running"
-
-    # Wait for the specified delay
-    - service: input_text.set_value
-      data:
-        entity_id: input_text.generator_start_status
-        value: >-
-          {% set delay = delay_minutes | int %}
-          {% if delay > 0 %}
-            Waiting to start ({{ delay }} min)
-          {% else %}
-            Starting generator
-          {% endif %}
+        value: "{{ 'Waiting to start (' ~ delay_minutes ~ ' min)' if delay_minutes > 0 else 'Checking generator state' }}"
     - delay:
-        minutes: "{{ delay_minutes | int }}"
-
-    # Turn on generator
-    - service: input_text.set_value
-      data:
-        entity_id: input_text.generator_start_status
-        value: "Starting generator (attempt 1)"
-    - service: switch.turn_on
-      target:
-        entity_id: switch.generator
-    - service: input_text.set_value
-      data:
-        entity_id: input_text.generator_start_status
-        value: "Verifying start"
-    # Wait 30 seconds for generator to start
-    - delay:
-        seconds: 30
-    
-    # Check if generator is on, retry up to 3 times
+        minutes: "{{ delay_minutes }}"
+    # One initial request plus at most three retries, only while freshly stopped.
     - repeat:
-        count: 3
+        count: 4
         sequence:
-          # Check if generator is still off
           - condition: template
-            value_template: "{{ is_state('switch.generator', 'off') }}"
-          - service: input_text.set_value
-            data:
-              entity_id: input_text.generator_start_status
-              value: >-
-                Retrying generator start (attempt {{ repeat.index + 1 }})
-          # If still off, turn on again
-          - service: switch.turn_on
-            target:
-              entity_id: switch.generator
-          - service: input_text.set_value
-            data:
-              entity_id: input_text.generator_start_status
-              value: "Waiting before retry"
-          # Wait 60 seconds before next check
-          - delay:
-              seconds: 60
-
-    # Final verification
-    - choose:
-        - conditions:
-            - condition: state
-              entity_id: switch.generator
-              state: 'on'
-          sequence:
-            - service: input_text.set_value
-              data:
-                entity_id: input_text.generator_start_status
-                value: "Generator started"
-      default:
-        - service: input_text.set_value
-          data:
-            entity_id: input_text.generator_start_status
-            value: "Generator off (start failed)"
+            value_template: "{{ not start_failed }}"
+          - variables:
+              feedback_state: "{{ states('sensor.generator_start_feedback') }}"
+              feedback_time: "{{ state_attr('sensor.generator_start_feedback', 'timestamp') | float(0) }}"
+          - choose:
+              - conditions: "{{ feedback_state == 'running' and -5 <= as_timestamp(now()) - feedback_time <= 30 }}"
+                sequence:
+                  - service: input_text.set_value
+                    data:
+                      entity_id: input_text.generator_start_status
+                      value: "{{ 'Generator already running' if start_attempts == 0 else 'Generator started' }}"
+                  - service: persistent_notification.dismiss
+                    data:
+                      notification_id: generator_start_failed
+                  - stop: "Generator running confirmed by RV-C feedback"
+          - choose:
+              - conditions: "{{ feedback_state == 'stopped' and -5 <= as_timestamp(now()) - feedback_time <= 30 }}"
+                sequence:
+                  - variables:
+                      start_attempts: "{{ start_attempts + 1 }}"
+                      requested_at: "{{ as_timestamp(now()) }}"
+                  - service: input_text.set_value
+                    data:
+                      entity_id: input_text.generator_start_status
+                      value: "Starting generator (attempt {{ start_attempts }}/4)"
+                  - service: switch.turn_on
+                    continue_on_error: true
+                    target:
+                      entity_id: switch.generator
+                  - service: input_text.set_value
+                    data:
+                      entity_id: input_text.generator_start_status
+                      value: "Verifying generator start (attempt {{ start_attempts }}/4)"
+                  # RV-C start is one command; the controller owns crank/hold timing.
+                  # Do not resend while the controller reports preheat or cranking.
+                  - wait_template: >-
+                      {% set state = states('sensor.generator_start_feedback') %}
+                      {% set timestamp = state_attr('sensor.generator_start_feedback', 'timestamp') | float(0) %}
+                      {{ state not in ['stopped', 'preheat', 'cranking', 'priming']
+                         or not (-5 <= as_timestamp(now()) - timestamp <= 30) }}
+                    timeout:
+                      seconds: 60
+                    continue_on_timeout: true
+                  - variables:
+                      feedback_state: "{{ states('sensor.generator_start_feedback') }}"
+                      feedback_time: "{{ state_attr('sensor.generator_start_feedback', 'timestamp') | float(0) }}"
+                  - choose:
+                      - conditions: >-
+                          {{ feedback_state == 'running' and feedback_time >= requested_at
+                             and -5 <= as_timestamp(now()) - feedback_time <= 30 }}
+                        sequence:
+                          - service: input_text.set_value
+                            data:
+                              entity_id: input_text.generator_start_status
+                              value: "Generator started"
+                          - service: persistent_notification.dismiss
+                            data:
+                              notification_id: generator_start_failed
+                          - stop: "Generator start confirmed by fresh RV-C feedback"
+                  - if:
+                      - condition: template
+                        value_template: >-
+                          {{ feedback_state != 'stopped' or feedback_time < requested_at
+                             or not (-5 <= as_timestamp(now()) - feedback_time <= 30) }}
+                    then:
+                      - variables:
+                          start_failed: true
+                          failure_reason: >-
+                            Start not confirmed: {{ feedback_state }} feedback.
+                            No further start commands sent; check the generator and bridge.
+            default:
+              - variables:
+                  start_failed: true
+                  failure_reason: >-
+                    Start blocked: {{ feedback_state }} feedback is not a fresh stopped state.
+                    Check the generator and bridge before retrying.
+    - service: input_text.set_value
+      data:
+        entity_id: input_text.generator_start_status
+        value: "Generator start failed ({{ start_attempts }}/4 attempts)"
+    - service: persistent_notification.create
+      data:
+        notification_id: generator_start_failed
+        title: "Generator Startup Failed"
+        message: "{{ failure_reason }} Start commands attempted: {{ start_attempts }}/4. Running was not confirmed."
+    - if:
+        - condition: template
+          value_template: >-
+            {% set parts = notification_service.split('.') %}
+            {{ parts | length == 2 and parts[0] == 'notify' and has_service(parts[0], parts[1]) }}
+      then:
         - service: "{{ notification_service }}"
+          continue_on_error: true
           data:
             title: "Generator Startup Failed"
-            message: "Unable to start generator after {{ delay_minutes }} minutes and 3 retry attempts. Manual intervention required."
-            data:
-              priority: "high"
-              channel: "alerts"
+            message: "{{ failure_reason }} Start commands attempted: {{ start_attempts }}/4."
+    - stop: "{{ failure_reason }}"
+      error: true
 
 start_generator:
   alias: "Start Generator"
