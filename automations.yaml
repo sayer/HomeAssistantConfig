@@ -1530,6 +1530,12 @@
   - entity_id: switch.generator
     to: 'on'
     trigger: state
+  conditions:
+  - condition: template
+    value_template: >-
+      {{ state_attr('input_datetime.generator_run_start', 'timestamp') | float(0) <= 0
+         or states('input_datetime.generator_run_start') == '1970-01-01 00:00:00'
+         or (trigger.from_state is not none and trigger.from_state.state == 'off') }}
   actions:
   - target:
       entity_id: input_datetime.generator_run_start
@@ -1542,6 +1548,7 @@
   description: ''
   triggers:
   - entity_id: switch.generator
+    from: 'on'
     to: 'off'
     trigger: state
   conditions:
@@ -1552,9 +1559,9 @@
       state: unknown
   actions:
   - variables:
-      duration: "{% set start = as_datetime(states('input_datetime.generator_run_start'))
-        %} {% set end = now() %} {% if start %}\n  {{ (end - start).total_seconds()
-        | int }}\n{% else %}\n  0\n{% endif %}\n"
+      duration: >-
+        {% set start = state_attr('input_datetime.generator_run_start', 'timestamp') | float(0) %}
+        {{ [0, (as_timestamp(now()) - start) | int(0)] | max if start > 0 and states('input_datetime.generator_run_start') != '1970-01-01 00:00:00' else 0 }}
   - variables:
       duration_hours: "{{ (duration | int // 3600) }}"
       duration_minutes: "{{ ((duration | int % 3600) // 60) }}"
@@ -1688,8 +1695,8 @@
       target:
         entity_id: input_datetime.generator_run_start
       data:
-        # Set to 5 minutes ago to ensure we show some runtime
-        datetime: "{{ now().timestamp() - 300 | timestamp_custom('%Y-%m-%d %H:%M:%S') }}"
+        # We observed it running now; do not invent an earlier start time.
+        timestamp: "{{ as_timestamp(now()) }}"
 
 - id: 'scene_slot_01_schedule'
   alias: Scenes - Slot 01 Scheduler
